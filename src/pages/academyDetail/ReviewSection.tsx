@@ -5,6 +5,7 @@ import { AcademyClass, Review } from "./types"; // types.ts에서 Review 타입�
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import { useRecoilState } from "recoil";
+import { useSearchParams } from "react-router-dom";
 
 interface ReviewSectionProps {
   star: number;
@@ -49,32 +50,26 @@ const ReviewSection = ({
   reviews: initialReviews, // 초기 리뷰 데이터
 }: ReviewSectionProps) => {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = 10;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [user, setUser] = useRecoilState(userInfo);
   const [commonClasses, setCommonClasses] = useState<number[]>([]);
 
-  // const fetchReviews = async (page: number) => {
-  //   try {
-  //     const response = await jwtApiRequest.get<ReviewResponse>(
-  //       `/api/review/academy?acaId=${academyId}&page=${page}&size=${pageSize}`,
-  //     );
+  const handlePageChange = (page: number) => {
+    setSearchParams(prevParams => {
+      const newParams = new URLSearchParams(prevParams);
+      newParams.set("page", String(page)); // 기존 쿼리스트링 유지하면서 page 값 변경
+      return newParams;
+    });
 
-  //     setReviews(response.data.resultData);
-  //   } catch (error) {
-  //     console.error("리뷰 데이터를 불러오는데 실패했습니다:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (currentPage > 1) {
-  //     fetchReviews(currentPage);
-  //   }
-  // }, [currentPage, academyId]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   useEffect(() => {
     setReviews(initialReviews);
+    console.log(reviewCount);
   }, [initialReviews]);
   useEffect(() => {
     getData();
@@ -122,9 +117,9 @@ const ReviewSection = ({
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  // const handlePageChange = (page: number) => {
+  //   setCurrentPage(page);
+  // };
 
   // const formatDate = (dateString: string) => {
   //   return new Date(dateString).toLocaleDateString();
