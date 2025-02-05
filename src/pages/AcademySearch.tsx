@@ -225,8 +225,11 @@ const AcademySearch = () => {
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
+    setCurrentPage(page);
     const params = new URLSearchParams(location.search);
     params.set("page", String(page));
+
+    // setCurrentPage(Number(params.get("page")));
 
     navigate({
       pathname: location.pathname,
@@ -262,7 +265,6 @@ const AcademySearch = () => {
       const params = new URLSearchParams(search);
       params.set(sectionId, newValues.join(","));
 
-      // ✅ **필터 변경 시 첫 페이지로 이동**
       params.set("page", "1");
 
       navigate({
@@ -354,15 +356,9 @@ const AcademySearch = () => {
   //   search,
   //   currentPage,
   // ]);
-  useEffect(() => {
-    const params = new URLSearchParams(search);
-    const pageFromURL = params.get("page") ? Number(params.get("page")) : 1;
-
-    // ✅ URL의 `page=1` 값이 반영된 후에만 `fetchData(1)` 실행
-    if (pageFromURL === 1 && currentPage !== 1) {
-      fetchData(1);
-    }
-  }, [search]);
+  // useEffect(() => {
+  //   const params = new URLSearchParams(search);
+  // }, [search]);
 
   useEffect(() => {
     const params = new URLSearchParams(search);
@@ -399,6 +395,13 @@ const AcademySearch = () => {
       setSelectedLocation(location ? Number(location) : -1);
       setSelectedLocationText(locationText || null);
     }
+
+    // ✅ URL의 `page=1` 값이 반영된 후에만 `fetchData(1)` 실행
+    if (pageFromURL === 1 && currentPage !== 1) {
+      fetchData(1);
+    } else {
+      fetchData(params.get("page"));
+    }
   }, [search]);
 
   // useEffect(() => {
@@ -411,6 +414,8 @@ const AcademySearch = () => {
   // }, [location.search]);
 
   useEffect(() => {
+    const params = new URLSearchParams(search);
+    setCurrentPage(Number(params.get("page")));
     if (
       Object.values(selectedFilters).some(filter => filter.length > 0) ||
       selectedLocation !== -1
@@ -420,7 +425,50 @@ const AcademySearch = () => {
   }, [selectedFilters, currentPage, selectedLocation]);
 
   useEffect(() => {
-    fetchData(1); // 첫 페이지 로드 시 실행
+    const params = new URLSearchParams(search);
+    const newFilters: { [key: string]: string[] } = {};
+
+    filterSections.forEach(section => {
+      const values = params.get(section.id);
+      newFilters[section.id] = values ? values.split(",") : [];
+    });
+
+    setSelectedFilters(prev => {
+      if (JSON.stringify(prev) !== JSON.stringify(newFilters)) {
+        return newFilters;
+      }
+      return prev;
+    });
+
+    // ✅ URL에서 페이지 번호 가져오기 (기존 유지)
+    const pageFromURL = params.get("page") ? Number(params.get("page")) : 1;
+
+    // ✅ 현재 `currentPage`와 다를 때만 변경
+    if (pageFromURL !== currentPage) {
+      setCurrentPage(pageFromURL);
+    }
+
+    // ✅ 지역 값 갱신
+    const location = params.get("location");
+    const locationText = params.get("locationText");
+
+    if (
+      location !== String(selectedLocation) ||
+      locationText !== selectedLocationText
+    ) {
+      setSelectedLocation(location ? Number(location) : -1);
+      setSelectedLocationText(locationText || null);
+    }
+    console.log(selectedFilters);
+
+    setCurrentPage(Number(params.get("page")));
+    if (
+      Object.values(selectedFilters).some(filter => filter.length > 0) ||
+      selectedLocation !== -1
+    ) {
+      fetchData(currentPage);
+    }
+    fetchData(currentPage); // 첫 페이지 로드 시 실행
   }, []);
 
   const SearchInput = styled(Input.Search)`
@@ -450,9 +498,6 @@ const AcademySearch = () => {
     if (selectedLocation !== -1) {
       params.set("dongId", String(selectedLocation));
     }
-
-    console.log(selectedSearchType);
-    console.log(values.searchInput);
 
     // 검색어 추가 (버튼을 눌렀을 때만 반영)
     if (values.searchInput) {
@@ -485,20 +530,41 @@ const AcademySearch = () => {
     params.set("size", "10");
 
     // 필터 값 추가
-    for (const [key, values] of Object.entries(selectedFilters)) {
-      if (values.length) {
-        values.forEach(value => {
-          params.append("categoryIds", value); // 같은 key에 여러 값을 추가
+    console.log(selectedFilters);
+
+    if (selectedFilters.age === null) {
+      for (const [key, values] of Object.entries(selectedFilters)) {
+        if (values.length) {
+          values.forEach(value => {
+            params.append("categoryIds", value); // 같은 key에 여러 값을 추가
+          });
+        }
+      }
+    } else {
+      const age = params.get("age")?.split(",") || [];
+      const level = params.get("level")?.split(",") || [];
+      console.log("11", [...age, ...level]);
+
+      if (age.length > 0 || level.length > 0) {
+        [...age, ...level].forEach(value => {
+          params.append("categoryIds", value);
         });
       }
     }
 
-    // location 값 추가 (필터가 있을 경우 추가)
-    if (selectedLocation !== -1) {
-      params.set("dongId", String(selectedLocation));
+    if (params.get("location") !== -1 || params.get("location") !== null) {
+      console.log("작동중", params.get("location"));
+      if (selectedLocation !== -1) {
+        params.set("dongId", String(params.get("location")));
+      }
+      setSearchLocation(params.get("location"));
     }
+    // if (selectedLocation !== -1) {
+    //   // location 값 추가 (필터가 있을 경우 추가)
+    //   params.set("dongId", String(selectedLocation));
+    // }
 
-    console.log(searchInput);
+    // console.log(searchInput);
 
     if (searchInput) {
       if (selectedSearchType === "태그") {
@@ -511,6 +577,7 @@ const AcademySearch = () => {
     // params가 어떤 값인지 확인하기
     console.log(params.toString()); // URL 파라미터 형태로 출력
     handlePageChange(params.get("page") ? params.get("page") : 1);
+    console.log(params.get("page"));
 
     try {
       const response = await axios.get("/api/academy/getAcademyListByAll", {

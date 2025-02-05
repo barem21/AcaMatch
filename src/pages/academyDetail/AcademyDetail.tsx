@@ -6,7 +6,7 @@ import { Cookies } from "react-cookie";
 import { FaFacebookF, FaLink, FaShare, FaXTwitter } from "react-icons/fa6";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { SiNaver } from "react-icons/si";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
@@ -71,10 +71,11 @@ const styles = {
   },
 };
 const AcademyDetail = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { search } = useLocation();
 
   const acaId = searchParams.get("id");
-  const page = searchParams.get("page") || "2";
   const size = 10;
 
   const [academyData, setAcademyData] = useState<AcademyData | null>(null);
@@ -94,8 +95,13 @@ const AcademyDetail = () => {
   const cookies = new Cookies();
   const navigate = useNavigate();
 
+  //리뷰를 위한 쿼리스트링
+  // const [searchParams, setSearchParams] = useSearchParams();
+  const page = searchParams.get("page") || "1";
+  const reviewTab = searchParams.get("review");
+
   const [items, setItems] = useState([
-    { label: "상세 학원정보", isActive: true },
+    { label: "상세 학원정보", isActive: !reviewTab },
     { label: "수업정보", isActive: false },
     { label: "후기", isActive: false },
   ]);
@@ -140,7 +146,17 @@ const AcademyDetail = () => {
             setAddress(response.data.resultData.addressDto.address);
           }
         }
+        const params = new URLSearchParams(searchParams);
+        if (params.get("review")) {
+          setItems(prevItems =>
+            prevItems.map((item, index) => ({
+              ...item,
+              isActive: index === 2, // index가 2(후기 탭)일 때 true, 나머지는 false
+            })),
+          );
+        }
         // console.log(`/pic/academy/${academyData.acaId}/${academyData.acaPic}`);
+        console.log("📌 API 응답 데이터:", response.data.resultData);
 
         console.log(response.data.resultData);
       } catch (error) {
@@ -154,7 +170,11 @@ const AcademyDetail = () => {
     if (acaId) {
       fetchAcademyData();
     }
-  }, [acaId, userId]);
+    console.log(academyData?.reviewCount);
+  }, [acaId, userId, page, search]);
+  useEffect(() => {
+    console.log("📌 최신 리뷰 개수:", academyData?.reviewCount);
+  }, [academyData]);
 
   const handleTabClick = (index: number) => {
     const updatedItems = items.map((item, idx) => ({
@@ -162,6 +182,17 @@ const AcademyDetail = () => {
       isActive: idx === index,
     }));
     setItems(updatedItems);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("page", page);
+    newParams.set("size", "10");
+
+    if (index === 2) {
+      newParams.set("review", "2");
+    } else {
+      newParams.delete("review");
+    }
+
+    setSearchParams(newParams);
   };
 
   const renderStars = (rating: number) => {
