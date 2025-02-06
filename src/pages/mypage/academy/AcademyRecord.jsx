@@ -22,6 +22,7 @@ function AcademyRecord() {
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [isModalVisible4, setIsModalVisible4] = useState(false);
   const [academyInfo, setAcademyInfo] = useState();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
 
@@ -126,6 +127,7 @@ function AcademyRecord() {
     setTestGradeId(gradeId);
     setTestRecord(score);
 
+
     form.setFieldsValue({
       record: score,
     });
@@ -141,6 +143,7 @@ function AcademyRecord() {
   const handleScoreUpload = () => {
     setIsModalVisible3(true);
   };
+
 
   //학원정보 가져오기
   const academyGetInfo = async () => {
@@ -263,6 +266,7 @@ function AcademyRecord() {
 
       <RecordList className="w-full">
         <h1 className="title-font flex justify-between align-middle">
+
           {academyInfo}의 수강생 목록
           {/*"강좌명 &gt; 테스트 명"의 수강생 목록*/}
           <div className="flex items-center gap-1">
@@ -355,6 +359,7 @@ function AcademyRecord() {
                 <Form
                   form={form}
                   //initialValues={initialValues}
+
                   onFinish={values => onFinished(values)}
                 >
                   <Form.Item

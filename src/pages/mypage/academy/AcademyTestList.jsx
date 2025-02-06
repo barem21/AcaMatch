@@ -168,6 +168,7 @@ function AcademyTestList() {
         <h1 className="title-font flex justify-between align-middle">
           {academyInfo}의 테스트 목록
           {/*} &gt; "강좌명"의 테스트 목록*/}
+
           <button
             className="flex items-center gap-1 mr-5 text-sm font-normal"
             onClick={() => setIsModalVisible(true)}

@@ -90,6 +90,8 @@ const AcademyDetail = () => {
 
   const [selectClass, setSelectClass] = useState<number>(0);
 
+  const currentUserInfo = useRecoilValue(userInfo);
+
   const cookies = new Cookies();
   const navigate = useNavigate();
 
@@ -383,7 +385,9 @@ const AcademyDetail = () => {
                         message.error("로그인이 필요한 서비스입니다.");
                         return;
                       }
-                      setIsModalVisible(true);
+                      navigate(
+                        `/support/inquiry/detail?acaId=${academyData.acaId}&userId=${currentUserInfo.userId}`,
+                      );
                     }}
                   >
                     학원 문의하기
