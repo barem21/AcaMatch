@@ -35,6 +35,7 @@ import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
 import HotAcademy from "./pages/HotAcademy.tsx";
 import MypageParent from "./pages/mypage/MypageParent";
 import InquiryList from "./pages/InquiryList";
+import AI from "./components/AI.tsx";
 
 function App() {
   useEffect(() => {
@@ -115,6 +116,7 @@ function App() {
               <Route path="/forgotPw" element={<ForgotPw />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/signup/end" element={<SignupEnd />} />
+              <Route path="/ai" element={<AI />} />
               <Route path="/mypage">
                 <Route index element={<MyPage />} />
                 <Route path="/mypage/record" element={<MyPageRecord />} />

@@ -134,15 +134,32 @@ const AcademySearch = () => {
     string | null
   >(null);
 
-  const [searchInput, _setSearchInput] = useState<string>("");
+  const [_searchInput, _setSearchInput] = useState<string>("");
 
   // const [age, setAge] = useState("");
   // const [level, setLevel] = useState("");
+  const [academyData, setAcademyData] = useState<Academy[]>([]);
 
-  const [searchValue, _setSearchValue] = useState("");
-  const [_searchLocation, setSearchLocation] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [_searchLocation, _setSearchLocation] = useState("");
 
-  const [isFirst, setIsFirst] = useState(true);
+  // const [isFirst, setIsFirst] = useState(true);
+
+  // const [isFlag, setIsFlag] = useState(true);
+  const [searchState, setSearchState] = useState(
+    "/api/academy/getAcademyListByAll?page=1&size=10",
+  );
+
+  const updateSearchState = (params: URLSearchParams) => {
+    const baseUrl = "/api/academy/getAcademyListByAll";
+
+    params.set("size", "10");
+
+    const newSearchState = `${baseUrl}?${params.toString()}`;
+
+    setSearchState(newSearchState);
+    navigate(`?${params.toString()}`, { replace: true });
+  };
 
   const handleLocationSelect = (location: number, locationText: string) => {
     setSelectedLocation(location);
@@ -150,11 +167,15 @@ const AcademySearch = () => {
     setIsModalVisible(false);
 
     const params = new URLSearchParams(search);
-    params.set("location", String(location));
-    params.set("locationText", locationText);
-
+    // if (selectedLocation === -1) {
+    //   params.set("dongId", "");
+    // } else {
+    params.set("dongId", String(location) === "-1" ? "" : String(location));
+    // }
     params.set("page", "1");
+    updateSearchState(params);
 
+    params.set("locationText", locationText);
     navigate({
       pathname: window.location.pathname,
       search: params.toString(),
@@ -162,7 +183,153 @@ const AcademySearch = () => {
 
     setCurrentPage(1);
   };
-  const [academyData, setAcademyData] = useState<Academy[]>([]);
+
+  // const handleFilterChange = (key: string, values: string[]) => {
+  //   const params = new URLSearchParams(searchState.split("?")[1]);
+  //   params.delete("categoryIds"); // 기존 categoryIds 제거
+
+  //   if (values.length) {
+  //     params.set(key, values.join(",")); // age=1,3 형태
+  //     values.forEach(value => params.append("categoryIds", value)); // categoryIds=1&categoryIds=3
+  //   } else {
+  //     params.delete(key);
+  //   }
+  //   updateSearchState(params);
+  // };
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchState.split("?")[1]);
+    params.set("page", String(page));
+    updateSearchState(params);
+    setCurrentPage(Number(params.get("page")));
+  };
+
+  // const handleLocationChange = (location: number) => {
+  //   const params = new URLSearchParams(searchState.split("?")[1]);
+  //   if (location !== -1) {
+  //     params.set("location", String(location));
+  //   } else {
+  //     params.delete("location");
+  //   }
+  //   updateSearchState(params);
+  // };
+  const handleFilterCheck = (
+    sectionId: string, // "age" 또는 "level"
+    id: string, // 선택한 필터 값
+    checked: boolean, // 체크 여부
+  ) => {
+    setSelectedFilters(prev => {
+      const currentValues = prev[sectionId] || [];
+      const newValues = checked
+        ? [...currentValues, id] // 선택한 필터 추가
+        : currentValues.filter(value => value !== id); // 선택한 필터 제거
+
+      // 🔥 필터 상태 업데이트 (age, level은 남기되 URL에는 반영하지 않음)
+      const updatedFilters = { ...prev, [sectionId]: newValues };
+
+      // 🔥 categoryIds 값만 URL에 반영
+      const allSelectedValues = [
+        ...(updatedFilters["age"] || []),
+        ...(updatedFilters["level"] || []),
+      ];
+
+      const params = new URLSearchParams(search);
+      params.set("page", "1"); // 필터 변경 시 첫 페이지로 이동
+      setCurrentPage(Number(params.get("page")));
+
+      // 🔥 categoryIds에 모든 필터 값 추가
+      if (allSelectedValues.length > 0) {
+        params.delete("categoryIds"); // 기존 값 제거 후 다시 추가
+        allSelectedValues.forEach(value => {
+          params.append("categoryIds", value);
+        });
+      } else {
+        params.delete("categoryIds"); // 모든 필터 해제 시 제거
+      }
+
+      // 🔥 URL 업데이트 (age, level은 URL에서 제거됨)
+      setTimeout(() => {
+        updateSearchState(params);
+      }, 0);
+
+      return updatedFilters;
+    });
+  };
+
+  // useEffect(() => {
+  //   console.log(searchState);
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axios.get(searchState);
+
+  //       console.log("API 응답:", response.data);
+  //     } catch (error) {
+  //       console.error("API 요청 실패:", error);
+  //     }
+  //   };
+  // }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+
+    // 🔥 categoryIds를 배열로 가져와서 필터 복원
+    const selectedCategories = params.getAll("categoryIds") || [];
+    const selectedFilters: { [key: string]: string[] } = {
+      age: [],
+      level: [],
+    };
+
+    // 🔥 categoryIds를 age와 level로 나누기
+    selectedCategories.forEach(value => {
+      if (["1", "2", "3", "4", "5"].includes(value)) {
+        selectedFilters.age.push(value);
+      } else if (["6", "7", "8", "9", "10"].includes(value)) {
+        selectedFilters.level.push(value);
+      }
+    });
+
+    setSelectedFilters(selectedFilters);
+
+    // 🔥 페이지 값 복원
+    const page = params.get("page") ? Number(params.get("page")) : 1;
+    setCurrentPage(page);
+
+    // 🔥 지역 값 복원
+    const location = params.get("dongId") ? Number(params.get("dongId")) : -1;
+    const locationText = params.get("locationText") || "-1";
+
+    const searchName = params.get("searchName") || "";
+    const tagName = params.get("tagName") || "";
+
+    setSearchValue(selectedSearchType === "태그" ? tagName : searchName);
+
+    updateSearchState(params);
+
+    setSelectedLocation(location);
+    setSelectedLocationText(locationText);
+  }, []); // 최초 1회 실행
+
+  useEffect(() => {
+    // if (isFlag) {
+    //   setIsFlag(false);
+    // } else {
+    const params = new URLSearchParams(search);
+    if (!searchState) return; // 초기 실행 방지
+
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(searchState);
+        console.log("API 응답:", response.data);
+        console.log(searchState);
+
+        setAcademyData(response.data.resultData);
+        // console.log("ddd", response.data.resultData);
+      } catch (error) {
+        console.error("API 요청 실패:", error);
+      }
+    };
+
+    fetchData();
+    // }
+  }, [searchState]);
 
   const navigate = useNavigate();
 
@@ -225,18 +392,18 @@ const AcademySearch = () => {
   ];
 
   // 페이지 변경 핸들러
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    const params = new URLSearchParams(location.search);
-    params.set("page", String(page));
+  // const handlePageChange = (page: number) => {
+  //   setCurrentPage(page);
+  //   const params = new URLSearchParams(location.search);
+  //   params.set("page", String(page));
 
-    // setCurrentPage(Number(params.get("page")));
+  //   // setCurrentPage(Number(params.get("page")));
 
-    navigate({
-      pathname: location.pathname,
-      search: params.toString(),
-    });
-  };
+  //   navigate({
+  //     pathname: location.pathname,
+  //     search: params.toString(),
+  //   });
+  // };
 
   // 필터 상태 관리
   const [selectedFilters, setSelectedFilters] = useState<{
@@ -252,80 +419,82 @@ const AcademySearch = () => {
   // });
 
   // 개별 필터 값 변경 핸들러
-  const handleFilterChange = (
-    sectionId: string,
-    id: string,
-    checked: boolean,
-  ) => {
-    setSelectedFilters(prev => {
-      const currentValues = prev[sectionId] || [];
-      const newValues = checked
-        ? [...currentValues, id]
-        : currentValues.filter(value => value !== id);
+  // const handleFilterChange = (
+  //   sectionId: string,
+  //   id: string,
+  //   checked: boolean,
+  // ) => {
+  //   setSelectedFilters(prev => {
+  //     const currentValues = prev[sectionId] || [];
+  //     const newValues = checked
+  //       ? [...currentValues, id]
+  //       : currentValues.filter(value => value !== id);
 
-      const params = new URLSearchParams(search);
-      params.set(sectionId, newValues.join(","));
+  //     const params = new URLSearchParams(search);
+  //     params.set(sectionId, newValues.join(","));
 
-      params.set("page", "1");
+  //     params.set("page", "1");
 
-      navigate({
-        pathname: window.location.pathname,
-        search: params.toString(),
-      });
+  //     navigate({
+  //       pathname: window.location.pathname,
+  //       search: params.toString(),
+  //     });
 
-      return { ...prev, [sectionId]: newValues };
-    });
-  };
-  useEffect(() => {
-    const params = new URLSearchParams(search);
-    const newFilters: { [key: string]: string[] } = {};
+  //     return { ...prev, [sectionId]: newValues };
+  //   });
+  // };
+  // useEffect(() => {
+  //   const params = new URLSearchParams(search);
+  //   const newFilters: { [key: string]: string[] } = {};
 
-    filterSections.forEach(section => {
-      const values = params.get(section.id);
-      newFilters[section.id] = values ? values.split(",") : [];
-    });
+  //   filterSections.forEach(section => {
+  //     const values = params.get(section.id);
+  //     newFilters[section.id] = values ? values.split(",") : [];
+  //   });
 
-    setSelectedFilters(prev => {
-      if (JSON.stringify(prev) !== JSON.stringify(newFilters)) {
-        return newFilters;
-      }
-      return prev;
-    });
+  //   setSelectedFilters(prev => {
+  //     if (JSON.stringify(prev) !== JSON.stringify(newFilters)) {
+  //       return newFilters;
+  //     }
+  //     return prev;
+  //   });
 
-    // URL에서 페이지 번호 가져오기 (기존 유지)
-    const pageFromURL = params.get("page") ? Number(params.get("page")) : 1;
+  //   // URL에서 페이지 번호 가져오기 (기존 유지)
+  //   const pageFromURL = params.get("page") ? Number(params.get("page")) : 1;
 
-    // 현재 `currentPage`와 다를 때만 변경
-    if (pageFromURL !== currentPage) {
-      setCurrentPage(pageFromURL);
-    }
+  //   // 현재 `currentPage`와 다를 때만 변경
+  //   if (pageFromURL !== currentPage) {
+  //     setCurrentPage(pageFromURL);
+  //   }
 
-    // 지역 값 갱신
-    const location = params.get("location");
-    const locationText = params.get("locationText");
+  //   // 지역 값 갱신
+  //   const location = params.get("location");
+  //   const locationText = params.get("locationText");
 
-    if (
-      location !== String(selectedLocation) ||
-      locationText !== selectedLocationText
-    ) {
-      setSelectedLocation(location ? Number(location) : -1);
-      setSelectedLocationText(locationText || null);
-    }
+  //   if (
+  //     location !== String(selectedLocation) ||
+  //     locationText !== selectedLocationText
+  //   ) {
+  //     setSelectedLocation(location ? Number(location) : -1);
+  //     setSelectedLocationText(locationText || null);
+  //   }
 
-    // ✅ URL의 `page=1` 값이 반영된 후에만 `fetchData(1)` 실행
-    if (pageFromURL === 1 && currentPage !== 1) {
-      fetchData(1);
-    } else {
-      fetchData(Number(params.get("page")));
-    }
-  }, []);
+  //   // ✅ URL의 `page=1` 값이 반영된 후에만 `fetchData(1)` 실행
+  //   if (pageFromURL === 1 && currentPage !== 1) {
+  //     fetchData(1);
+  //   } else {
+  //     fetchData(Number(params.get("page")));
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    if (isFirst) {
-      setIsFirst(false);
-    } else {
-      const params = new URLSearchParams(search);
-      const newFilters: { [key: string]: string[] } = {};
+  // useEffect(() => {
+  //   if (isFirst) {
+  //     setIsFirst(false);
+  //   } else {
+  //     const params = new URLSearchParams(search);
+  //     const newFilters: { [key: string]: string[] } = {};
+  //   }
+  // }, []);
 
   const SearchInput = styled(Input.Search)`
     .ant-input {
@@ -378,77 +547,77 @@ const AcademySearch = () => {
     fetchData(1); // 첫 페이지에서 다시 검색
   };
 
-  const fetchData = async (page: number) => {
-    const params = new URLSearchParams(search);
+  // const fetchData = async (page: number) => {
+  //   const params = new URLSearchParams(search);
 
-    // 페이지 번호와 크기
-    params.set("page", String(page));
-    params.set("size", "10");
+  //   // 페이지 번호와 크기
+  //   params.set("page", String(page));
+  //   params.set("size", "10");
 
-    // 필터 값 추가
-    // console.log(selectedFilters);
+  //   // 필터 값 추가
+  //   // console.log(selectedFilters);
 
-    if (selectedFilters.age === null) {
-      for (const [_key, values] of Object.entries(selectedFilters)) {
-        if (values.length) {
-          values.forEach(value => {
-            params.append("categoryIds", value); // 같은 key에 여러 값을 추가
-          });
-        }
-      }
-    } else {
-      const age = params.get("age")?.split(",") || [];
-      const level = params.get("level")?.split(",") || [];
-      // console.log("11", [...age, ...level]);
+  //   if (selectedFilters.age === null) {
+  //     for (const [_key, values] of Object.entries(selectedFilters)) {
+  //       if (values.length) {
+  //         values.forEach(value => {
+  //           params.append("categoryIds", value); // 같은 key에 여러 값을 추가
+  //         });
+  //       }
+  //     }
+  //   } else {
+  //     const age = params.get("age")?.split(",") || [];
+  //     const level = params.get("level")?.split(",") || [];
+  //     // console.log("11", [...age, ...level]);
 
-      if (age.length > 0 || level.length > 0) {
-        [...age, ...level].forEach(value => {
-          params.append("categoryIds", value);
-        });
-      }
-    }
+  //     if (age.length > 0 || level.length > 0) {
+  //       [...age, ...level].forEach(value => {
+  //         params.append("categoryIds", value);
+  //       });
+  //     }
+  //   }
 
-    if (params.get("location") !== "-1" || params.get("location") !== null) {
-      // console.log("작동중", params.get("location"));
-      if (selectedLocation !== -1) {
-        params.set("dongId", String(params.get("location")));
-      }
-      setSearchLocation(String(params.get("location")));
-    }
-    // if (selectedLocation !== -1) {
-    //   // location 값 추가 (필터가 있을 경우 추가)
-    //   params.set("dongId", String(selectedLocation));
-    // }
+  //   if (params.get("location") !== "-1" || params.get("location") !== null) {
+  //     // console.log("작동중", params.get("location"));
+  //     if (selectedLocation !== -1) {
+  //       params.set("dongId", String(params.get("location")));
+  //     }
+  //     setSearchLocation(String(params.get("location")));
+  //   }
+  //   // if (selectedLocation !== -1) {
+  //   //   // location 값 추가 (필터가 있을 경우 추가)
+  //   //   params.set("dongId", String(selectedLocation));
+  //   // }
 
-    // console.log(searchInput);
+  //   // console.log(searchInput);
 
-    if (searchInput) {
-      if (selectedSearchType === "태그") {
-        params.set("tagName", String(searchInput));
-      } else {
-        params.set("searchName", String(searchInput));
-      }
-    }
+  //   if (searchInput) {
+  //     if (selectedSearchType === "태그") {
+  //       params.set("tagName", String(searchInput));
+  //     } else {
+  //       params.set("searchName", String(searchInput));
+  //     }
+  //   }
 
-    // params가 어떤 값인지 확인하기
-    console.log(params.toString()); // URL 파라미터 형태로 출력
-    handlePageChange(
-      Number(params.get("page")) ? Number(params.get("page")) : 1,
-    );
-    // console.log(params.get("page"));
+  //   // params가 어떤 값인지 확인하기
+  //   console.log(params.toString()); // URL 파라미터 형태로 출력
+  //   handlePageChange(
+  //     Number(params.get("page")) ? Number(params.get("page")) : 1,
+  //   );
+  //   // console.log(params.get("page"));
 
-    try {
-      const response = await axios.get("/api/academy/getAcademyListByAll", {
-        params: params,
-      });
+  //   try {
+  //     const response = await axios.get("/api/academy/getAcademyListByAll", {
+  //       params: params,
+  //     });
 
-      setAcademyData(response.data.resultData);
-      // setTotalCount(response.data.)
-      console.log(response);
-    } catch (error) {
-      console.error("API 요청 실패:", error);
-    }
-  };
+  //     setAcademyData(response.data.resultData);
+  //     // setTotalCount(response.data.)
+  //     console.log(response);
+  //   } catch (error) {
+  //     console.error("API 요청 실패:", error);
+  //   }
+  // };
 
   return (
     <Form form={form} onFinish={onFinish}>
@@ -469,7 +638,7 @@ const AcademySearch = () => {
                   options={section.options}
                   selectedValues={selectedFilters[section.id] || []}
                   onValueChange={(value, checked) =>
-                    handleFilterChange(section.id, value, checked)
+                    handleFilterCheck(section.id, value, checked)
                   }
                 />
               ))}
@@ -509,10 +678,8 @@ const AcademySearch = () => {
                   placeholder={`${selectedSearchType}를 입력해주세요`}
                   className="border-none w-[395px] h-[56px]"
                   size="large"
-                  value={searchValue}
-                  defaultValue={
-                    new URLSearchParams(location.search).get("tagName") || ""
-                  }
+                  // value={searchValue}
+                  defaultValue={searchValue}
                   onSearch={() => form.submit()}
                 />
               </Form.Item>
@@ -564,7 +731,7 @@ const AcademySearch = () => {
                   <div className="flex justify-center items-center min-w-[10%]">
                     <img
                       className="w-[60px] h-[60px] rounded-[20px]"
-                      src={academy.acaPic} // 기본 이미지 설정
+                      src={`http://112.222.157.156:5223/pic/academy/${academy.acaId}/${academy.acaPic}`} // 기본 이미지 설정
                       onError={e => {
                         const target = e.target as HTMLImageElement;
                         const randomNum = getRandomUniqueNumber();
