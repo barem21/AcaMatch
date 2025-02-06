@@ -1,5 +1,4 @@
 import {
-  Button,
   Checkbox,
   CheckboxChangeEvent,
   DatePicker,
@@ -18,8 +17,8 @@ import { FadeLoader } from "react-spinners";
 import styled from "@emotion/styled";
 
 function SignupPage() {
-  const [value, setValue] = useState<number | null>(null); // 초기값을 1로 설정
-  const [imageUrl, setImageUrl] = useState<string>();
+  // const [value, setValue] = useState<number | null>(null); // 초기값을 1로 설정
+  // const [imageUrl, setImageUrl] = useState<string>();
   const navigate = useNavigate();
 
   const [checkedList, setCheckedList] = useState<string[]>([]);
@@ -27,7 +26,7 @@ function SignupPage() {
 
   const [emailCheck, setEmailCheck] = useState<number>(0); // 0: 미확인, 1: 중복, 2: 사용가능
   const [nickNameCheck, setNickNameCheck] = useState<number>(0);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  // const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const LoadingWrap = styled.div`
@@ -54,12 +53,12 @@ function SignupPage() {
 
   const handleChangePassword = () => {
     // 기본 비밀번호 입력값 알아내고
-    const pw = form.getFieldValue("password");
+    // const pw = form.getFieldValue("password");
     // 비교 비밀번호 입력값 알아내고, 비교한다.
     const pwConfirm = form.getFieldValue("passwordConfirm");
     if (pwConfirm) {
       // 비교 비밀 번호 있으면 비교하겠다.
-      setMatch(pw === pwConfirm);
+      // setMatch(pw === pwConfirm);
     }
   };
 
@@ -76,9 +75,9 @@ function SignupPage() {
     setCheckedList(newCheckedList);
   };
 
-  const handleButton1Click = () => {
-    console.log("중복확인");
-  };
+  // const handleButton1Click = () => {
+  //   console.log("중복확인");
+  // };
 
   const onCheckboxChange = (list: string[]) => {
     setCheckedList(list);
@@ -111,7 +110,7 @@ function SignupPage() {
 
     try {
       setIsLoading(true);
-      const res = await axios.post("/api/user/sign-up", {
+      await axios.post("/api/user/sign-up", {
         ...restValues,
         birthday: formattedBirthday,
         signUpType: 0,
@@ -215,7 +214,7 @@ function SignupPage() {
       <header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite">
         <div className="w-[1280px] flex items-center justify-between mx-auto  ">
           <img
-            src="/public/logo2.png"
+            src="/logo2.png"
             className="w-[160px] cursor-pointer mr-[full]"
             onClick={() => {
               navigate("/");

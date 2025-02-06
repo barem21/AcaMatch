@@ -49,7 +49,7 @@ function MypageReview() {
       ];
   }
 
-  const fetchData = async (page: number) => {
+  const fetchData = async page => {
     if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
@@ -112,7 +112,7 @@ function MypageReview() {
             </div>
           )}
 
-          {reviewList.map((item: any, index: number) => (
+          {reviewList.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-6 border-b"

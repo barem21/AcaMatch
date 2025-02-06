@@ -175,7 +175,7 @@ function AcademyClassAdd() {
     price: "",
   };
 
-  const onFinished = (values: any) => {
+  const onFinished = values => {
     //alert("학원 등록 완료");
     //console.log(values);
     const startDate = dayjs(values.classDate[0].$d).format("YYYY-MM-DD");

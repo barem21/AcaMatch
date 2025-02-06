@@ -10,7 +10,6 @@ import CustomModal from "../../../components/modal/Modal";
 import SideBar from "../../../components/SideBar";
 
 import { Form, Input } from "antd";
-import { getCookie } from "../../../utils/cookie";
 
 function AcademyTestList() {
   const [form] = Form.useForm();
@@ -197,7 +196,7 @@ function AcademyTestList() {
             </div>
           )}
 
-          {myAcademyTestList?.map((item: never, index: number) => (
+          {myAcademyTestList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"

@@ -1,16 +1,15 @@
-import axios from "axios";
-import styled from "@emotion/styled";
-import React, { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import userInfo from "../../../atoms/userInfo";
-import SideBar from "../../../components/SideBar";
-import { Button, Form, message, Pagination, Upload, UploadProps } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import styled from "@emotion/styled";
+import { Button, Form, message, Pagination, Upload } from "antd";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
-import CustomModal from "../../../components/modal/Modal";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import jwtAxios from "../../../apis/jwt";
-import { UploadChangeParam, UploadFile } from "antd/es/upload";
+import userInfo from "../../../atoms/userInfo";
+import CustomModal from "../../../components/modal/Modal";
+import SideBar from "../../../components/SideBar";
 
 function AcademyRecord() {
   const [form] = Form.useForm();
@@ -23,7 +22,7 @@ function AcademyRecord() {
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [isModalVisible4, setIsModalVisible4] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState([]);
 
   const navigate = useNavigate();
   const acaId = searchParams.get("acaId");
@@ -59,6 +58,21 @@ function AcademyRecord() {
     .ant-form-item-control-input button {
       display: flex !important;
     }
+    .ant-upload.ant-upload-select {
+      width: 100%;
+    }
+    .ant-upload.ant-upload-select .ant-btn {
+      width: 100%;
+      height: auto;
+      padding: 10px 0px;
+    }
+    .ant-upload-list-item .ant-upload-icon,
+    .ant-upload-list-item-progress {
+      display: none;
+    }
+    .btn-wrap .ant-form-item {
+      margin: 0px;
+    }
   `;
 
   const AddRecoad = styled.div``;
@@ -76,8 +90,13 @@ function AcademyRecord() {
   const handle2Button1Click = () => {
     setIsModalVisible2(false);
   };
+
+  //수강생 목록 다운로드(엑셀)
   const handle2Button2Click = async () => {
     const res = await axios.get(`/api/grade/export?subjectId=${subjectId}`);
+    if (res.data.resultData) {
+      window.open(res.data.resultData);
+    }
     //console.log(res.data);
 
     setIsModalVisible2(false);
@@ -85,9 +104,11 @@ function AcademyRecord() {
 
   //점수 일괄업로드 관련
   const handle3Button1Click = () => {
+    setFileList([]);
     setIsModalVisible3(false);
   };
   const handle3Button2Click = () => {
+    setFileList([]);
     setIsModalVisible3(false);
   };
 
@@ -123,7 +144,7 @@ function AcademyRecord() {
         `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
       );
       setTestStudentList(res.data.resultData);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -135,25 +156,7 @@ function AcademyRecord() {
   };
 
   //첨부파일 처리
-  const props: UploadProps = {
-    name: "file",
-    //action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    headers: {
-      authorization: "authorization-text",
-    },
-    onChange(info) {
-      if (info.file.status !== "uploading") {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === "done") {
-        message.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
-      }
-    },
-  };
-
-  const handleChange = (info: UploadChangeParam<UploadFile>) => {
+  const handleChange = info => {
     let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
@@ -162,13 +165,17 @@ function AcademyRecord() {
     // 파일 상태 업데이트
     setFileList(newFileList);
 
+    //console.log("파일 선택됨:", info.file.originFileObj);
+    form.setFieldValue("gradeFile", info.file.originFileObj);
+
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
-      form.setFieldValue("pic", info.file.originFileObj);
+      //console.log("파일 선택됨:", info.file.originFileObj);
+      //form.setFieldValue("gradeFile", info.file.originFileObj);
     }
   };
 
-  //점수 수정하기
+  //점수 직접 수정하기
   const onFinished = async values => {
     const datas = {
       gradeId: testGradeId,
@@ -186,9 +193,37 @@ function AcademyRecord() {
     }
   };
 
-  //엑셀 일괄수정
+  //엑셀 일괄 수정하기
   const onFinishedSe = async values => {
-    console.log(values);
+    //console.log(values.gradeFile);
+    try {
+      const formData = new FormData();
+
+      // gradeFile 있는 경우에만 추가
+      if (values.gradeFile) {
+        formData.append("gradeFile", values.gradeFile);
+      } else {
+        alert("파일을 선택해 주세요.");
+        return;
+      }
+
+      const header = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      const res = await axios.post(`/api/grade/import`, formData, header);
+      if (res.data.resultData === 1) {
+        form.resetFields(); //초기화
+        setFileList([]);
+        message.success("테스트 결과 수정이 완료되었습니다.");
+        setIsModalVisible3(false);
+        academyStudentList();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -241,7 +276,7 @@ function AcademyRecord() {
             </div>
           </div>
 
-          {testStudentList.map((item: never, index: number) => (
+          {testStudentList.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
@@ -322,7 +357,7 @@ function AcademyRecord() {
                   <div className="flex w-full gap-3 mt-4 justify-between">
                     <Form.Item className="mb-0">
                       <Button
-                        className="w-full h-14 bg-[#E8EEF3] text-sm"
+                        className="w-full h-14 text-sm"
                         onClick={() => handleButton1Click()}
                       >
                         창닫기
@@ -351,8 +386,8 @@ function AcademyRecord() {
 
         <CustomModal
           visible={isModalVisible2}
-          title={"수강생 다운로드"}
-          content={"수강생 목록을 다운로드 받으시겠습니까?"}
+          title={"수강생 엑셀 다운로드"}
+          content={"전체 수강생 목록을 다운로드 받으시겠습니까?"}
           onButton1Click={handle2Button1Click}
           onButton2Click={handle2Button2Click}
           button1Text={"취소하기"}
@@ -363,14 +398,25 @@ function AcademyRecord() {
         <div className="editModal">
           <CustomModal
             visible={isModalVisible3}
-            title={"점수 일괄 업로드"}
+            title={"테스트 결과 일괄등록"}
             content={
               <div>
-                <h4 className="mb-2">업로드하실 파일을 선택해 주세요.</h4>
+                <h4 className="mb-2">
+                  수강생 엑셀파일에서 성적수정 파일을 업로드하세요.
+                  <br />
+                  (양식을 임의변경하실 경우 일괄수정이 불가합니다.)
+                </h4>
                 <Form form={form} onFinish={values => onFinishedSe(values)}>
-                  <Form.Item name="file">
+                  <Form.Item
+                    name="gradeFile"
+                    rules={[
+                      {
+                        required: true,
+                        message: "파일을 선택해 주세요.",
+                      },
+                    ]}
+                  >
                     <Upload
-                      {...props}
                       maxCount={1}
                       onChange={handleChange}
                       fileList={fileList}
@@ -381,17 +427,19 @@ function AcademyRecord() {
                         }, 0);
                       }}
                     >
-                      <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                      <Button icon={<UploadOutlined />}>
+                        업로드할 파일을 선택해 주세요.
+                      </Button>
                     </Upload>
                   </Form.Item>
 
-                  <div className="flex w-full gap-3 justify-between">
+                  <div className="flex w-full gap-3 justify-between btn-wrap">
                     <Form.Item>
                       <Button
-                        className="w-full h-14 bg-[#E8EEF3] text-sm"
-                        onClick={() => setIsModalVisible3(false)}
+                        className="w-full h-14 text-sm"
+                        onClick={() => handle3Button1Click()}
                       >
-                        창닫기
+                        취소하기
                       </Button>
                     </Form.Item>
 

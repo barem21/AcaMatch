@@ -9,7 +9,7 @@ import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import LikeButton from "../../components/button/LikeButton";
 
-const usedRandomNumbers = new Set<number>();
+const usedRandomNumbers = new Set();
 
 // Generate random unique number
 const getRandomUniqueNumber = () => {
@@ -27,13 +27,13 @@ const getRandomUniqueNumber = () => {
 };
 
 function MyPageLike() {
-  const [likeList, setLikeList] = useState<any[]>([]); // 좋아요 목록
+  const [likeList, setLikeList] = useState([]); // 좋아요 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [resultMessage, setResultMessage] = useState("");
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
-  const [likeStates, setLikeStates] = useState<{ [key: number]: boolean }>({});
+  const [likeStates, setLikeStates] = useState({});
   const [totalLikesCount, setTotalLikesCount] = useState(0); // To track total items
 
   const titleName = "마이페이지";
@@ -68,7 +68,7 @@ function MyPageLike() {
       ];
   }
 
-  const handleLikeChange = (academyId: number, newIsLiked: boolean) => {
+  const handleLikeChange = (academyId, newIsLiked) => {
     setLikeStates(prevStates => ({
       ...prevStates,
       [academyId]: newIsLiked,
@@ -81,7 +81,7 @@ function MyPageLike() {
     }
   };
 
-  const fetchData = async (page: number) => {
+  const fetchData = async page => {
     try {
       const res = await jwtApiRequest.get(
         `/api/like/user?userId=${currentUserInfo.userId}&page=${page}`,
@@ -96,13 +96,10 @@ function MyPageLike() {
         setLikeList(res.data.resultData);
         setTotalLikesCount(res.data.totalCount); // Assuming API returns total count
 
-        const initialLikeStates = res.data.resultData.reduce(
-          (acc, item) => {
-            acc[item.acaId] = true;
-            return acc;
-          },
-          {} as { [key: number]: boolean },
-        );
+        const initialLikeStates = res.data.resultData.reduce((acc, item) => {
+          acc[item.acaId] = true;
+          return acc;
+        });
 
         setLikeStates(initialLikeStates);
       }
@@ -159,7 +156,7 @@ function MyPageLike() {
                     className="h-[60px] w-[60px] rounded-[20px]"
                     src={`http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`}
                     onError={e => {
-                      const target = e.target as HTMLImageElement;
+                      const target = e.target;
                       const randomNum = getRandomUniqueNumber();
                       target.src = `/default_academy${randomNum}.jpg`;
                     }}

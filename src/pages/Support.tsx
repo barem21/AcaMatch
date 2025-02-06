@@ -1,8 +1,7 @@
-import { useState } from "react";
-import SideBar from "../components/SideBar";
 import { Pagination } from "antd";
+import { useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
-import { FaQuestionCircle } from "react-icons/fa"; // Font Awesome 스타일
+import SideBar from "../components/SideBar";
 
 function Support() {
   const [currentPage, setCurrentPage] = useState(1);

@@ -185,28 +185,40 @@ function AcademyClassEdit() {
   const academyGetInfo = async () => {
     try {
       const res = await jwtAxios.get(`/api/acaClass/detail?acaId=${acaId}`);
-      console.log("aca_info : ", res.data.resultData);
+      for (let i = 0; i < res.data.resultData.length; i++) {
+        if (res.data.resultData[i].classId === parseInt(classId)) {
+          console.log(res.data.resultData[i]);
 
-      // 데이터를 받아온 즉시 form 값 설정
-      form.setFieldsValue({
-        /*
-        acaId: res.data.resultData.acaId,
-        classId: res.data.resultData.classId,
-        className: res.data.resultData.className,
-        classComment: res.data.resultData.comment,
-        startTime: dayjs(res.data.resultData.openTime.substr(0, 5), "HH:mm"),
-        endTime: dayjs(res.data.resultData.closeTime.substr(0, 5), "HH:mm"),
-        price: res.data.resultData.price,
-        day: res.data.resultData.day,
-        yearsAndLevel: res.data.resultData.yearsAndLevel,
-        */
-      });
+          // 데이터를 받아온 즉시 form 값 설정
+          form.setFieldsValue({
+            //acaId: res.data.resultData[i].acaId,
+            //classId: res.data.resultData[i].classId,
+            className: res.data.resultData[i].className,
+            classComment: res.data.resultData[i].classComment,
+            classDate: [
+              dayjs(res.data.resultData[i].startDate, "YYYY-MM-DD"),
+              dayjs(res.data.resultData[i].endDate, "YYYY-MM-DD"),
+            ],
+            startTime: dayjs(
+              res.data.resultData[i].startTime.substr(0, 5),
+              "HH:mm",
+            ),
+            endTime: dayjs(
+              res.data.resultData[i].endTime.substr(0, 5),
+              "HH:mm",
+            ),
+            price: res.data.resultData[i].price,
+            day: res.data.resultData[i].day,
+            yearsAndLevel: res.data.resultData[i].yearsAndLevel,
+          });
+        }
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const onFinished = async (values: any) => {
+  const onFinished = async values => {
     console.log(values);
 
     const startDate = dayjs(values.classDate[0].$d).format("YYYY-MM-DD");
@@ -216,6 +228,7 @@ function AcademyClassEdit() {
 
     const datas = {
       acaId: acaId,
+      classId: classId,
       className: values.className,
       classComment: values.classComment,
       startDate: startDate,
@@ -227,7 +240,7 @@ function AcademyClassEdit() {
 
     try {
       const res = await jwtAxios.put("/api/acaClass", datas);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
 
       if (res.data.resultData === 1) {
         //alert("강좌 수정 완료");
@@ -281,7 +294,7 @@ function AcademyClassEdit() {
               </Form.Item>
 
               <Form.Item
-                name="aca_name"
+                name="classDate"
                 label="강좌 기간"
                 rules={[
                   { required: true, message: "강좌 기간을 입력해 주세요." },
@@ -291,7 +304,7 @@ function AcademyClassEdit() {
               </Form.Item>
 
               <Form.Item
-                name="comment"
+                name="classComment"
                 label="강좌 소개글"
                 className="h-44"
                 rules={[
@@ -305,7 +318,7 @@ function AcademyClassEdit() {
               </Form.Item>
               <div className="flex gap-3">
                 <Form.Item
-                  name="openTime"
+                  name="startTime"
                   label="강좌 시간"
                   rules={[
                     { required: true, message: "시작 시간을 선택해 주세요." },
@@ -318,7 +331,7 @@ function AcademyClassEdit() {
                   />
                 </Form.Item>
                 <Form.Item
-                  name="closeTime"
+                  name="endTime"
                   label=""
                   rules={[
                     { required: true, message: "종료 시간을 선택해 주세요." },
@@ -331,13 +344,7 @@ function AcademyClassEdit() {
                   />
                 </Form.Item>
               </div>
-              <Form.Item
-                name="age"
-                label="수강 연령대"
-                rules={[
-                  { required: true, message: "수강 연령대를 선택해 주세요." },
-                ]}
-              >
+              <Form.Item name="classAge" label="수강 연령대">
                 <Checkbox>성인</Checkbox>
                 <Checkbox>청소년</Checkbox>
                 <Checkbox>초등학생</Checkbox>
@@ -345,7 +352,7 @@ function AcademyClassEdit() {
                 <Checkbox>기타</Checkbox>
               </Form.Item>
 
-              <Form.Item label="수준" name="disabled" valuePropName="checked">
+              <Form.Item label="수준" name="classLevel" valuePropName="checked">
                 <Checkbox>전문가</Checkbox>
                 <Checkbox>상급</Checkbox>
                 <Checkbox>중급</Checkbox>

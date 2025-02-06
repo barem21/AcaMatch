@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import MainButton from "../../components/button/MainButton";
 
@@ -13,7 +12,7 @@ function SignupEnd() {
       <header className="sticky top-0 z-50 flex items-center h-16 bg-white border-b border-brand-BTWhite">
         <div className="w-[1280px] flex items-center justify-between mx-auto">
           <img
-            src="/public/logo2.png"
+            src="/logo2.png"
             className="w-[160px] cursor-pointer"
             onClick={() => navigate("/")}
           />

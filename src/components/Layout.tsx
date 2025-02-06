@@ -1,9 +1,7 @@
 import React, { ReactNode, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
-import { message } from "antd";
-import { getCookie } from "../utils/cookie";
 
 interface LayoutProps {
   children?: ReactNode; // children의 타입을 ReactNode로 지정
@@ -12,7 +10,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { pathname } = useLocation(); // 현재 경로 확인
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   // 특정 경로에서 Header와 Footer를 숨기기 위한 배열
   const noLayoutPaths = ["/login", "/signup", "/signup/end", "/forgotPw"];
   // const noSideBarPaths = ["/signup", "/signup/end", "/"];
