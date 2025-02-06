@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { GoStar, GoStarFill } from "react-icons/go";
 import { Form, message } from "antd";
-import axios from "axios";
-import { SecondaryButton } from "./Modal";
-import MainButton from "../button/MainButton";
-import jwtAxios from "../../apis/jwt";
+import { useState } from "react";
+import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilState } from "recoil";
+import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
+import MainButton from "../button/MainButton";
+import { SecondaryButton } from "./Modal";
 
 interface ReviewModalProps {
   onClose: () => void;
@@ -21,8 +20,8 @@ function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
   const [form] = Form.useForm();
   const [rating, setRating] = useState(1);
   const [hoveredRating, setHoveredRating] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useRecoilState(userInfo);
+  const [_isSubmitting, setIsSubmitting] = useState(false);
+  const [user, _setUser] = useRecoilState(userInfo);
 
   const handleStarClick = (selectedRating: number) => {
     setRating(selectedRating);
@@ -32,11 +31,12 @@ function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
   //   console.log(rating); // rating 값이 변경된 후 출력됨
   // }, [rating]); // rating이 변경될 때마다 호출
 
-  useEffect(() => {
-    try {
-      const res = jwtAxios.post("/api/review/user");
-    } catch (error) {}
-  }, []);
+  // useEffect(() => {
+  //   try {
+  //     const res = jwtAxios.post("/api/review/user");
+
+  //   } catch (error) {}
+  // }, []);
 
   const handleSubmit = async (values: ReviewFormValues) => {
     if (rating === 0) {
@@ -67,10 +67,16 @@ function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
       onClose();
     } catch (error) {
       console.error("리뷰 등록 실패:", error);
-      if (error.response && error.response.status === 409) {
-        message.error("이미 등록된 리뷰입니다.");
-      } else if (error.response && error.response.request) {
-        message.error("리뷰 등록에 실패했습니다. 다시 시도해주세요.");
+
+      if (error instanceof Error) {
+        const axiosError = error as any; // `AxiosError` 타입으로 캐스팅
+        if (axiosError.response && axiosError.response.status === 409) {
+          message.error("이미 등록된 리뷰입니다.");
+        } else if (axiosError.response && axiosError.response.request) {
+          message.error("리뷰 등록에 실패했습니다. 다시 시도해주세요.");
+        }
+      } else {
+        message.error("알 수 없는 오류가 발생했습니다.");
       }
       onClose();
     } finally {

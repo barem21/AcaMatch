@@ -1,7 +1,6 @@
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
-import { Modal } from "antd";
 import { useMemo } from "react";
 import { AcademyData } from "./types";
 import styled from "@emotion/styled";
@@ -146,11 +145,11 @@ const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
 
 export default AcademyCalendar;
 
-interface EventContentProps {
-  eventInfo: {
-    event: any; // FullCalendar 이벤트 타입
-  };
-}
+// interface EventContentProps {
+//   eventInfo: {
+//     event: any; // FullCalendar 이벤트 타입
+//   };
+// }
 
 interface EventModalProps {
   event: any; // FullCalendar 이벤트 타입
@@ -173,10 +172,10 @@ export const EventContent = ({ eventInfo }: { eventInfo: any }) => {
   });
 
   // 날짜 포맷팅
-  const date = eventInfo.event.start?.toLocaleDateString("ko-KR", {
-    month: "short",
-    day: "numeric",
-  });
+  // const date = eventInfo.event.start?.toLocaleDateString("ko-KR", {
+  //   month: "short",
+  //   day: "numeric",
+  // });
 
   if (view === "dayGridMonth") {
     // 월간 뷰

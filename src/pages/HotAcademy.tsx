@@ -5,14 +5,14 @@ import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function HotAcademy() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // 쿼리스트링에서 page 값 읽기 (없으면 1로 설정)
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const [loading, setLoading] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  // const [hasMore, setHasMore] = useState(true);
   const pageSize = 10;
 
   const usedRandomNumbers = new Set<number>();
@@ -79,7 +79,7 @@ function HotAcademy() {
         console.log(response);
 
         setAcademyData(updatedCards);
-        setHasMore(updatedCards.length === pageSize);
+        // setHasMore(updatedCards.length === pageSize);
       } catch (error) {
         console.error("Error fetching academy data:", error);
       } finally {
@@ -92,13 +92,17 @@ function HotAcademy() {
 
   // 스켈레톤 UI 표시 최적화
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
     if (loading) {
       timeoutId = setTimeout(() => setShowSkeleton(true), 200);
     } else {
       setShowSkeleton(false);
     }
-    return () => timeoutId && clearTimeout(timeoutId);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId); // ✅ 명확하게 void만 반환하도록 수정
+    };
   }, [loading]);
 
   // 페이지 변경 핸들러
@@ -165,7 +169,7 @@ const SkeletonCard = () => (
 );
 
 // 학원 카드 컴포넌트
-const AcademyCard = ({ academy }: { academy: (typeof academyData)[0] }) => {
+const AcademyCard = ({ academy }: { academy: any }) => {
   const navigate = useNavigate();
   console.log("여기", academy);
 

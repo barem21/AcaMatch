@@ -58,7 +58,6 @@ function AcademyLike() {
       const res = await jwtAxios.get(
         "/api/like/all-owned-academy-likes?page=1&size=20",
       );
-      console.log(res.data.resultData);
 
       // 객체들을 하나로 합치기
       let mergedObj = {};

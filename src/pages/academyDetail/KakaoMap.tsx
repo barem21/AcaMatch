@@ -52,7 +52,7 @@ const KakaoMap = ({ address }: KakaoMapProps) => {
 
               if (address) {
                 const geocoder = new window.kakao.maps.services.Geocoder();
-                geocoder.addressSearch(address, (result, status) => {
+                geocoder.addressSearch(address, (result: any, status: any) => {
                   if (
                     status === window.kakao.maps.services.Status.OK &&
                     result[0]
@@ -87,7 +87,7 @@ const KakaoMap = ({ address }: KakaoMapProps) => {
             setIsMapLoaded(true);
 
             const geocoder = new window.kakao.maps.services.Geocoder();
-            geocoder.addressSearch(address, (result, status) => {
+            geocoder.addressSearch(address, (result: any, status: any) => {
               if (
                 status === window.kakao.maps.services.Status.OK &&
                 result[0]

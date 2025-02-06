@@ -18,7 +18,7 @@ function MypageParent() {
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
-  const [parentList, setParentList] = useState<object[]>([]); //자녀 목록
+  const [parentList, setParentList] = useState([]); //자녀 목록
   const navigate = useNavigate();
 
   const titleName = "마이페이지";
@@ -264,7 +264,7 @@ function MypageParent() {
                   <button
                     type="button"
                     className="showBtn small_line_button"
-                    onClick={e => cancelRequest(item.email)}
+                    onClick={() => cancelRequest(item.email)}
                   >
                     요청취소
                   </button>
@@ -309,7 +309,7 @@ function MypageParent() {
                 <div className="flex w-full gap-3 mt-4 justify-between">
                   <Form.Item>
                     <Button
-                      className="w-full h-14 bg-[#E8EEF3] text-sm"
+                      className="w-full h-14 text-sm"
                       onClick={() => handleButton1Click()}
                     >
                       창닫기

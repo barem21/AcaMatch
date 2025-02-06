@@ -99,7 +99,7 @@ function AcademyList() {
             </div>
           )}
 
-          {myAcademyList?.map((item: never, index: number) => (
+          {myAcademyList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"

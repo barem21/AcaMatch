@@ -1,12 +1,11 @@
-import { Skeleton } from "antd";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { BsBuilding, BsClock } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
+import { LiaUserFriendsSolid } from "react-icons/lia";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/CustomInput ";
 import MainButton from "../components/button/MainButton";
-import { BsBuilding, BsClock } from "react-icons/bs";
-import { LiaUserFriendsSolid } from "react-icons/lia";
 
 interface Academy {
   acaId: number;
@@ -18,39 +17,46 @@ interface Academy {
   reviewCount: number;
 }
 interface BestAcademy {
-  acaName: string;
-  acaId: number;
-  subject: string;
-  tagNames: string;
-  reviews: string;
-  image: string;
+  acaId?: number;
+  acaName?: string;
+  tagNames?: string;
+  subject?: string;
+  description?: string;
+  reviews?: string;
+  questionsAnswered?: string;
+  link?: string;
+  image?: string;
 }
 
-const usedRandomNumbers = new Set<number>();
+interface Tag {
+  tagName: string;
+}
 
-const getRandomUniqueNumber = () => {
-  if (usedRandomNumbers.size === 10) {
-    usedRandomNumbers.clear(); // 모든 숫자가 사용되면 초기화
-  }
+// const usedRandomNumbers = new Set<number>();
 
-  let randomNum;
-  do {
-    randomNum = Math.floor(Math.random() * 10) + 1; // 1~10 사이의 랜덤 숫자
-  } while (usedRandomNumbers.has(randomNum));
+// const getRandomUniqueNumber = () => {
+//   if (usedRandomNumbers.size === 10) {
+//     usedRandomNumbers.clear(); // 모든 숫자가 사용되면 초기화
+//   }
 
-  usedRandomNumbers.add(randomNum);
-  return randomNum;
-};
+//   let randomNum;
+//   do {
+//     randomNum = Math.floor(Math.random() * 10) + 1; // 1~10 사이의 랜덤 숫자
+//   } while (usedRandomNumbers.has(randomNum));
+
+//   usedRandomNumbers.add(randomNum);
+//   return randomNum;
+// };
 
 function HomePage() {
   const navigate = useNavigate();
 
   const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
-  const [isDefaultLoading, setIsDefaultLoading] = useState(true);
+  // const [isDefaultLoading, setIsDefaultLoading] = useState(true);
 
-  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+  // const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
-  const [popularTag, setPopularTag] = useState([]);
+  const [popularTag, setPopularTag] = useState<Tag[]>([]);
   const [bestAcademyCards, setBestAcademyCards] = useState<BestAcademy[]>([
     {
       subject: "수학 학원",
@@ -58,7 +64,7 @@ function HomePage() {
       reviews: "5.0 (123 reviews)",
       questionsAnswered: "12,000 questions answered",
       link: "/",
-      image: "/public/default-academy.png",
+      image: "/default-academy.png",
     },
     {
       subject: "과학 학원",
@@ -66,7 +72,7 @@ function HomePage() {
       reviews: "4.9 (87 reviews)",
       questionsAnswered: "9,000 questions answered",
       link: "/",
-      image: "/public/default-academy.png",
+      image: "/default-academy.png",
     },
     {
       subject: "영어 학원",
@@ -74,7 +80,7 @@ function HomePage() {
       reviews: "4.8 (56 reviews)",
       questionsAnswered: "7,500 questions answered",
       link: "/",
-      image: "/public/default-academy.png",
+      image: "/default-academy.png",
     },
     {
       subject: "외국어 학원",
@@ -82,7 +88,7 @@ function HomePage() {
       reviews: "4.7 (34 reviews)",
       questionsAnswered: "6,000 questions answered",
       link: "/",
-      image: "/public/default-academy.png",
+      image: "/default-academy.png",
     },
   ]);
 
@@ -105,11 +111,11 @@ function HomePage() {
   ];
   const [service, setService] = useState(serviceStats);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  // const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [searchValue, setSearchValue] = useState("");
 
-  const handleInputChange = e => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
 
@@ -135,7 +141,7 @@ function HomePage() {
 
   useEffect(() => {
     const fetchDefaultAcademies = async () => {
-      setIsDefaultLoading(true);
+      // setIsDefaultLoading(true);
       try {
         const response = await axios.get("/api/academy/popularSearch");
         setPopularTag(response.data.resultData);
@@ -143,7 +149,7 @@ function HomePage() {
       } catch (error) {
         console.error("Error fetching default academies:", error);
       } finally {
-        setIsDefaultLoading(false);
+        // setIsDefaultLoading(false);
       }
     };
 
@@ -152,7 +158,7 @@ function HomePage() {
 
   useEffect(() => {
     const fetchDefaultAcademies = async () => {
-      setIsDefaultLoading(true);
+      // setIsDefaultLoading(true);
       try {
         const response = await axios.get("/api/academy/AcademyDefault");
         setDefaultAcademies(response.data.resultData);
@@ -160,7 +166,7 @@ function HomePage() {
       } catch (error) {
         console.error(error);
       } finally {
-        setIsDefaultLoading(false);
+        // setIsDefaultLoading(false);
       }
     };
 
@@ -221,7 +227,7 @@ function HomePage() {
   //화제의 학원
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // 데이터 로딩 시작
+      // setLoading(true); // 데이터 로딩 시작
       try {
         const response = await axios.get("/api/academy/best", {
           params: { page: 1, size: 4 },
@@ -232,7 +238,7 @@ function HomePage() {
           (item: any) => ({
             acaId: item.acaId,
             acaName: item.acaName || "학원명",
-            reviews: `${item.reviewCount.toFixed(1)} (${item.reviewCount} reviews)`,
+            reviews: `${item.starAvg.toFixed(1)} (${item.reviewCount} reviews)`,
             image: getAcademyImageUrl(item.acaId, item.acaPic), // 이미지 URL 변환
             tagNames: item.tagNames,
           }),
@@ -243,32 +249,32 @@ function HomePage() {
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
-        setLoading(false); // 데이터 로딩 완료
+        // setLoading(false); // 데이터 로딩 완료
       }
     };
 
     fetchData();
   }, []);
 
-  const SkeletonCard = () => (
-    <div className="flex flex-col gap-4">
-      <Skeleton.Image
-        active
-        style={{
-          width: "100%",
-          height: "224px", // h-56과 동일
-          borderRadius: "12px",
-        }}
-      />
-      <div className="flex flex-col gap-3">
-        <Skeleton.Input active style={{ width: "60%" }} />
-        <div className="flex flex-col gap-1">
-          <Skeleton.Input active size="small" style={{ width: "80%" }} />
-          <Skeleton.Input active size="small" style={{ width: "40%" }} />
-        </div>
-      </div>
-    </div>
-  );
+  // const SkeletonCard = () => (
+  //   <div className="flex flex-col gap-4">
+  //     <Skeleton.Image
+  //       active
+  //       style={{
+  //         width: "100%",
+  //         height: "224px", // h-56과 동일
+  //         borderRadius: "12px",
+  //       }}
+  //     />
+  //     <div className="flex flex-col gap-3">
+  //       <Skeleton.Input active style={{ width: "60%" }} />
+  //       <div className="flex flex-col gap-1">
+  //         <Skeleton.Input active size="small" style={{ width: "80%" }} />
+  //         <Skeleton.Input active size="small" style={{ width: "40%" }} />
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 
   return (
     <div className="flex flex-col items-center px-4 py-[36px] gap-8 mx-auto">
@@ -408,7 +414,7 @@ function HomePage() {
             <div
               key={index}
               className="flex flex-col gap-4 cursor-pointer"
-              onClick={() => handleAcademyClick(card.acaId)}
+              onClick={() => handleAcademyClick(Number(card.acaId))}
             >
               <img
                 className="h-56 bg-gray-200 rounded-xl object-cover"

@@ -11,7 +11,7 @@ interface ReviewSectionProps {
   star: number;
   reviewCount: number;
   renderStars: (rating: number) => JSX.Element;
-  academyId: number;
+  academyId?: number;
   reviews: Review[];
   classes: AcademyClass[];
 }
@@ -45,7 +45,7 @@ const ReviewSection = ({
   star,
   reviewCount,
   renderStars,
-  academyId,
+  // academyId,
   classes,
   reviews: initialReviews, // 초기 리뷰 데이터
 }: ReviewSectionProps) => {
@@ -54,8 +54,8 @@ const ReviewSection = ({
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = 10;
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [user, setUser] = useRecoilState(userInfo);
-  const [commonClasses, setCommonClasses] = useState<number[]>([]);
+  const [user, _setUser] = useRecoilState(userInfo);
+  const [commonClasses, _setCommonClasses] = useState<number[]>([]);
 
   const handlePageChange = (page: number) => {
     setSearchParams(prevParams => {
@@ -82,7 +82,7 @@ const ReviewSection = ({
       );
 
       // API 응답에서 resultData를 가져옵니다.
-      const resultData = res.data.resultData;
+      const resultData: { classList?: ClassItem[] }[] = res.data.resultData;
 
       // classes와 resultData의 classId를 비교하는 로직
       const isClassInRes = classes.some(classItem =>
@@ -101,7 +101,7 @@ const ReviewSection = ({
 
       if (isClassInRes) {
         classes.forEach(classItem => {
-          resultData.forEach((academy: Academy) => {
+          resultData.forEach((academy: any) => {
             academy.classList?.forEach((classListItem: ClassItem) => {
               if (classListItem.classId === classItem.classId) {
                 // 일치하는 classId를 commonClasses 배열에 추가
@@ -125,9 +125,9 @@ const ReviewSection = ({
   //   return new Date(dateString).toLocaleDateString();
   // };
 
-  const getProfileImage = (writerPic: string) => {
-    return writerPic === "default_user.jpg" ? "/aca_image_1.png" : writerPic;
-  };
+  // const getProfileImage = (writerPic: string) => {
+  //   return writerPic === "default_user.jpg" ? "/aca_image_1.png" : writerPic;
+  // };
 
   return (
     <div className="flex flex-col mx-auto p-[12px]">
@@ -170,8 +170,34 @@ const ReviewSection = ({
                 alt="User"
                 className={styles.reviews.avatar}
               />
-              <div>
-                <div className={styles.reviews.text}>User {review.userId}</div>
+              <div className="w-full">
+                <div className="flex">
+                  <div className={`${styles.reviews.text} w-[700px]`}>
+                    User {review.userId}
+                  </div>
+                  <div>
+                    {review.userId === Number(user.userId) && (
+                      <div className="flex gap-2">
+                        <button
+                          className="small_line_button bg-[#3B77D8] text-[14px]"
+                          style={{
+                            color: "#fff",
+                          }}
+                        >
+                          리뷰수정
+                        </button>
+                        <button
+                          className="small_line_button bg-[#fff] text-[14px]"
+                          style={{
+                            color: "#242424",
+                          }}
+                        >
+                          리뷰삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className={styles.reviews.text}>
                   {new Date(review.createdAt).toLocaleDateString()}
                 </div>

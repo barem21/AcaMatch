@@ -1,22 +1,24 @@
-import { Button, Pagination } from "antd";
-import SideBar from "../components/SideBar";
-import { useNavigate } from "react-router-dom";
+import { Pagination } from "antd";
 import { useEffect, useState } from "react";
-import CustomModal from "../components/modal/Modal";
-import jwtAxios from "../apis/jwt";
+import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
+import jwtAxios from "../apis/jwt";
 import userInfo from "../atoms/userInfo";
+import CustomModal from "../components/modal/Modal";
+import SideBar from "../components/SideBar";
 function Inquiry() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { userId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
-  const [academyData, setAcademyData] = useState<InquiryData[]>([]); // 초기값을 빈 배열로 설정
+  const [academyData, setAcademyData] = useState([]); // 초기값을 빈 배열로 설정
 
   const titleName = "고객지원";
   const menuItems = [
     { label: "FAQ", isActive: false, link: "/support" },
     { label: "1 : 1 문의", isActive: true, link: "/support/inquiryList" },
   ];
+
+  /*
   interface InquiryData {
     id: number;
     academyName: string;
@@ -24,6 +26,8 @@ function Inquiry() {
     status: "처리중" | "답변완료";
     canCancel: boolean;
   }
+  */
+
   const handleButton1Click = () => {
     setIsModalVisible(false);
   };

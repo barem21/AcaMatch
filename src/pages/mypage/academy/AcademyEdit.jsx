@@ -1,26 +1,17 @@
-import { useEffect, useState } from "react";
-import {
-  Button,
-  Form,
-  Image,
-  Input,
-  message,
-  TimePicker,
-  Upload,
-  UploadFile,
-  UploadProps,
-} from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import SideBar from "../../../components/SideBar";
+import { Button, Form, Image, Input, TimePicker, Upload } from "antd";
+import axios from "axios";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import axios from "axios";
-import userInfo from "../../../atoms/userInfo";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import dayjs from "dayjs";
+import jwtAxios from "../../../apis/jwt";
+import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
-import { useNavigate } from "react-router-dom";
+import SideBar from "../../../components/SideBar";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -124,6 +115,7 @@ const TagListSelect = styled.div`
   }
 `;
 
+const titleName = "마이페이지";
 const menuItems = [
   { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
   { label: "학원정보 관리", isActive: true, link: "/mypage/academy" },
@@ -142,18 +134,24 @@ const menuItems = [
   { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
 ];
 
-function AcademyAdd() {
+function AcademyEdit() {
   const [form] = Form.useForm();
+  const [resultTitle, setResultTitle] = useState("");
+  const [resultMessage, setResultMessage] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [tagKeyword, setTagKeyword] = useState(""); //태그검색 키워드
   const [tagList, setTagList] = useState([]); //태그목록(전체/검색결과)
   const [selectedItems, setSelectedItems] = useState([]); //선택한 태그값
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [fileList, setFileList] = useState([]);
 
+  const acaId = searchParams.get("acaId");
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
+  //console.log(currentUserInfo);
 
   // 체크박스 클릭 시 선택/해제 처리
   const handleCheckbox2Change = value => {
@@ -174,7 +172,7 @@ function AcademyAdd() {
 
   const handleAddressSearch = () => {
     new window.daum.Postcode({
-      oncomplete: (data: any) => {
+      oncomplete: data => {
         form.setFieldsValue({ postNum: data.zonecode });
         form.setFieldsValue({ address: data.address });
       },
@@ -187,6 +185,15 @@ function AcademyAdd() {
 
   const handleButton2Click = () => {
     setIsModalVisible(false);
+  };
+
+  const handleButton1Click2 = () => {
+    setIsModalVisible2(false);
+  };
+
+  const handleButton2Click2 = () => {
+    setIsModalVisible2(false);
+    navigate("/mypage/academy");
   };
 
   //모달창에서 태그 검색하기
@@ -238,8 +245,43 @@ function AcademyAdd() {
     );
   });
 
+  //학원정보 가져오기
+  const academyGetInfo = async () => {
+    try {
+      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      //console.log("aca_info : ", res.data.resultData);
+
+      // 데이터를 받아온 즉시 form 값 설정
+      form.setFieldsValue({
+        acaId: res.data.resultData.acaId,
+        acaName: res.data.resultData.acaName,
+        address: res.data.resultData.addressDto.address,
+        detailAddress: res.data.resultData.addressDto.detailAddress,
+        postNum: res.data.resultData.addressDto.postNum,
+        acaPhone: res.data.resultData.acaPhone,
+        openTime: dayjs(res.data.resultData.openTime.substr(0, 5), "HH:mm"),
+        closeTime: dayjs(res.data.resultData.closeTime.substr(0, 5), "HH:mm"),
+        comment: res.data.resultData.comment,
+        teacherNum: res.data.resultData.teacherNum,
+      });
+
+      if (res.data.resultData.acaPic) {
+        setFileList([
+          {
+            uid: "1",
+            name: res.data.resultData.acaPic,
+            status: "done",
+            url: `http://112.222.157.156:5223/pic/academy/${res.data.resultData.acaId}/${res.data.resultData.acaPic}`,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   //첨부파일 처리
-  const handleChange = (info: UploadChangeParam<UploadFile>) => {
+  const handleChange = info => {
     let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
@@ -250,7 +292,7 @@ function AcademyAdd() {
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
-      console.log("파일 선택됨:", info.file.originFileObj);
+      //console.log("파일 선택됨:", info.file.originFileObj);
       form.setFieldValue("pic", info.file.originFileObj);
     }
   };
@@ -268,6 +310,7 @@ function AcademyAdd() {
       }
 
       const reqData = {
+        acaId: acaId,
         userId: currentUserInfo.userId,
         dongId: 3,
         acaName: values.acaName,
@@ -293,16 +336,16 @@ function AcademyAdd() {
 
       const header = {
         headers: {
+          Accept: "*/*",
           "Content-Type": "multipart/form-data",
         },
       };
 
-      const res = await axios.post("/api/academy", formData, header);
-      //console.log(res.data.resultData);
+      const res = await jwtAxios.put("/api/academy", formData, header);
       if (res.data.resultData === 1) {
-        navigate("/mypage/academy");
-        message.error("학원등록이 완료되었습니다.");
-        return;
+        setResultTitle("학원정보 수정 완료");
+        setResultMessage("학원정보 수정이 완료되었습니다.");
+        setIsModalVisible2(true);
       }
     } catch (error) {
       console.log(error);
@@ -328,20 +371,17 @@ function AcademyAdd() {
   }, []);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
-      navigate("/login");
-      message.error("로그인이 필요한 서비스입니다.");
-    }
+    academyGetInfo();
   }, []);
 
   return (
     <AcademyInfo className="w-full">
       <div className="flex gap-5 w-full justify-center pb-10">
-        <SideBar menuItems={menuItems} />
+        <SideBar menuItems={menuItems} titleName={titleName} />
 
         <div className="w-full">
           <h1 className="title-font flex justify-between align-middle">
-            학원 등록
+            학원정보 수정
           </h1>
           <div className="w-3/4">
             <Form form={form} onFinish={values => onFinished(values)}>
@@ -483,7 +523,7 @@ function AcademyAdd() {
                   <Input
                     className="input"
                     id="academyTag"
-                    placeholder="태그를 입력해 주세요."
+                    placeholder="태그를 선택해 주세요."
                     onClick={() => handleTagSearch()}
                     readOnly
                   />
@@ -533,6 +573,13 @@ function AcademyAdd() {
                     maxCount={1}
                     onChange={handleChange}
                     showUploadList={{ showPreviewIcon: false }}
+                    fileList={fileList}
+                    customRequest={({ onSuccess }) => {
+                      // 자동 업로드 방지
+                      setTimeout(() => {
+                        onSuccess?.("ok");
+                      }, 0);
+                    }}
                   >
                     <button
                       style={{ border: 0, background: "none" }}
@@ -542,16 +589,18 @@ function AcademyAdd() {
                     </button>
                   </Upload>
 
-                  <Image
-                    wrapperStyle={{ display: "none" }}
-                    preview={{
-                      visible: previewOpen,
-                      onVisibleChange: visible => setPreviewOpen(visible),
-                      afterOpenChange: visible =>
-                        !visible && setPreviewImage(""),
-                    }}
-                    src={previewImage}
-                  />
+                  {previewImage && (
+                    <Image
+                      wrapperStyle={{ display: "none" }}
+                      preview={{
+                        visible: previewOpen,
+                        onVisibleChange: visible => setPreviewOpen(visible),
+                        afterOpenChange: visible =>
+                          !visible && setPreviewImage(""),
+                      }}
+                      src={previewImage}
+                    />
+                  )}
                 </div>
               </Form.Item>
 
@@ -560,7 +609,7 @@ function AcademyAdd() {
                   htmlType="submit"
                   className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
                 >
-                  학원 등록
+                  학원정보 수정
                 </Button>
               </Form.Item>
             </Form>
@@ -579,7 +628,7 @@ function AcademyAdd() {
                   type="text"
                   name="tagSearch"
                   value={tagKeyword}
-                  placeholder="태그를 선택해 주세요."
+                  placeholder="태그를 입력해 주세요."
                   className="w-full h-14 pl-3 border rounded-xl text-sm"
                   onChange={handleChangeTag}
                 />
@@ -607,8 +656,19 @@ function AcademyAdd() {
         button2Text={"선택완료"}
         modalWidth={400}
       />
+
+      <CustomModal
+        visible={isModalVisible2}
+        title={resultTitle}
+        content={resultMessage}
+        onButton1Click={handleButton1Click2}
+        onButton2Click={handleButton2Click2}
+        button1Text={"창닫기"}
+        button2Text={"목록으로"}
+        modalWidth={400}
+      />
     </AcademyInfo>
   );
 }
 
-export default AcademyAdd;
+export default AcademyEdit;

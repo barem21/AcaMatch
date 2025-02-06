@@ -1,27 +1,17 @@
-import axios from "axios";
 import { PlusOutlined } from "@ant-design/icons";
+import axios from "axios";
 
-import {
-  Button,
-  Form,
-  Image,
-  Input,
-  message,
-  Upload,
-  UploadFile,
-  UploadProps,
-} from "antd";
 import styled from "@emotion/styled";
-import SideBar from "../../components/SideBar";
+import { Button, Form, Image, Input, message, Upload } from "antd";
 import { useEffect, useState } from "react";
-import { getCookie } from "../../utils/cookie";
-import userInfo from "../../atoms/userInfo";
-import { useRecoilValue } from "recoil";
-import CustomModal from "../../components/modal/Modal";
-import jwtAxios from "../../apis/jwt";
-import { UploadChangeParam } from "antd/es/upload";
 import { Cookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import jwtAxios from "../../apis/jwt";
+import userInfo from "../../atoms/userInfo";
+import CustomModal from "../../components/modal/Modal";
+import SideBar from "../../components/SideBar";
+import { removeCookie } from "../../utils/cookie";
 
 const MemberInfo = styled.div`
   .ant-form-item-label {
@@ -104,20 +94,26 @@ const MemberInfo = styled.div`
   .ant-upload-list-item {
     border: 1px solid #3b77d8 !important;
   }
-`;
-const PasswordLabel = styled.div`
-  .ant-form-item-label {
-    min-width: 120px !important;
+  .modal-popup-wrap button {
+    display: none;
+  }
+  .btn-wrap button {
+    display: block;
+  }
+  .btn-wrap .ant-form-item {
+    margin-bottom: 0px;
   }
 `;
 
 function MyPageUserInfo() {
   const [form] = Form.useForm();
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [nickNameCheck, setNickNameCheck] = useState<number>(0);
+  const [form2] = Form.useForm();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible2, setIsModalVisible2] = useState(false);
+  const [nickNameCheck, setNickNameCheck] = useState(0);
   const [editMember, setEditMember] = useState({});
   const currentUserInfo = useRecoilValue(userInfo);
-  const accessToken = getCookie("accessToken");
+  //const accessToken = getCookie("accessToken");
 
   const cookies = new Cookies();
 
@@ -167,9 +163,7 @@ function MyPageUserInfo() {
       return;
     }
     try {
-      const res = await jwtAxios.get(`/api/user`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const res = await jwtAxios.get(`/api/user`);
       setEditMember(res.data.resultData);
       //console.log("res.data.resultData : ", res.data.resultData);
 
@@ -188,7 +182,7 @@ function MyPageUserInfo() {
   };
 
   // 비밀번호와 비밀번호 확인이 일치하는지 검사하는 커스텀 유효성 검사 함수
-  const validateConfirmPassword = (_, value: string) => {
+  const validateConfirmPassword = (_, value) => {
     const password = form.getFieldValue("newPw"); // 'password' 필드의 값 가져오기
     if (value && value !== password) {
       return Promise.reject(new Error("비밀번호가 일치하지 않습니다."));
@@ -229,31 +223,12 @@ function MyPageUserInfo() {
     }
   }, [editMember, form]);
 
-  // const initialValues = {
-  //   user_id: email,
-  //   name: name,
-  //   nick_name: nickName,
-  //   phone: phone,
-  //   birth: birth,
-  //   pic: userPic,
-  // };
-  const [initialValues, setInitialValues] = useState({
-    user_id: "",
-    name: "",
-    nickName: "",
-    phone: "",
-    birth: "",
-    pic: "",
-  });
-
-  //console.log(initialValues);
-
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState([]);
 
-  const handleChange = (info: UploadChangeParam<UploadFile>) => {
+  const handleChange = info => {
     let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
@@ -279,7 +254,7 @@ function MyPageUserInfo() {
     setIsModalVisible(false);
   };
 
-  const onFinished = async (values: any) => {
+  const onFinished = async values => {
     if (nickNameCheck === 2) {
       setIsModalVisible(true);
       //console.log("닉네임 확인이 필요합니다.");
@@ -328,7 +303,7 @@ function MyPageUserInfo() {
   };
 
   //닉네임 중복확인
-  const sameCheck = async (nickName: string) => {
+  const sameCheck = async nickName => {
     if (!nickName) {
       setIsModalVisible(true);
       setNickNameCheck(3);
@@ -371,6 +346,54 @@ function MyPageUserInfo() {
     }
   };
 
+  //회원탈퇴 팝업창
+  const handleButton1Click2 = () => {
+    form2.resetFields(); //초기화
+    setIsModalVisible2(false);
+  };
+  const handleButton2Click2 = () => {
+    setIsModalVisible2(false);
+  };
+  const memberOut = () => {
+    setIsModalVisible2(true);
+  };
+
+  //로그아웃
+  const logOut = async () => {
+    try {
+      const res = await jwtAxios.post("/api/user/log-out", {});
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
+
+  //회원탈퇴 실행
+  const onFinishedSe = async values => {
+    try {
+      const res = await jwtAxios.delete("/api/user", {
+        data: { pw: values.pw },
+      });
+      if (res.data.resultData === 1) {
+        message.success("회원탈퇴 완료되었습니다.");
+
+        // 로그아웃 처리 로직 추가
+        removeCookie("accessToken");
+        // 리코일 정보 삭제 아직 안함
+        logOut();
+        navigate("/");
+      } else {
+        message.error("회원탈퇴가 실패되었습니다.");
+      }
+    } catch (error) {
+      console.log(error);
+      if (error.response.data.resultMessage === "잘못된 파라미터입니다.") {
+        message.error("비밀번호가 잘못되었습니다. 다시 시도해 주세요.");
+      } else {
+        message.error("회원탈퇴가 실패되었습니다.");
+      }
+    }
+  };
+
   useEffect(() => {
     if (!currentUserInfo.userId) {
       navigate("/login");
@@ -385,11 +408,7 @@ function MyPageUserInfo() {
       <div className="w-full mb-20">
         <h1 className="title-font">회원정보 관리</h1>
         <div className="w-3/5">
-          <Form
-            form={form}
-            onFinish={values => onFinished(values)}
-            // initialValues={initialValues}
-          >
+          <Form form={form} onFinish={values => onFinished(values)}>
             <Form.Item
               name="user_id"
               label="이메일"
@@ -542,14 +561,25 @@ function MyPageUserInfo() {
               )}
             </Form.Item>
 
-            <Form.Item>
-              <Button
-                htmlType="submit"
-                className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
-              >
-                회원정보 수정
-              </Button>
-            </Form.Item>
+            <div className="flex w-full gap-3">
+              <Form.Item className="w-40">
+                <Button
+                  className="w-full h-14 text-sm"
+                  onClick={e => memberOut()}
+                >
+                  회원탈퇴
+                </Button>
+              </Form.Item>
+
+              <Form.Item className="w-full">
+                <Button
+                  htmlType="submit"
+                  className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
+                >
+                  회원정보 수정
+                </Button>
+              </Form.Item>
+            </div>
           </Form>
         </div>
       </div>
@@ -558,20 +588,86 @@ function MyPageUserInfo() {
         visible={isModalVisible}
         title={"닉네임 중복체크"}
         content={
-          nickNameCheck === 1
-            ? "사용가능한 닉네임입니다."
-            : nickNameCheck === 2
-              ? "닉네임 중복확인해 주세요."
-              : nickNameCheck === 3
-                ? "닉네임을 입력해 주세요."
-                : "닉네임이 중복되었습니다."
+          <div>
+            {nickNameCheck === 1
+              ? "사용가능한 닉네임입니다."
+              : nickNameCheck === 2
+                ? "닉네임 중복확인해 주세요."
+                : nickNameCheck === 3
+                  ? "닉네임을 입력해 주세요."
+                  : "닉네임이 중복되었습니다."}
+            <div className="w-full mt-5 btn-wrap">
+              <button
+                className="w-full h-14 text-sm font-bold border rounded-xl bg-[#E8EEF3]"
+                onClick={() => handleButton1Click()}
+              >
+                확인
+              </button>
+            </div>
+          </div>
         }
         onButton1Click={handleButton1Click}
         onButton2Click={handleButton2Click}
         button1Text={"취소"}
         button2Text={"확인"}
         modalWidth={400}
-        modalHeight={244}
+      />
+
+      <CustomModal
+        visible={isModalVisible2}
+        title={"회원탈퇴"}
+        content={
+          <div>
+            <div className="mb-5">
+              회원탈퇴하시면 사이트의 모든 정보가 삭제됩니다.
+              <br />
+              회원탈퇴하시겠습니까?
+            </div>
+
+            <Form form={form2} onFinish={values => onFinishedSe(values)}>
+              <Form.Item
+                name="pw"
+                rules={[
+                  {
+                    required: true,
+                    message: "비밀번호를 입력해 주세요.",
+                  },
+                ]}
+                className="mb-8"
+              >
+                <Input.Password
+                  maxLength={20}
+                  placeholder="회원 비밀번호 입력"
+                />
+              </Form.Item>
+
+              <div className="flex w-full gap-3 justify-between btn-wrap">
+                <Form.Item>
+                  <Button
+                    className="w-full h-14 text-sm"
+                    onClick={() => handleButton1Click2()}
+                  >
+                    취소하기
+                  </Button>
+                </Form.Item>
+
+                <Form.Item className="w-full">
+                  <Button
+                    htmlType="submit"
+                    className="w-full h-14 bg-[#E8EEF3] text-sm"
+                  >
+                    탈퇴하기
+                  </Button>
+                </Form.Item>
+              </div>
+            </Form>
+          </div>
+        }
+        onButton1Click={handleButton1Click2}
+        onButton2Click={handleButton2Click2}
+        button1Text={"취소하기"}
+        button2Text={"회원탈퇴"}
+        modalWidth={400}
       />
     </MemberInfo>
   );

@@ -52,7 +52,7 @@ function LoginPage() {
       <header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite">
         <div className="w-[1280px] flex items-center justify-between mx-auto">
           <img
-            src="/public/logo2.png"
+            src="/logo2.png"
             className="w-[160px] cursor-pointer mr-[full]"
             onClick={() => {
               navigate("/");

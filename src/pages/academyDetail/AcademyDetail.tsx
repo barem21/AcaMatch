@@ -24,7 +24,7 @@ declare global {
     kakao: any;
   }
 }
-const usedRandomNumbers = new Set<number>();
+// const usedRandomNumbers = new Set<number>();
 
 // Tailwind 스타일 상수
 const styles = {
@@ -83,14 +83,14 @@ const AcademyDetail = () => {
   const [error, setError] = useState<string | null>(null);
   // const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [address, setAddress] = useState("");
+  const [_address, setAddress] = useState("");
   const [likeCount, setLikeCount] = useState<number>(0);
 
   const [isLiked, setIsLiked] = useState<boolean>(false);
 
   const [selectClass, setSelectClass] = useState<number>(0);
 
-  const [isLink, setIslink] = useState(false);
+  const currentUserInfo = useRecoilValue(userInfo);
 
   const cookies = new Cookies();
   const navigate = useNavigate();
@@ -111,19 +111,19 @@ const AcademyDetail = () => {
     return !!accessToken; // accessToken이 존재하면 true, 없으면 false
   };
 
-  const getRandomUniqueNumber = () => {
-    if (usedRandomNumbers.size === 10) {
-      usedRandomNumbers.clear(); // 모든 숫자가 사용되면 초기화
-    }
+  // const getRandomUniqueNumber = () => {
+  //   if (usedRandomNumbers.size === 10) {
+  //     usedRandomNumbers.clear(); // 모든 숫자가 사용되면 초기화
+  //   }
 
-    let randomNum;
-    do {
-      randomNum = Math.floor(Math.random() * 10) + 1; // 1~10 사이의 랜덤 숫자
-    } while (usedRandomNumbers.has(randomNum));
+  //   let randomNum;
+  //   do {
+  //     randomNum = Math.floor(Math.random() * 10) + 1; // 1~10 사이의 랜덤 숫자
+  //   } while (usedRandomNumbers.has(randomNum));
 
-    usedRandomNumbers.add(randomNum);
-    return randomNum;
-  };
+  //   usedRandomNumbers.add(randomNum);
+  //   return randomNum;
+  // };
 
   const { userId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
 
@@ -240,20 +240,10 @@ const AcademyDetail = () => {
     setSelectClass(classId);
   };
 
-  const handleCopy = async () => {
-    setIslink(true);
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      message.success("링크가 복사되었습니다!");
-    } catch (error) {
-      message.error("링크 복사에 실패했습니다.");
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        로딩 중...
+        {/* 로딩 중... */}
       </div>
     );
   }
@@ -395,7 +385,9 @@ const AcademyDetail = () => {
                         message.error("로그인이 필요한 서비스입니다.");
                         return;
                       }
-                      setIsModalVisible(true);
+                      navigate(
+                        `/support/inquiry/detail?acaId=${academyData.acaId}&userId=${currentUserInfo.userId}`,
+                      );
                     }}
                   >
                     학원 문의하기

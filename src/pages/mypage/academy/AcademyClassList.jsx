@@ -1,11 +1,11 @@
+import { message, Pagination } from "antd";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { FaPlusCircle } from "react-icons/fa";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import SideBar from "../../../components/SideBar";
-import { message, Pagination } from "antd";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { FaPlusCircle } from "react-icons/fa";
 
 function AcademyClassList() {
   const currentUserInfo = useRecoilValue(userInfo);
@@ -60,7 +60,7 @@ function AcademyClassList() {
   };
 
   //학원 상세보기 이동
-  const detailAcademy = (acaId: number) => {
+  const detailAcademy = acaId => {
     navigate(`/academy/detail?id=${acaId}`);
   };
 
@@ -116,7 +116,7 @@ function AcademyClassList() {
             </div>
           )}
 
-          {classList?.map((item: never, index: number) => (
+          {classList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
