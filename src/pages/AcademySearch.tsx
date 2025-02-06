@@ -327,58 +327,6 @@ const AcademySearch = () => {
       const params = new URLSearchParams(search);
       const newFilters: { [key: string]: string[] } = {};
 
-      filterSections.forEach(section => {
-        const values = params.get(section.id);
-        newFilters[section.id] = values ? values.split(",") : [];
-      });
-
-      setSelectedFilters(prev => {
-        if (JSON.stringify(prev) !== JSON.stringify(newFilters)) {
-          return newFilters;
-        }
-        return prev;
-      });
-
-      // URL에서 페이지 번호 가져오기 (기존 유지)
-      const pageFromURL = params.get("page") ? Number(params.get("page")) : 1;
-
-      // 현재 `currentPage`와 다를 때만 변경
-      if (pageFromURL !== currentPage) {
-        setCurrentPage(pageFromURL);
-      }
-
-      // 지역 값 갱신
-      const location = params.get("location");
-      const locationText = params.get("locationText");
-
-      if (
-        location !== String(selectedLocation) ||
-        locationText !== selectedLocationText
-      ) {
-        setSelectedLocation(location ? Number(location) : -1);
-        setSelectedLocationText(locationText || null);
-      }
-
-      // ✅ URL의 `page=1` 값이 반영된 후에만 `fetchData(1)` 실행
-      if (pageFromURL === 1 && currentPage !== 1) {
-        fetchData(1);
-      } else {
-        fetchData(Number(params.get("page")));
-      }
-    }
-  }, [search]);
-
-  // useEffect(() => {
-  //   const params = new URLSearchParams(search);
-  //   setCurrentPage(Number(params.get("page")));
-  //   if (
-  //     Object.values(selectedFilters).some(filter => filter.length > 0) ||
-  //     selectedLocation !== -1
-  //   ) {
-  //     fetchData(currentPage);
-  //   }
-  // }, [selectedFilters, currentPage, selectedLocation]);
-
   const SearchInput = styled(Input.Search)`
     .ant-input {
       height: 56px !important;

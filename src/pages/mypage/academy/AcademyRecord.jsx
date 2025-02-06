@@ -21,6 +21,8 @@ function AcademyRecord() {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [isModalVisible4, setIsModalVisible4] = useState(false);
+  const [academyInfo, setAcademyInfo] = useState();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
 
@@ -124,6 +126,11 @@ function AcademyRecord() {
   const handleRecordEdit = (gradeId, score) => {
     setTestGradeId(gradeId);
     setTestRecord(score);
+
+
+    form.setFieldsValue({
+      record: score,
+    });
     setIsModalVisible(true);
   };
 
@@ -135,6 +142,18 @@ function AcademyRecord() {
   //점수 일괄 업로드 모달창 오픈
   const handleScoreUpload = () => {
     setIsModalVisible3(true);
+  };
+
+
+  //학원정보 가져오기
+  const academyGetInfo = async () => {
+    try {
+      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      setAcademyInfo(res.data.resultData.acaName);
+      //console.log(res.data.resultData.acaName);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //학생목록 가져오기
@@ -227,6 +246,10 @@ function AcademyRecord() {
   };
 
   useEffect(() => {
+    academyGetInfo();
+  }, []);
+
+  useEffect(() => {
     academyStudentList();
   }, []);
 
@@ -243,7 +266,9 @@ function AcademyRecord() {
 
       <RecordList className="w-full">
         <h1 className="title-font flex justify-between align-middle">
-          "강좌명 &gt; 테스트 명"의 수강생 목록
+
+          {academyInfo}의 수강생 목록
+          {/*"강좌명 &gt; 테스트 명"의 수강생 목록*/}
           <div className="flex items-center gap-1">
             <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
@@ -333,7 +358,8 @@ function AcademyRecord() {
                 </h4>
                 <Form
                   form={form}
-                  initialValues={initialValues}
+                  //initialValues={initialValues}
+
                   onFinish={values => onFinished(values)}
                 >
                   <Form.Item
