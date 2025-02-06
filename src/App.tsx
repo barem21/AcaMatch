@@ -27,14 +27,14 @@ import ForgotPw from "./pages/member/ForgotPw";
 import { useEffect } from "react";
 import Inquiry from "./pages/Inquiry";
 import ScrollToTop from "./components/ScrollToTop.tsx";
-import InquiryDetail from "./pages/InquiryDetail.tsx";
+import InquiryDetail from "./pages/InquiryDetail";
 import AcademyClassList from "./pages/mypage/academy/AcademyClassList";
 import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
 import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
 import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
 import HotAcademy from "./pages/HotAcademy.tsx";
-import MypageParent from "./pages/mypage/MypageParent.tsx";
-import InquiryList from "./pages/InquiryList.tsx";
+import MypageParent from "./pages/mypage/MypageParent";
+import InquiryList from "./pages/InquiryList";
 
 function App() {
   useEffect(() => {

@@ -1,6 +1,6 @@
-import React, { Children } from "react";
-import MainButton from "../button/MainButton";
 import styled from "@emotion/styled";
+import React from "react";
+import MainButton from "../button/MainButton";
 
 interface CustomModalProps {
   visible: boolean;
@@ -56,7 +56,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50"
+      className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50 modal-popup-wrap"
       style={{
         width: "100%", // 부모 div가 전체 화면을 차지하게
         height: "100vh", // 화면 전체 높이를 차지하게

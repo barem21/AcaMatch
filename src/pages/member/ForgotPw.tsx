@@ -1,9 +1,10 @@
-import { Button, Form, Input, message } from "antd";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import MainButton from "../../components/button/MainButton";
-import { FadeLoader } from "react-spinners";
 import styled from "@emotion/styled";
+import { Form, Input, message } from "antd";
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FadeLoader } from "react-spinners";
+import MainButton from "../../components/button/MainButton";
 
 function ForgotPw() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ function ForgotPw() {
   const onFinish = async (values: any) => {
     try {
       setIsLoading(true);
-      const res = await axios.post("/api/user/temp-pw", values);
+      await axios.post("/api/user/temp-pw", values);
       //console.log(res);
       setIsLoading(false);
       navigate("/signup/end");
@@ -41,7 +42,7 @@ function ForgotPw() {
       <header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite">
         <div className="w-[1280px] flex items-center justify-between mx-auto">
           <img
-            src="/public/logo2.png"
+            src="/logo2.png"
             className="w-[160px] cursor-pointer mr-[full]"
             onClick={() => {
               navigate("/");

@@ -52,7 +52,7 @@ function LoginPage() {
       <header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite">
         <div className="w-[1280px] flex items-center justify-between mx-auto">
           <img
-            src="/public/logo2.png"
+            src="/logo2.png"
             className="w-[160px] cursor-pointer mr-[full]"
             onClick={() => {
               navigate("/");
@@ -154,7 +154,7 @@ function LoginPage() {
                 회원가입
               </SecondaryButton>
 
-              {/* SNS 로그인 */}
+              {/* SNS 로그인 * /}
               <SecondaryButton
                 onClick={() => navigate("/")}
                 className={`px-4 py-2 w-[480px] h-[40px]`}
@@ -162,13 +162,14 @@ function LoginPage() {
                 Log in with kakao
               </SecondaryButton>
 
-              {/* Google 로그인 */}
+              {/ * Google 로그인 * /}
               <SecondaryButton
                 onClick={() => navigate("/")}
                 className={`px-4 py-2 w-[480px] h-[40px]`}
               >
                 Log in with Google
               </SecondaryButton>
+              */}
 
               {/* 로그인 버튼 */}
               <MainButton
