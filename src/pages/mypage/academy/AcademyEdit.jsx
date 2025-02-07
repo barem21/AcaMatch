@@ -12,6 +12,7 @@ import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
 import SideBar from "../../../components/SideBar";
+import { Cookies } from "react-cookie";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -135,6 +136,7 @@ const menuItems = [
 ];
 
 function AcademyEdit() {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const [resultTitle, setResultTitle] = useState("");
   const [resultMessage, setResultMessage] = useState("");
@@ -372,6 +374,13 @@ function AcademyEdit() {
 
   useEffect(() => {
     academyGetInfo();
+  }, [currentUserInfo]);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken")) {
+      navigate("/login");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (

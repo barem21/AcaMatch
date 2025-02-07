@@ -10,12 +10,11 @@ import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
 
 function MypageReview() {
+  const cookies = new Cookies();
   const navigate = useNavigate();
   const [reviewList, setReviewList] = useState([]);
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
-
-  const cookies = new Cookies();
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -77,10 +76,10 @@ function MypageReview() {
 
   useEffect(() => {
     fetchData(1);
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }

@@ -7,8 +7,10 @@ import { getCookie } from "../../utils/cookie";
 import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
+import { Cookies } from "react-cookie";
 
 function MyPage() {
+  const cookies = new Cookies();
   const [resultTitle, setResultTitle] = useState("");
   const [resultMessage, setResultMessage] = useState("");
   const [mypageAcademyList, setMypageAcademyList] = useState([]); //내 학원 내역
@@ -67,11 +69,12 @@ function MyPage() {
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
+
         `/api/joinClass?userId=${currentUserInfo.userId}&page=${page}&size=100`,
       );
 
       if (res.data.resultData?.length > 0) {
-        //console.log(res.data.resultData);
+        console.log(res.data.resultData);
         setMypageAcademyList(res.data.resultData);
       }
     } catch (error) {
@@ -93,8 +96,14 @@ function MyPage() {
   }, []);
 
   useEffect(() => {
-    if (currentUserInfo.userId !== "") {
-      myAcademyList(1);
+    myAcademyList(1);
+  }, [currentUserInfo]);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken")) {
+      navigate("/login");
+      message.error("로그인이 필요한 서비스입니다.");
+
     }
   }, [currentUserInfo]);
 
@@ -166,30 +175,38 @@ function MyPage() {
               }
             >
               <div className="flex justify-start items-center w-full">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={
-                      item.acaPic
-                        ? `http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`
-                        : "aca_image_1.png"
-                    }
-                    alt=" /"
-                    className="w-[60px] h-[60px] rounded-[20px]"
-                  />
+                <div
+                  className="flex items-center gap-3 cursor-pointer"
+                  onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
+                >
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.acaPic
+                          ? `http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`
+                          : "aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
+                  </div>
                   <div>
-                    <h4>{item.acaName}</h4>
-                    <p
-                      className="text-gray-400 text-sm cursor-pointer"
-                      onClick={event => {
-                        event.stopPropagation(); // 부모의 onClick 이벤트가 실행되지 않도록 방지
-                        navigate(
-                          `/support/inquiry/detail?acaId=${item.acaId}&userId=${currentUserInfo.userId}`,
-                        );
-                      }}
-                    >
-                      {/* [수업명 : {item.className}] */}
-                      [1 : 1 문의 하기]
-                    </p>
+                    <h4 className="font-semibold">{item.acaName}</h4>
+                    {item.classList.length > 0 ? (
+                      <div className="flex text-gray-400 text-sm">
+                        {" "}
+                        [수업명 :&nbsp;
+                        {item.classList.map((classItem, index) => (
+                          <p key={index} className="text-sm">
+                            {classItem.className}
+                            {item.classList.length !== index + 1 ? ", " : ""}
+                          </p>
+                        ))}
+                        ]
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </div>
               </div>

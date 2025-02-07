@@ -6,8 +6,11 @@ import SideBar from "../../../components/SideBar";
 import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import { FaPlusCircle } from "react-icons/fa";
+import { Cookies } from "react-cookie";
+import jwtAxios from "../../../apis/jwt";
 
 function AcademyList() {
+  const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const [myAcademyList, setMyAcademyList] = useState([]);
   const navigate = useNavigate();
@@ -44,12 +47,30 @@ function AcademyList() {
     }
   };
 
-  useEffect(() => {
-    academyList();
-  }, []);
+  //학원 삭제
+  const DeleteAcademy = async acaId => {
+    try {
+      //alert("학원 삭제" + acaId + currentUserInfo.userId);
+      const res = await jwtAxios.delete(
+        `/api/academy?acaId=${acaId}&userId=${currentUserInfo.userId}`,
+      );
+      //console.log(res.data.resultData);
+
+      if (res.data.resultData === 1) {
+        message.success("등록된 학원을 삭제하였습니다.");
+        academyList();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    academyList();
+  }, [currentUserInfo]);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -85,6 +106,9 @@ function AcademyList() {
             </div>
             <div className="flex items-center justify-center w-40">
               수정하기
+            </div>
+            <div className="flex items-center justify-center w-40">
+              삭제하기
             </div>
           </div>
 
@@ -137,6 +161,15 @@ function AcademyList() {
                   }
                 >
                   수정하기
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center w-40">
+                <button
+                  className="small_line_button"
+                  onClick={e => DeleteAcademy(item.acaId)}
+                >
+                  삭제하기
                 </button>
               </div>
             </div>

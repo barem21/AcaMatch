@@ -8,10 +8,11 @@ import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
 import SideBar from "../../../components/SideBar";
-
+import { Cookies } from "react-cookie";
 import { Form, Input } from "antd";
 
 function AcademyTestList() {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const currentUserInfo = useRecoilValue(userInfo);
   const [myAcademyTestList, setMyAcademyTestList] = useState([]);
@@ -101,7 +102,7 @@ function AcademyTestList() {
   };
 
   const initialValues = {
-    scoreType: 1,
+    scoreType: 0,
     subjectName: "",
   };
 
@@ -139,7 +140,7 @@ function AcademyTestList() {
         `/api/grade/status?acaId=${acaId}&classId=${classId}`,
       );
       setMyAcademyTestList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -154,7 +155,7 @@ function AcademyTestList() {
   }, []);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -168,7 +169,6 @@ function AcademyTestList() {
         <h1 className="title-font flex justify-between align-middle">
           {academyInfo}의 테스트 목록
           {/*} &gt; "강좌명"의 테스트 목록*/}
-
           <button
             className="flex items-center gap-1 mr-5 text-sm font-normal"
             onClick={() => setIsModalVisible(true)}
@@ -207,7 +207,7 @@ function AcademyTestList() {
                 <div
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() =>
-                    navigate(`/mypage/academy/record?id=${item.acaId}`)
+                    navigate(`/mypage/academy/student?classId=${classId}`)
                   }
                 >
                   <div className="flex justify-center align-middle w-14 h-14 rounded-xl overflow-hidden">
@@ -278,11 +278,11 @@ function AcademyTestList() {
                     value={radioValue}
                     options={[
                       {
-                        value: 1,
+                        value: 0,
                         label: "점수",
                       },
                       {
-                        value: 2,
+                        value: 1,
                         label: "합격 / 불합격",
                       },
                     ]}

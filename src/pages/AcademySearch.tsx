@@ -516,6 +516,7 @@ const AcademySearch = () => {
       search: params.toString(),
     });
 
+
     setTimeout(() => {
       updateSearchState(params);
     }, 0);

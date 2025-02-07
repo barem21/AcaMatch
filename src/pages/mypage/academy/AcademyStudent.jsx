@@ -5,13 +5,17 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import SideBar from "../../../components/SideBar";
+import { Cookies } from "react-cookie";
 
 function AcademyStudent() {
+  const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [studentList, setStudentList] = useState([]);
+  const [academyInfo, setAcademyInfo] = useState("");
 
+  const acaId = searchParams.get("acaId");
   const classId = searchParams.get("classId");
 
   const titleName = "마이페이지";
@@ -39,18 +43,33 @@ function AcademyStudent() {
         `/api/acaClass/acaClassUser?classId=${classId}&page=1`,
       );
       setStudentList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //학원정보 가져오기
+  const academyGetInfo = async () => {
+    try {
+      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      setAcademyInfo(res.data.resultData.acaName);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
-    academyStudentList();
+    academyGetInfo();
   }, []);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    academyStudentList();
+  }, [currentUserInfo]);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -62,18 +81,19 @@ function AcademyStudent() {
 
       <div className="w-full">
         <h1 className="title-font flex justify-between align-middle">
-          "강좌명"의 수강생 목록
+          {academyInfo}의 수강생 목록
         </h1>
-        <div className="w-full gap-0 border border-b-0 rounded-lg overflow-hidden">
+
+        <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 border-b">
             <div className="flex items-center justify-center w-full">
-              수강생
+              수강생 이름
             </div>
             <div className="flex items-center justify-center w-60">연락처</div>
-            <div className="flex items-center justify-center w-60">
+            <div className="flex items-center justify-center w-40">
               생년월일
             </div>
-            <div className="flex items-center justify-center w-40">삭제</div>
+            {/*<div className="flex items-center justify-center w-40">삭제</div>*/}
           </div>
 
           {studentList.length === 0 && (
@@ -88,18 +108,27 @@ function AcademyStudent() {
               className="loop-content flex justify-between align-middle p-4 border-b"
             >
               <div className="flex justify-start items-center w-full">
-                <div className="flex items-center gap-3 cursor-pointer">
-                  <img src="/aca_image_1.png" alt="" />
-                  {item.pic}
-                  {item.userName}
+                <div className="flex items-center gap-3 font-bold">
+                  <img
+                    src={
+                      item.userPic
+                        ? item.userPic === "default_user.jpg"
+                          ? "/aca_image_1.png"
+                          : `http://112.222.157.156:5223/api/user/${item.userId}/${item.userPic}`
+                        : "/aca_image_1.png"
+                    }
+                    alt=""
+                  />
+                  {item.name}
                 </div>
               </div>
               <div className="flex items-center justify-center w-60">
                 {item.phone}
               </div>
-              <div className="flex items-center justify-center w-60">
-                {item.birth}
+              <div className="flex items-center justify-center w-40">
+                {item.birth.substr(0, 10)}
               </div>
+              {/*
               <div className="flex items-center justify-center w-40">
                 <button
                   className="small_line_button"
@@ -108,6 +137,7 @@ function AcademyStudent() {
                   삭제하기
                 </button>
               </div>
+              */}
             </div>
           ))}
         </div>

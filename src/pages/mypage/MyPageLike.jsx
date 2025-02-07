@@ -4,10 +4,11 @@ import CustomModal from "../../components/modal/Modal";
 import { getCookie } from "../../utils/cookie";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
-import { jwtApiRequest } from "../../apis/jwt";
+import jwtAxios, { jwtApiRequest } from "../../apis/jwt";
 import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import LikeButton from "../../components/button/LikeButton";
+import { Cookies } from "react-cookie";
 
 const usedRandomNumbers = new Set();
 
@@ -27,6 +28,7 @@ const getRandomUniqueNumber = () => {
 };
 
 function MyPageLike() {
+  const cookies = new Cookies();
   const [likeList, setLikeList] = useState([]); // 좋아요 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [resultMessage, setResultMessage] = useState("");
@@ -83,13 +85,8 @@ function MyPageLike() {
 
   const fetchData = async page => {
     try {
-      const res = await jwtApiRequest.get(
+      const res = await jwtAxios.get(
         `/api/like/user?userId=${currentUserInfo.userId}&page=${page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
       );
 
       if (res.data.resultData.length > 0) {
@@ -110,10 +107,10 @@ function MyPageLike() {
 
   useEffect(() => {
     fetchData(1); // Fetch data when the component mounts
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }

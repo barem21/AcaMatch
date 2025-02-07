@@ -122,10 +122,8 @@ function InquiryDetail() {
               style={{ height: "calc(100vh - 405px)" }}
               id="chat-list-wrap"
             >
-              <div
-                className="flex-1 overflow-y-auto p-4 space-y-4"
-                ref={scrollRef}
-              >
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
                 {chatMessages?.map((chat, index) => (
                   <div
                     key={index}

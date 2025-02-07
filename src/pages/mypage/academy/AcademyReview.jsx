@@ -9,8 +9,10 @@ import axios from "axios";
 import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
 import { useNavigate } from "react-router-dom";
+import { Cookies } from "react-cookie";
 
 function AcademyReview() {
+  const cookies = new Cookies();
   const [academyReviewList, setAcademyReviewList] = useState([]); //학원리뷰 목록
   const [resultMessage, setResultMessage] = useState("");
   const [reviewId, setReviewId] = useState();
@@ -99,10 +101,10 @@ function AcademyReview() {
 
   useEffect(() => {
     getTagList();
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
