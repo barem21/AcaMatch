@@ -143,7 +143,7 @@ const AcademySearch = () => {
   const [searchValue, setSearchValue] = useState("");
   const [_searchLocation, _setSearchLocation] = useState("");
 
-  // const [isFirst, setIsFirst] = useState(true);
+  const [isFirst, setIsFirst] = useState(true);
 
   const [isFlag, setIsFlag] = useState(true);
   const [temp, setTemp] = useState(0);
@@ -235,62 +235,6 @@ const AcademySearch = () => {
     });
   };
 
-  // useEffect(() => {
-  //   const params = new URLSearchParams(search);
-
-  //   // 🔥 categoryIds를 배열로 가져와서 필터 복원
-  //   const selectedCategories = params.getAll("categoryIds") || [];
-  //   const selectedFilters: { [key: string]: string[] } = {
-  //     age: [],
-  //     level: [],
-  //   };
-
-  //   // 🔥 categoryIds를 age와 level로 나누기
-  //   selectedCategories.forEach(value => {
-  //     if (["1", "2", "3", "4", "5"].includes(value)) {
-  //       selectedFilters.age.push(value);
-  //     } else if (["6", "7", "8", "9", "10"].includes(value)) {
-  //       selectedFilters.level.push(value);
-  //     }
-  //   });
-
-  //   setSelectedFilters(selectedFilters);
-
-  //   // 🔥 페이지 값 복원
-  //   const page = params.get("page") ? Number(params.get("page")) : 1;
-  //   setCurrentPage(page);
-
-  //   // 🔥 지역 값 복원
-  //   const location = params.get("dongId") ? Number(params.get("dongId")) : -1;
-  //   const locationText = params.get("locationText") || "-1";
-
-  //   const searchName = params.get("searchName") || "";
-  //   const tagName = params.get("tagName") || "";
-
-  //   setSearchValue(selectedSearchType === "태그" ? tagName : searchName);
-
-  //   updateSearchState(params);
-
-  //   setSelectedLocation(location);
-  //   setSelectedLocationText(locationText);
-
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await axios.get(searchState);
-  //       // console.log("API 응답:", response.data);
-  //       console.log(searchState);
-  //       console.log("나실행");
-
-  //       setAcademyData(response.data.resultData);
-  //       // console.log("ddd", response.data.resultData);
-  //     } catch (error) {
-  //       console.error("API 요청 실패:", error);
-  //     }
-  //   };
-
-  //   // fetchData();
-  // }, []); // 최초 1회 실행
-
   useEffect(() => {
     const params = new URLSearchParams(search);
 
@@ -324,7 +268,26 @@ const AcademySearch = () => {
     const searchName = params.get("searchName") || "";
     const tagName = params.get("tagName") || "";
 
-    setSearchValue(selectedSearchType === "태그" ? tagName : searchName);
+    console.log(searchName);
+
+    // console.log("전", selectedSearchType);
+    if (searchName) {
+      setSelectedSearchType("검색어");
+    }
+    if (tagName) {
+      setSelectedSearchType("태그");
+    }
+
+    if (tagName) {
+      setSearchValue(tagName);
+      updateSearchState(params);
+    }
+    if (searchName) {
+      setSearchValue(searchName);
+      updateSearchState(params);
+    }
+
+    // console.log("후", selectedSearchType);
 
     // updateSearchState(params);
 
@@ -348,7 +311,15 @@ const AcademySearch = () => {
     if (selectedSearchType === "태그" && tagName) {
       params.set("tagName", tagName);
       updateSearchState(params);
-      console.log("여기실행");
+      // console.log("여기실행");
+      return;
+    } else {
+      setTemp(1);
+    }
+    if (selectedSearchType === "검색어" && searchName) {
+      params.set("searchName", searchName);
+      updateSearchState(params);
+      // console.log("여기실행");
       return;
     } else {
       setTemp(1);
@@ -371,14 +342,23 @@ const AcademySearch = () => {
     } else {
       setTemp(3);
     }
+
     if (temp >= 0) {
-      fetchData();
+      if (isFirst && params.get("searchName")) {
+        setIsFirst(false);
+      } else {
+        fetchData();
+        setIsFirst(false);
+      }
     }
   }, []); // 최초 1회 실행
+
   useEffect(() => {
     if (isFlag) {
       setIsFlag(false);
     } else {
+      // console.log("나실행");
+
       // const params = new URLSearchParams(search);
       if (!searchState) return; // 초기 실행 방지
 
@@ -485,11 +465,11 @@ const AcademySearch = () => {
     const params = new URLSearchParams(search);
 
     // 필터 값 추가
-    for (const [key, values] of Object.entries(selectedFilters)) {
-      if (values.length) {
-        params.set(key, values.join(",")); // 필터 값들을 ','로 연결하여 저장
-      }
-    }
+    // for (const [key, values] of Object.entries(selectedFilters)) {
+    //   if (values.length) {
+    //     params.set(key, values.join(",")); // 필터 값들을 ','로 연결하여 저장
+    //   }
+    // }
 
     // 지역 추가
     if (selectedLocation !== -1) {
@@ -497,25 +477,62 @@ const AcademySearch = () => {
     }
 
     // 검색어 추가 (버튼을 눌렀을 때만 반영)
-    if (values.searchInput) {
+    if (values.searchInput !== null && values.searchInput !== undefined) {
       if (selectedSearchType === "태그") {
         params.set("tagName", values.searchInput);
+        setSearchValue(values.searchInput);
         params.delete("searchName");
       } else {
         params.set("searchName", values.searchInput);
+        setSearchValue(values.searchInput);
         params.delete("tagName");
       }
-    } else {
+    }
+    // console.log(selectedSearchType);
+
+    // console.log("검색", params.get("searchName"));
+    // console.log("태그", params.get("tagName"));
+
+    // console.log("전원본", values.searchInput);
+
+    if (params.get("tagName")) {
+      values.searchInput = params.get("tagName");
+      params.set("tagName", values.searchInput);
+      params.delete("searchName");
+      console.log(values.searchInput);
+    } else if (params.get("searchName")) {
+      values.searchInput = params.get("searchName");
       params.delete("tagName");
+      params.set("searchName", values.searchInput);
+      console.log(values.searchInput);
+    } else {
+      if (!params.get("tagName") && !params.get("searchName")) {
+        params.delete("tagName");
+        params.delete("searchName");
+      }
+    }
+    // console.log("원본", values.searchInput);
+
+    // console.log("검색", params.get("searchName"));
+    // console.log("태그", params.get("tagName"));
+    if (params.get("tagName") && selectedSearchType !== "태그") {
+      params.set("searchName", values.searchInput);
+      params.delete("tagName");
+    } else if (params.get("searchName") && selectedSearchType !== "검색어") {
+      params.set("tagName", values.searchInput);
       params.delete("searchName");
     }
+    // console.log("후원본", values.searchInput);
+    // console.log("후검색", params.get("searchName"));
+    // console.log("후태그", params.get("tagName"));
+
+    console.log(search);
 
     // URL 업데이트
     navigate({
       pathname: window.location.pathname,
       search: params.toString(),
     });
-
 
     setTimeout(() => {
       updateSearchState(params);
@@ -525,7 +542,7 @@ const AcademySearch = () => {
   return (
     <Form form={form} onFinish={onFinish}>
       <div className="flex flex-row justify-between w-full gap-[12px]">
-        <div className="flex mt-[77px] ">
+        <div className="flex mt-[75px] ">
           <div className="flex-col-start gap-4 w-[288px] h-[916px]">
             <div className="flex items-start pb-5">
               <h2 className="text-[24px] font-[500] leading-[21px] text-brand-default mb-[15px]">

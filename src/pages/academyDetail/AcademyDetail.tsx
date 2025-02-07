@@ -73,7 +73,7 @@ const styles = {
 const AcademyDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { search } = useLocation();
+  // const { search } = useLocation();
 
   const acaId = searchParams.get("id");
   const size = 10;
