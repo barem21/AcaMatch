@@ -18,6 +18,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
+import { Cookies } from "react-cookie";
 const { RangePicker } = DatePicker;
 
 const AcademyInfo = styled.div`
@@ -107,6 +108,7 @@ const AcademyInfo = styled.div`
 `;
 
 function AcademyClassEdit() {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
@@ -257,10 +259,10 @@ function AcademyClassEdit() {
 
   useEffect(() => {
     academyGetInfo();
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }

@@ -142,6 +142,7 @@ function AcademyAdd() {
   const [tagList, setTagList] = useState([]); //태그목록(전체/검색결과)
   const [selectedItems, setSelectedItems] = useState([]); //선택한 태그값
   const [fileList, setFileList] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
@@ -247,6 +248,8 @@ function AcademyAdd() {
   };
 
   const onFinished = async values => {
+    if (isSubmitting) return; // 이미 제출 중이면 추가 제출을 막음
+    setIsSubmitting(true); // 제출 중 상태로 설정
     try {
       const startTimes = dayjs(values.openTime.$d).format("HH:mm");
       const endTimes = dayjs(values.closeTime.$d).format("HH:mm");
@@ -292,11 +295,13 @@ function AcademyAdd() {
       //console.log(res.data.resultData);
       if (res.data.resultData === 1) {
         navigate("/mypage/academy");
-        message.error("학원등록이 완료되었습니다.");
+        message.success("학원등록이 완료되었습니다.");
         return;
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsSubmitting(false); // 제출 완료 후 상태 리셋
     }
   };
 
@@ -474,7 +479,7 @@ function AcademyAdd() {
                   <Input
                     className="input"
                     id="academyTag"
-                    placeholder="태그를 입력해 주세요."
+                    placeholder="태그를 선택해 주세요."
                     onClick={() => handleTagSearch()}
                     readOnly
                   />
@@ -550,6 +555,7 @@ function AcademyAdd() {
                 <Button
                   htmlType="submit"
                   className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
+                  disabled={isSubmitting}
                 >
                   학원 등록
                 </Button>

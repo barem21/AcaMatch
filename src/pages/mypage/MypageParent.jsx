@@ -9,8 +9,10 @@ import { FaPlusCircle } from "react-icons/fa";
 import CustomModal from "../../components/modal/Modal";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
+import { Cookies } from "react-cookie";
 
 function MypageParent() {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const [myypageChildList, setMypageChildList] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -174,10 +176,10 @@ function MypageParent() {
 
   useEffect(() => {
     myChildList();
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }

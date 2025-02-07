@@ -311,7 +311,7 @@ const AcademySearch = () => {
     // if (isFlag) {
     //   setIsFlag(false);
     // } else {
-    const params = new URLSearchParams(search);
+    // const params = new URLSearchParams(search);
     if (!searchState) return; // 초기 실행 방지
 
     const fetchData = async () => {
@@ -544,7 +544,7 @@ const AcademySearch = () => {
       search: params.toString(),
     });
 
-    fetchData(1); // 첫 페이지에서 다시 검색
+    // fetchData(1); // 첫 페이지에서 다시 검색
   };
 
   // const fetchData = async (page: number) => {

@@ -106,6 +106,7 @@ const MemberInfo = styled.div`
 `;
 
 function MyPageUserInfo() {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -114,8 +115,6 @@ function MyPageUserInfo() {
   const [editMember, setEditMember] = useState({});
   const currentUserInfo = useRecoilValue(userInfo);
   //const accessToken = getCookie("accessToken");
-
-  const cookies = new Cookies();
 
   const navigate = useNavigate();
 
@@ -395,7 +394,7 @@ function MyPageUserInfo() {
   };
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }

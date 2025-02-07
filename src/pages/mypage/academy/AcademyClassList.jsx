@@ -6,8 +6,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import SideBar from "../../../components/SideBar";
+import { Cookies } from "react-cookie";
 
 function AcademyClassList() {
+  const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const [classList, setClassList] = useState([]);
   const [academyInfo, setAcademyInfo] = useState("");
@@ -66,14 +68,14 @@ function AcademyClassList() {
 
   useEffect(() => {
     academyClassList();
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
     academyGetInfo();
   }, []);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -126,7 +128,7 @@ function AcademyClassList() {
                   className="flex items-center gap-4 cursor-pointer"
                   onClick={() =>
                     navigate(
-                      `/mypage/academy/student?acaId=${acaId}classId=${item.classId}`,
+                      `/mypage/academy/student?acaId=${acaId}&classId=${item.classId}`,
                     )
                   }
                 >

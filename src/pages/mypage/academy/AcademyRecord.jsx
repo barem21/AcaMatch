@@ -10,17 +10,25 @@ import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
 import SideBar from "../../../components/SideBar";
+import AI from "../../../components/AI";
+import { Cookies } from "react-cookie";
 
 function AcademyRecord() {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
+  const [form2] = Form.useForm();
   const currentUserInfo = useRecoilValue(userInfo);
   const [testStudentList, setTestStudentList] = useState([]);
   const [testGradeId, setTestGradeId] = useState();
   const [testRecord, setTestRecord] = useState();
+  const [joinClassId, setJoinClassId] = useState();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [isModalVisible4, setIsModalVisible4] = useState(false);
+  const [isModalVisible5, setIsModalVisible5] = useState(false); //ai 성적분석 팝업창
+  const [isModalVisible6, setIsModalVisible6] = useState(false);
+  const [isModalVisible7, setIsModalVisible7] = useState(false);
   const [academyInfo, setAcademyInfo] = useState();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -122,16 +130,51 @@ function AcademyRecord() {
     setIsModalVisible4(false);
   };
 
+  //AI 성적분석 관련
+  const handle5Button1Click = () => {
+    setIsModalVisible5(false);
+  };
+  const handle5Button2Click = () => {
+    setIsModalVisible5(false);
+  };
+
+  //점수 등록 관련
+  const handle6Button1Click = () => {
+    form2.resetFields(); //초기화
+    setIsModalVisible6(false);
+  };
+  const handle6Button2Click = () => {
+    setIsModalVisible6(false);
+  };
+
+  //점수 등록결과 관련
+  const handle7Button1Click = () => {
+    setIsModalVisible7(false);
+  };
+  const handle7Button2Click = () => {
+    setIsModalVisible7(false);
+  };
+
   //점수 수정하기 모달창 오픈
   const handleRecordEdit = (gradeId, score) => {
     setTestGradeId(gradeId);
     setTestRecord(score);
 
-
     form.setFieldsValue({
       record: score,
     });
     setIsModalVisible(true);
+  };
+
+  //점수 등록하기 모달창 오픈
+  const handleRecordAdd = joinId => {
+    setJoinClassId(joinId);
+    setIsModalVisible6(true);
+  };
+
+  //AI 성적분석 모달창 오픈
+  const handleRecordAI = userId => {
+    setIsModalVisible5(true);
   };
 
   //수강생 다운로드 모달창 오픈
@@ -143,7 +186,6 @@ function AcademyRecord() {
   const handleScoreUpload = () => {
     setIsModalVisible3(true);
   };
-
 
   //학원정보 가져오기
   const academyGetInfo = async () => {
@@ -163,7 +205,7 @@ function AcademyRecord() {
         `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
       );
       setTestStudentList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -184,13 +226,31 @@ function AcademyRecord() {
     // 파일 상태 업데이트
     setFileList(newFileList);
 
-    //console.log("파일 선택됨:", info.file.originFileObj);
     form.setFieldValue("gradeFile", info.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
       //console.log("파일 선택됨:", info.file.originFileObj);
       //form.setFieldValue("gradeFile", info.file.originFileObj);
+    }
+  };
+
+  //점수 직접 등록하기
+  const onFinishedTh = async values => {
+    const datas = {
+      joinClassId: joinClassId,
+      subjectId: subjectId,
+      score: parseInt(values.record),
+      pass: values.pass,
+      examDate: "2025-02-07",
+      processingStatus: 1,
+    };
+    const res = await jwtAxios.post("/api/grade", datas);
+    if (res.data.resultData === 1) {
+      form2.resetFields(); //초기화
+      setIsModalVisible6(false);
+      setIsModalVisible7(true);
+      academyStudentList();
     }
   };
 
@@ -251,10 +311,10 @@ function AcademyRecord() {
 
   useEffect(() => {
     academyStudentList();
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -266,7 +326,6 @@ function AcademyRecord() {
 
       <RecordList className="w-full">
         <h1 className="title-font flex justify-between align-middle">
-
           {academyInfo}의 수강생 목록
           {/*"강좌명 &gt; 테스트 명"의 수강생 목록*/}
           <div className="flex items-center gap-1">
@@ -299,9 +358,19 @@ function AcademyRecord() {
             <div className="flex items-center justify-center w-40">
               수정하기
             </div>
+            <div className="flex items-center justify-center w-60">
+              AI성적분석
+            </div>
           </div>
 
-          {testStudentList.map((item, index) => (
+          {testStudentList === null && (
+            <div className="p-4 text-center border-b">수강생이 없습니다.</div>
+          )}
+          {testStudentList?.length === 0 && (
+            <div className="p-4 text-center border-b">수강생이 없습니다.</div>
+          )}
+
+          {testStudentList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
@@ -320,19 +389,39 @@ function AcademyRecord() {
                   ? item.pass === 1
                     ? "합격"
                     : "불합격"
-                  : item.score + "점"}
+                  : item.score !== null
+                    ? item.score + "점"
+                    : 0 + "점"}
               </div>
               <div className="flex items-center justify-center w-40">
+                {item.score === null ? (
+                  <button
+                    className="small_line_button"
+                    onClick={() => handleRecordAdd(item.joinClassId)}
+                  >
+                    등록하기
+                  </button>
+                ) : (
+                  <button
+                    className="small_line_button"
+                    onClick={() =>
+                      handleRecordEdit(
+                        item.gradeId,
+                        item.pass !== null ? item.pass : item.score,
+                      )
+                    }
+                  >
+                    수정하기
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center justify-center w-60">
                 <button
                   className="small_line_button"
-                  onClick={() =>
-                    handleRecordEdit(
-                      item.gradeId,
-                      item.pass !== null ? item.pass : item.score,
-                    )
-                  }
+                  onClick={() => handleRecordAI()}
                 >
-                  수정하기
+                  AI 분석하기
                 </button>
               </div>
             </div>
@@ -350,7 +439,7 @@ function AcademyRecord() {
         <div className="editModal">
           <CustomModal
             visible={isModalVisible}
-            title={"점수 수정"}
+            title={"점수 수정하기"}
             content={
               <AddRecoad>
                 <h4 className="mb-3">
@@ -404,6 +493,69 @@ function AcademyRecord() {
             }
             onButton1Click={handleButton1Click}
             onButton2Click={handleButton2Click}
+            button1Text={"취소하기"}
+            button2Text={"수정하기"}
+            modalWidth={400}
+          />
+        </div>
+
+        <div className="editModal">
+          <CustomModal
+            visible={isModalVisible6}
+            title={"점수 등록하기"}
+            content={
+              <AddRecoad>
+                <h4 className="mb-3">
+                  등록할 점수, 또는 합격여부를 입력해 주세요.
+                </h4>
+                <Form
+                  form={form2}
+                  //initialValues={initialValues}
+
+                  onFinish={values => onFinishedTh(values)}
+                >
+                  <Form.Item
+                    name="record"
+                    className="w-full"
+                    rules={[
+                      { required: true, message: "시험 점수를 입력해 주세요." },
+                      {
+                        pattern: /^\d+$/,
+                        message: "숫자만 입력 가능합니다.",
+                      },
+                    ]}
+                  >
+                    <input
+                      maxLength={5}
+                      placeholder="시험 점수를 입력해 주세요."
+                      className="w-full h-14 pl-3 border rounded-xl text-sm"
+                    />
+                  </Form.Item>
+
+                  <div className="flex w-full gap-3 mt-4 justify-between">
+                    <Form.Item className="mb-0">
+                      <Button
+                        className="w-full h-14 text-sm"
+                        onClick={() => handle6Button1Click()}
+                      >
+                        창닫기
+                      </Button>
+                    </Form.Item>
+
+                    <Form.Item className="w-full mb-0">
+                      <Button
+                        htmlType="submit"
+                        className="w-full h-14 bg-[#E8EEF3] text-sm"
+                      >
+                        등록하기
+                      </Button>
+                    </Form.Item>
+                  </div>
+                </Form>
+              </AddRecoad>
+            }
+            onButton1Click={handle6Button1Click}
+            onButton2Click={handle6Button1Click}
             button1Text={"취소하기"}
             button2Text={"수정하기"}
             modalWidth={400}
@@ -491,8 +643,35 @@ function AcademyRecord() {
 
         <div className="editModal">
           <CustomModal
+            visible={isModalVisible7}
+            title={"점수등록 완료"}
+            content={
+              <div>
+                <p>점수등록이 완료되었습니다.</p>
+                <div className="w-full mt-4 justify-between">
+                  <Form.Item className="mb-0">
+                    <Button
+                      className="w-full h-14 bg-[#E8EEF3] text-sm"
+                      onClick={() => handle7Button1Click()}
+                    >
+                      창닫기
+                    </Button>
+                  </Form.Item>
+                </div>
+              </div>
+            }
+            onButton1Click={handle7Button1Click}
+            onButton2Click={handle7Button2Click}
+            button1Text={"취소하기"}
+            button2Text={"창닫기"}
+            modalWidth={400}
+          />
+        </div>
+
+        <div className="editModal">
+          <CustomModal
             visible={isModalVisible4}
-            title={"점수 수정"}
+            title={"점수수정 완료"}
             content={
               <div>
                 <p>점수 수정이 완료되었습니다.</p>
@@ -515,6 +694,17 @@ function AcademyRecord() {
             modalWidth={400}
           />
         </div>
+
+        <CustomModal
+          visible={isModalVisible5}
+          title={"수강생 AI성적분석"}
+          content={<AI />}
+          onButton1Click={handle5Button1Click}
+          onButton2Click={handle5Button2Click}
+          button1Text={"창닫기"}
+          button2Text={"분석완료"}
+          modalWidth={500}
+        />
       </RecordList>
     </div>
   );

@@ -6,8 +6,10 @@ import { message, Pagination } from "antd";
 import jwtAxios from "../../../apis/jwt";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Cookies } from "react-cookie";
 
 function AcademyLike() {
+  const cookies = new Cookies();
   const [academyLikeList, setAcademyLikeList] = useState([]);
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
@@ -85,10 +87,10 @@ function AcademyLike() {
 
   useEffect(() => {
     getLikeList();
-  }, []);
+  }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }

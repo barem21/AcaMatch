@@ -1,16 +1,20 @@
 import { Pagination } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../apis/jwt";
 import userInfo from "../atoms/userInfo";
 import CustomModal from "../components/modal/Modal";
 import SideBar from "../components/SideBar";
+
 function Inquiry() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { userId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
   const [academyData, setAcademyData] = useState([]); // 초기값을 빈 배열로 설정
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const acaId = searchParams.get("acaId");
 
   const titleName = "고객지원";
   const menuItems = [
@@ -37,7 +41,7 @@ function Inquiry() {
   //1:1 문의 목록 호출
   const myMtomList = async () => {
     try {
-      const res = await jwtAxios.get(`/api/chat?aca-id=2047`);
+      const res = await jwtAxios.get(`/api/chat?aca-id=${acaId}`);
       console.log(res.data.resultData.users);
       setAcademyData(res.data.resultData.users);
     } catch (error) {
