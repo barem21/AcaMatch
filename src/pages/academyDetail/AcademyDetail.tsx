@@ -170,11 +170,11 @@ const AcademyDetail = () => {
     if (acaId) {
       fetchAcademyData();
     }
-    console.log(academyData?.reviewCount);
-  }, [acaId, userId, page, search]);
-  useEffect(() => {
-    console.log("📌 최신 리뷰 개수:", academyData?.reviewCount);
-  }, [academyData]);
+    // console.log(academyData?.reviewCount);
+  }, [acaId, userId, page]);
+  // useEffect(() => {
+  //   console.log("📌 최신 리뷰 개수:", academyData?.reviewCount);
+  // }, [academyData]);
 
   const handleTabClick = (index: number) => {
     const updatedItems = items.map((item, idx) => ({

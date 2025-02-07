@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SideBar from "../components/SideBar";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { VscSend } from "react-icons/vsc";
@@ -17,6 +17,8 @@ function InquiryDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const acaId = searchParams.get("acaId");
   const userId = searchParams.get("userId");
+
+  const scrollRef = useRef(null); //scroll을 내릴 div
 
   const titleName = "고객지원";
   const menuItems = [
@@ -40,11 +42,12 @@ function InquiryDetail() {
   const myMtomDetail = async () => {
     try {
       const res = await jwtAxios.get(
-        `/api/chat/log?user-id=${userId}&aca-id=${acaId}`,
+        `/api/chat/log?user-id=${userId}&aca-id=${acaId}&size=200`,
       );
       //console.log(res.data.resultData);
+      form.resetFields(); //초기화
       setAcademyName(res.data.resultData[0].acaName);
-      setChatMessages(res.data.resultData);
+      setChatMessages(res.data.resultData.reverse());
     } catch (error) {
       console.log(error);
     }
@@ -68,6 +71,10 @@ function InquiryDetail() {
   useEffect(() => {
     myMtomDetail();
   }, []);
+
+  useEffect(() => {
+    document.querySelector("#chat-list-wrap").scrollTo(0, 1500);
+  }, [chatMessages]);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -111,12 +118,18 @@ function InquiryDetail() {
           {/* 채팅 컨테이너 */}
           <div className="flex flex-col h-full bg-gray-200">
             {/* 메시지 영역 */}
-            <CustomScrollbar>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <CustomScrollbar
+              style={{ height: "calc(100vh - 405px)" }}
+              id="chat-list-wrap"
+            >
+              <div
+                className="flex-1 overflow-y-auto p-4 space-y-4"
+                ref={scrollRef}
+              >
                 {chatMessages?.map((chat, index) => (
                   <div
                     key={index}
-                    className={`flex ${chat.senderType === 0 ? "justify-end" : "gap-2"}`}
+                    className={`flex ${chat.senderType === 0 ? (roleId === 3 ? "gap-2" : "justify-end") : roleId === 3 ? "justify-end" : "gap-2"}`}
                   >
                     {/* 학원 프로필 이미지 (사용자가 아닐 때만 표시) */}
                     {!chat.senderType === 1 && (
@@ -132,16 +145,27 @@ function InquiryDetail() {
                     <div
                       className={`${
                         chat.senderType === 0
-                          ? "text-white"
-                          : "bg-white text-black"
+                          ? roleId === 3
+                            ? "bg-white text-block"
+                            : "text-white"
+                          : roleId === 3
+                            ? "text-white"
+                            : "bg-white text-block"
                       } rounded-lg p-3 max-w-[70%]`}
                       style={
                         chat.senderType === 0
-                          ? {
-                              background:
-                                "linear-gradient(45deg, #3B77D8 0%, #4B89DC 50%, #69A7E4 100%)",
-                            }
-                          : {}
+                          ? roleId === 3
+                            ? {}
+                            : {
+                                background:
+                                  "linear-gradient(45deg, #3B77D8 0%, #4B89DC 50%, #69A7E4 100%)",
+                              }
+                          : roleId === 3
+                            ? {
+                                background:
+                                  "linear-gradient(45deg, #3B77D8 0%, #4B89DC 50%, #69A7E4 100%)",
+                              }
+                            : {}
                       }
                     >
                       {Array.isArray(chat.message) ? (
@@ -169,7 +193,7 @@ function InquiryDetail() {
                     rules={[
                       {
                         required: true,
-                        message: "메시지 내용을 입력해 주세요.",
+                        message: "보내실 메시지를 입력해 주세요.",
                       },
                     ]}
                   >

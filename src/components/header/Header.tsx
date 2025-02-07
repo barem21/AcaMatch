@@ -236,6 +236,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                   onClick={() => {
                     // 로그아웃 처리 로직 추가
                     removeCookie("accessToken");
+                    removeCookie("message");
                     // 리코일 정보 삭제 아직 안함
                     logOut();
                     navigate("/");

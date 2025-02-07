@@ -122,11 +122,11 @@ function MypageReview() {
                   <div className="w-10 h-10 rounded-full overflow-hidden">
                     <img
                       src={
-                        item.writerPic
+                        item.writerPic && item.writerPic !== "default_user.jpg"
                           ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.writerPic}`
                           : "/aca_image_1.png"
                       }
-                      alt=" /"
+                      alt="User Profile"
                     />
                   </div>
                   <div>
