@@ -1,14 +1,12 @@
 import { Pagination } from "antd";
 import { useEffect, useState } from "react";
-import ReviewModal from "../../components/modal/ReviewModal";
-import { AcademyClass, Review } from "./types"; // types.ts에서 Review 타입을 임포트
+import { useSearchParams } from "react-router-dom";
+import { useRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
-import { useRecoilState } from "recoil";
-import { useSearchParams } from "react-router-dom";
-import { Cookies } from "react-cookie";
-import { getCookie } from "../../utils/cookie";
 import CustomModal from "../../components/modal/Modal";
+import ReviewModal from "../../components/modal/ReviewModal";
+import { AcademyClass, Review } from "./types"; // types.ts에서 Review 타입을 임포트
 
 interface ReviewSectionProps {
   star: number;

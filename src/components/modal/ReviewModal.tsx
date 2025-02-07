@@ -7,6 +7,7 @@ import userInfo from "../../atoms/userInfo";
 import MainButton from "../button/MainButton";
 import { SecondaryButton } from "./Modal";
 import { useNavigate } from "react-router-dom";
+import { Review } from "../../pages/academyDetail/types";
 
 interface ReviewModalProps {
   onClose: () => void;

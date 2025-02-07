@@ -405,17 +405,19 @@ function SignupPage() {
             {/* 생일 */}
             <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
-                생일 &nbsp;
+                생년월일 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
               <Form.Item
                 name="birth"
-                rules={[{ required: true, message: "생일을 선택해 주세요!" }]}
+                rules={[
+                  { required: true, message: "생년월일을 선택해 주세요!" },
+                ]}
                 style={{ width: "448px", height: "56px" }}
               >
                 <DatePicker
                   format="YYYY-MM-DD" // 원하는 날짜 형식
-                  placeholder="생일을 선택하세요"
+                  placeholder="생년월일을 선택하세요"
                   style={{ width: "100%", height: "56px" }} // 스타일 조정
                 />
               </Form.Item>

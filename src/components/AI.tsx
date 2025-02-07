@@ -12,7 +12,7 @@ const AI: React.FC = () => {
   });
 
   const [image, setImage] = useState<File | null>(null);
-  const [textInput, setTextInput] = useState<string>(""); // ✅ 텍스트 입력 상태 추가
+  const [textInput, _setTextInput] = useState<string>(""); // ✅ 텍스트 입력 상태 추가
   const [analysisResult, setAnalysisResult] = useState<string>("");
   const [fileName, setFileName] = useState<string>(""); //첨부파일명
   const [loading, setLoading] = useState(false);

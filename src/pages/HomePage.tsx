@@ -13,7 +13,7 @@ interface Academy {
   acaName: string;
   address: string;
   star: number;
-  tagName: string | null;
+  tagNames: string | null;
   reviewCount: number;
   starAvg: number;
 }
@@ -193,7 +193,7 @@ function HomePage() {
 
     const fetchData2 = async () => {
       try {
-        const res = await axios.post("/api/access-log");
+        await axios.post("/api/access-log");
         // console.log("작동중", res);
       } catch (error) {
         console.log(error);
@@ -373,7 +373,7 @@ function HomePage() {
                   {academy.tagNames || "태그 정보 없음"}
                 </p>
                 <p className="text-sm text-[#507A95]">
-                  {academy.starAvg?.toFixed(1)}&nbsp; ({academy.reviewCount}
+                  {academy.starAvg?.toFixed(1)}&nbsp; ({academy.reviewCount}{" "}
                   reviews)
                 </p>
               </div>
