@@ -6,6 +6,9 @@ import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import { useRecoilState } from "recoil";
 import { useSearchParams } from "react-router-dom";
+import { Cookies } from "react-cookie";
+import { getCookie } from "../../utils/cookie";
+import CustomModal from "../../components/modal/Modal";
 
 interface ReviewSectionProps {
   star: number;
@@ -45,7 +48,7 @@ const ReviewSection = ({
   star,
   reviewCount,
   renderStars,
-  // academyId,
+  academyId,
   classes,
   reviews: initialReviews, // 초기 리뷰 데이터
 }: ReviewSectionProps) => {
@@ -56,6 +59,15 @@ const ReviewSection = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [user, _setUser] = useRecoilState(userInfo);
   const [commonClasses, _setCommonClasses] = useState<number[]>([]);
+
+  const [editReview, setEditReview] = useState<Review | null>(null);
+
+  const [isClassIn, setIsClassIn] = useState(false);
+
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deleteReviewId, setDeleteReviewId] = useState<number | null>(null);
+
+  // const [isModaldele]
 
   const handlePageChange = (page: number) => {
     setSearchParams(prevParams => {
@@ -74,6 +86,9 @@ const ReviewSection = ({
   useEffect(() => {
     getData();
   }, []);
+  // useEffect(() => {
+  //   getData();
+  // }, [isModalVisible]);
   const getData = async () => {
     try {
       // 비동기적으로 데이터 요청
@@ -92,7 +107,7 @@ const ReviewSection = ({
           ),
         ),
       );
-
+      setIsClassIn(isClassInRes);
       console.log(resultData);
       console.log("Classes: ", classes);
       console.log("결과: ", isClassInRes); // true 또는 false가 출력됨
@@ -115,6 +130,19 @@ const ReviewSection = ({
     } catch (error) {
       console.log("오류 발생:", error);
     }
+  };
+
+  const handleDeleteReview = async () => {
+    if (deleteReviewId === null) return;
+    try {
+      await jwtAxios.delete("/api/review/user", {
+        data: { acaId: academyId, userId: user.userId },
+      });
+      setReviews(reviews.filter(review => review.reviewId !== deleteReviewId));
+    } catch (error) {
+      console.error("리뷰 삭제 실패:", error);
+    }
+    setIsDeleteModalVisible(false);
   };
 
   // const handlePageChange = (page: number) => {
@@ -145,71 +173,87 @@ const ReviewSection = ({
 
       <div className="flex justify-between items-center">
         <h3 className="text-[18px] font-bold h-[47px]">Reviews</h3>
-        <button
-          className="small_line_button bg-[#3B77D8]"
-          style={{
-            color: "#fff",
-          }}
-          onClick={e => {
-            e.stopPropagation(); // 이벤트 전파 중지
-            setIsModalVisible(true);
-          }}
-        >
-          리뷰등록
-        </button>
+        {isClassIn && (
+          <button
+            className="small_line_button bg-[#3B77D8]"
+            style={{
+              color: "#fff",
+            }}
+            onClick={e => {
+              e.stopPropagation(); // 이벤트 전파 중지
+              setIsModalVisible(true);
+            }}
+          >
+            리뷰등록
+          </button>
+        )}
       </div>
       <div className={styles.reviews.container}>
-        {reviews.map((review, index) => (
-          <div
-            key={index}
-            className="flex flex-col mb-[24px] p-[16px] border rounded-[8px]"
-          >
-            <div className={styles.reviews.header}>
-              <img
-                src="/aca_image_1.png" // 기본 이미지 사용
-                alt="User"
-                className={styles.reviews.avatar}
-              />
-              <div className="w-full">
-                <div className="flex">
-                  <div className={`${styles.reviews.text} w-[700px]`}>
-                    User {review.userId}
+        {reviews.length > 0 ? (
+          reviews.map((review, index) => (
+            <div
+              key={index}
+              className="flex flex-col mb-[24px] p-[16px] border rounded-[8px]"
+            >
+              <div className={styles.reviews.header}>
+                <img
+                  src="/aca_image_1.png" // 기본 이미지 사용
+                  alt="User"
+                  className={styles.reviews.avatar}
+                />
+                <div className="w-full">
+                  <div className="flex">
+                    <div className={`${styles.reviews.text} w-[700px]`}>
+                      User {review.userId}
+                    </div>
+                    <div>
+                      {review.userId === Number(user.userId) && (
+                        <div className="flex gap-2">
+                          <button
+                            className="small_line_button bg-[#3B77D8] text-[14px]"
+                            style={{
+                              color: "#fff",
+                            }}
+                            onClick={() => {
+                              setIsModalVisible(true);
+                              setEditReview(review); // 수정할 리뷰 데이터 설정
+                            }}
+                            // onClick={}
+                          >
+                            리뷰수정
+                          </button>
+                          <button
+                            className="small_line_button bg-[#fff] text-[14px] text-[#242424]"
+                            onClick={() => {
+                              setDeleteReviewId(review.reviewId);
+                              setIsDeleteModalVisible(true);
+                            }}
+                          >
+                            리뷰삭제
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    {review.userId === Number(user.userId) && (
-                      <div className="flex gap-2">
-                        <button
-                          className="small_line_button bg-[#3B77D8] text-[14px]"
-                          style={{
-                            color: "#fff",
-                          }}
-                        >
-                          리뷰수정
-                        </button>
-                        <button
-                          className="small_line_button bg-[#fff] text-[14px]"
-                          style={{
-                            color: "#242424",
-                          }}
-                        >
-                          리뷰삭제
-                        </button>
-                      </div>
-                    )}
+                  <div className={styles.reviews.text}>
+                    {new Date(review.createdAt).toLocaleDateString()}
                   </div>
-                </div>
-                <div className={styles.reviews.text}>
-                  {new Date(review.createdAt).toLocaleDateString()}
                 </div>
               </div>
+              <div className={styles.reviews.rating}>
+                {renderStars(review.star)}
+                <span className="ml-2 text-[14px]">
+                  {review.star.toFixed(0)}
+                </span>
+              </div>
+              <div className={styles.reviews.content}>{review.comment}</div>
             </div>
-            <div className={styles.reviews.rating}>
-              {renderStars(review.star)}
-              <span className="ml-2 text-[14px]">{review.star.toFixed(1)}</span>
-            </div>
-            <div className={styles.reviews.content}>{review.comment}</div>
+          ))
+        ) : (
+          <div className="flex justify-center items-center text-[14px] text-gray-500 border rounded-[8px] h-[142px]">
+            <span className="">등록된 리뷰가 없습니다.</span>
           </div>
-        ))}
+        )}
       </div>
       <div className="flex justify-center mb-[40px]">
         <Pagination
@@ -223,8 +267,22 @@ const ReviewSection = ({
       {isModalVisible && (
         <ReviewModal
           joinClassId={commonClasses}
+          academyId={Number(academyId)}
+          existingReview={editReview}
           // rating={3} // 선택적으로 전달
           onClose={() => setIsModalVisible(false)}
+        />
+      )}
+      {isDeleteModalVisible && (
+        <CustomModal
+          visible={isDeleteModalVisible}
+          title={"리뷰 삭제"}
+          content={<p className="mt-[15px]">리뷰를 삭제하시겠습니까?</p>}
+          onButton1Click={() => setIsDeleteModalVisible(false)}
+          onButton2Click={handleDeleteReview}
+          button1Text={"취소"}
+          button2Text={"확인"}
+          modalWidth={400}
         />
       )}
     </div>

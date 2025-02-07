@@ -15,6 +15,7 @@ interface Academy {
   star: number;
   tagName: string | null;
   reviewCount: number;
+  starAvg: number;
 }
 interface BestAcademy {
   acaId?: number;
@@ -176,7 +177,7 @@ function HomePage() {
     const fetchData = async () => {
       try {
         const res = await axios.get("/api/access-log");
-        console.log(res);
+        // console.log(res);
 
         setService(prevService =>
           prevService.map(item =>
@@ -193,7 +194,7 @@ function HomePage() {
     const fetchData2 = async () => {
       try {
         const res = await axios.post("/api/access-log");
-        console.log("작동중", res);
+        // console.log("작동중", res);
       } catch (error) {
         console.log(error);
       }
@@ -202,7 +203,7 @@ function HomePage() {
     const fetchData3 = async () => {
       try {
         const res = await axios.get("/api/academy/GetAcademyCount");
-        console.log("작동중", res);
+        // console.log("작동중", res);
 
         setService(prevService =>
           prevService.map(item => {
@@ -295,7 +296,12 @@ function HomePage() {
             여러분의 학습 목표에 맞는 학원을 쉽고 빠르게 추천해 드립니다.
           </p>
         </div>
-        <div className="absolute left-10 right-10 bottom-10 py-5 flex justify-center items-center w-[full]">
+        <div
+          className="absolute left-10 right-10 bottom-10 py-5 flex justify-center items-center w-[full]"
+          onKeyDown={e => {
+            if (e.key === "Enter") handleButton1Click(); // 엔터 입력 시 버튼 클릭
+          }}
+        >
           <CustomInput
             placeholder="태그를 입력해 주세요"
             width="100%"
@@ -329,7 +335,9 @@ function HomePage() {
             <div
               key={index}
               className="bg-brand-BTWhite hover:bg-brand-BTWhiteHover px-4 py-1.5 rounded-xl flex-row-center cursor-pointer"
-              onClick={() => navigate(`academy?tagName=${subject.tagName}`)}
+              onClick={() =>
+                navigate(`academy?tagName=${subject.tagName}&page=1&size=10`)
+              }
             >
               <span className="text-sm font-medium">{subject.tagName}</span>
             </div>
@@ -362,10 +370,10 @@ function HomePage() {
                 </h3>
                 <p className="text-sm text-[#507A95] truncate">
                   {/* {academy.address} */}
-                  {academy.tagName || "태그 정보 없음"}
+                  {academy.tagNames || "태그 정보 없음"}
                 </p>
                 <p className="text-sm text-[#507A95]">
-                  {academy.reviewCount?.toFixed(1)}({academy.reviewCount}
+                  {academy.starAvg?.toFixed(1)}&nbsp; ({academy.reviewCount}
                   reviews)
                 </p>
               </div>

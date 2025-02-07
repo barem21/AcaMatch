@@ -1,42 +1,48 @@
 import { Form, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import MainButton from "../button/MainButton";
 import { SecondaryButton } from "./Modal";
+import { useNavigate } from "react-router-dom";
 
 interface ReviewModalProps {
   onClose: () => void;
   joinClassId: number[];
+  academyId: number;
+  existingReview?: Review | null;
 }
 
 interface ReviewFormValues {
   comment: string;
 }
 
-function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
+function ReviewModal({
+  onClose,
+  joinClassId,
+  academyId,
+  existingReview,
+}: ReviewModalProps) {
   const [form] = Form.useForm();
-  const [rating, setRating] = useState(1);
+  const [rating, setRating] = useState(existingReview?.star || 1);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [_isSubmitting, setIsSubmitting] = useState(false);
   const [user, _setUser] = useRecoilState(userInfo);
+
+  const navigate = useNavigate();
 
   const handleStarClick = (selectedRating: number) => {
     setRating(selectedRating);
     // console.log(rating);
   };
-  // useEffect(() => {
-  //   console.log(rating); // rating 값이 변경된 후 출력됨
-  // }, [rating]); // rating이 변경될 때마다 호출
 
-  // useEffect(() => {
-  //   try {
-  //     const res = jwtAxios.post("/api/review/user");
-
-  //   } catch (error) {}
-  // }, []);
+  useEffect(() => {
+    if (existingReview) {
+      form.setFieldsValue({ comment: existingReview.comment }); // 기존 리뷰 내용 설정
+    }
+  }, [existingReview]);
 
   const handleSubmit = async (values: ReviewFormValues) => {
     if (rating === 0) {
@@ -50,20 +56,35 @@ function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
 
     console.log(joinClassId, values.comment.trim(), rating);
     try {
-      setIsSubmitting(true);
+      if (existingReview) {
+        // 리뷰 수정 요청 (PUT)
+        await jwtAxios.put(`/api/review/user`, {
+          acaId: academyId, // 기존 리뷰 ID
+          comment: values.comment.trim(),
+          star: rating,
+          userId: user.userId,
+        });
+        message.success("리뷰가 수정되었습니다.");
+      } else {
+        setIsSubmitting(true);
 
-      const res = await jwtAxios.post("/api/review/user", {
-        classId: joinClassId[0],
-        comment: values.comment.trim(),
-        star: rating,
-        userId: user.userId,
-      });
+        const res = await jwtAxios.post("/api/review/user", {
+          acaId: academyId,
+          comment: values.comment.trim(),
+          star: rating,
+          userId: user.userId,
+        });
 
-      console.log(joinClassId[0]);
-      console.log(user.userId);
+        console.log(joinClassId[0]);
+        console.log(user.userId);
 
-      console.log(res);
-      message.success("리뷰가 등록되었습니다.");
+        console.log(res);
+        message.success("리뷰가 등록되었습니다.");
+      }
+      const handleRefresh = () => {
+        navigate(0);
+      };
+      handleRefresh();
       onClose();
     } catch (error) {
       console.error("리뷰 등록 실패:", error);
@@ -125,7 +146,7 @@ function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
           <div className="flex items-center w-full mb-6">
             <div className="flex items-center justify-between w-full">
               <h2 className="text-[32px] font-bold text-[#0E161B] font-lexend leading-none">
-                리뷰 작성하기
+                {existingReview ? "리뷰 수정하기" : "리뷰 작성하기"}
               </h2>
               <div className="flex items-center self-center">
                 {renderStars()}
@@ -154,7 +175,9 @@ function ReviewModal({ onClose, joinClassId }: ReviewModalProps) {
               htmlType="submit"
               className="flex justify-center items-center w-full h-10 bg-[#3B77D8] rounded-xl"
             >
-              <span className="font-bold text-sm text-[#F8FAFB]">등록</span>
+              <span className="font-bold text-sm text-[#F8FAFB]">
+                {existingReview ? "수정" : "등록"}
+              </span>
             </MainButton>
           </div>
         </Form>

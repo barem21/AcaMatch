@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import SideBar from "../components/SideBar";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { VscSend } from "react-icons/vsc";
@@ -17,6 +17,8 @@ function InquiryDetail() {
   const [searchParams, setSearchParams] = useSearchParams();
   const acaId = searchParams.get("acaId");
   const userId = searchParams.get("userId");
+
+  const scrollRef = useRef(null); //scroll을 내릴 div
 
   const titleName = "고객지원";
   const menuItems = [
@@ -121,6 +123,7 @@ function InquiryDetail() {
               id="chat-list-wrap"
             >
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
                 {chatMessages?.map((chat, index) => (
                   <div
                     key={index}

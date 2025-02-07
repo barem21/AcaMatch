@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
@@ -15,9 +15,11 @@ function MyPage() {
   const [resultMessage, setResultMessage] = useState("");
   const [mypageAcademyList, setMypageAcademyList] = useState([]); //내 학원 내역
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
+  const pageSize = 10;
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -55,12 +57,20 @@ function MyPage() {
       mypageUrl = "/mypage";
       break;
   }
+  const scrollRef = useRef(null);
+
+  const handleScrollToTop = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
 
   const myAcademyList = async page => {
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${currentUserInfo.userId}&page=${page}`,
+
+        `/api/joinClass?userId=${currentUserInfo.userId}&page=${page}&size=100`,
       );
 
       if (res.data.resultData?.length > 0) {
@@ -93,11 +103,44 @@ function MyPage() {
     if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
+
     }
-  }, []);
+  }, [currentUserInfo]);
+
+  // useEffect(() => {
+  //   if (!currentUserInfo.userId) {
+  //     navigate("/login");
+  //     message.error("로그인이 필요한 서비스입니다.");
+  //   }
+  // }, []);
+
+  const handlePageChange = page => {
+    setCurrentPage(page);
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+  // useEffect(() => {
+  //   // CSS 스크롤 동작 방해 방지
+  //   document.documentElement.style.scrollBehavior = "auto";
+
+  //   // 스크롤 이동 (리렌더링 후 적용 보장)
+  //   requestAnimationFrame(() => {
+  //     window.scrollTo(0, 0);
+  //   });
+  // }, [currentPage]);
+
+  const paginatedData = mypageAcademyList.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div
+      id="list-wrap"
+      ref={scrollRef}
+      className="flex gap-5 w-full justify-center align-top"
+    >
       <SideBar menuItems={menuItems} titleName={titleName} />
 
       <div className="w-full">
@@ -123,10 +166,13 @@ function MyPage() {
             </div>
           )}
 
-          {mypageAcademyList.map((item, index) => (
+          {paginatedData.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-4 border-b"
+              className="loop-content flex justify-between align-middle p-4 border-b cursor-pointer"
+              onClick={() =>
+                navigate(`/academy/detail?id=${item.acaId}&page=1&size=10`)
+              }
             >
               <div className="flex justify-start items-center w-full">
                 <div
@@ -181,8 +227,10 @@ function MyPage() {
 
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
-            defaultCurrent={1}
+            current={currentPage}
             total={mypageAcademyList?.length}
+            pageSize={pageSize}
+            onChange={handlePageChange}
             showSizeChanger={false}
           />
         </div>

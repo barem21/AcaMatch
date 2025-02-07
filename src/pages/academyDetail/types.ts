@@ -86,4 +86,5 @@ export interface Review {
   star: number;
   comment: string;
   createdAt: string;
+  reviewId: number;
 }
