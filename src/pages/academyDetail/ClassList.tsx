@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AcademyClass } from "./types";
 import DOMPurify from "dompurify";
 
@@ -6,9 +7,12 @@ interface ClassListProps {
 }
 
 const ClassList = ({ classes }: ClassListProps) => {
+  useEffect(() => {
+    console.log("classes:", classes);
+  }, []);
   return (
     <div className="flex flex-col justify-center items-center mt-[12px] w-[930px] mx-auto mb-[50px]">
-      {classes.classCategoryName === null ? (
+      {classes[0].classCategoryName !== "" ? (
         classes.map(classItem => (
           <div
             key={classItem.classId}

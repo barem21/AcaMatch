@@ -11,6 +11,7 @@ import userInfo from "../../atoms/userInfo";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
 import AI from "../../components/AI";
+import jwtAxios from "../../apis/jwt";
 
 function MyPageRecordDetail() {
   const cookies = new Cookies();
@@ -29,6 +30,8 @@ function MyPageRecordDetail() {
   const [isModalVisible6, setIsModalVisible6] = useState(false);
   const [isModalVisible7, setIsModalVisible7] = useState(false);
   const [academyInfo, setAcademyInfo] = useState();
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
@@ -100,35 +103,6 @@ function MyPageRecordDetail() {
     setIsModalVisible2(false);
   };
 
-  //수강생 목록 다운로드(엑셀)
-  const handle2Button2Click = async () => {
-    const res = await axios.get(`/api/grade/export?subjectId=${subjectId}`);
-    if (res.data.resultData) {
-      window.open(res.data.resultData);
-    }
-    //console.log(res.data);
-
-    setIsModalVisible2(false);
-  };
-
-  //점수 일괄업로드 관련
-  const handle3Button1Click = () => {
-    setFileList([]);
-    setIsModalVisible3(false);
-  };
-  const handle3Button2Click = () => {
-    setFileList([]);
-    setIsModalVisible3(false);
-  };
-
-  //점수 수정결과 관련
-  const handle4Button1Click = () => {
-    setIsModalVisible4(false);
-  };
-  const handle4Button2Click = () => {
-    setIsModalVisible4(false);
-  };
-
   //AI 성적분석 관련
   const handle5Button1Click = () => {
     setIsModalVisible5(false);
@@ -186,10 +160,16 @@ function MyPageRecordDetail() {
     setIsModalVisible3(true);
   };
 
-  //학원정보 가져오기
-  const academyGetInfo = async () => {
+  //시험정보 가져오기
+  const testGetInfo = async () => {
+    console.log("여기", currentUserInfo.userId);
+
     try {
-      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      const res = await jwtAxios.get(
+        `/api/grade?joinClassId=${currentUserInfo.userId}&page=${currentPage}&size=1000`,
+      );
+      console.log(res);
+
       setAcademyInfo(res.data.resultData.acaName);
       //console.log(res.data.resultData.acaName);
     } catch (error) {
@@ -198,17 +178,17 @@ function MyPageRecordDetail() {
   };
 
   //학생목록 가져오기
-  const academyStudentList = async () => {
-    try {
-      const res = await axios.get(
-        `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
-      );
-      setTestStudentList(res.data.resultData);
-      console.log(res.data.resultData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const academyStudentList = async () => {
+  //   try {
+  //     const res = await axios.get(
+  //       `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
+  //     );
+  //     setTestStudentList(res.data.resultData);
+  //     console.log(res.data.resultData);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const initialValues = {
     gradeId: testGradeId,
@@ -305,12 +285,22 @@ function MyPageRecordDetail() {
   };
 
   useEffect(() => {
-    academyGetInfo();
-  }, []);
-
-  useEffect(() => {
-    academyStudentList();
+    if (currentUserInfo.userId !== "") {
+      // testGetInfo();
+      // setAcademyInfo([
+      //   {
+      //     subjectName: "초등 영어 1차시험",
+      //     examDate: "2025-01-01",
+      //     score: 91,
+      //     pass: null,
+      //   },
+      // ]);
+    }
   }, [currentUserInfo]);
+
+  // useEffect(() => {
+  //   academyStudentList();
+  // }, [currentUserInfo]);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
@@ -325,16 +315,15 @@ function MyPageRecordDetail() {
 
       <RecordList className="w-full">
         <h1 className="title-font flex justify-between align-middle">
-          {academyInfo}의 수강생 목록
-          {/*"강좌명 &gt; 테스트 명"의 수강생 목록*/}
+          {academyInfo}의 시험 결과
           <div className="flex items-center gap-1">
-            <button
+            {/* <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
               onClick={() => handleStudentDownload()}
             >
               수강생 엑셀 다운로드
               <FaPlusCircle />
-            </button>
+            </button> */}
             <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
               onClick={() => handleScoreUpload()}
@@ -429,8 +418,10 @@ function MyPageRecordDetail() {
 
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
-            defaultCurrent={1}
-            total={testStudentList?.length}
+            current={currentPage}
+            total={100}
+            pageSize={10}
+            // onChange={handlePageChange}
             showSizeChanger={false}
           />
         </div>
@@ -557,139 +548,6 @@ function MyPageRecordDetail() {
             onButton2Click={handle6Button1Click}
             button1Text={"취소하기"}
             button2Text={"수정하기"}
-            modalWidth={400}
-          />
-        </div>
-
-        {/* <CustomModal
-          visible={isModalVisible2}
-          title={"수강생 엑셀 다운로드"}
-          content={"전체 수강생 목록을 다운로드 받으시겠습니까?"}
-          onButton1Click={handle2Button1Click}
-          onButton2Click={handle2Button2Click}
-          button1Text={"취소하기"}
-          button2Text={"다운로드"}
-          modalWidth={400}
-        /> */}
-
-        <div className="editModal">
-          {/* <CustomModal
-            visible={isModalVisible3}
-            title={"테스트 결과 일괄등록"}
-            content={
-              <div>
-                <h4 className="mb-2">
-                  수강생 엑셀파일에서 성적수정 파일을 업로드하세요.
-                  <br />
-                  (양식을 임의변경하실 경우 일괄수정이 불가합니다.)
-                </h4>
-                <Form form={form} onFinish={values => onFinishedSe(values)}>
-                  <Form.Item
-                    name="gradeFile"
-                    rules={[
-                      {
-                        required: true,
-                        message: "파일을 선택해 주세요.",
-                      },
-                    ]}
-                  >
-                    <Upload
-                      maxCount={1}
-                      onChange={handleChange}
-                      fileList={fileList}
-                      customRequest={({ onSuccess }) => {
-                        // 자동 업로드 방지
-                        setTimeout(() => {
-                          onSuccess?.("ok");
-                        }, 0);
-                      }}
-                    >
-                      <Button icon={<UploadOutlined />}>
-                        업로드할 파일을 선택해 주세요.
-                      </Button>
-                    </Upload>
-                  </Form.Item>
-
-                  <div className="flex w-full gap-3 justify-between btn-wrap">
-                    <Form.Item>
-                      <Button
-                        className="w-full h-14 text-sm"
-                        onClick={() => handle3Button1Click()}
-                      >
-                        취소하기
-                      </Button>
-                    </Form.Item>
-
-                    <Form.Item className="w-full">
-                      <Button
-                        htmlType="submit"
-                        className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      >
-                        등록하기
-                      </Button>
-                    </Form.Item>
-                  </div>
-                </Form>
-              </div>
-            }
-            onButton1Click={handle3Button1Click}
-            onButton2Click={handle3Button2Click}
-            button1Text={"취소하기"}
-            button2Text={"업로드하기"}
-            modalWidth={400}
-          /> */}
-        </div>
-
-        <div className="editModal">
-          {/* <CustomModal
-            visible={isModalVisible7}
-            title={"점수등록 완료"}
-            content={
-              <div>
-                <p>점수등록이 완료되었습니다.</p>
-                <div className="w-full mt-4 justify-between">
-                  <Form.Item className="mb-0">
-                    <Button
-                      className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      onClick={() => handle7Button1Click()}
-                    >
-                      창닫기
-                    </Button>
-                  </Form.Item>
-                </div>
-              </div>
-            }
-            onButton1Click={handle7Button1Click}
-            onButton2Click={handle7Button2Click}
-            button1Text={"취소하기"}
-            button2Text={"창닫기"}
-            modalWidth={400}
-          /> */}
-        </div>
-
-        <div className="editModal">
-          <CustomModal
-            visible={isModalVisible4}
-            title={"점수수정 완료"}
-            content={
-              <div>
-                <p>점수 수정이 완료되었습니다.</p>
-                <div className="w-full mt-4 justify-between">
-                  <Form.Item className="mb-0">
-                    <Button
-                      className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      onClick={() => handle4Button1Click()}
-                    >
-                      창닫기
-                    </Button>
-                  </Form.Item>
-                </div>
-              </div>
-            }
-            onButton1Click={handle4Button1Click}
-            onButton2Click={handle4Button2Click}
-            button1Text={"취소하기"}
-            button2Text={"다운로드"}
             modalWidth={400}
           />
         </div>
