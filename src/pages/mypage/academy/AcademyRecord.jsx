@@ -29,7 +29,9 @@ function AcademyRecord() {
   const [isModalVisible5, setIsModalVisible5] = useState(false); //ai 성적분석 팝업창
   const [isModalVisible6, setIsModalVisible6] = useState(false);
   const [isModalVisible7, setIsModalVisible7] = useState(false);
+  const [isModalVisible8, setIsModalVisible8] = useState(false);
   const [academyInfo, setAcademyInfo] = useState();
+  const [aiHistoryList, setaiHistoryList] = useState([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
@@ -155,6 +157,14 @@ function AcademyRecord() {
     setIsModalVisible7(false);
   };
 
+  //AI 성적분석 내역 관련
+  const handle8Button1Click = () => {
+    setIsModalVisible8(false);
+  };
+  const handle8Button2Click = () => {
+    setIsModalVisible8(false);
+  };
+
   //점수 수정하기 모달창 오픈
   const handleRecordEdit = (gradeId, score) => {
     setTestGradeId(gradeId);
@@ -173,8 +183,24 @@ function AcademyRecord() {
   };
 
   //AI 성적분석 모달창 오픈
-  const handleRecordAI = userId => {
+  const handleRecordAI = gradeId => {
+    setTestGradeId(gradeId);
     setIsModalVisible5(true);
+  };
+
+  //AI 분석내역 모달창 오픈
+  const handleHistoryAI = async gradeId => {
+    setTestGradeId(gradeId);
+    setIsModalVisible8(true);
+
+    //분석목록 가져오기
+    try {
+      const res = await axios.get(`/api/ai/${gradeId}`);
+      console.log(res.data.resultData);
+      setaiHistoryList(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //수강생 다운로드 모달창 오픈
@@ -347,19 +373,22 @@ function AcademyRecord() {
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle p-4 border-b">
+          <div className="flex justify-between align-middle pt-4 pb-4 border-b">
             <div className="flex items-center justify-center w-full">
               수강생 명
             </div>
-            <div className="flex items-center justify-center w-60">
+            <div className="flex items-center justify-center w-40">
               테스트 일
             </div>
-            <div className="flex items-center justify-center w-60">평가</div>
+            <div className="flex items-center justify-center w-40">평가</div>
             <div className="flex items-center justify-center w-40">
               수정하기
             </div>
-            <div className="flex items-center justify-center w-60">
+            <div className="flex items-center justify-center w-52">
               AI성적분석
+            </div>
+            <div className="flex items-center justify-center w-56">
+              AI성적분석 내역
             </div>
           </div>
 
@@ -373,18 +402,29 @@ function AcademyRecord() {
           {testStudentList?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-4 border-b"
+              className="loop-content flex justify-between align-middle pt-4 pb-4 border-b"
             >
               <div className="flex justify-start items-center w-full">
-                <div className="flex items-center gap-3 cursor-pointer">
-                  <img src="/aca_image_1.png" alt="" />
+                <div className="flex items-center gap-3 pl-4 cursor-pointer">
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.userPic && item.userPic !== "default_user.jpg"
+                          ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.userPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
+                  </div>
+
                   {item.userName}
                 </div>
               </div>
-              <div className="flex items-center justify-center w-60">
+              <div className="flex items-center justify-center w-40">
                 {item.examDate}
               </div>
-              <div className="flex items-center justify-center w-60">
+              <div className="flex items-center justify-center w-40">
                 {item.pass !== null
                   ? item.pass === 1
                     ? "합격"
@@ -416,12 +456,21 @@ function AcademyRecord() {
                 )}
               </div>
 
-              <div className="flex items-center justify-center w-60">
+              <div className="flex items-center justify-center w-52">
                 <button
                   className="small_line_button"
-                  onClick={() => handleRecordAI()}
+                  onClick={() => handleRecordAI(item.gradeId)}
                 >
                   AI 분석하기
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center w-56">
+                <button
+                  className="small_line_button"
+                  onClick={() => handleHistoryAI(item.gradeId)}
+                >
+                  AI 분석내역
                 </button>
               </div>
             </div>
@@ -698,11 +747,43 @@ function AcademyRecord() {
         <CustomModal
           visible={isModalVisible5}
           title={"수강생 AI성적분석"}
-          content={<AI />}
+          content={<AI gradeId={testGradeId} />}
           onButton1Click={handle5Button1Click}
           onButton2Click={handle5Button2Click}
           button1Text={"창닫기"}
           button2Text={"분석완료"}
+          modalWidth={500}
+        />
+
+        <CustomModal
+          visible={isModalVisible8}
+          title={"AI 성적분석 내역 (최근 3회)"}
+          content={
+            <div className="pb-2 max-h-60 overflow-y-auto">
+              {aiHistoryList.length > 0 ? (
+                aiHistoryList.map((item, index) => (
+                  <div
+                    className={
+                      index % 2 === 0 ? "p-3 pl-4 bg-gray-100" : "p-3 pl-4"
+                    }
+                  >
+                    <h4 className="pb-2 font-semibold">
+                      분석내역 {index + 1}.
+                    </h4>
+                    {item.feedBack}
+                  </div>
+                ))
+              ) : (
+                <div className="p-3 pl-4 bg-gray-100 text-center">
+                  AI 분석내역이 없습니다.
+                </div>
+              )}
+            </div>
+          }
+          onButton1Click={handle8Button1Click}
+          onButton2Click={handle8Button2Click}
+          button1Text={"창닫기"}
+          button2Text={"확인완료"}
           modalWidth={500}
         />
       </RecordList>

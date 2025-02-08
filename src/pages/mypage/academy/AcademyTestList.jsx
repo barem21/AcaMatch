@@ -58,9 +58,6 @@ function AcademyTestList() {
     }
   `;
   const AddTest = styled.div`
-    input[type="text"] {
-      margin-bottom: 15px;
-    }
     div {
       display: flex;
       align-items: center;
@@ -82,6 +79,10 @@ function AcademyTestList() {
       margin-top: 5px;
       color: #ff4400;
       font-size: 1.25rem;
+    }
+    .ant-form-item-additional {
+      width: 100%;
+      font-size: 14px;
     }
   `;
 
@@ -259,7 +260,7 @@ function AcademyTestList() {
 
         <CustomModal
           visible={isModalVisible}
-          title={"시험 등록"}
+          title={"테스트 신규등록"}
           content={
             <AddTest>
               <Form
@@ -289,7 +290,7 @@ function AcademyTestList() {
                   />
                 </Form.Item>
 
-                <div className="flex w-full mt-3 mb-3">
+                <div className="flex w-full mt-3 pb-5">
                   <Form.Item
                     name="subjectName"
                     className="w-full"
@@ -307,10 +308,10 @@ function AcademyTestList() {
                 <div className="flex w-full gap-3 justify-between">
                   <Form.Item>
                     <Button
-                      className="w-full h-14 bg-[#E8EEF3] text-sm"
+                      className="w-full h-14 text-sm"
                       onClick={() => setIsModalVisible(false)}
                     >
-                      창닫기
+                      취소하기
                     </Button>
                   </Form.Item>
 

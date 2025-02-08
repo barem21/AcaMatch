@@ -109,16 +109,19 @@ function AcademyStudent() {
             >
               <div className="flex justify-start items-center w-full">
                 <div className="flex items-center gap-3 font-bold">
-                  <img
-                    src={
-                      item.userPic
-                        ? item.userPic === "default_user.jpg"
-                          ? "/aca_image_1.png"
-                          : `http://112.222.157.156:5223/api/user/${item.userId}/${item.userPic}`
-                        : "/aca_image_1.png"
-                    }
-                    alt=""
-                  />
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.userPic
+                          ? item.userPic === "default_user.jpg"
+                            ? "/aca_image_1.png"
+                            : `http://112.222.157.156:5223/api/user/${item.userId}/${item.userPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=""
+                    />
+                  </div>
                   {item.name}
                 </div>
               </div>

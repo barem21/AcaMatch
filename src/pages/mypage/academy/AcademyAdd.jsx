@@ -551,15 +551,25 @@ function AcademyAdd() {
                 </div>
               </Form.Item>
 
-              <Form.Item>
-                <Button
-                  htmlType="submit"
-                  className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
-                  disabled={isSubmitting}
+              <div className="flex justify-between gap-3">
+                <button
+                  type="button"
+                  className="w-1/5 h-14 border rounded-xl"
+                  onClick={e => navigate(-1)}
                 >
-                  학원 등록
-                </Button>
-              </Form.Item>
+                  취소하기
+                </button>
+
+                <Form.Item className="w-full">
+                  <Button
+                    htmlType="submit"
+                    className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
+                    disabled={isSubmitting}
+                  >
+                    학원 등록
+                  </Button>
+                </Form.Item>
+              </div>
             </Form>
           </div>
         </div>
