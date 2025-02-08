@@ -36,6 +36,7 @@ import HotAcademy from "./pages/HotAcademy.tsx";
 import MypageParent from "./pages/mypage/MypageParent";
 import InquiryList from "./pages/InquiryList";
 import AI from "./components/AI.tsx";
+import MyPageRecordDetail from "./pages/mypage/MyPageRecordDetail.jsx";
 
 function App() {
   useEffect(() => {
@@ -153,6 +154,10 @@ function App() {
                 <Route
                   path="/mypage/academy/record"
                   element={<AcademyRecord />}
+                />
+                <Route
+                  path="/mypage/academy/record/detail"
+                  element={<MyPageRecordDetail />}
                 />
                 <Route path="/mypage/academy/like" element={<AcademyLike />} />
                 <Route

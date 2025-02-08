@@ -1,15 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import OpenAI from "openai";
 import { message } from "antd";
 import styled from "@emotion/styled";
 import { FadeLoader } from "react-spinners";
+import axios from "axios";
 
 const AI: React.FC = () => {
+  const [openAiKey, setOpenAiKey] = useState<string | null>(null);
+  const [openai, setOpenai] = useState<OpenAI | null>(null); // OpenAI 인스턴스를 상태로 관리
+
+  const fetchApiKey = async () => {
+    try {
+      const res = await axios.get("/api/ai/getApiKey"); // await 추가
+      setOpenAiKey(res.data.resultData); // 응답 데이터에서 API 키 가져오기
+    } catch (error) {
+      console.log("API 키 가져오기 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchApiKey();
+  }, []);
+
+  // API 키가 설정된 후 OpenAI 인스턴스 생성
+  useEffect(() => {
+    if (openAiKey) {
+      setOpenai(
+        new OpenAI({
+          apiKey: openAiKey,
+          dangerouslyAllowBrowser: true,
+        }),
+      );
+    }
+  }, [openAiKey]); // openAiKey가 변경될 때만 실행
+
   // OpenAI API 설정
-  const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_KEY, // 🔥 OpenAI API 키 설정
-    dangerouslyAllowBrowser: true,
-  });
+  // const openai = new OpenAI({
+  //   // apiKey: import.meta.env.VITE_OPENAI_KEY, // 🔥 OpenAI API 키 설정
+  //   apiKey: openAiKey, // 🔥 OpenAI API 키 설정
+  //   dangerouslyAllowBrowser: true,
+  // });
 
   const [image, setImage] = useState<File | null>(null);
   const [textInput, _setTextInput] = useState<string>(""); // ✅ 텍스트 입력 상태 추가
