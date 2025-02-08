@@ -142,11 +142,14 @@ const AcademyDetail = () => {
           setAcademyData(response.data.resultData);
           setIsLiked(response.data.resultData.isLiked);
           setLikeCount(response.data.resultData.likeCount);
+          console.log("여기긱기", response.data.resultData.classes);
+          console.log("여기", academyData?.classes);
           if (response.data.resultData.addressDto.address) {
             setAddress(response.data.resultData.addressDto.address);
           }
         }
         const params = new URLSearchParams(searchParams);
+
         if (params.get("review")) {
           setItems(prevItems =>
             prevItems.map((item, index) => ({
