@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
-import OpenAI from "openai";
-import { message } from "antd";
 import styled from "@emotion/styled";
+import { message } from "antd";
+import OpenAI from "openai";
+import React, { useEffect, useState } from "react";
 import { FadeLoader } from "react-spinners";
-import axios from "axios";
+import jwtAxios from "../apis/jwt";
 
 interface TestGradeId {
   testGradeId?: { gradeId: number };
 }
 
-const AI: React.FC<TestGradeId> = testGradeId => {
+const AI: React.FC<TestGradeId> = () => {
   const [openAiKey, setOpenAiKey] = useState<string | null>(null);
   const [openai, setOpenai] = useState<OpenAI | null>(null); // OpenAI 인스턴스를 상태로 관리
   const fetchApiKey = async () => {
     try {
-      const res = await axios.get("/api/ai/getApiKey"); // await 추가
+      const res = await jwtAxios.get("/api/ai/getApiKey"); // await 추가
       setOpenAiKey(res.data.resultData); // 응답 데이터에서 API 키 가져오기
     } catch (error) {
       console.log("API 키 가져오기 실패:", error);
@@ -112,12 +112,14 @@ const AI: React.FC<TestGradeId> = testGradeId => {
           });
 
           // OpenAI API 요청
-          await openai?.chat.completions.create({
+          const response = await openai?.chat.completions.create({
             model: "gpt-4-turbo",
             messages,
           });
 
-          //setAnalysisResult(response.choices[0].message.content || "분석 실패");
+          setAnalysisResult(
+            response?.choices[0].message.content || "분석 실패",
+          );
           setLoading(false);
           setIsLoading(false); //로딩중 닫기
         };
@@ -143,20 +145,20 @@ const AI: React.FC<TestGradeId> = testGradeId => {
     }
   };
 
-  // console.log(testGradeId.gradeId);
+  // console.log(testGradeId);
 
   //피드백 저장
-  const hadleSaveHistory = async () => {
-    const res = await axios.post("/api/ai/postFeedBack", {
-      gradeId: testGradeId.gradeId,
-      feedBack: analysisResult,
-    });
-    console.log(res.data.dataResult);
+  // const hadleSaveHistory = async () => {
+  //   const res = await axios.post("/api/ai/postFeedBack", {
+  //     gradeId: testGradeId?.gradeId,
+  //     feedBack: analysisResult,
+  //   });
+  //   console.log(res.data.dataResult);
 
-    if (res.data.dataResult === 1) {
-      message.success("AI 성적분석 결과 저장이 완료되었습니다.");
-    }
-  };
+  //   if (res.data.dataResult === 1) {
+  //     message.success("AI 성적분석 결과 저장이 완료되었습니다.");
+  //   }
+  // };
 
   return (
     <div className="flex flex-col items-center p-0">
@@ -219,13 +221,13 @@ const AI: React.FC<TestGradeId> = testGradeId => {
             </h2>
             <p>{analysisResult}</p>
           </div>
-          <button
+          {/* <button
             type="button"
             className="w-full bg-gray-400 text-white px-4 py-2 mt-4 rounded-md"
             onClick={() => hadleSaveHistory()}
           >
             분석결과 저장
-          </button>
+          </button> */}
         </div>
       )}
 

@@ -185,6 +185,7 @@ function AcademyRecord() {
   //AI 성적분석 모달창 오픈
   const handleRecordAI = gradeId => {
     setTestGradeId(gradeId);
+
     setIsModalVisible5(true);
   };
 
@@ -387,9 +388,9 @@ function AcademyRecord() {
             <div className="flex items-center justify-center w-52">
               AI성적분석
             </div>
-            <div className="flex items-center justify-center w-56">
+            {/* <div className="flex items-center justify-center w-56">
               AI성적분석 내역
-            </div>
+            </div> */}
           </div>
 
           {testStudentList === null && (
@@ -465,14 +466,14 @@ function AcademyRecord() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-center w-56">
+              {/* <div className="flex items-center justify-center w-56">
                 <button
                   className="small_line_button"
                   onClick={() => handleHistoryAI(item.gradeId)}
                 >
                   AI 분석내역
                 </button>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
