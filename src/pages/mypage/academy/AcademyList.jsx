@@ -8,10 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { FaPlusCircle } from "react-icons/fa";
 import { Cookies } from "react-cookie";
 import jwtAxios from "../../../apis/jwt";
+import CustomModal from "../../../components/modal/Modal";
 
 function AcademyList() {
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [academyId, setAcademyId] = useState("");
   const [myAcademyList, setMyAcademyList] = useState([]);
   const navigate = useNavigate();
 
@@ -47,12 +50,19 @@ function AcademyList() {
     }
   };
 
+  //학원삭제 팝업
+  const handleAcademyDelete = acaId => {
+    setAcademyId(acaId);
+    setIsModalVisible(true);
+  };
+
   //학원 삭제
-  const DeleteAcademy = async acaId => {
+  const DeleteAcademy = async academyId => {
+    //alert(academyId);
     try {
       //alert("학원 삭제" + acaId + currentUserInfo.userId);
       const res = await jwtAxios.delete(
-        `/api/academy?acaId=${acaId}&userId=${currentUserInfo.userId}`,
+        `/api/academy?acaId=${academyId}&userId=${currentUserInfo.userId}`,
       );
       //console.log(res.data.resultData);
 
@@ -63,6 +73,15 @@ function AcademyList() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  //학원삭제 확인
+  const handleButton1Click = () => {
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = () => {
+    DeleteAcademy(academyId);
+    setIsModalVisible(false);
   };
 
   useEffect(() => {
@@ -177,7 +196,8 @@ function AcademyList() {
               <div className="flex items-center justify-center w-40">
                 <button
                   className="small_line_button"
-                  onClick={e => DeleteAcademy(item.acaId)}
+                  //onClick={e => DeleteAcademy(item.acaId)}
+                  onClick={e => handleAcademyDelete(item.acaId)}
                 >
                   삭제하기
                 </button>
@@ -194,6 +214,17 @@ function AcademyList() {
           />
         </div>
       </div>
+
+      <CustomModal
+        visible={isModalVisible}
+        title={"학원 삭제하기"}
+        content={"선택하신 학원을 삭제하시겠습니까?"}
+        onButton1Click={handleButton1Click}
+        onButton2Click={handleButton2Click}
+        button1Text={"취소하기"}
+        button2Text={"삭제하기"}
+        modalWidth={400}
+      />
     </div>
   );
 }
