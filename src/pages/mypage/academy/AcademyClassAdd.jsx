@@ -328,14 +328,24 @@ function AcademyClassAdd() {
                   placeholder="가격을 입력해 주세요."
                 />
               </Form.Item>
-              <Form.Item>
-                <Button
-                  htmlType="submit"
-                  className="w-full h-14 mt-5 mb-10 bg-[#E8EEF3] font-bold text-sm"
+              <div className="flex justify-between gap-3 mb-10">
+                <button
+                  type="button"
+                  className="w-1/5 h-14 border rounded-xl"
+                  onClick={e => navigate(-1)}
                 >
-                  강좌 등록
-                </Button>
-              </Form.Item>
+                  취소하기
+                </button>
+
+                <Form.Item className="w-full">
+                  <Button
+                    htmlType="submit"
+                    className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
+                  >
+                    강좌 등록
+                  </Button>
+                </Form.Item>
+              </div>
             </Form>
           </div>
 

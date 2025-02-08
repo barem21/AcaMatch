@@ -178,11 +178,6 @@ function AcademyClassEdit() {
     price: "",
   };
 
-  //뒤로가기
-  const historyBack = () => {
-    navigate(-1);
-  };
-
   //강좌정보 가져오기
   const academyGetInfo = async () => {
     try {
@@ -373,22 +368,25 @@ function AcademyClassEdit() {
                   placeholder="가격을 입력해 주세요."
                 />
               </Form.Item>
-              <Form.Item>
-                <div className="flex justify-end gap-3">
-                  <Button
-                    className="w-1/2 h-14 border font-bold text-sm"
-                    onClick={() => historyBack()}
-                  >
-                    취소하기
-                  </Button>
+
+              <div className="flex justify-between gap-3 mb-10">
+                <button
+                  type="button"
+                  className="w-1/5 h-14 border rounded-xl"
+                  onClick={e => navigate(-1)}
+                >
+                  취소하기
+                </button>
+
+                <Form.Item className="w-full">
                   <Button
                     htmlType="submit"
                     className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
                   >
                     강좌 수정
                   </Button>
-                </div>
-              </Form.Item>
+                </Form.Item>
+              </div>
             </Form>
           </div>
 

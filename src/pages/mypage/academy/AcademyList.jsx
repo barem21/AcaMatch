@@ -41,7 +41,7 @@ function AcademyList() {
         `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
       );
       setMyAcademyList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -133,7 +133,17 @@ function AcademyList() {
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
                 >
-                  <img src="/aca_image_1.png" alt="" />
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.acaPic && item.acaPic !== "default_user.jpg"
+                          ? `http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
+                  </div>
                   {item?.acaName}
                 </div>
               </div>

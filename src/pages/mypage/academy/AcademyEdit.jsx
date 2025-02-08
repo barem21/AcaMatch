@@ -613,14 +613,24 @@ function AcademyEdit() {
                 </div>
               </Form.Item>
 
-              <Form.Item>
-                <Button
-                  htmlType="submit"
-                  className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
+              <div className="flex justify-between gap-3">
+                <button
+                  type="button"
+                  className="w-1/5 h-14 border rounded-xl"
+                  onClick={e => navigate(-1)}
                 >
-                  학원정보 수정
-                </Button>
-              </Form.Item>
+                  취소하기
+                </button>
+
+                <Form.Item className="w-full">
+                  <Button
+                    htmlType="submit"
+                    className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
+                  >
+                    학원정보 수정
+                  </Button>
+                </Form.Item>
+              </div>
             </Form>
           </div>
         </div>

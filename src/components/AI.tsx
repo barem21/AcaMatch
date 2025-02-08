@@ -1,22 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import OpenAI from "openai";
 import { message } from "antd";
 import styled from "@emotion/styled";
 import { FadeLoader } from "react-spinners";
+import axios from "axios";
 
-const AI: React.FC = () => {
+const AI: React.FC = testGradeId => {
+  const [openAiKey, setOpenAiKey] = useState<string | null>(null);
+  const [openai, setOpenai] = useState<OpenAI | null>(null); // OpenAI 인스턴스를 상태로 관리
+  const fetchApiKey = async () => {
+    try {
+      const res = await axios.get("/api/ai/getApiKey"); // await 추가
+      setOpenAiKey(res.data.resultData); // 응답 데이터에서 API 키 가져오기
+    } catch (error) {
+      console.log("API 키 가져오기 실패:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchApiKey();
+  }, []);
+
+  // API 키가 설정된 후 OpenAI 인스턴스 생성
+  useEffect(() => {
+    if (openAiKey) {
+      setOpenai(
+        new OpenAI({
+          apiKey: openAiKey,
+          dangerouslyAllowBrowser: true,
+        }),
+      );
+    }
+  }, [openAiKey]); // openAiKey가 변경될 때만 실행
+
   // OpenAI API 설정
-  const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_KEY, // 🔥 OpenAI API 키 설정
-    dangerouslyAllowBrowser: true,
-  });
+  // const openai = new OpenAI({
+  //   // apiKey: import.meta.env.VITE_OPENAI_KEY, // :불: OpenAI API 키 설정
+  //   apiKey: openAiKey, // :불: OpenAI API 키 설정
+  //   dangerouslyAllowBrowser: true,
+  // });
 
   const [image, setImage] = useState<File | null>(null);
   const [textInput, _setTextInput] = useState<string>(""); // ✅ 텍스트 입력 상태 추가
   const [analysisResult, setAnalysisResult] = useState<string>("");
   const [fileName, setFileName] = useState<string>(""); //첨부파일명
   const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const LoadingWrap = styled.div`
     position: fixed;
@@ -84,7 +113,7 @@ const AI: React.FC = () => {
             messages,
           });
 
-          setAnalysisResult(response.choices[0].message.content || "분석 실패");
+          //setAnalysisResult(response.choices[0].message.content || "분석 실패");
           setLoading(false);
           setIsLoading(false); //로딩중 닫기
         };
@@ -107,6 +136,21 @@ const AI: React.FC = () => {
     } finally {
       setLoading(false);
       //setIsLoading(false); //로딩중 닫기
+    }
+  };
+
+  //console.log(testGradeId.gradeId);
+
+  //피드백 저장
+  const hadleSaveHistory = async () => {
+    const res = await axios.post("/api/ai/postFeedBack", {
+      gradeId: testGradeId.gradeId,
+      feedBack: analysisResult,
+    });
+    console.log(res.data.dataResult);
+
+    if (res.data.dataResult === 1) {
+      message.success("AI 성적분석 결과 저장이 완료되었습니다.");
     }
   };
 
@@ -164,11 +208,20 @@ const AI: React.FC = () => {
 
       {/* 분석 결과 표시 */}
       {analysisResult && (
-        <div className="mt-4 p-4 border rounded-md bg-gray-100 w-full">
-          <h2 className="mb-3 p-3 pt-2 pb-2 bg-white border rounded-md text-lg font-semibold">
-            분석결과 확인 📢
-          </h2>
-          <p>{analysisResult}</p>
+        <div className="w-full">
+          <div className="mt-4 p-4 border rounded-md bg-gray-100 w-full">
+            <h2 className="mb-3 p-3 pt-2 pb-2 bg-white border rounded-md text-lg font-semibold">
+              분석결과 확인 📢
+            </h2>
+            <p>{analysisResult}</p>
+          </div>
+          <button
+            type="button"
+            className="w-full bg-gray-400 text-white px-4 py-2 mt-4 rounded-md"
+            onClick={e => hadleSaveHistory()}
+          >
+            분석결과 저장
+          </button>
         </div>
       )}
 
