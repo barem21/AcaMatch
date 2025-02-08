@@ -5,7 +5,11 @@ import styled from "@emotion/styled";
 import { FadeLoader } from "react-spinners";
 import axios from "axios";
 
-const AI: React.FC = testGradeId => {
+interface TestGradeId {
+  testGradeId?: { gradeId: number };
+}
+
+const AI: React.FC<TestGradeId> = testGradeId => {
   const [openAiKey, setOpenAiKey] = useState<string | null>(null);
   const [openai, setOpenai] = useState<OpenAI | null>(null); // OpenAI 인스턴스를 상태로 관리
   const fetchApiKey = async () => {
@@ -108,7 +112,7 @@ const AI: React.FC = testGradeId => {
           });
 
           // OpenAI API 요청
-          const response = await openai.chat.completions.create({
+          await openai?.chat.completions.create({
             model: "gpt-4-turbo",
             messages,
           });
@@ -124,12 +128,12 @@ const AI: React.FC = testGradeId => {
       }
 
       // ✅ 텍스트만 입력된 경우 OpenAI API 요청
-      const response = await openai.chat.completions.create({
+      const response = await openai?.chat.completions.create({
         model: "gpt-4-turbo",
         messages,
       });
 
-      setAnalysisResult(response.choices[0].message.content || "분석 실패");
+      setAnalysisResult(response?.choices[0].message.content || "분석 실패");
     } catch (error) {
       console.error("입력 분석 오류:", error);
       setAnalysisResult("분석 중 오류가 발생했습니다.");
@@ -139,7 +143,7 @@ const AI: React.FC = testGradeId => {
     }
   };
 
-  //console.log(testGradeId.gradeId);
+  // console.log(testGradeId.gradeId);
 
   //피드백 저장
   const hadleSaveHistory = async () => {
@@ -218,7 +222,7 @@ const AI: React.FC = testGradeId => {
           <button
             type="button"
             className="w-full bg-gray-400 text-white px-4 py-2 mt-4 rounded-md"
-            onClick={e => hadleSaveHistory()}
+            onClick={() => hadleSaveHistory()}
           >
             분석결과 저장
           </button>

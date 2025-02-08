@@ -6,7 +6,7 @@ import { Cookies } from "react-cookie";
 import { FaFacebookF, FaLink, FaShare, FaXTwitter } from "react-icons/fa6";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { SiNaver } from "react-icons/si";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";

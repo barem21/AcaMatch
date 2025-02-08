@@ -1,42 +1,41 @@
-import Layout from "./components/Layout";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ConfigProvider, message } from "antd";
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/member/LoginPage";
-import SignupPage from "./pages/member/SignupPage";
-import SignupEnd from "./pages/member/SignupEnd";
-import MyPage from "./pages/mypage/MyPage";
+import { useEffect } from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { RecoilRoot } from "recoil";
+import Layout from "./components/Layout";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 import AcademySearch from "./pages/AcademySearch";
-import AcademyDetail from "./pages/academyDetail/AcademyDetail";
-import Support from "./pages/Support";
+import HomePage from "./pages/HomePage";
+import HotAcademy from "./pages/HotAcademy.tsx";
+import Inquiry from "./pages/Inquiry";
+import InquiryDetail from "./pages/InquiryDetail";
+import InquiryList from "./pages/InquiryList";
 import NotFoundPage from "./pages/NotFoundPage";
-import MyPageRecord from "./pages/mypage/MyPageRecord";
+import Support from "./pages/Support";
+import AcademyDetail from "./pages/academyDetail/AcademyDetail";
+import ForgotPw from "./pages/member/ForgotPw";
+import LoginPage from "./pages/member/LoginPage";
+import SignupEnd from "./pages/member/SignupEnd";
+import SignupPage from "./pages/member/SignupPage";
+import MyPage from "./pages/mypage/MyPage";
 import MyPageLike from "./pages/mypage/MyPageLike";
+import MyPageRecord from "./pages/mypage/MyPageRecord";
+import MyPageRecordDetail from "./pages/mypage/MyPageRecordDetail.jsx";
 import MyPageUserInfo from "./pages/mypage/MyPageUserInfo";
+import MypageChild from "./pages/mypage/MypageChild";
+import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
-import AcademyList from "./pages/mypage/academy/AcademyList";
 import AcademyAdd from "./pages/mypage/academy/AcademyAdd";
-import AcademyEdit from "./pages/mypage/academy/AcademyEdit";
 import AcademyClassAdd from "./pages/mypage/academy/AcademyClassAdd";
 import AcademyClassEdit from "./pages/mypage/academy/AcademyClassEdit";
-import { RecoilRoot } from "recoil";
-import AcademyLike from "./pages/mypage/academy/AcademyLike";
-import AcademyReview from "./pages/mypage/academy/AcademyReview";
-import MypageChild from "./pages/mypage/MypageChild";
-import ForgotPw from "./pages/member/ForgotPw";
-import { useEffect } from "react";
-import Inquiry from "./pages/Inquiry";
-import ScrollToTop from "./components/ScrollToTop.tsx";
-import InquiryDetail from "./pages/InquiryDetail";
 import AcademyClassList from "./pages/mypage/academy/AcademyClassList";
+import AcademyEdit from "./pages/mypage/academy/AcademyEdit";
+import AcademyLike from "./pages/mypage/academy/AcademyLike";
+import AcademyList from "./pages/mypage/academy/AcademyList";
+import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
+import AcademyReview from "./pages/mypage/academy/AcademyReview";
 import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
 import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
-import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
-import HotAcademy from "./pages/HotAcademy.tsx";
-import MypageParent from "./pages/mypage/MypageParent";
-import InquiryList from "./pages/InquiryList";
-import AI from "./components/AI.tsx";
-import MyPageRecordDetail from "./pages/mypage/MyPageRecordDetail.jsx";
 
 function App() {
   useEffect(() => {
@@ -117,7 +116,7 @@ function App() {
               <Route path="/forgotPw" element={<ForgotPw />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/signup/end" element={<SignupEnd />} />
-              <Route path="/ai" element={<AI />} />
+              {/* <Route path="/ai" element={<AI />} /> */}
               <Route path="/mypage">
                 <Route index element={<MyPage />} />
                 <Route path="/mypage/record" element={<MyPageRecord />} />
