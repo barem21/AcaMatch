@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SideBar from "../../components/SideBar";
 import { message, Pagination } from "antd";
 import { useRecoilValue } from "recoil";
@@ -12,6 +12,9 @@ function MyPageRecord() {
   const [myAcademyArray, setMyAcademyArray] = useState([]);
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const scrollRef = useRef(null);
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -52,9 +55,24 @@ function MyPageRecord() {
       const res = await jwtAxios.get(
         `/api/joinClass?userId=${currentUserInfo.userId}&page=1`,
       );
-      //console.log(res.data.resultData);
+      console.log(res);
 
-      setMyAcademyArray(res.data.resultData);
+      const splitClasses = res.data.resultData.flatMap(academy => {
+        return academy.classList.map(classItem => {
+          return {
+            acaId: academy.acaId,
+            acaPic: academy.acaPic,
+            acaName: academy.acaName,
+            classId: classItem.classId,
+            className: classItem.className,
+            startDate: classItem.startDate,
+            endDate: classItem.endDate,
+          };
+        });
+      });
+
+      // 나눈 데이터를 상태에 저장
+      setMyAcademyArray(splitClasses);
     } catch (error) {
       console.log(error);
     }
@@ -73,8 +91,19 @@ function MyPageRecord() {
     }
   }, []);
 
+  const handlePageChange = page => {
+    setCurrentPage(page);
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+  const paginatedData = myAcademyArray.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div ref={scrollRef} className="flex gap-5 w-full justify-center align-top">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
       <div className="w-full">
@@ -85,11 +114,11 @@ function MyPageRecord() {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-60">
+            {/* <div className="flex items-center justify-center w-60">
               테스트일
-            </div>
+            </div> */}
             <div className="flex items-center justify-center w-40">
-              처리상태
+              문의하기
             </div>
             <div className="flex items-center justify-center w-40">
               성적확인
@@ -102,7 +131,7 @@ function MyPageRecord() {
             </div>
           )}
 
-          {myAcademyArray?.map((item, index) => (
+          {paginatedData?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
@@ -125,7 +154,10 @@ function MyPageRecord() {
                   </div>
                   <div>
                     <h4 className="font-semibold">{item.acaName}</h4>
-                    {item.classList.length > 0 ? (
+                    <div className="flex text-gray-400 text-sm">
+                      [수업명 :{item.className}]
+                    </div>
+                    {/* {item.classList?.length > 0 ? (
                       <div className="flex text-gray-400 text-sm">
                         {" "}
                         [수업명 :&nbsp;
@@ -139,15 +171,24 @@ function MyPageRecord() {
                       </div>
                     ) : (
                       ""
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center w-60">
+              {/* <div className="flex items-center justify-center w-60">
                 2025-01-01
-              </div>
+              </div> */}
               <div className="flex items-center justify-center w-40">
-                등록완료
+                <span
+                  className="small_line_button bg-gray-200 cursor-pointer"
+                  onClick={() =>
+                    navigate(
+                      `/support/inquiry/detail?acaId=${item.acaId}&userId=${currentUserInfo.userId}`,
+                    )
+                  }
+                >
+                  1:1 문의
+                </span>
               </div>
               <div className="flex items-center justify-center w-40">
                 <span className="small_line_button bg-gray-200 opacity-50">
@@ -160,8 +201,11 @@ function MyPageRecord() {
 
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
+            current={currentPage}
             defaultCurrent={1}
             total={myAcademyArray?.length}
+            pageSize={pageSize}
+            onChange={handlePageChange}
             showSizeChanger={false}
           />
         </div>

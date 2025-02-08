@@ -6,14 +6,14 @@ import { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import jwtAxios from "../../../apis/jwt";
-import userInfo from "../../../atoms/userInfo";
-import CustomModal from "../../../components/modal/Modal";
-import SideBar from "../../../components/SideBar";
-import AI from "../../../components/AI";
 import { Cookies } from "react-cookie";
+import userInfo from "../../atoms/userInfo";
+import SideBar from "../../components/SideBar";
+import CustomModal from "../../components/modal/Modal";
+import AI from "../../components/AI";
+import jwtAxios from "../../apis/jwt";
 
-function AcademyRecord() {
+function MyPageRecordDetail() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
@@ -29,9 +29,9 @@ function AcademyRecord() {
   const [isModalVisible5, setIsModalVisible5] = useState(false); //ai 성적분석 팝업창
   const [isModalVisible6, setIsModalVisible6] = useState(false);
   const [isModalVisible7, setIsModalVisible7] = useState(false);
-  const [isModalVisible8, setIsModalVisible8] = useState(false);
   const [academyInfo, setAcademyInfo] = useState();
-  const [aiHistoryList, setaiHistoryList] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
@@ -103,35 +103,6 @@ function AcademyRecord() {
     setIsModalVisible2(false);
   };
 
-  //수강생 목록 다운로드(엑셀)
-  const handle2Button2Click = async () => {
-    const res = await axios.get(`/api/grade/export?subjectId=${subjectId}`);
-    if (res.data.resultData) {
-      window.open(res.data.resultData);
-    }
-    //console.log(res.data);
-
-    setIsModalVisible2(false);
-  };
-
-  //점수 일괄업로드 관련
-  const handle3Button1Click = () => {
-    setFileList([]);
-    setIsModalVisible3(false);
-  };
-  const handle3Button2Click = () => {
-    setFileList([]);
-    setIsModalVisible3(false);
-  };
-
-  //점수 수정결과 관련
-  const handle4Button1Click = () => {
-    setIsModalVisible4(false);
-  };
-  const handle4Button2Click = () => {
-    setIsModalVisible4(false);
-  };
-
   //AI 성적분석 관련
   const handle5Button1Click = () => {
     setIsModalVisible5(false);
@@ -157,14 +128,6 @@ function AcademyRecord() {
     setIsModalVisible7(false);
   };
 
-  //AI 성적분석 내역 관련
-  const handle8Button1Click = () => {
-    setIsModalVisible8(false);
-  };
-  const handle8Button2Click = () => {
-    setIsModalVisible8(false);
-  };
-
   //점수 수정하기 모달창 오픈
   const handleRecordEdit = (gradeId, score) => {
     setTestGradeId(gradeId);
@@ -183,24 +146,8 @@ function AcademyRecord() {
   };
 
   //AI 성적분석 모달창 오픈
-  const handleRecordAI = gradeId => {
-    setTestGradeId(gradeId);
+  const handleRecordAI = userId => {
     setIsModalVisible5(true);
-  };
-
-  //AI 분석내역 모달창 오픈
-  const handleHistoryAI = async gradeId => {
-    setTestGradeId(gradeId);
-    setIsModalVisible8(true);
-
-    //분석목록 가져오기
-    try {
-      const res = await axios.get(`/api/ai/${gradeId}`);
-      console.log(res.data.resultData);
-      setaiHistoryList(res.data.resultData);
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   //수강생 다운로드 모달창 오픈
@@ -213,10 +160,16 @@ function AcademyRecord() {
     setIsModalVisible3(true);
   };
 
-  //학원정보 가져오기
-  const academyGetInfo = async () => {
+  //시험정보 가져오기
+  const testGetInfo = async () => {
+    console.log("여기", currentUserInfo.userId);
+
     try {
-      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      const res = await jwtAxios.get(
+        `/api/grade?joinClassId=${currentUserInfo.userId}&page=${currentPage}&size=1000`,
+      );
+      console.log(res);
+
       setAcademyInfo(res.data.resultData.acaName);
       //console.log(res.data.resultData.acaName);
     } catch (error) {
@@ -225,17 +178,17 @@ function AcademyRecord() {
   };
 
   //학생목록 가져오기
-  const academyStudentList = async () => {
-    try {
-      const res = await axios.get(
-        `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
-      );
-      setTestStudentList(res.data.resultData);
-      console.log(res.data.resultData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const academyStudentList = async () => {
+  //   try {
+  //     const res = await axios.get(
+  //       `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
+  //     );
+  //     setTestStudentList(res.data.resultData);
+  //     console.log(res.data.resultData);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const initialValues = {
     gradeId: testGradeId,
@@ -332,12 +285,22 @@ function AcademyRecord() {
   };
 
   useEffect(() => {
-    academyGetInfo();
-  }, []);
-
-  useEffect(() => {
-    academyStudentList();
+    if (currentUserInfo.userId !== "") {
+      // testGetInfo();
+      // setAcademyInfo([
+      //   {
+      //     subjectName: "초등 영어 1차시험",
+      //     examDate: "2025-01-01",
+      //     score: 91,
+      //     pass: null,
+      //   },
+      // ]);
+    }
   }, [currentUserInfo]);
+
+  // useEffect(() => {
+  //   academyStudentList();
+  // }, [currentUserInfo]);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
@@ -352,16 +315,15 @@ function AcademyRecord() {
 
       <RecordList className="w-full">
         <h1 className="title-font flex justify-between align-middle">
-          {academyInfo}의 수강생 목록
-          {/*"강좌명 &gt; 테스트 명"의 수강생 목록*/}
+          {academyInfo}의 시험 결과
           <div className="flex items-center gap-1">
-            <button
+            {/* <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
               onClick={() => handleStudentDownload()}
             >
               수강생 엑셀 다운로드
               <FaPlusCircle />
-            </button>
+            </button> */}
             <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
               onClick={() => handleScoreUpload()}
@@ -373,22 +335,19 @@ function AcademyRecord() {
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle pt-4 pb-4 border-b">
+          <div className="flex justify-between align-middle p-4 border-b">
             <div className="flex items-center justify-center w-full">
               수강생 명
             </div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center w-60">
               테스트 일
             </div>
-            <div className="flex items-center justify-center w-40">평가</div>
+            <div className="flex items-center justify-center w-60">평가</div>
             <div className="flex items-center justify-center w-40">
               수정하기
             </div>
-            <div className="flex items-center justify-center w-52">
+            <div className="flex items-center justify-center w-60">
               AI성적분석
-            </div>
-            <div className="flex items-center justify-center w-56">
-              AI성적분석 내역
             </div>
           </div>
 
@@ -402,29 +361,18 @@ function AcademyRecord() {
           {testStudentList?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle pt-4 pb-4 border-b"
+              className="loop-content flex justify-between align-middle p-4 border-b"
             >
               <div className="flex justify-start items-center w-full">
-                <div className="flex items-center gap-3 pl-4 cursor-pointer">
-                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                    <img
-                      src={
-                        item.userPic && item.userPic !== "default_user.jpg"
-                          ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.userPic}`
-                          : "/aca_image_1.png"
-                      }
-                      className="max-w-fit max-h-full object-cover"
-                      alt=" /"
-                    />
-                  </div>
-
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <img src="/aca_image_1.png" alt="" />
                   {item.userName}
                 </div>
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center w-60">
                 {item.examDate}
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center w-60">
                 {item.pass !== null
                   ? item.pass === 1
                     ? "합격"
@@ -456,21 +404,12 @@ function AcademyRecord() {
                 )}
               </div>
 
-              <div className="flex items-center justify-center w-52">
+              <div className="flex items-center justify-center w-60">
                 <button
                   className="small_line_button"
-                  onClick={() => handleRecordAI(item.gradeId)}
+                  onClick={() => handleRecordAI()}
                 >
                   AI 분석하기
-                </button>
-              </div>
-
-              <div className="flex items-center justify-center w-56">
-                <button
-                  className="small_line_button"
-                  onClick={() => handleHistoryAI(item.gradeId)}
-                >
-                  AI 분석내역
                 </button>
               </div>
             </div>
@@ -479,8 +418,10 @@ function AcademyRecord() {
 
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
-            defaultCurrent={1}
-            total={testStudentList?.length}
+            current={currentPage}
+            total={100}
+            pageSize={10}
+            // onChange={handlePageChange}
             showSizeChanger={false}
           />
         </div>
@@ -612,178 +553,13 @@ function AcademyRecord() {
         </div>
 
         <CustomModal
-          visible={isModalVisible2}
-          title={"수강생 엑셀 다운로드"}
-          content={"전체 수강생 목록을 다운로드 받으시겠습니까?"}
-          onButton1Click={handle2Button1Click}
-          onButton2Click={handle2Button2Click}
-          button1Text={"취소하기"}
-          button2Text={"다운로드"}
-          modalWidth={400}
-        />
-
-        <div className="editModal">
-          {/* <CustomModal
-            visible={isModalVisible3}
-            title={"테스트 결과 일괄등록"}
-            content={
-              <div>
-                <h4 className="mb-2">
-                  수강생 엑셀파일에서 성적수정 파일을 업로드하세요.
-                  <br />
-                  (양식을 임의변경하실 경우 일괄수정이 불가합니다.)
-                </h4>
-                <Form form={form} onFinish={values => onFinishedSe(values)}>
-                  <Form.Item
-                    name="gradeFile"
-                    rules={[
-                      {
-                        required: true,
-                        message: "파일을 선택해 주세요.",
-                      },
-                    ]}
-                  >
-                    <Upload
-                      maxCount={1}
-                      onChange={handleChange}
-                      fileList={fileList}
-                      customRequest={({ onSuccess }) => {
-                        // 자동 업로드 방지
-                        setTimeout(() => {
-                          onSuccess?.("ok");
-                        }, 0);
-                      }}
-                    >
-                      <Button icon={<UploadOutlined />}>
-                        업로드할 파일을 선택해 주세요.
-                      </Button>
-                    </Upload>
-                  </Form.Item>
-
-                  <div className="flex w-full gap-3 justify-between btn-wrap">
-                    <Form.Item>
-                      <Button
-                        className="w-full h-14 text-sm"
-                        onClick={() => handle3Button1Click()}
-                      >
-                        취소하기
-                      </Button>
-                    </Form.Item>
-
-                    <Form.Item className="w-full">
-                      <Button
-                        htmlType="submit"
-                        className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      >
-                        등록하기
-                      </Button>
-                    </Form.Item>
-                  </div>
-                </Form>
-              </div>
-            }
-            onButton1Click={handle3Button1Click}
-            onButton2Click={handle3Button2Click}
-            button1Text={"취소하기"}
-            button2Text={"업로드하기"}
-            modalWidth={400}
-          /> */}
-        </div>
-
-        <div className="editModal">
-          {/* <CustomModal
-            visible={isModalVisible7}
-            title={"점수등록 완료"}
-            content={
-              <div>
-                <p>점수등록이 완료되었습니다.</p>
-                <div className="w-full mt-4 justify-between">
-                  <Form.Item className="mb-0">
-                    <Button
-                      className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      onClick={() => handle7Button1Click()}
-                    >
-                      창닫기
-                    </Button>
-                  </Form.Item>
-                </div>
-              </div>
-            }
-            onButton1Click={handle7Button1Click}
-            onButton2Click={handle7Button2Click}
-            button1Text={"취소하기"}
-            button2Text={"창닫기"}
-            modalWidth={400}
-          /> */}
-        </div>
-
-        <div className="editModal">
-          <CustomModal
-            visible={isModalVisible4}
-            title={"점수수정 완료"}
-            content={
-              <div>
-                <p>점수 수정이 완료되었습니다.</p>
-                <div className="w-full mt-4 justify-between">
-                  <Form.Item className="mb-0">
-                    <Button
-                      className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      onClick={() => handle4Button1Click()}
-                    >
-                      창닫기
-                    </Button>
-                  </Form.Item>
-                </div>
-              </div>
-            }
-            onButton1Click={handle4Button1Click}
-            onButton2Click={handle4Button2Click}
-            button1Text={"취소하기"}
-            button2Text={"다운로드"}
-            modalWidth={400}
-          />
-        </div>
-
-        <CustomModal
           visible={isModalVisible5}
           title={"수강생 AI성적분석"}
-          content={<AI gradeId={testGradeId} />}
+          content={<AI />}
           onButton1Click={handle5Button1Click}
           onButton2Click={handle5Button2Click}
           button1Text={"창닫기"}
           button2Text={"분석완료"}
-          modalWidth={500}
-        />
-
-        <CustomModal
-          visible={isModalVisible8}
-          title={"AI 성적분석 내역 (최근 3회)"}
-          content={
-            <div className="pb-2 max-h-60 overflow-y-auto">
-              {aiHistoryList.length > 0 ? (
-                aiHistoryList.map((item, index) => (
-                  <div
-                    className={
-                      index % 2 === 0 ? "p-3 pl-4 bg-gray-100" : "p-3 pl-4"
-                    }
-                  >
-                    <h4 className="pb-2 font-semibold">
-                      분석내역 {index + 1}.
-                    </h4>
-                    {item.feedBack}
-                  </div>
-                ))
-              ) : (
-                <div className="p-3 pl-4 bg-gray-100 text-center">
-                  AI 분석내역이 없습니다.
-                </div>
-              )}
-            </div>
-          }
-          onButton1Click={handle8Button1Click}
-          onButton2Click={handle8Button2Click}
-          button1Text={"창닫기"}
-          button2Text={"확인완료"}
           modalWidth={500}
         />
       </RecordList>
@@ -791,4 +567,4 @@ function AcademyRecord() {
   );
 }
 
-export default AcademyRecord;
+export default MyPageRecordDetail;
