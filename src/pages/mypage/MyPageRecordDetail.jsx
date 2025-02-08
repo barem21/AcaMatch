@@ -6,14 +6,13 @@ import { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import jwtAxios from "../../../apis/jwt";
-import userInfo from "../../../atoms/userInfo";
-import CustomModal from "../../../components/modal/Modal";
-import SideBar from "../../../components/SideBar";
-import AI from "../../../components/AI";
 import { Cookies } from "react-cookie";
+import userInfo from "../../atoms/userInfo";
+import SideBar from "../../components/SideBar";
+import CustomModal from "../../components/modal/Modal";
+import AI from "../../components/AI";
 
-function AcademyRecord() {
+function MyPageRecordDetail() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
@@ -562,7 +561,7 @@ function AcademyRecord() {
           />
         </div>
 
-        <CustomModal
+        {/* <CustomModal
           visible={isModalVisible2}
           title={"수강생 엑셀 다운로드"}
           content={"전체 수강생 목록을 다운로드 받으시겠습니까?"}
@@ -571,7 +570,7 @@ function AcademyRecord() {
           button1Text={"취소하기"}
           button2Text={"다운로드"}
           modalWidth={400}
-        />
+        /> */}
 
         <div className="editModal">
           {/* <CustomModal
@@ -710,4 +709,4 @@ function AcademyRecord() {
   );
 }
 
-export default AcademyRecord;
+export default MyPageRecordDetail;

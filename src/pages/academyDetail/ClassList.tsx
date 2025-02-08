@@ -8,7 +8,7 @@ interface ClassListProps {
 const ClassList = ({ classes }: ClassListProps) => {
   return (
     <div className="flex flex-col justify-center items-center mt-[12px] w-[930px] mx-auto mb-[50px]">
-      {classes ? (
+      {classes.classCategoryName === null ? (
         classes.map(classItem => (
           <div
             key={classItem.classId}
