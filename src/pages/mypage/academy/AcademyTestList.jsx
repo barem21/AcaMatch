@@ -209,7 +209,9 @@ function AcademyTestList() {
                 <div
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() =>
-                    navigate(`/mypage/academy/student?classId=${classId}`)
+                    navigate(
+                      `/mypage/academy/student?acaId=${acaId}&classId=${classId}`,
+                    )
                   }
                 >
                   <div className="flex justify-center align-middle w-14 h-14 rounded-xl overflow-hidden">

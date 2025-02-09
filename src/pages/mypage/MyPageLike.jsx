@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
 import { FaHeartCircleMinus } from "react-icons/fa6";
 
+
 const usedRandomNumbers = new Set();
 
 // Generate random unique number
@@ -32,6 +33,7 @@ function MyPageLike() {
   const [likeList, setLikeList] = useState([]); // 좋아요 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [academyIdToDelete, setAcademyIdToDelete] = useState(null); // 삭제할 학원 ID
+
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
@@ -83,6 +85,33 @@ function MyPageLike() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  //좋아요 삭제하기
+  const handleButton1Click = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleButton2Click = async () => {
+    try {
+      // 좋아요 삭제
+      const res = await jwtAxios.delete(`/api/like`, {
+        data: {
+          acaId: likeAcaId,
+          userId: currentUserInfo.userId,
+        },
+      });
+      //console.log(res.data.reultMessage);
+      fetchData(1); //리스트 다시 호출
+    } catch (error) {
+      console.log(error);
+    }
+    setIsModalVisible(false);
+  };
+
+  const handleLikeChange = academyId => {
+    setLikeAcaId(academyId);
+    setIsModalVisible(true);
   };
 
   useEffect(() => {
@@ -144,7 +173,7 @@ function MyPageLike() {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-20">
+            <div className="flex items-center justify-center w-24">
               삭제하기
             </div>
           </div>
@@ -201,7 +230,6 @@ function MyPageLike() {
             onChange={page => fetchData(page)}
           />
         </div>
-
         {isModalVisible && (
           <CustomModal
             visible={isModalVisible}

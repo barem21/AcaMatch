@@ -113,10 +113,10 @@ function AcademyList() {
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 border-b">
-            <div className="flex items-center justify-center w-full">
-              학원명
+            <div className="flex items-center justify-center w-3/4">
+              학원명1
             </div>
-            <div className="flex items-center justify-center w-60">등록일</div>
+            <div className="flex items-center justify-center w-40">등록일</div>
             <div className="flex items-center justify-center w-40">
               처리상태
             </div>
@@ -147,7 +147,7 @@ function AcademyList() {
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
             >
-              <div className="flex justify-start items-center w-full">
+              <div className="flex justify-start items-center w-3/4">
                 <div
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
@@ -166,7 +166,7 @@ function AcademyList() {
                   {item?.acaName}
                 </div>
               </div>
-              <div className="flex items-center justify-center text-center w-60">
+              <div className="flex items-center justify-center text-center w-40">
                 {item.createdAt.substr(0, 10)}
               </div>
               <div className="flex items-center justify-center w-40">

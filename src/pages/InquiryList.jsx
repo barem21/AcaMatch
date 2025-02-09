@@ -45,14 +45,19 @@ function InquiryList() {
       const res = await jwtAxios.get(
         roleId === 3
           ? `/api/academy/getAcademyListByUserId?signedUserId=${userId}`
-          : `/api/joinClass?userId=${userId}&page=1`,
+          : `/api/chat?user-id=${userId}`,
       );
-      setMyAcademyList(res.data.resultData);
-      console.log(res.data.resultData);
+      if (roleId === 3) {
+        setMyAcademyList(res.data.resultData);
+      } else {
+        setMyAcademyList(res.data.resultData.users);
+      }
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/login");
@@ -61,7 +66,11 @@ function InquiryList() {
   }, []);
 
   useEffect(() => {
-    academyList();
+    if (roleId !== 3) {
+      navigate("/support/inquiry");
+    } else {
+      academyList();
+    }
   }, []);
 
   return (
