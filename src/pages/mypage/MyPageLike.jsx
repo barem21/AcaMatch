@@ -9,6 +9,7 @@ import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import LikeButton from "../../components/button/LikeButton";
 import { Cookies } from "react-cookie";
+import { FaHeartCircleMinus, FaHeartCirclePlus } from "react-icons/fa6";
 
 const usedRandomNumbers = new Set();
 
@@ -31,6 +32,7 @@ function MyPageLike() {
   const cookies = new Cookies();
   const [likeList, setLikeList] = useState([]); // 좋아요 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [likeAcaId, setLikeAcaId] = useState("");
   const [resultMessage, setResultMessage] = useState("");
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
@@ -70,19 +72,6 @@ function MyPageLike() {
       ];
   }
 
-  const handleLikeChange = (academyId, newIsLiked) => {
-    setLikeStates(prevStates => ({
-      ...prevStates,
-      [academyId]: newIsLiked,
-    }));
-
-    if (!newIsLiked) {
-      setLikeList(prevList =>
-        prevList.filter(item => item.acaId !== academyId),
-      );
-    }
-  };
-
   const fetchData = async page => {
     try {
       const res = await jwtAxios.get(
@@ -91,7 +80,7 @@ function MyPageLike() {
 
       if (res.data.resultData.length > 0) {
         setLikeList(res.data.resultData);
-        console.log(res.data.resultData);
+        //console.log(res.data.resultData);
 
         setTotalLikesCount(res.data.totalCount); // Assuming API returns total count
 
@@ -101,10 +90,39 @@ function MyPageLike() {
         });
 
         setLikeStates(initialLikeStates);
+      } else {
+        setLikeList([]);
       }
     } catch (error) {
       console.log(error);
     }
+  };
+
+  //좋아요 삭제하기
+  const handleButton1Click = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleButton2Click = async () => {
+    try {
+      // 좋아요 삭제
+      const res = await jwtAxios.delete(`/api/like`, {
+        data: {
+          acaId: likeAcaId,
+          userId: currentUserInfo.userId,
+        },
+      });
+      //console.log(res.data.reultMessage);
+      fetchData(1); //리스트 다시 호출
+    } catch (error) {
+      console.log(error);
+    }
+    setIsModalVisible(false);
+  };
+
+  const handleLikeChange = academyId => {
+    setLikeAcaId(academyId);
+    setIsModalVisible(true);
   };
 
   useEffect(() => {
@@ -130,7 +148,7 @@ function MyPageLike() {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-20">
+            <div className="flex items-center justify-center w-24">
               삭제하기
             </div>
           </div>
@@ -164,15 +182,13 @@ function MyPageLike() {
                   {item.acaName}
                 </div>
               </div>
-              <div className="flex items-center justify-center w-20">
-                <LikeButton
-                  academyId={item.acaId}
-                  initialIsLiked={likeStates[item.acaId] || true}
-                  onLikeChange={newIsLiked =>
-                    handleLikeChange(item.acaId, newIsLiked)
-                  }
-                  isMyLike={true}
-                />
+              <div className="flex items-center justify-center w-24">
+                <div
+                  class="w-full flex justify-center small_line_button cursor-pointer"
+                  onClick={e => handleLikeChange(item.acaId)}
+                >
+                  <FaHeartCircleMinus className="text-blue-500 w-5 h-5" />
+                </div>
               </div>
             </div>
           ))}
@@ -191,12 +207,11 @@ function MyPageLike() {
           visible={isModalVisible}
           title={"좋아요 삭제하기"}
           content={"선택하신 학원을 좋아요에서 삭제하시겠습니까?"}
-          onButton1Click={() => setIsModalVisible(false)}
-          onButton2Click={() => setIsModalVisible(false)}
+          onButton1Click={() => handleButton1Click()}
+          onButton2Click={() => handleButton2Click()}
           button1Text={"취소"}
           button2Text={"확인"}
           modalWidth={400}
-          modalHeight={244}
         />
       </div>
     </div>

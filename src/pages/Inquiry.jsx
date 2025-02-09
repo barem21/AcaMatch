@@ -11,7 +11,7 @@ import { Cookies } from "react-cookie";
 function Inquiry() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { userId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
+  const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
   const [academyData, setAcademyData] = useState([]); // 초기값을 빈 배열로 설정
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -42,10 +42,15 @@ function Inquiry() {
   //1:1 문의 목록 호출
   const myMtomList = async () => {
     try {
-      const res = await jwtAxios.get(`/api/chat?aca-id=${acaId}`);
+      const res = await jwtAxios.get(
+        roleId === 3
+          ? `/api/chat?aca-id=${acaId}`
+          : `/api/chat?user-id=${userId}`,
+        ``,
+      );
       // console.log(acaId);
 
-      // console.log(res.data.resultData.users);
+      console.log(res.data.resultData.users);
       setAcademyData(res.data.resultData.users);
     } catch (error) {
       console.log(error);
@@ -89,9 +94,9 @@ function Inquiry() {
                   <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
                       src={
-                        academy.acaPic
+                        academy.userPic
                           ? `http://112.222.157.156:5223/pic/user/${academy.userId}/${academy.userPic}`
-                          : "/default_academy.jpg"
+                          : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
                       alt=""

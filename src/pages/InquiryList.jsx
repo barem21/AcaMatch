@@ -53,6 +53,7 @@ function InquiryList() {
       console.log(error);
     }
   };
+
   useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/login");
@@ -61,7 +62,11 @@ function InquiryList() {
   }, []);
 
   useEffect(() => {
-    academyList();
+    if (roleId !== 3) {
+      navigate("/support/inquiry");
+    } else {
+      academyList();
+    }
   }, []);
 
   return (
