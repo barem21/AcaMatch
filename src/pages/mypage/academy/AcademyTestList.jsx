@@ -118,22 +118,6 @@ function AcademyTestList() {
     }
   };
 
-  //전송하기
-  const onFinished = async values => {
-    values.classId = parseInt(classId);
-    const res = await axios.post("/api/subject", values);
-    //console.log(res.data);
-    if (res.data.resultData === 1) {
-      form.resetFields(); //초기화
-      setIsModal2Visible(true);
-      setIsModalVisible(false);
-    }
-    if (res.data.resultData === 0) {
-      setIsModal2Visible(true);
-    }
-    setResultMessage(res.data.resultMessage); //결과 메시지
-  };
-
   //과목별 등록된 테스트 목록 가져오기
   const academyTestList = async () => {
     try {
@@ -145,6 +129,23 @@ function AcademyTestList() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  //전송하기
+  const onFinished = async values => {
+    values.classId = parseInt(classId);
+    const res = await axios.post("/api/subject", values);
+    //console.log(res.data);
+    if (res.data.resultData === 1) {
+      form.resetFields(); //초기화
+      setIsModal2Visible(true);
+      setIsModalVisible(false);
+      academyTestList(); //목록 다시 호출
+    }
+    if (res.data.resultData === 0) {
+      setIsModal2Visible(true);
+    }
+    setResultMessage(res.data.resultMessage); //결과 메시지
   };
 
   useEffect(() => {
