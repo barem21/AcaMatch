@@ -217,7 +217,7 @@ function MyPageRecordDetail() {
     }
   };
 
-  const paginatedData = testStudentList.slice(
+  const paginatedData = testStudentList?.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );

@@ -9,7 +9,7 @@ interface CustomModalProps {
   onButton1Click?: () => void;
   onButton2Click?: () => void;
   button1Text: string;
-  button2Text: string;
+  button2Text?: string;
   modalWidth?: number;
   modalHeight?: number;
   btWidth?: number; // 버튼 너비
