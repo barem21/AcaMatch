@@ -7,6 +7,7 @@ import jwtAxios from "../apis/jwt";
 import { useRecoilValue } from "recoil";
 import userInfo from "../atoms/userInfo";
 import { Button, Form } from "antd";
+import axios from "axios";
 
 function InquiryDetail() {
   const [form] = Form.useForm();
@@ -38,6 +39,17 @@ function InquiryDetail() {
     }
   `;
 
+  //학원정보 가져오기
+  const academyGetInfo = async () => {
+    try {
+      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      setAcademyName(res.data.resultData.acaName);
+      //console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   //1:1 문의 내용 호출
   const myMtomDetail = async () => {
     try {
@@ -46,7 +58,6 @@ function InquiryDetail() {
       );
       //console.log(res.data.resultData);
       form.resetFields(); //초기화
-      setAcademyName(res.data.resultData[0].acaName);
       setChatMessages(res.data.resultData.reverse());
     } catch (error) {
       console.log(error);
@@ -70,6 +81,10 @@ function InquiryDetail() {
 
   useEffect(() => {
     myMtomDetail();
+  }, []);
+
+  useEffect(() => {
+    academyGetInfo();
   }, []);
 
   useEffect(() => {
@@ -123,7 +138,6 @@ function InquiryDetail() {
               id="chat-list-wrap"
             >
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
                 {chatMessages?.map((chat, index) => (
                   <div
                     key={index}
