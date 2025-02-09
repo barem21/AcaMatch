@@ -125,11 +125,13 @@ function AcademyClassEdit() {
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
         { label: "학원정보 관리", isActive: true, link: "/mypage" },
+        /*
         {
           label: "학원학생 관리",
           isActive: false,
           link: "/mypage/academy/student",
         },
+        */
         {
           label: "학원리뷰 목록",
           isActive: false,
