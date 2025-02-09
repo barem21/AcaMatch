@@ -1,6 +1,6 @@
 import { UploadOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, message, Pagination, Upload } from "antd";
+import { Button, Form, message, Pagination, Radio, Upload } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
@@ -173,15 +173,22 @@ function AcademyRecord() {
     setTestPass(pass);
 
     form.setFieldsValue({
-      record: score,
-      pass: pass,
+      record: pass ? null : score,
+      pass: score ? null : pass,
     });
     setIsModalVisible(true);
   };
 
   //점수 등록하기 모달창 오픈
-  const handleRecordAdd = joinId => {
+  const handleRecordAdd = (joinId, score, pass) => {
     setJoinClassId(joinId);
+    setTestRecord(score);
+    setTestPass(pass);
+
+    form2.setFieldsValue({
+      record: pass ? null : score,
+      pass: score ? null : pass,
+    });
     setIsModalVisible6(true);
   };
 
@@ -228,7 +235,7 @@ function AcademyRecord() {
     }
   };
 
-  //학생목록 가져오기
+  //수강생 채점목록 가져오기
   const academyStudentList = async () => {
     try {
       const res = await axios.get(
@@ -269,6 +276,8 @@ function AcademyRecord() {
 
   //점수 직접 등록하기
   const onFinishedTh = async values => {
+    console.log(values);
+
     //오늘 날짜 확인
     const today = new Date();
     const year = today.getFullYear();
@@ -295,6 +304,8 @@ function AcademyRecord() {
 
   //점수 직접 수정하기
   const onFinished = async values => {
+    console.log(values);
+
     const datas = {
       gradeId: testGradeId,
       score: values.record ? parseInt(values.record) : null,
@@ -444,11 +455,14 @@ function AcademyRecord() {
                     ? item.score + "점"
                     : "미응시"}
               </div>
+
               <div className="flex items-center justify-center w-40">
                 {item.score === null ? (
                   <button
                     className="small_line_button"
-                    onClick={() => handleRecordAdd(item.joinClassId)}
+                    onClick={() =>
+                      handleRecordAdd(item.joinClassId, item.score, 0)
+                    }
                   >
                     등록하기
                   </button>
@@ -456,7 +470,7 @@ function AcademyRecord() {
                   <button
                     className="small_line_button"
                     onClick={() =>
-                      handleRecordEdit(item.gradeId, item.score, item.pass)
+                      handleRecordEdit(item.gradeId, item.score, 1)
                     }
                   >
                     수정하기
@@ -508,7 +522,7 @@ function AcademyRecord() {
 
                   onFinish={values => onFinished(values)}
                 >
-                  {testRecord !== null ? (
+                  {testRecord !== null && (
                     <Form.Item
                       name="record"
                       className="w-full"
@@ -529,8 +543,18 @@ function AcademyRecord() {
                         className="w-full h-14 pl-3 border rounded-xl text-sm"
                       />
                     </Form.Item>
-                  ) : (
-                    <Form.Item name="pass"></Form.Item>
+                  )}
+
+                  {testPass !== null && (
+                    <Form.Item name="pass">
+                      <Radio.Group
+                        value={1}
+                        options={[
+                          { value: 0, label: "불합격" },
+                          { value: 1, label: "합격" },
+                        ]}
+                      />
+                    </Form.Item>
                   )}
 
                   <div className="flex w-full gap-3 mt-4 justify-between">
@@ -595,6 +619,18 @@ function AcademyRecord() {
                       className="w-full h-14 pl-3 border rounded-xl text-sm"
                     />
                   </Form.Item>
+
+                  {testPass !== null && (
+                    <Form.Item name="pass">
+                      <Radio.Group
+                        value={1}
+                        options={[
+                          { value: 0, label: "불합격" },
+                          { value: 1, label: "합격" },
+                        ]}
+                      />
+                    </Form.Item>
+                  )}
 
                   <div className="flex w-full gap-3 mt-4 justify-between">
                     <Form.Item className="mb-0">
