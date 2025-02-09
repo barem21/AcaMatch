@@ -365,7 +365,7 @@ function AcademyRecord() {
             </button>
             <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
-              onClick={() => handleScoreUpload()}
+              onClick={e => handleScoreUpload()}
             >
               테스트 결과 일괄등록
               <FaPlusCircle />
@@ -624,7 +624,7 @@ function AcademyRecord() {
         />
 
         <div className="editModal">
-          {/* <CustomModal
+          <CustomModal
             visible={isModalVisible3}
             title={"테스트 결과 일괄등록"}
             content={
@@ -688,7 +688,7 @@ function AcademyRecord() {
             button1Text={"취소하기"}
             button2Text={"업로드하기"}
             modalWidth={400}
-          /> */}
+          />
         </div>
 
         <div className="editModal">
