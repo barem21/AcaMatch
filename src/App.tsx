@@ -125,6 +125,10 @@ function App() {
                 <Route path="/mypage/review" element={<MypageReview />} />
                 <Route path="/mypage/child" element={<MypageChild />} />
                 <Route path="/mypage/parent" element={<MypageParent />} />
+                <Route
+                  path="/mypage/record/detail"
+                  element={<MyPageRecordDetail />}
+                />
               </Route>
               <Route path="/mypage/academy">
                 <Route index element={<AcademyList />} />
@@ -153,10 +157,6 @@ function App() {
                 <Route
                   path="/mypage/academy/record"
                   element={<AcademyRecord />}
-                />
-                <Route
-                  path="/mypage/academy/record/detail"
-                  element={<MyPageRecordDetail />}
                 />
                 <Route path="/mypage/academy/like" element={<AcademyLike />} />
                 <Route

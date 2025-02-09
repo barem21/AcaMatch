@@ -1,4 +1,4 @@
-import { Pagination } from "antd";
+import { message, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
@@ -6,12 +6,14 @@ import jwtAxios from "../apis/jwt";
 import userInfo from "../atoms/userInfo";
 import CustomModal from "../components/modal/Modal";
 import SideBar from "../components/SideBar";
+import { Cookies } from "react-cookie";
 
 function InquiryList() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
   const [myAcademyList, setMyAcademyList] = useState([]);
+  const cookies = new Cookies();
 
   const titleName = "고객지원";
   const menuItems = [
@@ -51,6 +53,12 @@ function InquiryList() {
       console.log(error);
     }
   };
+  useEffect(() => {
+    if (!cookies.get("accessToken")) {
+      navigate("/login");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
+  }, []);
 
   useEffect(() => {
     academyList();

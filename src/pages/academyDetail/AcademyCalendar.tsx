@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import { useMemo } from "react";
 import { AcademyData } from "./types";
 import styled from "@emotion/styled";
+import DOMPurify from "dompurify";
 
 const CalendarContainer = styled.div`
   .fc .fc-toolbar-title {
@@ -194,8 +195,15 @@ export const EventContent = ({ eventInfo }: { eventInfo: any }) => {
         <div className="text-sm">
           {startTime} - {endTime}
         </div>
-        <div className="text-sm">
-          {eventInfo.event.extendedProps.classComment}
+        <div
+          className="text-sm"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(
+              eventInfo.event.extendedProps.classComment,
+            ),
+          }}
+        >
+          {/* {eventInfo.event.extendedProps.classComment} */}
         </div>
       </div>
     );

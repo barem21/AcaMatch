@@ -241,3 +241,122 @@ const AI: React.FC<TestGradeId> = () => {
 };
 
 export default AI;
+
+interface AITextProps {
+  textInput?: string; // ✅ textInput을 선택적 props로 변경 (옵셔널)
+}
+
+export const AIText: React.FC<AITextProps> = ({ textInput }) => {
+  const [openAiKey, setOpenAiKey] = useState<string | null>(null);
+  const [openai, setOpenai] = useState<OpenAI | null>(null);
+  // const [textInput, setTextInput] = useState<string>("");
+  const [analysisResult, setAnalysisResult] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
+  // OpenAI API 키 가져오기
+  useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        const res = await jwtAxios.get("/api/ai/getApiKey");
+        setOpenAiKey(res.data.resultData);
+      } catch (error) {
+        console.log("API 키 가져오기 실패:", error);
+      }
+    };
+    fetchApiKey();
+  }, []);
+
+  // OpenAI 인스턴스 생성
+  useEffect(() => {
+    if (openAiKey) {
+      setOpenai(
+        new OpenAI({
+          apiKey: openAiKey,
+          dangerouslyAllowBrowser: true,
+        }),
+      );
+    }
+  }, [openAiKey]);
+
+  const LoadingWrap = styled.div`
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+  `;
+
+  // OpenAI API 호출 (텍스트 분석)
+  const analyzeInput = async () => {
+    console.log(textInput);
+
+    const jsonData = JSON.stringify(textInput, null, 2);
+
+    setLoading(true);
+    try {
+      const messages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }> = [
+        {
+          role: "system",
+          content:
+            "넌 학원 선생이다. 학생의 성적 데이터를 분석하여 발전한 점, 잘하는 과목, 부족한 과목을 구체적으로 설명하고 학습 방향을 제안해라. 150자 이하로 답변해라.",
+        },
+        {
+          role: "user",
+          content: jsonData,
+        },
+      ];
+
+      const response = await openai?.chat.completions.create({
+        model: "gpt-4-turbo",
+        messages,
+      });
+
+      setAnalysisResult(response?.choices[0].message.content || "분석 실패");
+    } catch (error) {
+      console.error("입력 분석 오류:", error);
+      setAnalysisResult("분석 중 오류가 발생했습니다.");
+      console.log(jsonData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      <p className="mb-5 text-md text-gray-500">
+        학생의 시험 성적 데이터를 확인할 수 있습니다.
+        <br />
+        AI 분석을 통해 과목별 성적 변화 및 학습 방향을 제안해 드립니다.
+      </p>
+      {/* 분석 버튼 */}
+      <button
+        className="w-full bg-blue-500 text-white px-4 py-2 rounded-md"
+        onClick={analyzeInput}
+        disabled={loading}
+      >
+        {loading ? "분석 중..." : "AI 분석 시작"}
+      </button>
+
+      {/* 분석 결과 */}
+      {analysisResult && (
+        <div className="mt-4 p-4 border rounded-md bg-gray-100 w-full">
+          <h2 className="mb-3 text-lg font-semibold">📢 분석 결과</h2>
+          <p>{analysisResult}</p>
+        </div>
+      )}
+      {loading && (
+        <LoadingWrap>
+          <FadeLoader color="#fff" width={10} height={30} margin={20} />
+        </LoadingWrap>
+      )}
+    </div>
+  );
+};
