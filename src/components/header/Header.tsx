@@ -149,6 +149,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
       console.log(res);
       removeCookie("accessToken");
       removeCookie("message");
+      navigate("/");
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
@@ -239,9 +240,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                   onClick={() => {
                     logOut();
                     // 로그아웃 처리 로직 추가
-
-                    // 리코일 정보 삭제 아직 안함
-                    navigate("/");
                   }}
                   className={`px-4 py-2 w-[85px] h-[40px]`}
                 >

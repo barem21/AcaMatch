@@ -132,10 +132,14 @@ const ReviewSection = ({
 
   const handleDeleteReview = async () => {
     if (deleteReviewId === null) return;
+    console.log(academyId, user.userId);
+
     try {
-      await jwtAxios.delete("/api/review/user", {
+      const res = await jwtAxios.delete("/api/review/user", {
         data: { acaId: academyId, userId: user.userId },
       });
+      console.log(res);
+
       setReviews(reviews.filter(review => review.reviewId !== deleteReviewId));
     } catch (error) {
       console.error("리뷰 삭제 실패:", error);

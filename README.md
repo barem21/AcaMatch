@@ -83,3 +83,118 @@
 - **기능 추가**: 사이트 관리자 페이지를 추가할 예정입니다.
 
 ---
+
+## git tree
+
+```
+acaMatch
+├─ .gitignore
+├─ .prettierrc
+├─ eslint.config.js
+├─ index.html
+├─ package-lock.json
+├─ package.json
+├─ public
+│  ├─ aca_image_1.png
+│  ├─ default_academy1.jpg
+│  ├─ default_academy10.jpg
+│  ├─ default_academy2.jpg
+│  ├─ default_academy3.jpg
+│  ├─ default_academy4.jpg
+│  ├─ default_academy5.jpg
+│  ├─ default_academy6.jpg
+│  ├─ default_academy7.jpg
+│  ├─ default_academy8.jpg
+│  ├─ default_academy9.jpg
+│  ├─ favicon.png
+│  ├─ li-image.png
+│  ├─ logo.png
+│  ├─ logo2.png
+│  ├─ mail.jpg
+│  └─ main_banner.jpg
+├─ README.md
+├─ src
+│  ├─ apis
+│  │  └─ jwt.ts
+│  ├─ App.css
+│  ├─ App.tsx
+│  ├─ assets
+│  │  └─ react.svg
+│  ├─ atoms
+│  │  └─ userInfo.ts
+│  ├─ components
+│  │  ├─ AI.tsx
+│  │  ├─ button
+│  │  │  ├─ LikeButton.tsx
+│  │  │  └─ MainButton.tsx
+│  │  ├─ CustomInput .tsx
+│  │  ├─ footer
+│  │  │  └─ Footer.tsx
+│  │  ├─ header
+│  │  │  └─ Header.tsx
+│  │  ├─ Layout.tsx
+│  │  ├─ modal
+│  │  │  ├─ LocationModal.tsx
+│  │  │  ├─ Modal.tsx
+│  │  │  └─ ReviewModal.tsx
+│  │  ├─ page
+│  │  │  └─ Pages.tsx
+│  │  ├─ RandomImg.tsx
+│  │  ├─ ScrollToTop.tsx
+│  │  └─ SideBar.tsx
+│  ├─ index.css
+│  ├─ main.tsx
+│  ├─ pages
+│  │  ├─ academyDetail
+│  │  │  ├─ AcademyCalendar.tsx
+│  │  │  ├─ AcademyDetail.tsx
+│  │  │  ├─ ClassList.tsx
+│  │  │  ├─ KakaoMap.tsx
+│  │  │  ├─ ReviewSection.tsx
+│  │  │  └─ types.ts
+│  │  ├─ AcademySearch.tsx
+│  │  ├─ HomePage.tsx
+│  │  ├─ HotAcademy.tsx
+│  │  ├─ Inquiry.jsx
+│  │  ├─ InquiryDetail.jsx
+│  │  ├─ InquiryList.jsx
+│  │  ├─ member
+│  │  │  ├─ ForgotPw.tsx
+│  │  │  ├─ LoginPage.tsx
+│  │  │  ├─ SignupEnd.tsx
+│  │  │  └─ SignupPage.tsx
+│  │  ├─ mypage
+│  │  │  ├─ academy
+│  │  │  │  ├─ AcademyAdd.jsx
+│  │  │  │  ├─ AcademyClassAdd.jsx
+│  │  │  │  ├─ AcademyClassEdit.jsx
+│  │  │  │  ├─ AcademyClassList.jsx
+│  │  │  │  ├─ AcademyEdit.jsx
+│  │  │  │  ├─ AcademyLike.jsx
+│  │  │  │  ├─ AcademyList.jsx
+│  │  │  │  ├─ AcademyRecord.jsx
+│  │  │  │  ├─ AcademyReview.jsx
+│  │  │  │  ├─ AcademyStudent.jsx
+│  │  │  │  └─ AcademyTestList.jsx
+│  │  │  ├─ MyPage.jsx
+│  │  │  ├─ MypageChild.jsx
+│  │  │  ├─ MyPageLike.jsx
+│  │  │  ├─ MypageParent.jsx
+│  │  │  ├─ MyPageRecord.jsx
+│  │  │  ├─ MyPageRecordDetail.jsx
+│  │  │  ├─ MypageReview.jsx
+│  │  │  └─ MyPageUserInfo.jsx
+│  │  ├─ NotFoundPage.tsx
+│  │  └─ Support.tsx
+│  ├─ ui
+│  │  └─ Alert.tsx
+│  ├─ utils
+│  │  └─ cookie.ts
+│  └─ vite-env.d.ts
+├─ tailwind.config.js
+├─ tsconfig.app.json
+├─ tsconfig.json
+├─ tsconfig.node.json
+└─ vite.config.ts
+
+```

@@ -144,7 +144,7 @@ const AcademyDetail = () => {
   //   return randomNum;
   // };
 
-  const { userId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
+  const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
 
   useEffect(() => {
     const fetchAcademyData = async () => {
@@ -399,35 +399,43 @@ const AcademyDetail = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-center gap-[12px]">
-                  <MainButton
-                    className="w-[119px] h-[40px] text-[14px]"
-                    onClick={() => {
-                      if (!checkIsAuthenticated()) {
-                        navigate("/login");
-                        message.error("로그인이 필요한 서비스입니다.");
-                        return;
-                      }
-                      navigate(
-                        `/support/inquiry/detail?acaId=${academyData.acaId}&userId=${currentUserInfo.userId}`,
-                      );
-                    }}
-                  >
-                    학원 문의하기
-                  </MainButton>
-                  <MainButton
-                    className="w-[119px] h-[40px] text-[14px]"
-                    onClick={() => {
-                      if (!checkIsAuthenticated()) {
-                        navigate("/login");
-                        message.error("로그인이 필요한 서비스입니다.");
-                        return;
-                      }
-                      setIsModalVisible(true);
-                    }}
-                    type="primary"
-                  >
-                    학원 신청하기
-                  </MainButton>
+                  {roleId === "3" ? (
+                    <MainButton
+                      className="w-[119px] h-[40px] text-[14px]"
+                      onClick={() => {
+                        if (!checkIsAuthenticated()) {
+                          navigate("/login");
+                          message.error("로그인이 필요한 서비스입니다.");
+                          return;
+                        }
+                        navigate(
+                          `/support/inquiry/detail?acaId=${academyData.acaId}&userId=${currentUserInfo.userId}`,
+                        );
+                      }}
+                    >
+                      학원 문의하기
+                    </MainButton>
+                  ) : (
+                    <div className="w-[119px] h-[40px] text-[14px]"></div>
+                  )}
+                  {roleId === "3" ? (
+                    <MainButton
+                      className="w-[119px] h-[40px] text-[14px]"
+                      onClick={() => {
+                        if (!checkIsAuthenticated()) {
+                          navigate("/login");
+                          message.error("로그인이 필요한 서비스입니다.");
+                          return;
+                        }
+                        setIsModalVisible(true);
+                      }}
+                      type="primary"
+                    >
+                      학원 신청하기
+                    </MainButton>
+                  ) : (
+                    <div className="w-[119px] h-[40px] text-[14px]"></div>
+                  )}
                 </div>
               </div>
 

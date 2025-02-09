@@ -1,19 +1,34 @@
-import { useEffect } from "react";
-import { AcademyClass } from "./types";
+import { Pagination } from "antd";
 import DOMPurify from "dompurify";
+import { useRef, useState } from "react";
+import { AcademyClass } from "./types";
 
 interface ClassListProps {
   classes: AcademyClass[];
 }
 
 const ClassList = ({ classes }: ClassListProps) => {
-  useEffect(() => {
-    console.log("classes:", classes);
-  }, []);
+  // useEffect(() => {
+  //   console.log("classes:", classes);
+  // }, []);
+  const [currentPage, setCurrentPage] = useState(1);
+  const scrollRef = useRef<HTMLElement | null>(null);
+  const pageSize = 2;
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const paginatedData = classes.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
   return (
     <div className="flex flex-col justify-center items-center mt-[12px] w-[930px] mx-auto mb-[50px]">
       {classes[0].classId !== null ? (
-        classes.map(classItem => (
+        paginatedData.map(classItem => (
           <div
             key={classItem.classId}
             className="w-full mb-[24px] p-[24px] border rounded-[8px]"
@@ -91,6 +106,13 @@ const ClassList = ({ classes }: ClassListProps) => {
           <span>등록한 강좌가 없습니다.</span>
         </div>
       )}
+      <Pagination
+        current={currentPage}
+        total={classes?.length}
+        pageSize={pageSize}
+        onChange={handlePageChange}
+        showSizeChanger={false}
+      />
     </div>
   );
 };

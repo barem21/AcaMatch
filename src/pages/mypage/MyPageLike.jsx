@@ -4,11 +4,11 @@ import CustomModal from "../../components/modal/Modal";
 import { getCookie } from "../../utils/cookie";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
-import jwtAxios, { jwtApiRequest } from "../../apis/jwt";
+import jwtAxios from "../../apis/jwt";
 import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
-import LikeButton from "../../components/button/LikeButton";
 import { Cookies } from "react-cookie";
+import { FaHeartCircleMinus } from "react-icons/fa6";
 
 const usedRandomNumbers = new Set();
 
@@ -31,11 +31,10 @@ function MyPageLike() {
   const cookies = new Cookies();
   const [likeList, setLikeList] = useState([]); // 좋아요 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [resultMessage, setResultMessage] = useState("");
+  const [academyIdToDelete, setAcademyIdToDelete] = useState(null); // 삭제할 학원 ID
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
-  const [likeStates, setLikeStates] = useState({});
   const [totalLikesCount, setTotalLikesCount] = useState(0); // To track total items
 
   const titleName = "마이페이지";
@@ -70,37 +69,16 @@ function MyPageLike() {
       ];
   }
 
-  const handleLikeChange = (academyId, newIsLiked) => {
-    setLikeStates(prevStates => ({
-      ...prevStates,
-      [academyId]: newIsLiked,
-    }));
-
-    if (!newIsLiked) {
-      setLikeList(prevList =>
-        prevList.filter(item => item.acaId !== academyId),
-      );
-    }
-  };
-
   const fetchData = async page => {
     try {
       const res = await jwtAxios.get(
         `/api/like/user?userId=${currentUserInfo.userId}&page=${page}`,
       );
+      console.log(res);
 
       if (res.data.resultData.length > 0) {
         setLikeList(res.data.resultData);
-        console.log(res.data.resultData);
-
         setTotalLikesCount(res.data.totalCount); // Assuming API returns total count
-
-        const initialLikeStates = res.data.resultData.reduce((acc, item) => {
-          acc[item.acaId] = true;
-          return acc;
-        });
-
-        setLikeStates(initialLikeStates);
       }
     } catch (error) {
       console.log(error);
@@ -117,6 +95,42 @@ function MyPageLike() {
       message.error("로그인이 필요한 서비스입니다.");
     }
   }, []);
+
+  const handleLikeClick = academyId => {
+    // 학원 ID를 모달에 전달하여 삭제 여부를 확인
+    setAcademyIdToDelete(academyId);
+    setIsModalVisible(true);
+  };
+
+  const deleteLike = async () => {
+    console.log(academyIdToDelete);
+
+    try {
+      // 좋아요 삭제 요청
+      await jwtAxios.delete(
+        `/api/like?userId=${currentUserInfo.userId}&acaId=${academyIdToDelete}`,
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.get("accessToken")}`,
+          },
+          data: {
+            userId: currentUserInfo.userId,
+            acaId: academyIdToDelete,
+          },
+        },
+      );
+
+      // 삭제 후 상태 업데이트
+      setLikeList(prevList =>
+        prevList.filter(item => item.acaId !== academyIdToDelete),
+      );
+      setIsModalVisible(false); // 모달 닫기
+      message.success("좋아요가 삭제되었습니다.");
+    } catch (error) {
+      console.log(error);
+      message.error("좋아요 삭제에 실패했습니다.");
+    }
+  };
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -165,14 +179,15 @@ function MyPageLike() {
                 </div>
               </div>
               <div className="flex items-center justify-center w-20">
-                <LikeButton
-                  academyId={item.acaId}
-                  initialIsLiked={likeStates[item.acaId] || true}
-                  onLikeChange={newIsLiked =>
-                    handleLikeChange(item.acaId, newIsLiked)
-                  }
-                  isMyLike={true}
-                />
+                <button
+                  onClick={() => handleLikeClick(item.acaId)}
+                  className="px-2.5 py-0.5 border-0 rounded bg-gray-200 w-full flex justify-center items-center group"
+                >
+                  <FaHeartCircleMinus
+                    className="text-[20px] focus:outline-none transition-transform duration-200 group-hover:scale-110"
+                    color="#3b77d8"
+                  />
+                </button>
               </div>
             </div>
           ))}
@@ -187,17 +202,22 @@ function MyPageLike() {
           />
         </div>
 
-        <CustomModal
-          visible={isModalVisible}
-          title={"좋아요 삭제하기"}
-          content={"선택하신 학원을 좋아요에서 삭제하시겠습니까?"}
-          onButton1Click={() => setIsModalVisible(false)}
-          onButton2Click={() => setIsModalVisible(false)}
-          button1Text={"취소"}
-          button2Text={"확인"}
-          modalWidth={400}
-          modalHeight={244}
-        />
+        {isModalVisible && (
+          <CustomModal
+            visible={isModalVisible}
+            title={"좋아요 삭제하기"}
+            content={
+              <div className="mt-[50px] mb-[25px]">
+                선택하신 학원을 좋아요에서 삭제하시겠습니까?
+              </div>
+            }
+            onButton1Click={() => setIsModalVisible(false)}
+            onButton2Click={deleteLike} // 확인 버튼 클릭 시 삭제 실행
+            button1Text={"취소"}
+            button2Text={"확인"}
+            modalWidth={400}
+          />
+        )}
       </div>
     </div>
   );

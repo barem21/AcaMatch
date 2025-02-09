@@ -197,16 +197,16 @@ const AcademySearch = () => {
     id: string, // 선택한 필터 값
     checked: boolean, // 체크 여부
   ) => {
+    console.log("나실행");
+
     setSelectedFilters(prev => {
       const currentValues = prev[sectionId] || [];
       const newValues = checked
         ? [...currentValues, id] // 선택한 필터 추가
         : currentValues.filter(value => value !== id); // 선택한 필터 제거
 
-      // 🔥 필터 상태 업데이트 (age, level은 남기되 URL에는 반영하지 않음)
       const updatedFilters = { ...prev, [sectionId]: newValues };
 
-      // 🔥 categoryIds 값만 URL에 반영
       const allSelectedValues = [
         ...(updatedFilters["age"] || []),
         ...(updatedFilters["level"] || []),
@@ -226,7 +226,6 @@ const AcademySearch = () => {
         params.delete("categoryIds"); // 모든 필터 해제 시 제거
       }
 
-      // 🔥 URL 업데이트 (age, level은 URL에서 제거됨)
       setTimeout(() => {
         updateSearchState(params);
       }, 0);
@@ -238,14 +237,12 @@ const AcademySearch = () => {
   useEffect(() => {
     const params = new URLSearchParams(search);
 
-    // 🔥 categoryIds를 배열로 가져와서 필터 복원
     const selectedCategories = params.getAll("categoryIds") || [];
     const selectedFilters: { [key: string]: string[] } = {
       age: [],
       level: [],
     };
 
-    // 🔥 categoryIds를 age와 level로 나누기
     selectedCategories.forEach(value => {
       if (["1", "2", "3", "4", "5"].includes(value)) {
         selectedFilters.age.push(value);
@@ -256,13 +253,11 @@ const AcademySearch = () => {
 
     setSelectedFilters(selectedFilters);
 
-    // 🔥 페이지 값 복원
     const page = params.get("page") ? Number(params.get("page")) : 1;
     // console.log("page", page);
 
     setCurrentPage(page);
 
-    // 🔥 지역 값 복원
     const location = params.get("dongId") ? Number(params.get("dongId")) : -1;
 
     const locationText = params.get("locationText") || "-1";
@@ -391,6 +386,24 @@ const AcademySearch = () => {
       fetchData();
     }
   }, [searchState]);
+  useEffect(() => {
+    console.log(search);
+    const params = new URLSearchParams(search);
+
+    if (search === "?page=1") {
+      setCurrentPage(Number(params.get("page")));
+      selectedFilters.age.length = 0;
+      selectedFilters.level.length = 0;
+      setSearchValue("");
+      setSelectedLocation(-1);
+      setSelectedLocationText("지역 검색");
+      // onFinish("");
+      form.resetFields();
+      updateSearchState(params);
+    }
+    console.log("주소가 변경되었습니다!", location.pathname); // 경로(pathname) 출력
+    console.log("쿼리 파라미터:", location.search); // 쿼리 파라미터 출력
+  }, [search]);
 
   const navigate = useNavigate();
 
@@ -540,9 +553,11 @@ const AcademySearch = () => {
     // console.log("후태그", params.get("tagName"));
 
     // console.log(search);
+    // console.log("나 작동");
 
     if (temp1 === search) {
       setCurrentPage(1);
+
       params.set("page", "1");
     }
 
@@ -558,18 +573,20 @@ const AcademySearch = () => {
   };
 
   const handleSearch = (value: string) => {
-    console.log("나 작동");
+    // console.log("나 작동");
 
     if (!value.trim()) {
       // 값이 없을 경우에도 폼을 제출
       form.submit();
+      setSearchValue("");
     } else {
       form.submit();
+      setSearchValue("");
     }
   };
-  const handleSearchClick = () => {
-    form.submit(); // 검색 값이 없을 때도 강제로 form.submit() 호출
-  };
+  // const handleSearchClick = () => {
+  //   form.submit(); // 검색 값이 없을 때도 강제로 form.submit() 호출
+  // };
 
   return (
     <Form form={form} onFinish={onFinish}>
@@ -634,7 +651,6 @@ const AcademySearch = () => {
                   defaultValue={searchValue}
                   // onSearch={() => form.submit()}
                   onSearch={handleSearch}
-                  // onClick={handleSearchClick}
                 />
               </Form.Item>
               {/* <CiSearch className="text-[24px] font-bold  text-brand-placeholder absolute right-[10px] bottom-[15px] " /> */}
