@@ -175,9 +175,9 @@ const AcademySearch = () => {
     params.set("dongId", String(location) === "-1" ? "" : String(location));
     // }
     params.set("page", "1");
+    params.set("locationText", locationText);
     updateSearchState(params);
 
-    params.set("locationText", locationText);
     navigate({
       pathname: window.location.pathname,
       search: params.toString(),
@@ -258,6 +258,8 @@ const AcademySearch = () => {
 
     // 🔥 페이지 값 복원
     const page = params.get("page") ? Number(params.get("page")) : 1;
+    // console.log("page", page);
+
     setCurrentPage(page);
 
     // 🔥 지역 값 복원
@@ -268,7 +270,7 @@ const AcademySearch = () => {
     const searchName = params.get("searchName") || "";
     const tagName = params.get("tagName") || "";
 
-    console.log(searchName);
+    // console.log(searchName);
 
     // console.log("전", selectedSearchType);
     if (searchName) {
@@ -295,10 +297,17 @@ const AcademySearch = () => {
     setSelectedLocationText(locationText);
 
     const fetchData = async () => {
+      if (categoryIds) {
+        return;
+      }
+      if (page > 1) {
+        return;
+      }
       try {
         const response = await axios.get(searchState);
         // console.log("API 응답:", response.data);
-        console.log(searchState);
+        // console.log(searchState);
+        // console.log("처음");
 
         setAcademyData(response.data.resultData);
         // console.log("ddd", response.data.resultData);
@@ -307,7 +316,7 @@ const AcademySearch = () => {
       }
     };
 
-    console.log(selectedSearchType);
+    // console.log(selectedSearchType);
     if (selectedSearchType === "태그" && tagName) {
       params.set("tagName", tagName);
       updateSearchState(params);
@@ -328,7 +337,7 @@ const AcademySearch = () => {
       if (location !== -1) {
         params.set("dongId", String(location));
         updateSearchState(params);
-        console.log(location);
+        // console.log(location);
 
         return;
       }
@@ -337,7 +346,7 @@ const AcademySearch = () => {
     }
 
     const categoryIds = params.get("categoryIds");
-    if (!categoryIds) {
+    if (categoryIds) {
       updateSearchState(params);
     } else {
       setTemp(3);
@@ -347,6 +356,7 @@ const AcademySearch = () => {
       if (isFirst && params.get("searchName")) {
         setIsFirst(false);
       } else {
+        updateSearchState(params);
         fetchData();
         setIsFirst(false);
       }
@@ -363,6 +373,7 @@ const AcademySearch = () => {
       if (!searchState) return; // 초기 실행 방지
 
       const fetchData = async () => {
+        // console.log(searchState);
         try {
           const response = await axios.get(searchState);
           // console.log("API 응답:", response.data);
@@ -464,6 +475,8 @@ const AcademySearch = () => {
   const onFinish = async (values: any) => {
     const params = new URLSearchParams(search);
 
+    const temp1 = search;
+
     // 필터 값 추가
     // for (const [key, values] of Object.entries(selectedFilters)) {
     //   if (values.length) {
@@ -499,12 +512,12 @@ const AcademySearch = () => {
       values.searchInput = params.get("tagName");
       params.set("tagName", values.searchInput);
       params.delete("searchName");
-      console.log(values.searchInput);
+      // console.log(values.searchInput);
     } else if (params.get("searchName")) {
       values.searchInput = params.get("searchName");
       params.delete("tagName");
       params.set("searchName", values.searchInput);
-      console.log(values.searchInput);
+      // console.log(values.searchInput);
     } else {
       if (!params.get("tagName") && !params.get("searchName")) {
         params.delete("tagName");
@@ -526,7 +539,12 @@ const AcademySearch = () => {
     // console.log("후검색", params.get("searchName"));
     // console.log("후태그", params.get("tagName"));
 
-    console.log(search);
+    // console.log(search);
+
+    if (temp1 === search) {
+      setCurrentPage(1);
+      params.set("page", "1");
+    }
 
     // URL 업데이트
     navigate({
@@ -537,6 +555,20 @@ const AcademySearch = () => {
     setTimeout(() => {
       updateSearchState(params);
     }, 0);
+  };
+
+  const handleSearch = (value: string) => {
+    console.log("나 작동");
+
+    if (!value.trim()) {
+      // 값이 없을 경우에도 폼을 제출
+      form.submit();
+    } else {
+      form.submit();
+    }
+  };
+  const handleSearchClick = () => {
+    form.submit(); // 검색 값이 없을 때도 강제로 form.submit() 호출
   };
 
   return (
@@ -600,7 +632,9 @@ const AcademySearch = () => {
                   size="large"
                   // value={searchValue}
                   defaultValue={searchValue}
-                  onSearch={() => form.submit()}
+                  // onSearch={() => form.submit()}
+                  onSearch={handleSearch}
+                  // onClick={handleSearchClick}
                 />
               </Form.Item>
               {/* <CiSearch className="text-[24px] font-bold  text-brand-placeholder absolute right-[10px] bottom-[15px] " /> */}
@@ -666,7 +700,9 @@ const AcademySearch = () => {
                   </div>
                   <div className="flex min-w-[15%] items-center p-4">
                     <span className="text-[14px] text-brand-placeholder line-clamp-1 text-start">
-                      {academy.tagName}
+                      {Array.isArray(academy.tagName)
+                        ? academy.tagName.join(", ")
+                        : academy.tagName}
                     </span>
                   </div>
                   <div className="flex min-w-[15%] justify-center items-center p-4">

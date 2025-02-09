@@ -18,6 +18,7 @@ import ClassList from "./ClassList";
 import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
 import { AcademyClass, AcademyData } from "./types";
+import styled from "@emotion/styled";
 
 declare global {
   interface Window {
@@ -25,6 +26,24 @@ declare global {
   }
 }
 // const usedRandomNumbers = new Set<number>();
+const CustomScrollbar = styled.div`
+  overflow-x: hidden;
+  &::-webkit-scrollbar {
+    width: 7px; /* 세로 스크롤바의 너비 */
+  }
+
+  &::-webkit-scrollbar-track {
+    /* background: #f1f1f1;  */
+    background: none;
+    border-radius: 10px; /* 스크롤바 트랙의 둥근 모서리 */
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #eee; /* 스크롤바 핸들의 색 */
+    border-radius: 10px; /* 핸들의 둥근 모서리 */
+    /* border: 3px solid #888; */
+  }
+`;
 
 // Tailwind 스타일 상수
 const styles = {
@@ -142,8 +161,8 @@ const AcademyDetail = () => {
           setAcademyData(response.data.resultData);
           setIsLiked(response.data.resultData.isLiked);
           setLikeCount(response.data.resultData.likeCount);
-          console.log("여기긱기", response.data.resultData.classes);
-          console.log("여기", academyData?.classes);
+          // console.log("여기긱기", response.data.resultData.classes);
+          console.log("여기", response.data.resultData);
           if (response.data.resultData.addressDto.address) {
             setAddress(response.data.resultData.addressDto.address);
           }
@@ -159,9 +178,9 @@ const AcademyDetail = () => {
           );
         }
         // console.log(`/pic/academy/${academyData.acaId}/${academyData.acaPic}`);
-        console.log("📌 API 응답 데이터:", response.data.resultData);
+        // console.log("📌 API 응답 데이터:", response.data.resultData);
 
-        console.log(response.data.resultData);
+        // console.log(response.data.resultData);
       } catch (error) {
         console.error("Failed to fetch academy data:", error);
         setError("학원 정보를 불러오는데 실패했습니다.");
@@ -446,23 +465,25 @@ const AcademyDetail = () => {
         title={"수강등록"}
         content={
           <>
-            <div className="flex flex-col gap-2">
-              {academyData.classes.map(classItem => (
-                <Radio
-                  key={classItem.classId}
-                  checked={selectClass === classItem.classId}
-                  onChange={() => handleClassSelect(classItem.classId)}
-                >
-                  <div className="flex items-center line-clamp-1">
-                    <p className="text-[16px] font-[400] line-clamp-1">
-                      {classItem.className}{" "}
-                    </p>
-                    <p className="text-[14px] line-clamp-1">
-                      ({classItem.classStartDate}~{classItem.classEndDate})
-                    </p>
-                  </div>
-                </Radio>
-              ))}
+            <div className="flex flex-col gap-2 max-h-[100px]">
+              <CustomScrollbar>
+                {academyData.classes.map(classItem => (
+                  <Radio
+                    key={classItem.classId}
+                    checked={selectClass === classItem.classId}
+                    onChange={() => handleClassSelect(classItem.classId)}
+                  >
+                    <div className="flex items-center line-clamp-1">
+                      <p className="text-[16px] font-[400] line-clamp-1">
+                        {classItem.className}{" "}
+                      </p>
+                      <p className="text-[14px] line-clamp-1">
+                        ({classItem.classStartDate}~{classItem.classEndDate})
+                      </p>
+                    </div>
+                  </Radio>
+                ))}
+              </CustomScrollbar>
               <p className="mt-[15px]">수강등록 하시겠습니까?</p>
             </div>
           </>

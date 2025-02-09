@@ -4,7 +4,7 @@ import { message, Pagination } from "antd";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
 import jwtAxios from "../../apis/jwt";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
 
 function MyPageRecord() {
@@ -15,6 +15,7 @@ function MyPageRecord() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const scrollRef = useRef(null);
+  const { search } = useLocation();
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -50,10 +51,12 @@ function MyPageRecord() {
   }
 
   const myAcademyList = async () => {
+    const params = new URLSearchParams(search);
+    // setCurrentPage(params.get("page"));
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${currentUserInfo.userId}&page=1`,
+        `/api/joinClass?userId=${currentUserInfo.userId}&page=${currentPage}`,
       );
       console.log(res);
 
@@ -101,7 +104,6 @@ function MyPageRecord() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
-
   return (
     <div ref={scrollRef} className="flex gap-5 w-full justify-center align-top">
       <SideBar menuItems={menuItems} titleName={titleName} />
@@ -180,7 +182,7 @@ function MyPageRecord() {
               </div> */}
               <div className="flex items-center justify-center w-40">
                 <span
-                  className="small_line_button bg-gray-200 cursor-pointer"
+                  className="small_line_button cursor-pointer"
                   onClick={() =>
                     navigate(
                       `/support/inquiry/detail?acaId=${item.acaId}&userId=${currentUserInfo.userId}`,
@@ -191,7 +193,14 @@ function MyPageRecord() {
                 </span>
               </div>
               <div className="flex items-center justify-center w-40">
-                <span className="small_line_button bg-gray-200 opacity-50">
+                <span
+                  className="small_line_button cursor-pointer"
+                  onClick={() =>
+                    navigate(
+                      `/mypage/record/detail?acaId=${item.acaId}&acaName=${item.acaName}`,
+                    )
+                  }
+                >
                   성적확인
                 </span>
               </div>

@@ -12,7 +12,7 @@ const ClassList = ({ classes }: ClassListProps) => {
   }, []);
   return (
     <div className="flex flex-col justify-center items-center mt-[12px] w-[930px] mx-auto mb-[50px]">
-      {classes[0].classCategoryName !== "" ? (
+      {classes[0].classId !== null ? (
         classes.map(classItem => (
           <div
             key={classItem.classId}
@@ -87,7 +87,9 @@ const ClassList = ({ classes }: ClassListProps) => {
           </div>
         ))
       ) : (
-        <div>등록한 강좌가 없습니다.</div>
+        <div className="flex w-full justify-center items-center text-[14px] text-gray-500 border rounded-[8px] h-[142px]">
+          <span>등록한 강좌가 없습니다.</span>
+        </div>
       )}
     </div>
   );

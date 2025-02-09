@@ -69,7 +69,6 @@ function MyPage() {
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-
         `/api/joinClass?userId=${currentUserInfo.userId}&page=${page}&size=100`,
       );
 
@@ -103,7 +102,6 @@ function MyPage() {
     if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
-
     }
   }, [currentUserInfo]);
 
@@ -120,15 +118,6 @@ function MyPage() {
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-  // useEffect(() => {
-  //   // CSS 스크롤 동작 방해 방지
-  //   document.documentElement.style.scrollBehavior = "auto";
-
-  //   // 스크롤 이동 (리렌더링 후 적용 보장)
-  //   requestAnimationFrame(() => {
-  //     window.scrollTo(0, 0);
-  //   });
-  // }, [currentPage]);
 
   const paginatedData = mypageAcademyList.slice(
     (currentPage - 1) * pageSize,
@@ -151,7 +140,7 @@ function MyPage() {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-60">등록일</div>
+            {/* <div className="flex items-center justify-center w-60">등록일</div> */}
             <div className="flex items-center justify-center w-40">
               처리상태
             </div>
@@ -210,9 +199,9 @@ function MyPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center w-60">
+              {/* <div className="flex items-center justify-center w-60">
                 2025-01-01
-              </div>
+              </div> */}
               <div className="flex items-center justify-center w-40">
                 등록완료
               </div>

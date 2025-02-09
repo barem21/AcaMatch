@@ -71,23 +71,23 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     const accessToken = cookies.get("accessToken");
     if (!accessToken || !currentUserInfo.userId) return;
 
-    console.log(currentUserInfo.userId);
+    // console.log(currentUserInfo.userId);
 
-    console.log(
-      "✅ SSE 연결 시도:",
-      `/api/notifications/subscribe/${currentUserInfo.userId}`,
-    );
+    // console.log(
+    //   "✅ SSE 연결 시도:",
+    //   `/api/notifications/subscribe/${currentUserInfo.userId}`,
+    // );
 
     const eventSource = new EventSource(
       `/api/notifications/subscribe/${currentUserInfo.userId}`,
     );
 
     eventSource.onopen = () => {
-      console.log("🟢 SSE 연결 성공!");
+      // console.log("🟢 SSE 연결 성공!");
     };
 
-    eventSource.onmessage = event => {
-      console.log("🔔 새 알림 수신:", event.data);
+    eventSource.onmessage = () => {
+      // console.log("🔔 새 알림 수신:", event.data);
       try {
         // const data = JSON.parse(event.data);
         setCookie("message", "true", { path: "/" });
@@ -145,7 +145,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
   const logOut = async () => {
     try {
-      await jwtAxios.post("/api/user/log-out", {});
+      const res = await jwtAxios.post("/api/user/log-out", {});
+      console.log(res);
+      removeCookie("accessToken");
+      removeCookie("message");
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
@@ -234,11 +237,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 </div>
                 <MainButton
                   onClick={() => {
-                    // 로그아웃 처리 로직 추가
-                    removeCookie("accessToken");
-                    removeCookie("message");
-                    // 리코일 정보 삭제 아직 안함
                     logOut();
+                    // 로그아웃 처리 로직 추가
+
+                    // 리코일 정보 삭제 아직 안함
                     navigate("/");
                   }}
                   className={`px-4 py-2 w-[85px] h-[40px]`}

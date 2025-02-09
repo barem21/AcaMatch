@@ -91,6 +91,8 @@ function MyPageLike() {
 
       if (res.data.resultData.length > 0) {
         setLikeList(res.data.resultData);
+        console.log(res.data.resultData);
+
         setTotalLikesCount(res.data.totalCount); // Assuming API returns total count
 
         const initialLikeStates = res.data.resultData.reduce((acc, item) => {
@@ -165,7 +167,7 @@ function MyPageLike() {
               <div className="flex items-center justify-center w-20">
                 <LikeButton
                   academyId={item.acaId}
-                  initialIsLiked={likeStates[item.acaId] || false}
+                  initialIsLiked={likeStates[item.acaId] || true}
                   onLikeChange={newIsLiked =>
                     handleLikeChange(item.acaId, newIsLiked)
                   }

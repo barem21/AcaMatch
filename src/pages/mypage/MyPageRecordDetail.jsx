@@ -10,8 +10,9 @@ import { Cookies } from "react-cookie";
 import userInfo from "../../atoms/userInfo";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
-import AI from "../../components/AI";
+import AI, { AIText } from "../../components/AI";
 import jwtAxios from "../../apis/jwt";
+import { useLocation } from "react-router-dom";
 
 function MyPageRecordDetail() {
   const cookies = new Cookies();
@@ -33,8 +34,12 @@ function MyPageRecordDetail() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { search } = useLocation();
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
+
+  const pageSize = 10;
 
   const navigate = useNavigate();
   const acaId = searchParams.get("acaId");
@@ -42,23 +47,37 @@ function MyPageRecordDetail() {
   const subjectId = searchParams.get("subjectId");
 
   const titleName = "마이페이지";
-  const menuItems = [
-    { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-    { label: "학원정보 관리", isActive: true, link: "/mypage/academy" },
-    /*
-    {
-      label: "학원학생 관리",
-      isActive: false,
-      link: "/mypage/academy/student",
-    },
-    */
-    {
-      label: "학원리뷰 목록",
-      isActive: false,
-      link: "/mypage/academy/review",
-    },
-    { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-  ];
+  let menuItems = [];
+  switch (currentUserInfo.roleId) {
+    case 3: //학원 관계자
+      menuItems = [
+        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
+        { label: "학원정보 관리", isActive: true, link: "/mypage" },
+        { label: "리뷰 목록", isActive: false, link: "/mypage/academy/review" },
+        { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
+      ];
+      break;
+    case 2: //학부모
+      menuItems = [
+        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
+        { label: "자녀 관리", isActive: false, link: "/mypage/child" },
+        { label: "자녀 학원정보", isActive: false, link: "/mypage" },
+        { label: "자녀 성적확인", isActive: true, link: "/mypage/record" },
+        { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
+        { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
+      ];
+      break;
+    default: //일반학생
+      menuItems = [
+        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
+        { label: "나의 학원정보", isActive: false, link: "/mypage" },
+        { label: "보호자 정보", isActive: false, link: "/mypage/parent" },
+        { label: "나의 성적확인", isActive: true, link: "/mypage/record" },
+        { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
+        { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
+      ];
+      break;
+  }
 
   const RecordList = styled.div`
     .editModal button {
@@ -128,25 +147,12 @@ function MyPageRecordDetail() {
     setIsModalVisible7(false);
   };
 
-  //점수 수정하기 모달창 오픈
-  const handleRecordEdit = (gradeId, score) => {
-    setTestGradeId(gradeId);
-    setTestRecord(score);
-
-    form.setFieldsValue({
-      record: score,
-    });
-    setIsModalVisible(true);
-  };
-
-  //점수 등록하기 모달창 오픈
-  const handleRecordAdd = joinId => {
-    setJoinClassId(joinId);
-    setIsModalVisible6(true);
-  };
-
   //AI 성적분석 모달창 오픈
   const handleRecordAI = userId => {
+    if (testStudentList === null || testStudentList?.length === 0) {
+      message.error("테스트 내역이 없습니다.");
+      return;
+    }
     setIsModalVisible5(true);
   };
 
@@ -164,150 +170,57 @@ function MyPageRecordDetail() {
   const testGetInfo = async () => {
     console.log("여기", currentUserInfo.userId);
 
+    const params = new URLSearchParams(search);
+    const acaId = params.get("acaId");
+
+    console.log(
+      `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
+    );
     try {
       const res = await jwtAxios.get(
-        `/api/grade?joinClassId=${currentUserInfo.userId}&page=${currentPage}&size=1000`,
+        `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
       );
       console.log(res);
-
-      setAcademyInfo(res.data.resultData.acaName);
-      //console.log(res.data.resultData.acaName);
+      setTestStudentList(res.data.resultData);
+      setAcademyInfo(() => params.get("acaName"));
+      // console.log(res.data.resultData.acaName);
     } catch (error) {
       console.log(error);
     }
   };
-
-  //학생목록 가져오기
-  // const academyStudentList = async () => {
-  //   try {
-  //     const res = await axios.get(
-  //       `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
-  //     );
-  //     setTestStudentList(res.data.resultData);
-  //     console.log(res.data.resultData);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
 
   const initialValues = {
     gradeId: testGradeId,
     record: testRecord ? testRecord : 0,
   };
 
-  //첨부파일 처리
-  const handleChange = info => {
-    let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
-
-    // 파일 상태 업데이트
-    setFileList(newFileList);
-
-    form.setFieldValue("gradeFile", info.file.originFileObj);
-
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info.file.status === "done" && info.file.originFileObj) {
-      //console.log("파일 선택됨:", info.file.originFileObj);
-      //form.setFieldValue("gradeFile", info.file.originFileObj);
-    }
-  };
-
-  //점수 직접 등록하기
-  const onFinishedTh = async values => {
-    const datas = {
-      joinClassId: joinClassId,
-      subjectId: subjectId,
-      score: parseInt(values.record),
-      pass: values.pass,
-      examDate: "2025-02-07",
-      processingStatus: 1,
-    };
-    const res = await jwtAxios.post("/api/grade", datas);
-    if (res.data.resultData === 1) {
-      form2.resetFields(); //초기화
-      setIsModalVisible6(false);
-      setIsModalVisible7(true);
-      academyStudentList();
-    }
-  };
-
-  //점수 직접 수정하기
-  const onFinished = async values => {
-    const datas = {
-      gradeId: testGradeId,
-      score: parseInt(values.record),
-      pass: values.pass,
-      processingStatus: 1,
-    };
-
-    const res = await jwtAxios.put("/api/grade", datas);
-    if (res.data.resultData === 1) {
-      form.resetFields(); //초기화
-      setIsModalVisible(false);
-      setIsModalVisible4(true);
-      academyStudentList();
-    }
-  };
-
-  //엑셀 일괄 수정하기
-  const onFinishedSe = async values => {
-    //console.log(values.gradeFile);
-    try {
-      const formData = new FormData();
-
-      // gradeFile 있는 경우에만 추가
-      if (values.gradeFile) {
-        formData.append("gradeFile", values.gradeFile);
-      } else {
-        alert("파일을 선택해 주세요.");
-        return;
-      }
-
-      const header = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      };
-
-      const res = await axios.post(`/api/grade/import`, formData, header);
-      if (res.data.resultData === 1) {
-        form.resetFields(); //초기화
-        setFileList([]);
-        message.success("테스트 결과 수정이 완료되었습니다.");
-        setIsModalVisible3(false);
-        academyStudentList();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
     if (currentUserInfo.userId !== "") {
-      // testGetInfo();
-      // setAcademyInfo([
-      //   {
-      //     subjectName: "초등 영어 1차시험",
-      //     examDate: "2025-01-01",
-      //     score: 91,
-      //     pass: null,
-      //   },
-      // ]);
+      testGetInfo();
     }
   }, [currentUserInfo]);
 
   // useEffect(() => {
   //   academyStudentList();
   // }, [currentUserInfo]);
-
   useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/login");
       message.error("로그인이 필요한 서비스입니다.");
     }
   }, []);
+
+  const handlePageChange = page => {
+    setCurrentPage(page);
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const paginatedData = testStudentList.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -317,45 +230,49 @@ function MyPageRecordDetail() {
         <h1 className="title-font flex justify-between align-middle">
           {academyInfo}의 시험 결과
           <div className="flex items-center gap-1">
-            {/* <button
-              className="flex items-center gap-1 mr-5 text-sm font-normal"
-              onClick={() => handleStudentDownload()}
-            >
-              수강생 엑셀 다운로드
-              <FaPlusCircle />
-            </button> */}
             <button
+              className="flex items-center gap-1 mr-5 text-sm font-normal"
+              onClick={() => handleRecordAI()}
+            >
+              AI 시험 분석
+              <FaPlusCircle />
+            </button>
+            {/* <button
               className="flex items-center gap-1 mr-5 text-sm font-normal"
               onClick={() => handleScoreUpload()}
             >
-              테스트 결과 일괄등록
+              AI 성적 분석
               <FaPlusCircle />
-            </button>
+            </button> */}
           </div>
         </h1>
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 border-b">
             <div className="flex items-center justify-center w-full">
-              수강생 명
+              테스트 명
             </div>
             <div className="flex items-center justify-center w-60">
               테스트 일
             </div>
             <div className="flex items-center justify-center w-60">평가</div>
-            <div className="flex items-center justify-center w-40">
+            {/* <div className="flex items-center justify-center w-40">
               수정하기
-            </div>
-            <div className="flex items-center justify-center w-60">
+            </div> */}
+            {/* <div className="flex items-center justify-center w-60">
               AI성적분석
-            </div>
+            </div> */}
           </div>
 
           {testStudentList === null && (
-            <div className="p-4 text-center border-b">수강생이 없습니다.</div>
+            <div className="p-4 text-center border-b">
+              테스트 내역이 없습니다.
+            </div>
           )}
           {testStudentList?.length === 0 && (
-            <div className="p-4 text-center border-b">수강생이 없습니다.</div>
+            <div className="p-4 text-center border-b">
+              테스트 내역이 없습니다.
+            </div>
           )}
 
           {testStudentList?.map((item, index) => (
@@ -366,7 +283,7 @@ function MyPageRecordDetail() {
               <div className="flex justify-start items-center w-full">
                 <div className="flex items-center gap-3 cursor-pointer">
                   <img src="/aca_image_1.png" alt="" />
-                  {item.userName}
+                  {item.subjectName}
                 </div>
               </div>
               <div className="flex items-center justify-center w-60">
@@ -381,7 +298,7 @@ function MyPageRecordDetail() {
                     ? item.score + "점"
                     : 0 + "점"}
               </div>
-              <div className="flex items-center justify-center w-40">
+              {/* <div className="flex items-center justify-center w-40">
                 {item.score === null ? (
                   <button
                     className="small_line_button"
@@ -402,16 +319,16 @@ function MyPageRecordDetail() {
                     수정하기
                   </button>
                 )}
-              </div>
+              </div> */}
 
-              <div className="flex items-center justify-center w-60">
+              {/* <div className="flex items-center justify-center w-60">
                 <button
                   className="small_line_button"
                   onClick={() => handleRecordAI()}
                 >
                   AI 분석하기
                 </button>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
@@ -419,143 +336,17 @@ function MyPageRecordDetail() {
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
             current={currentPage}
-            total={100}
-            pageSize={10}
-            // onChange={handlePageChange}
+            total={testStudentList?.length}
+            pageSize={pageSize}
+            onChange={handlePageChange}
             showSizeChanger={false}
-          />
-        </div>
-
-        <div className="editModal">
-          <CustomModal
-            visible={isModalVisible}
-            title={"점수 수정하기"}
-            content={
-              <AddRecoad>
-                <h4 className="mb-3">
-                  수정할 점수, 또는 합격여부를 입력해 주세요.
-                </h4>
-                <Form
-                  form={form}
-                  //initialValues={initialValues}
-
-                  onFinish={values => onFinished(values)}
-                >
-                  <Form.Item
-                    name="record"
-                    className="w-full"
-                    rules={[
-                      { required: true, message: "시험 점수를 입력해 주세요." },
-                      {
-                        pattern: /^\d+$/,
-                        message: "숫자만 입력 가능합니다.",
-                      },
-                    ]}
-                  >
-                    <input
-                      maxLength={5}
-                      placeholder="시험 점수를 입력해 주세요."
-                      className="w-full h-14 pl-3 border rounded-xl text-sm"
-                    />
-                  </Form.Item>
-
-                  <div className="flex w-full gap-3 mt-4 justify-between">
-                    <Form.Item className="mb-0">
-                      <Button
-                        className="w-full h-14 text-sm"
-                        onClick={() => handleButton1Click()}
-                      >
-                        창닫기
-                      </Button>
-                    </Form.Item>
-
-                    <Form.Item className="w-full mb-0">
-                      <Button
-                        htmlType="submit"
-                        className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      >
-                        수정하기
-                      </Button>
-                    </Form.Item>
-                  </div>
-                </Form>
-              </AddRecoad>
-            }
-            onButton1Click={handleButton1Click}
-            onButton2Click={handleButton2Click}
-            button1Text={"취소하기"}
-            button2Text={"수정하기"}
-            modalWidth={400}
-          />
-        </div>
-
-        <div className="editModal">
-          <CustomModal
-            visible={isModalVisible6}
-            title={"점수 등록하기"}
-            content={
-              <AddRecoad>
-                <h4 className="mb-3">
-                  등록할 점수, 또는 합격여부를 입력해 주세요.
-                </h4>
-                <Form
-                  form={form2}
-                  //initialValues={initialValues}
-
-                  onFinish={values => onFinishedTh(values)}
-                >
-                  <Form.Item
-                    name="record"
-                    className="w-full"
-                    rules={[
-                      { required: true, message: "시험 점수를 입력해 주세요." },
-                      {
-                        pattern: /^\d+$/,
-                        message: "숫자만 입력 가능합니다.",
-                      },
-                    ]}
-                  >
-                    <input
-                      maxLength={5}
-                      placeholder="시험 점수를 입력해 주세요."
-                      className="w-full h-14 pl-3 border rounded-xl text-sm"
-                    />
-                  </Form.Item>
-
-                  <div className="flex w-full gap-3 mt-4 justify-between">
-                    <Form.Item className="mb-0">
-                      <Button
-                        className="w-full h-14 text-sm"
-                        onClick={() => handle6Button1Click()}
-                      >
-                        창닫기
-                      </Button>
-                    </Form.Item>
-
-                    <Form.Item className="w-full mb-0">
-                      <Button
-                        htmlType="submit"
-                        className="w-full h-14 bg-[#E8EEF3] text-sm"
-                      >
-                        등록하기
-                      </Button>
-                    </Form.Item>
-                  </div>
-                </Form>
-              </AddRecoad>
-            }
-            onButton1Click={handle6Button1Click}
-            onButton2Click={handle6Button1Click}
-            button1Text={"취소하기"}
-            button2Text={"수정하기"}
-            modalWidth={400}
           />
         </div>
 
         <CustomModal
           visible={isModalVisible5}
           title={"수강생 AI성적분석"}
-          content={<AI />}
+          content={<AIText textInput={testStudentList} />}
           onButton1Click={handle5Button1Click}
           onButton2Click={handle5Button2Click}
           button1Text={"창닫기"}

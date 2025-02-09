@@ -6,6 +6,7 @@ import jwtAxios from "../apis/jwt";
 import userInfo from "../atoms/userInfo";
 import CustomModal from "../components/modal/Modal";
 import SideBar from "../components/SideBar";
+import { Cookies } from "react-cookie";
 
 function Inquiry() {
   const navigate = useNavigate();
@@ -42,7 +43,9 @@ function Inquiry() {
   const myMtomList = async () => {
     try {
       const res = await jwtAxios.get(`/api/chat?aca-id=${acaId}`);
-      console.log(res.data.resultData.users);
+      // console.log(acaId);
+
+      // console.log(res.data.resultData.users);
       setAcademyData(res.data.resultData.users);
     } catch (error) {
       console.log(error);

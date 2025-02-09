@@ -76,7 +76,7 @@ function HotAcademy() {
           academyLikeCount: item.academyLikeCount,
         }));
 
-        console.log(response);
+        // console.log(response);
 
         setAcademyData(updatedCards);
         // setHasMore(updatedCards.length === pageSize);
@@ -171,7 +171,7 @@ const SkeletonCard = () => (
 // 학원 카드 컴포넌트
 const AcademyCard = ({ academy }: { academy: any }) => {
   const navigate = useNavigate();
-  console.log("여기", academy);
+  // console.log("여기", academy);
 
   return (
     <div
@@ -192,7 +192,7 @@ const AcademyCard = ({ academy }: { academy: any }) => {
         <p className="text-sm text-[#507A95] leading-[21px] w-full ">
           <p className="line-clamp-1">{academy.tags}</p>
           <p className="text-sm line-clamp-1">
-            {console.log(academy.starAvg)}
+            {/* {console.log(academy.starAvg)} */}
             {academy.starAvg} ({academy.reviewCount} reviews)
           </p>
         </p>
