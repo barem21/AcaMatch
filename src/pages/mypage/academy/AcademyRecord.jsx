@@ -21,6 +21,7 @@ function AcademyRecord() {
   const [testStudentList, setTestStudentList] = useState([]);
   const [testGradeId, setTestGradeId] = useState();
   const [testRecord, setTestRecord] = useState();
+  const [testPass, setTestPass] = useState();
   const [joinClassId, setJoinClassId] = useState();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
@@ -166,12 +167,14 @@ function AcademyRecord() {
   };
 
   //점수 수정하기 모달창 오픈
-  const handleRecordEdit = (gradeId, score) => {
+  const handleRecordEdit = (gradeId, score, pass) => {
     setTestGradeId(gradeId);
     setTestRecord(score);
+    setTestPass(pass);
 
     form.setFieldsValue({
       record: score,
+      pass: pass,
     });
     setIsModalVisible(true);
   };
@@ -197,7 +200,7 @@ function AcademyRecord() {
     //분석목록 가져오기
     try {
       const res = await axios.get(`/api/ai/${gradeId}`);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
       setaiHistoryList(res.data.resultData);
     } catch (error) {
       console.log(error);
@@ -232,16 +235,18 @@ function AcademyRecord() {
         `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
       );
       setTestStudentList(res.data.resultData);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
 
+  /*
   const initialValues = {
     gradeId: testGradeId,
     record: testRecord ? testRecord : 0,
   };
+  */
 
   //첨부파일 처리
   const handleChange = info => {
@@ -264,12 +269,19 @@ function AcademyRecord() {
 
   //점수 직접 등록하기
   const onFinishedTh = async values => {
+    //오늘 날짜 확인
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = ("0" + (today.getMonth() + 1)).slice(-2);
+    const day = ("0" + today.getDate()).slice(-2);
+    const dateString = year + "-" + month + "-" + day;
+
     const datas = {
       joinClassId: joinClassId,
       subjectId: subjectId,
       score: parseInt(values.record),
       pass: values.pass,
-      examDate: "2025-02-07",
+      examDate: dateString,
       processingStatus: 1,
     };
     const res = await jwtAxios.post("/api/grade", datas);
@@ -285,8 +297,8 @@ function AcademyRecord() {
   const onFinished = async values => {
     const datas = {
       gradeId: testGradeId,
-      score: parseInt(values.record),
-      pass: values.pass,
+      score: values.record ? parseInt(values.record) : null,
+      pass: values.pass ? parseInt(values.pass) : null,
       processingStatus: 1,
     };
 
@@ -378,12 +390,10 @@ function AcademyRecord() {
             <div className="flex items-center justify-center w-full">
               수강생 명
             </div>
-            <div className="flex items-center justify-center w-40">
-              테스트 일
-            </div>
+            <div className="flex items-center justify-center w-40">채점일</div>
             <div className="flex items-center justify-center w-40">평가</div>
             <div className="flex items-center justify-center w-40">
-              수정하기
+              결과 등록/수정
             </div>
             <div className="flex items-center justify-center w-52">
               AI성적분석
@@ -432,7 +442,7 @@ function AcademyRecord() {
                     : "불합격"
                   : item.score !== null
                     ? item.score + "점"
-                    : 0 + "점"}
+                    : "미응시"}
               </div>
               <div className="flex items-center justify-center w-40">
                 {item.score === null ? (
@@ -446,10 +456,7 @@ function AcademyRecord() {
                   <button
                     className="small_line_button"
                     onClick={() =>
-                      handleRecordEdit(
-                        item.gradeId,
-                        item.pass !== null ? item.pass : item.score,
-                      )
+                      handleRecordEdit(item.gradeId, item.score, item.pass)
                     }
                   >
                     수정하기
@@ -501,23 +508,30 @@ function AcademyRecord() {
 
                   onFinish={values => onFinished(values)}
                 >
-                  <Form.Item
-                    name="record"
-                    className="w-full"
-                    rules={[
-                      { required: true, message: "시험 점수를 입력해 주세요." },
-                      {
-                        pattern: /^\d+$/,
-                        message: "숫자만 입력 가능합니다.",
-                      },
-                    ]}
-                  >
-                    <input
-                      maxLength={5}
-                      placeholder="시험 점수를 입력해 주세요."
-                      className="w-full h-14 pl-3 border rounded-xl text-sm"
-                    />
-                  </Form.Item>
+                  {testRecord !== null ? (
+                    <Form.Item
+                      name="record"
+                      className="w-full"
+                      rules={[
+                        {
+                          required: true,
+                          message: "시험 점수를 입력해 주세요.",
+                        },
+                        {
+                          pattern: /^\d+$/,
+                          message: "숫자만 입력 가능합니다.",
+                        },
+                      ]}
+                    >
+                      <input
+                        maxLength={5}
+                        placeholder="시험 점수를 입력해 주세요."
+                        className="w-full h-14 pl-3 border rounded-xl text-sm"
+                      />
+                    </Form.Item>
+                  ) : (
+                    <Form.Item name="pass"></Form.Item>
+                  )}
 
                   <div className="flex w-full gap-3 mt-4 justify-between">
                     <Form.Item className="mb-0">
