@@ -399,7 +399,9 @@ const AcademyDetail = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-center gap-[12px]">
-                  {roleId === "3" ? (
+                  {roleId === 3 ? (
+                    <div className="w-[119px] h-[40px] text-[14px]"></div>
+                  ) : (
                     <MainButton
                       className="w-[119px] h-[40px] text-[14px]"
                       onClick={() => {
@@ -415,10 +417,10 @@ const AcademyDetail = () => {
                     >
                       학원 문의하기
                     </MainButton>
-                  ) : (
-                    <div className="w-[119px] h-[40px] text-[14px]"></div>
                   )}
-                  {roleId === "3" ? (
+                  {roleId === 3 ? (
+                    <div className="w-[119px] h-[40px] text-[14px]"></div>
+                  ) : (
                     <MainButton
                       className="w-[119px] h-[40px] text-[14px]"
                       onClick={() => {
@@ -433,8 +435,6 @@ const AcademyDetail = () => {
                     >
                       학원 신청하기
                     </MainButton>
-                  ) : (
-                    <div className="w-[119px] h-[40px] text-[14px]"></div>
                   )}
                 </div>
               </div>
@@ -473,7 +473,7 @@ const AcademyDetail = () => {
         title={"수강등록"}
         content={
           <>
-            <div className="flex flex-col gap-2 max-h-[100px]">
+            <div className="flex flex-col gap-2 max-h-[2000px]">
               <CustomScrollbar>
                 {academyData.classes.map(classItem => (
                   <Radio

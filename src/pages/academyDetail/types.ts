@@ -87,4 +87,5 @@ export interface Review {
   comment: string;
   createdAt: string;
   reviewId: number;
+  nickName: string;
 }

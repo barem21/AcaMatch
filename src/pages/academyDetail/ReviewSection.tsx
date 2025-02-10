@@ -206,7 +206,7 @@ const ReviewSection = ({
                 <div className="w-full">
                   <div className="flex">
                     <div className={`${styles.reviews.text} w-[700px]`}>
-                      User {review.userId}
+                      {review.nickName}
                     </div>
                     <div>
                       {review.userId === Number(user.userId) && (

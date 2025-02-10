@@ -6,11 +6,13 @@ import userInfo from "../../atoms/userInfo";
 import MainButton from "../../components/button/MainButton";
 import { SecondaryButton } from "../../components/modal/Modal";
 import { removeCookie, setCookie, getCookie } from "../../utils/cookie";
+import { useState } from "react";
 
 function LoginPage() {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const setUserInfo = useSetRecoilState(userInfo);
+  const [msg, setMsg] = useState("");
 
   const onFinish = async (values: any) => {
     try {
@@ -44,6 +46,7 @@ function LoginPage() {
       console.error(error);
       removeCookie("accessToken");
       message.error("아이디와 비밀번호가 일치하지않습니다.");
+      setMsg("아이디와 비밀번호가 일치하지않습니다.");
     }
   };
 
@@ -127,8 +130,12 @@ function LoginPage() {
                 />
               </Form.Item>
 
+              <div className="flex h-[30px] items-center justify-center">
+                <span className="text-[#D9534F]">{msg}</span>
+              </div>
+
               {/* 아이디 기억하기 */}
-              <div className="flex items-center justify-between mt-[8px]">
+              <div className="flex items-center justify-between mt-[0px]">
                 <Form.Item name="remember" valuePropName="checked" noStyle>
                   <Checkbox>
                     <span className="text-[14px] text-brand-default">

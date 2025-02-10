@@ -109,9 +109,22 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   }, [currentUserInfo.userId]);
 
   useEffect(() => {
-    if (getCookie("message")) {
-      setNotifications(["1"]);
-    }
+    const fetchUnreadMessages = async () => {
+      try {
+        const res = await jwtAxios.get("/api/chat/unread-message");
+        if (res.data.resultData) {
+          setCookie("message", "true", { path: "/" });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+
+      if (getCookie("message")) {
+        setNotifications(["1"]);
+      }
+    };
+
+    fetchUnreadMessages(); // 함수 호출
   }, []);
 
   useEffect(() => {

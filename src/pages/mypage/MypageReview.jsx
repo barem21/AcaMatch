@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
 import SideBar from "../../components/SideBar";
 import { getCookie } from "../../utils/cookie";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
-import { jwtApiRequest } from "../../apis/jwt";
+import jwtAxios, { jwtApiRequest } from "../../apis/jwt";
 import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
+import ReviewModal from "../../components/modal/ReviewModal";
+import CustomModal from "../../components/modal/Modal";
 
 function MypageReview() {
   const cookies = new Cookies();
@@ -15,6 +17,12 @@ function MypageReview() {
   const [reviewList, setReviewList] = useState([]);
   const currentUserInfo = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [editReview, setEditReview] = useState(null); // 수정할 리뷰 데이터 상태 추가
+
+  const [academyId, setAcademyId] = useState(null);
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -85,6 +93,23 @@ function MypageReview() {
     }
   }, []);
 
+  const handleDeleteReview = async () => {
+    // if (deleteReviewId === null) return;
+    console.log(academyId, currentUserInfo.userId);
+
+    try {
+      const res = await jwtAxios.delete("/api/review/user", {
+        data: { acaId: academyId, userId: currentUserInfo.userId },
+      });
+      console.log(res);
+
+      setReviewList(reviewList.filter(review => review.acaId !== academyId));
+    } catch (error) {
+      console.error("리뷰 삭제 실패:", error);
+    }
+    setIsDeleteModalVisible(false);
+  };
+
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <SideBar menuItems={menuItems} titleName={titleName} />
@@ -149,10 +174,34 @@ function MypageReview() {
                 <div className="text-sm text-gray-500">{item.comment}</div>
               </div>
               <div className="flex items-center justify-center w-40">
-                <button className="small_line_button">수정하기</button>
+                <button
+                  className="small_line_button"
+                  onClick={() => {
+                    console.log(item);
+                    setAcademyId(item.acaId);
+                    const temp = {
+                      star: item.star,
+                      comment: item.comment,
+                    };
+
+                    setIsModalVisible(true);
+                    setEditReview(temp); // 수정할 리뷰 데이터 설정
+                  }}
+                >
+                  수정하기
+                </button>
               </div>
               <div className="flex items-center justify-center w-40">
-                <button className="small_line_button">삭제하기</button>
+                <button
+                  className="small_line_button"
+                  onClick={() => {
+                    setAcademyId(item.acaId);
+                    // setDeleteReviewId(review.reviewId);
+                    setIsDeleteModalVisible(true);
+                  }}
+                >
+                  삭제하기
+                </button>
               </div>
             </div>
           ))}
@@ -165,6 +214,27 @@ function MypageReview() {
             showSizeChanger={false}
           />
         </div>
+        {isModalVisible && (
+          <ReviewModal
+            // joinClassId={commonClasses}
+            academyId={Number(academyId)}
+            existingReview={editReview}
+            // rating={3} // 선택적으로 전달
+            onClose={() => setIsModalVisible(false)}
+          />
+        )}
+        {isDeleteModalVisible && (
+          <CustomModal
+            visible={isDeleteModalVisible}
+            title={"리뷰 삭제"}
+            content={<p className="mt-[15px]">리뷰를 삭제하시겠습니까?</p>}
+            onButton1Click={() => setIsDeleteModalVisible(false)}
+            onButton2Click={handleDeleteReview}
+            button1Text={"취소"}
+            button2Text={"확인"}
+            modalWidth={400}
+          />
+        )}
       </div>
     </div>
   );

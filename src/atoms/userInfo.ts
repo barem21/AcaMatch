@@ -2,8 +2,8 @@ import { atom } from "recoil";
 
 interface UserInfo {
   name: string;
-  roleId: string;
-  userId: string;
+  roleId: string | null | number;
+  userId: string | null | number;
 }
 
 export const userInfo = atom<UserInfo>({
@@ -11,7 +11,7 @@ export const userInfo = atom<UserInfo>({
   default: {
     name: "",
     roleId: "",
-    userId: "",
+    userId: null,
   },
 });
 
