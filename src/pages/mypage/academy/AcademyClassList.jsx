@@ -7,10 +7,14 @@ import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import SideBar from "../../../components/SideBar";
 import { Cookies } from "react-cookie";
+import CustomModal from "../../../components/modal/Modal";
 
 function AcademyClassList() {
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
+  const [classId, setClassId] = useState("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [classList, setClassList] = useState([]);
   const [academyInfo, setAcademyInfo] = useState("");
   const navigate = useNavigate();
@@ -61,6 +65,42 @@ function AcademyClassList() {
     }
   };
 
+  //강좌 삭제하기
+  const deleteClass = async classId => {
+    setClassId(classId);
+    setIsModalVisible(true);
+  };
+
+  //강좌삭제 확인팝업 관련
+  const handleButton1Click = () => {
+    setClassId();
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = async () => {
+    try {
+      const res = await axios.delete(
+        `/api/acaClass?acaId=${acaId}&classId=${classId}`,
+      );
+      //console.log(res.data.resultData);
+      if (res.data.resultData === 1) {
+        setIsModalVisible(false);
+        setIsModalVisible2(true);
+        setClassId();
+        academyClassList();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //강좌 삭제완료 팝업
+  const handleButton1Click1 = () => {
+    setIsModalVisible2(false);
+  };
+  const handleButton2Click2 = () => {
+    setIsModalVisible2(false);
+  };
+
   //학원 상세보기 이동
   const detailAcademy = acaId => {
     navigate(`/academy/detail?id=${acaId}`);
@@ -99,16 +139,17 @@ function AcademyClassList() {
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 border-b">
-            <div className="flex items-center justify-center w-full">
-              강좌명
-            </div>
-            <div className="flex items-center justify-center w-48">시작일</div>
-            <div className="flex items-center justify-center w-48">종료일</div>
-            <div className="flex items-center justify-center w-60">
+            <div className="flex items-center justify-center w-4/5">강좌명</div>
+            <div className="flex items-center justify-center w-44">시작일</div>
+            <div className="flex items-center justify-center w-44">종료일</div>
+            <div className="flex items-center justify-center w-48">
               테스트 관리
             </div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center w-36">
               수정하기
+            </div>
+            <div className="flex items-center justify-center w-36">
+              삭제하기
             </div>
           </div>
 
@@ -123,7 +164,7 @@ function AcademyClassList() {
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
             >
-              <div className="flex justify-start items-center w-full">
+              <div className="flex justify-start items-center w-4/5">
                 <div
                   className="flex items-center gap-4 cursor-pointer"
                   onClick={() =>
@@ -142,13 +183,13 @@ function AcademyClassList() {
                   {item.className}
                 </div>
               </div>
-              <div className="flex items-center justify-center w-48">
+              <div className="flex items-center justify-center w-44">
                 {item.startDate}
               </div>
-              <div className="flex items-center justify-center w-48">
+              <div className="flex items-center justify-center w-44">
                 {item.endDate}
               </div>
-              <div className="flex items-center justify-center w-60">
+              <div className="flex items-center justify-center w-48">
                 <button
                   className="small_line_button"
                   onClick={() =>
@@ -160,7 +201,7 @@ function AcademyClassList() {
                   테스트 목록
                 </button>
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center w-36">
                 <button
                   className="small_line_button"
                   onClick={() =>
@@ -170,6 +211,15 @@ function AcademyClassList() {
                   }
                 >
                   수정하기
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center w-36">
+                <button
+                  className="small_line_button"
+                  onClick={() => deleteClass(item.classId)}
+                >
+                  삭제하기
                 </button>
               </div>
             </div>
@@ -183,6 +233,28 @@ function AcademyClassList() {
             showSizeChanger={false}
           />
         </div>
+
+        <CustomModal
+          visible={isModalVisible}
+          title={"강좌 삭제하기"}
+          content={"선택하신 강좌를 삭제하시겠습니까?"}
+          onButton1Click={handleButton1Click}
+          onButton2Click={handleButton2Click}
+          button1Text={"취소하기"}
+          button2Text={"삭제하기"}
+          modalWidth={400}
+        />
+
+        <CustomModal
+          visible={isModalVisible2}
+          title={"강좌 삭제완료"}
+          content={"선택하신 강좌가 삭제되었습니다."}
+          onButton1Click={handleButton1Click1}
+          onButton2Click={handleButton2Click2}
+          button1Text={"닫기"}
+          button2Text={"확인"}
+          modalWidth={400}
+        />
       </div>
     </div>
   );

@@ -66,10 +66,26 @@ function MyPage() {
   };
 
   const myAcademyList = async page => {
+    //자녀목록 호출
+    let checkUserId = currentUserInfo.userId; //기본은 본인 아이디
+    if (currentUserInfo.roleId === 2) {
+      //학부모는 자녀 정보 필요
+      const myChildList = async () => {
+        try {
+          const res = await jwtAxios.get("/api/user/relationship/list/1");
+          //console.log(res.data.resultData[0].userId);
+          checkUserId = res.data.resultData[0].userId; //자녀 아이디로 교체
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      myChildList();
+    }
+
     try {
-      //나의 수강목록 호출
+      //나(자녀)의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${currentUserInfo.userId}&page=${page}&size=100`,
+        `/api/joinClass?userId=${checkUserId}&page=${page}&size=100`,
       );
 
       if (res.data.resultData?.length > 0) {
@@ -133,7 +149,9 @@ function MyPage() {
       <SideBar menuItems={menuItems} titleName={titleName} />
 
       <div className="w-full">
-        <h1 className="title-font">나의 학원정보</h1>
+        <h1 className="title-font">
+          {currentUserInfo.roleId === 2 ? "자녀" : "나의"} 학원정보
+        </h1>
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 border-b">

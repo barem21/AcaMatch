@@ -1,6 +1,6 @@
 import { UploadOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, message, Pagination, Upload } from "antd";
+import { Button, Form, message, Pagination, Upload, Radio } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaPlusCircle } from "react-icons/fa";
@@ -23,6 +23,7 @@ function AcademyRecord() {
   const [testRecord, setTestRecord] = useState();
   const [testPass, setTestPass] = useState();
   const [joinClassId, setJoinClassId] = useState();
+  const [scoreType, setScoreType] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
@@ -31,6 +32,8 @@ function AcademyRecord() {
   const [isModalVisible6, setIsModalVisible6] = useState(false);
   const [isModalVisible7, setIsModalVisible7] = useState(false);
   const [isModalVisible8, setIsModalVisible8] = useState(false);
+  const [isModalVisible9, setIsModalVisible9] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [academyInfo, setAcademyInfo] = useState();
   const [aiHistoryList, setaiHistoryList] = useState([]);
 
@@ -166,22 +169,32 @@ function AcademyRecord() {
     setIsModalVisible8(false);
   };
 
+  //점수 일괄등록 에러(엑셀파일 아닐 때)
+  const handle9Button1Click = () => {
+    setIsModalVisible9(false);
+  };
+  const handle9Button2Click = () => {
+    setIsModalVisible9(false);
+  };
+
   //점수 수정하기 모달창 오픈
-  const handleRecordEdit = (gradeId, score, pass) => {
+  const handleRecordEdit = (gradeId, score, pass, scoreType) => {
     setTestGradeId(gradeId);
     setTestRecord(score);
     setTestPass(pass);
+    setScoreType(scoreType);
 
     form.setFieldsValue({
-      record: score,
-      pass: pass,
+      record: pass ? null : score,
+      pass: score ? null : pass,
     });
     setIsModalVisible(true);
   };
 
   //점수 등록하기 모달창 오픈
-  const handleRecordAdd = joinId => {
+  const handleRecordAdd = (joinId, scoreType) => {
     setJoinClassId(joinId);
+    setScoreType(scoreType);
     setIsModalVisible6(true);
   };
 
@@ -235,7 +248,7 @@ function AcademyRecord() {
         `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
       );
       setTestStudentList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -269,6 +282,8 @@ function AcademyRecord() {
 
   //점수 직접 등록하기
   const onFinishedTh = async values => {
+    console.log(values);
+
     //오늘 날짜 확인
     const today = new Date();
     const year = today.getFullYear();
@@ -295,10 +310,20 @@ function AcademyRecord() {
 
   //점수 직접 수정하기
   const onFinished = async values => {
+    console.log(values);
+
+    //오늘 날짜 확인
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = ("0" + (today.getMonth() + 1)).slice(-2);
+    const day = ("0" + today.getDate()).slice(-2);
+    const dateString = year + "-" + month + "-" + day;
+
     const datas = {
       gradeId: testGradeId,
       score: values.record ? parseInt(values.record) : null,
-      pass: values.pass ? parseInt(values.pass) : null,
+      pass: values.pass ? parseInt(values.pass) : 0,
+      examDate: dateString,
       processingStatus: 1,
     };
 
@@ -340,7 +365,27 @@ function AcademyRecord() {
         academyStudentList();
       }
     } catch (error) {
-      console.log(error);
+      console.log(error.response.data.resultMessage);
+
+      form.resetFields(); //초기화
+      setFileList([]);
+      setIsModalVisible9(true);
+
+      //academyStudentList();
+
+      const errorMessage = error.response.data.resultMessage; //에러 메시지
+      if (errorMessage.includes("엑셀 파일이 아닙니다")) {
+        setErrorMessage(
+          "엑셀 파일(.xlsx)이 아닙니다. 올바른 파일을 선택해주세요.",
+        );
+      }
+      if (errorMessage.includes("DB 수정 중 오류 발생")) {
+        setErrorMessage(
+          "양식에 맞지 않은 데이터가 포함되어 있습니다. 양식에 맞춰서 엑셀 파일을 작성해 주세요.",
+        );
+      }
+
+      //message.error(error.response.data.resultMessage);
     }
   };
 
@@ -439,16 +484,47 @@ function AcademyRecord() {
                 {item.pass !== null
                   ? item.pass === 1
                     ? "합격"
-                    : "불합격"
+                    : item.examDate === null
+                      ? "미응시"
+                      : "불합격"
                   : item.score !== null
                     ? item.score + "점"
                     : "미응시"}
               </div>
               <div className="flex items-center justify-center w-40">
-                {item.score === null ? (
+                {item.scoreType === 0 ? (
+                  item.score === null ? (
+                    //점수타입
+                    <button
+                      className="small_line_button"
+                      onClick={() =>
+                        handleRecordAdd(item.joinClassId, item.scoreType)
+                      }
+                    >
+                      등록하기
+                    </button>
+                  ) : (
+                    <button
+                      className="small_line_button"
+                      onClick={() =>
+                        handleRecordEdit(
+                          item.gradeId,
+                          item.score,
+                          item.pass,
+                          item.scoreType,
+                        )
+                      }
+                    >
+                      수정하기
+                    </button>
+                  )
+                ) : item.pass === null ? (
+                  //합격 불합격 타입
                   <button
                     className="small_line_button"
-                    onClick={() => handleRecordAdd(item.joinClassId)}
+                    onClick={() =>
+                      handleRecordAdd(item.joinClassId, item.scoreType)
+                    }
                   >
                     등록하기
                   </button>
@@ -456,7 +532,12 @@ function AcademyRecord() {
                   <button
                     className="small_line_button"
                     onClick={() =>
-                      handleRecordEdit(item.gradeId, item.score, item.pass)
+                      handleRecordEdit(
+                        item.gradeId,
+                        item.score,
+                        item.pass,
+                        item.scoreType,
+                      )
                     }
                   >
                     수정하기
@@ -508,7 +589,7 @@ function AcademyRecord() {
 
                   onFinish={values => onFinished(values)}
                 >
-                  {testRecord !== null ? (
+                  {scoreType === 0 ? (
                     <Form.Item
                       name="record"
                       className="w-full"
@@ -530,7 +611,15 @@ function AcademyRecord() {
                       />
                     </Form.Item>
                   ) : (
-                    <Form.Item name="pass"></Form.Item>
+                    <Form.Item name="pass">
+                      <Radio.Group
+                        value={1}
+                        options={[
+                          { value: 1, label: "합격" },
+                          { value: 0, label: "불합격" },
+                        ]}
+                      />
+                    </Form.Item>
                   )}
 
                   <div className="flex w-full gap-3 mt-4 justify-between">
@@ -578,23 +667,38 @@ function AcademyRecord() {
 
                   onFinish={values => onFinishedTh(values)}
                 >
-                  <Form.Item
-                    name="record"
-                    className="w-full"
-                    rules={[
-                      { required: true, message: "시험 점수를 입력해 주세요." },
-                      {
-                        pattern: /^\d+$/,
-                        message: "숫자만 입력 가능합니다.",
-                      },
-                    ]}
-                  >
-                    <input
-                      maxLength={5}
-                      placeholder="시험 점수를 입력해 주세요."
-                      className="w-full h-14 pl-3 border rounded-xl text-sm"
-                    />
-                  </Form.Item>
+                  {scoreType === 0 ? (
+                    <Form.Item
+                      name="record"
+                      className="w-full"
+                      rules={[
+                        {
+                          required: true,
+                          message: "시험 점수를 입력해 주세요.",
+                        },
+                        {
+                          pattern: /^\d+$/,
+                          message: "숫자만 입력 가능합니다.",
+                        },
+                      ]}
+                    >
+                      <input
+                        maxLength={5}
+                        placeholder="시험 점수를 입력해 주세요."
+                        className="w-full h-14 pl-3 border rounded-xl text-sm"
+                      />
+                    </Form.Item>
+                  ) : (
+                    <Form.Item name="pass">
+                      <Radio.Group
+                        value={1}
+                        options={[
+                          { value: 1, label: "합격" },
+                          { value: 0, label: "불합격" },
+                        ]}
+                      />
+                    </Form.Item>
+                  )}
 
                   <div className="flex w-full gap-3 mt-4 justify-between">
                     <Form.Item className="mb-0">
@@ -800,6 +904,17 @@ function AcademyRecord() {
           button1Text={"창닫기"}
           button2Text={"확인완료"}
           modalWidth={500}
+        />
+
+        <CustomModal
+          visible={isModalVisible9}
+          title={"테스트 결과 일괄등록"}
+          content={errorMessage}
+          onButton1Click={handle9Button1Click}
+          onButton2Click={handle9Button2Click}
+          button1Text={"취소하기"}
+          button2Text={"확인완료"}
+          modalWidth={400}
         />
       </RecordList>
     </div>
