@@ -195,6 +195,10 @@ function AcademyRecord() {
   const handleRecordAdd = (joinId, scoreType) => {
     setJoinClassId(joinId);
     setScoreType(scoreType);
+    form2.setFieldsValue({
+      record: scoreType === 0 && 0,
+      pass: scoreType === 1 && 1,
+    });
     setIsModalVisible6(true);
   };
 
@@ -248,7 +252,7 @@ function AcademyRecord() {
         `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
       );
       setTestStudentList(res.data.resultData);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -282,7 +286,7 @@ function AcademyRecord() {
 
   //점수 직접 등록하기
   const onFinishedTh = async values => {
-    console.log(values);
+    //console.log(values);
 
     //오늘 날짜 확인
     const today = new Date();
@@ -310,7 +314,7 @@ function AcademyRecord() {
 
   //점수 직접 수정하기
   const onFinished = async values => {
-    console.log(values);
+    //console.log(values);
 
     //오늘 날짜 확인
     const today = new Date();
@@ -365,7 +369,7 @@ function AcademyRecord() {
         academyStudentList();
       }
     } catch (error) {
-      console.log(error.response.data.resultMessage);
+      //console.log(error.response.data.resultMessage);
 
       form.resetFields(); //초기화
       setFileList([]);
@@ -492,34 +496,8 @@ function AcademyRecord() {
                     : "미응시"}
               </div>
               <div className="flex items-center justify-center w-40">
-                {item.scoreType === 0 ? (
-                  item.score === null ? (
-                    //점수타입
-                    <button
-                      className="small_line_button"
-                      onClick={() =>
-                        handleRecordAdd(item.joinClassId, item.scoreType)
-                      }
-                    >
-                      등록하기
-                    </button>
-                  ) : (
-                    <button
-                      className="small_line_button"
-                      onClick={() =>
-                        handleRecordEdit(
-                          item.gradeId,
-                          item.score,
-                          item.pass,
-                          item.scoreType,
-                        )
-                      }
-                    >
-                      수정하기
-                    </button>
-                  )
-                ) : item.pass === null ? (
-                  //합격 불합격 타입
+                {item.examDate === null ? (
+                  //점수타입
                   <button
                     className="small_line_button"
                     onClick={() =>
