@@ -83,7 +83,9 @@ function MypageReview() {
   };
 
   useEffect(() => {
-    fetchData(1);
+    if (currentUserInfo.roleId !== "") {
+      fetchData(1);
+    }
   }, [currentUserInfo]);
 
   useEffect(() => {
