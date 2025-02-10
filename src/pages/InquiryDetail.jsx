@@ -207,6 +207,10 @@ function InquiryDetail() {
                         required: true,
                         message: "보내실 메시지를 입력해 주세요.",
                       },
+                      {
+                        pattern: /^[a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ\s=,\-@]*$/, // 알파벳, 숫자, 한글, 공백만 허용
+                        message: "특수문자는 사용하실 수 없습니다.",
+                      },
                     ]}
                   >
                     <input
