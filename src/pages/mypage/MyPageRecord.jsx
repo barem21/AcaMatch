@@ -53,12 +53,30 @@ function MyPageRecord() {
   const myAcademyList = async () => {
     const params = new URLSearchParams(search);
     // setCurrentPage(params.get("page"));
+
+    //자녀목록 호출
+    let checkUserId = currentUserInfo.userId; //기본은 본인 아이디
+    if (currentUserInfo.roleId === 2) {
+      //학부모는 자녀 정보 필요
+      const myChildList = async () => {
+        try {
+          const res = await jwtAxios.get("/api/user/relationship/list/1");
+          //console.log(res.data.resultData[0].userId);
+          checkUserId = res.data.resultData[0].userId; //자녀 아이디로 교체
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      myChildList();
+    }
+
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${currentUserInfo.userId}&page=${currentPage}`,
+        `/api/joinClass?userId=${checkUserId}&page=${currentPage}`,
       );
-      console.log(res);
+      //console.log(checkUserId);
+      //console.log(res);
 
       const splitClasses = res.data.resultData.flatMap(academy => {
         return academy.classList.map(classItem => {
@@ -109,7 +127,9 @@ function MyPageRecord() {
       <SideBar menuItems={menuItems} titleName={titleName} />
 
       <div className="w-full">
-        <h1 className="title-font">나의 성적확인</h1>
+        <h1 className="title-font">
+          {currentUserInfo.roleId === 2 ? "자녀" : "나의"} 성적확인
+        </h1>
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 border-b">
