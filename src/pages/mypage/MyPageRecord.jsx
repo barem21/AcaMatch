@@ -58,22 +58,18 @@ function MyPageRecord() {
     let checkUserId = currentUserInfo.userId; //기본은 본인 아이디
     if (currentUserInfo.roleId === 2) {
       //학부모는 자녀 정보 필요
-      const myChildList = async () => {
-        try {
-          const res = await jwtAxios.get("/api/user/relationship/list/1");
-          //console.log(res.data.resultData[0].userId);
-          checkUserId = res.data.resultData[0].userId; //자녀 아이디로 교체
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      myChildList();
+      try {
+        const ress = await jwtAxios.get("/api/user/relationship/list/1");
+        checkUserId = ress.data.resultData[0].userId; //자녀 아이디로 교체
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${checkUserId}&page=${currentPage}`,
+        `/api/joinClass?userId=${checkUserId}&role=${currentUserInfo.roleId}&page=${currentPage}`,
       );
       //console.log(checkUserId);
       //console.log(res);

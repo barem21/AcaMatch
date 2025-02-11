@@ -70,26 +70,23 @@ function MyPage() {
     let checkUserId = currentUserInfo.userId; //기본은 본인 아이디
     if (currentUserInfo.roleId === 2) {
       //학부모는 자녀 정보 필요
-      const myChildList = async () => {
-        try {
-          const res = await jwtAxios.get("/api/user/relationship/list/1");
-          //console.log(res.data.resultData[0].userId);
-          checkUserId = res.data.resultData[0].userId; //자녀 아이디로 교체
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      myChildList();
+      try {
+        const ress = await jwtAxios.get("/api/user/relationship/list/1");
+        checkUserId = ress.data.resultData[0].userId; //자녀 아이디로 교체
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     try {
       //나(자녀)의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${checkUserId}&page=${page}&size=100`,
+        `/api/joinClass?userId=${checkUserId}&role=${currentUserInfo.roleId}&page=${page}&size=100`,
       );
 
+      console.log(res.data.resultData);
+
       if (res.data.resultData?.length > 0) {
-        console.log(res.data.resultData);
         setMypageAcademyList(res.data.resultData);
       }
     } catch (error) {
