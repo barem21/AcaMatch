@@ -40,8 +40,8 @@ import AcademyReview from "./pages/mypage/academy/AcademyReview";
 import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
 import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
 
-import DashBoard from "./pages/admin/DashBoard";
-import AcaManagement from "./pages/admin/AcaManagement";
+// import DashBoard from "./pages/admin/DashBoard";
+// import AcaManagement from "./pages/admin/AcaManagement";
 
 function App() {
   useEffect(() => {

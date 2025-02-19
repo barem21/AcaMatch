@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { FiMenu } from "react-icons/fi";
 import jwtAxios from "../../apis/jwt";
@@ -6,7 +5,6 @@ import { Cookies } from "react-cookie";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import userInfo from "../../atoms/userInfo";
 import { FaBell } from "react-icons/fa";
-import { FiMenu } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
@@ -48,16 +46,14 @@ const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
   }, [setUserInfo]);
 
   const navigate = useNavigate();
-  
+
   return (
     <>
       <header
-        className={`${className} relative w-full border-b bg-white transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-0"
-        }`}
+        className={`${className} relative w-full border-b bg-white transform transition-transform duration-300`}
       >
         <div
-          className={`flex justify-between min-w-0 transition-all duration-300 ${isOpen ? "w-[100%]" : "w-[100%]"}`}
+          className={`flex justify-between min-w-0 transition-all duration-300 w-[100%]`}
         >
           <div className="w-[60px] flex justify-center">
             {/* Menu Button */}

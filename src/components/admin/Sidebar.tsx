@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { FiX, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -158,7 +157,6 @@ const Sidebar: React.FC<{
                           onClick={e => {
                             e.stopPropagation();
                             navigate(subItem.link);
-
                           }}
                         >
                           {subItem.label}
