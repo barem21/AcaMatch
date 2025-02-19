@@ -33,6 +33,83 @@
   @apply text-[14px];
 }
 
+/* 관리자 전용 */
+.title-admin-font {
+  @apply font-bold text-xl pt-3 pb-3;
+}
+.title-admin-font p {
+  line-height: 140%;
+  color: #7381bb;
+  font-size: 12px;
+}
+.input-admin-basic {
+  height: 32px;
+  line-height: 32px;
+  padding-left: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  /*background: #dbeafe;
+  color: #3063ff;*/
+  font-size: 12px;
+}
+.input-admin-basic::placeholder {
+  color: #999;
+  font-size: 12px;
+}
+.input-admin-basic:focus {
+  outline: none;
+}
+
+.btn-admin-basic {
+  height: 32px;
+  border-radius: 4px;
+}
+.btn-admin-basic span {
+  font-size: 12px;
+}
+.btn-admin-ok {
+  height: 30px;
+  padding: 0px 10px;
+  background: #e9f0ff;
+  border: none;
+  border-radius: 4px;
+  color: #4274ff;
+  font-size: 12px;
+}
+.btn-admin-ok:hover {
+  background: #e9f0ff !important;
+}
+.btn-admin-ok span {
+  font-size: 12px;
+}
+.btn-admin-cancel {
+  height: 30px;
+  padding: 0px 10px;
+  background: #fcebef;
+  border-radius: 4px;
+  color: #eb2f5a;
+  font-size: 12px;
+}
+
+.select-admin-basic {
+  min-width: 100px;
+}
+.select-admin-basic .ant-select-selector {
+  border: none !important;
+  border-radius: 4px;
+  background: #dbeafe !important;
+}
+.select-admin-basic span {
+  color: #3063ff !important;
+  font-size: 12px;
+}
+.select-admin-basic svg {
+  width: auto;
+  height: 10px;
+  color: #444;
+}
+/* 관리자 전용 */
+
 .small_line_button {
   padding: 3px 10px;
   border: 1px solid #ddd;
