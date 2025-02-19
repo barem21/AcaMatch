@@ -37,6 +37,7 @@ import AcademyReview from "./pages/mypage/academy/AcademyReview";
 import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
 import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
 import DashBoard from "./pages/admin/DashBoard.tsx";
+import AcaManagement from "./pages/admin/AcaManagement.tsx";
 
 function App() {
   useEffect(() => {
@@ -178,7 +179,8 @@ function App() {
               <Route path="/hotAcademy" element={<HotAcademy />} />
               {/* <Route path="/support" element={<Support />} /> */}
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
-              <Route path="/dashboard" element={<DashBoard />} />
+              <Route path="/admin" element={<DashBoard />} />
+              <Route path="/acamanager" element={<AcaManagement />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>

@@ -41,20 +41,21 @@ const menuItems: (MenuItem | Divider)[] = [
   { icon: <FaShieldAlt />, label: "사이트 운영 및 보안", active: false },
 ];
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Sidebar = ({ isOpen, close }: { isOpen: boolean; close: () => void }) => {
+  // const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="flex">
+      {/* {isOpen && <div className="w-[256px]">aaaa</div>} */}
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-[#254C98] text-white w-64 transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full bg-[#254C98] text-white w-[256px] transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
         <div className="p-4 flex justify-between items-center border-b border-gray-700">
           <h1 className="text-xl font-bold">로고 AcaMatch</h1>
-          <button onClick={() => setIsOpen(false)}>
+          <button onClick={() => close()}>
             <FiX className="w-6 h-6" />
           </button>
         </div>
@@ -94,14 +95,6 @@ const Sidebar = () => {
           </ul>
         </nav>
       </div>
-
-      {/* Menu Button */}
-      <button
-        className="fixed top-4 left-4 bg-[#254C98] text-white p-2 rounded-md"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <FiMenu className="w-6 h-6" />
-      </button>
     </div>
   );
 };
