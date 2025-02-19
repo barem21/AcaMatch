@@ -1,4 +1,6 @@
+import { FaBell } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   className?: string;
@@ -7,6 +9,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
+  const navigate = useNavigate();
   return (
     <>
       <header
@@ -15,7 +18,7 @@ const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
         }`}
       >
         <div
-          className={`flex justify-between min-w-0 transition-all duration-300 ${isOpen ? "w-[calc(100%-256px)]" : "w-[100%]"}`}
+          className={`flex justify-between min-w-0 transition-all duration-300 w-[100%]`}
         >
           <div className="w-[60px] flex justify-center">
             {/* Menu Button */}
@@ -27,9 +30,11 @@ const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
             </button>
           </div>
           <div>
-            <ul>
-              <li>알림</li>
-              <li>프로필</li>
+            <ul className="flex justify-center items-center gap-[12px] p-[12px] ">
+              <li>
+                <FaBell />
+              </li>
+              <li className="text-[13px]">프로필</li>
             </ul>
           </div>
         </div>

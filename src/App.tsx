@@ -179,8 +179,10 @@ function App() {
               <Route path="/hotAcademy" element={<HotAcademy />} />
               {/* <Route path="/support" element={<Support />} /> */}
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
-              <Route path="/admin" element={<DashBoard />} />
-              <Route path="/acamanager" element={<AcaManagement />} />
+              <Route path="/admin">
+                <Route index element={<DashBoard />} />
+                <Route path="acamanager" element={<AcaManagement />} />
+              </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>
