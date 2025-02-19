@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { FiX, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -38,7 +39,6 @@ const Sidebar: React.FC<{
     setMenuItems(prevItems =>
       prevItems.map((item, index) => {
         if (!isMenuItem(item)) return item;
-
         const isActive =
           (item.link && pathname.startsWith(item.link)) ||
           (item.list?.some(subItem => pathname === subItem.link) ?? false);
@@ -104,7 +104,7 @@ const Sidebar: React.FC<{
           isOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <div className="p-4 flex justify-between items-center border-b border-gray-700">
+        <div className="p-4 flex justify-between items-center h-14">
           <h1 className="text-xl font-bold">로고 AcaMatch</h1>
           <button onClick={close}>
             <FiX className="w-6 h-6" />
@@ -145,7 +145,6 @@ const Sidebar: React.FC<{
                       )
                     ) : null}
                   </div>
-
                   {openSubmenus[index] && item.list && (
                     <ul className="pl-6 mt-2 space-y-2">
                       {item.list.map((subItem, subIndex) => (
@@ -159,6 +158,7 @@ const Sidebar: React.FC<{
                           onClick={e => {
                             e.stopPropagation();
                             navigate(subItem.link);
+
                           }}
                         >
                           {subItem.label}

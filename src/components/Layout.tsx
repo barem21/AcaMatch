@@ -171,7 +171,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
             <main
               className="flex w-full h-[100vh]" //
-              style={{ backgroundColor: "#ccc" }}
             >
               {children}
             </main>

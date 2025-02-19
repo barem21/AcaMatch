@@ -40,6 +40,9 @@ import AcademyReview from "./pages/mypage/academy/AcademyReview";
 import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
 import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
 
+import DashBoard from "./pages/admin/DashBoard";
+import AcaManagement from "./pages/admin/AcaManagement";
+
 function App() {
   useEffect(() => {
     const style = document.createElement("style");
@@ -184,6 +187,8 @@ function App() {
                 <Route index element={<DashBoard />} />
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentanager" element={<Paymentanager />} />
+                <Route path="academy" element={<AcademyList />} />
+                <Route path="academy/add" element={<AcademyAdd />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
