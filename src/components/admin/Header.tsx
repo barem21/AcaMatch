@@ -4,6 +4,9 @@ import jwtAxios from "../../apis/jwt";
 import { Cookies } from "react-cookie";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import userInfo from "../../atoms/userInfo";
+import { FaBell } from "react-icons/fa";
+import { FiMenu } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   className?: string;
@@ -43,6 +46,8 @@ const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
     }
   }, [setUserInfo]);
 
+  const navigate = useNavigate();
+  
   return (
     <>
       <header
@@ -62,11 +67,12 @@ const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
               <FiMenu className="w-[20px] h-[20px]" />
             </button>
           </div>
-
-          <div className="mr-5">
-            <ul className="flex gap-5">
-              <li>알림</li>
-              <li>프로필</li>
+          <div>
+            <ul className="flex justify-center items-center gap-[12px] p-[12px] ">
+              <li>
+                <FaBell />
+              </li>
+              <li className="text-[13px]">프로필</li>
             </ul>
           </div>
         </div>

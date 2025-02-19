@@ -182,7 +182,6 @@ function App() {
               <Route path="/hotAcademy" element={<HotAcademy />} />
               {/* <Route path="/support" element={<Support />} /> */}
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
-
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="acamanager" element={<AcaManagement />} />
@@ -190,7 +189,6 @@ function App() {
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
               </Route>
-
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>
