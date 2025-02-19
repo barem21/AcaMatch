@@ -13,6 +13,9 @@ import InquiryList from "./pages/InquiryList";
 import NotFoundPage from "./pages/NotFoundPage";
 import Support from "./pages/Support";
 import AcademyDetail from "./pages/academyDetail/AcademyDetail";
+import AcaManagement from "./pages/admin/AcaManagement.tsx";
+import DashBoard from "./pages/admin/DashBoard.tsx";
+import Paymentanager from "./pages/admin/Paymentanager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
 import LoginPage from "./pages/member/LoginPage";
 import SignupEnd from "./pages/member/SignupEnd";
@@ -36,7 +39,6 @@ import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
 import AcademyReview from "./pages/mypage/academy/AcademyReview";
 import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
 import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
-import DashBoard from "./pages/admin/DashBoard.tsx";
 
 function App() {
   useEffect(() => {
@@ -178,7 +180,11 @@ function App() {
               <Route path="/hotAcademy" element={<HotAcademy />} />
               {/* <Route path="/support" element={<Support />} /> */}
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
-              <Route path="/dashboard" element={<DashBoard />} />
+              <Route path="/admin">
+                <Route index element={<DashBoard />} />
+                <Route path="acamanager" element={<AcaManagement />} />
+                <Route path="paymentanager" element={<Paymentanager />} />
+              </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>

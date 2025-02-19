@@ -161,22 +161,20 @@ function LoginPage() {
                 회원가입
               </SecondaryButton>
 
-              {/* SNS 로그인 * /}
               <SecondaryButton
                 onClick={() => navigate("/")}
-                className={`px-4 py-2 w-[480px] h-[40px]`}
+                className={`px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff] `}
               >
-                Log in with kakao
+                <img src="/btnG_Naver.png" className="w-[30px] h-[30px]" />
+                <span className="flex mr-[25px]">네이버 로그인</span>
               </SecondaryButton>
 
-              {/ * Google 로그인 * /}
-              <SecondaryButton
+              {/* <SecondaryButton
                 onClick={() => navigate("/")}
                 className={`px-4 py-2 w-[480px] h-[40px]`}
               >
                 Log in with Google
-              </SecondaryButton>
-              */}
+              </SecondaryButton> */}
 
               {/* 로그인 버튼 */}
               <MainButton

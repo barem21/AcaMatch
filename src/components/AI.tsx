@@ -45,7 +45,7 @@ const AI: React.FC<TestGradeId> = () => {
   // });
 
   const [image, setImage] = useState<File | null>(null);
-  const [textInput, _setTextInput] = useState<string>(""); // ✅ 텍스트 입력 상태 추가
+  const [textInput, _setTextInput] = useState<string>("");
   const [analysisResult, setAnalysisResult] = useState<string>("");
   const [fileName, setFileName] = useState<string>(""); //첨부파일명
   const [loading, setLoading] = useState(false);
@@ -89,12 +89,10 @@ const AI: React.FC<TestGradeId> = () => {
         },
       ];
 
-      // ✅ 텍스트 입력이 있는 경우
       if (textInput.trim() !== "") {
         messages.push({ role: "user", content: textInput });
       }
 
-      // ✅ 이미지가 있는 경우 (Base64 변환 후 전송)
       if (image) {
         const reader = new FileReader();
         reader.readAsDataURL(image);
@@ -129,7 +127,6 @@ const AI: React.FC<TestGradeId> = () => {
         return;
       }
 
-      // ✅ 텍스트만 입력된 경우 OpenAI API 요청
       const response = await openai?.chat.completions.create({
         model: "gpt-4-turbo",
         messages,
@@ -164,7 +161,7 @@ const AI: React.FC<TestGradeId> = () => {
     <div className="flex flex-col items-center p-0">
       {/* <h1 className="text-2xl font-bold mb-4">📄 입력 분석</h1> */}
 
-      {/* ✅ 텍스트 입력 필드 추가 * /}
+      {/* 
       <textarea
         value={textInput}
         onChange={e => setTextInput(e.target.value)}
@@ -180,7 +177,6 @@ const AI: React.FC<TestGradeId> = () => {
         분석되지 않을 수 있습니다.
       </p>
 
-      {/* ✅ 이미지 업로드 입력 */}
       <div className="flex justify-between items-center gap-1 w-full">
         <label
           htmlFor="add-img"
@@ -243,7 +239,7 @@ const AI: React.FC<TestGradeId> = () => {
 export default AI;
 
 interface AITextProps {
-  textInput?: string; // ✅ textInput을 선택적 props로 변경 (옵셔널)
+  textInput?: string;
 }
 
 export const AIText: React.FC<AITextProps> = ({ textInput }) => {

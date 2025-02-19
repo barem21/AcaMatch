@@ -536,12 +536,10 @@ const LinkModal = ({ projectId }: { projectId?: string }) => {
     };
   }, [isOpen]);
 
-  // ✅ 모달 내부 클릭 이벤트 전파 방지
   const handleModalClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
-  // ✅ 링크 복사 기능
   const handleCopy = async () => {
     setIsLink(true);
     try {
@@ -552,7 +550,6 @@ const LinkModal = ({ projectId }: { projectId?: string }) => {
     }
   };
 
-  // ✅ SNS 공유 함수
   const snsSendProc = (type: string) => {
     const shareTitle = "공유하기";
     const shareURL = `http://localhost:5173/share/view?projectId=${projectId}`;
@@ -580,7 +577,7 @@ const LinkModal = ({ projectId }: { projectId?: string }) => {
       {/* 모달을 여는 버튼 */}
       <button
         onClick={e => {
-          e.stopPropagation(); // ✅ 버튼 클릭 시 handleClickOutside 방지
+          e.stopPropagation();
           setIsOpen(true);
         }}
       >
