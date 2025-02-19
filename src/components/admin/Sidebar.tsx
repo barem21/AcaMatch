@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import { FiX, FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -32,13 +33,12 @@ const Sidebar: React.FC<{
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: number]: boolean }>(
     {},
   );
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     setMenuItems(prevItems =>
       prevItems.map((item, index) => {
         if (!isMenuItem(item)) return item;
-
-        // 현재 URL이 메뉴 항목과 일치하는지 확인
         const isActive =
           (item.link && pathname.startsWith(item.link)) ||
           (item.list?.some(subItem => pathname === subItem.link) ?? false);
@@ -48,8 +48,53 @@ const Sidebar: React.FC<{
     );
   }, [pathname, setMenuItems]);
 
+  useEffect(() => {
+    if (!isFirstLoad.current) return;
+
+    const newOpenSubmenus: { [key: number]: boolean } = {};
+    menuItems.forEach((item, index) => {
+      if (isMenuItem(item) && item.list) {
+        const isSubmenuActive = item.list.some(subItem =>
+          pathname.startsWith(subItem.link),
+        );
+        if (isSubmenuActive) {
+          newOpenSubmenus[index] = true;
+        }
+      }
+    });
+
+    setOpenSubmenus(newOpenSubmenus);
+    isFirstLoad.current = false;
+  }, [menuItems, pathname]);
+
   const toggleSubmenu = (index: number) => {
-    setOpenSubmenus({ [index]: !openSubmenus[index] }); // 클릭한 메뉴만 열고 나머지는 닫기
+    setOpenSubmenus(prevState => ({
+      ...Object.keys(prevState).reduce(
+        (acc, key) => {
+          acc[parseInt(key)] = false;
+          return acc;
+        },
+        {} as { [key: number]: boolean },
+      ),
+      [index]: !prevState[index],
+    }));
+  };
+
+  const handleMenuClick = (index: number, item: MenuItem) => {
+    setMenuItems(prevItems =>
+      prevItems.map((prevItem, idx) => {
+        if (!isMenuItem(prevItem)) return prevItem;
+        return { ...prevItem, active: idx === index };
+      }),
+    );
+
+    if (item.list && item.list.length > 0) {
+      navigate(item.list[0].link);
+    } else if (item.link) {
+      navigate(item.link);
+    }
+
+    setOpenSubmenus({});
   };
 
   return (
@@ -71,28 +116,13 @@ const Sidebar: React.FC<{
             {menuItems.map((item, index) =>
               isMenuItem(item) ? (
                 <li key={index} className="flex flex-col">
-                  {/* ✅ 상위 메뉴 */}
                   <div
                     className="flex justify-between items-center p-3 rounded-lg cursor-pointer"
                     onClick={() => {
-                      if (item.link) {
-                        navigate(item.link);
-                      }
-
+                      handleMenuClick(index, item);
                       if (item.list) {
-                        toggleSubmenu(index); // 하위 메뉴 토글
+                        toggleSubmenu(index);
                       }
-
-                      // ✅ 클릭한 항목만 활성화
-                      setMenuItems(prevItems =>
-                        prevItems.map((prevItem, idx) =>
-                          idx === index
-                            ? { ...prevItem, active: true }
-                            : isMenuItem(prevItem)
-                              ? { ...prevItem, active: false }
-                              : prevItem,
-                        ),
-                      );
                     }}
                   >
                     <div className="flex items-center gap-3">
@@ -115,8 +145,6 @@ const Sidebar: React.FC<{
                       )
                     ) : null}
                   </div>
-
-                  {/* ✅ 하위 메뉴 */}
                   {openSubmenus[index] && item.list && (
                     <ul className="pl-6 mt-2 space-y-2">
                       {item.list.map((subItem, subIndex) => (
@@ -127,18 +155,10 @@ const Sidebar: React.FC<{
                               ? "text-white"
                               : "text-gray-300"
                           }`}
-                          onClick={() => {
+                          onClick={e => {
+                            e.stopPropagation();
                             navigate(subItem.link);
-                            // ✅ 하위 메뉴 클릭 시 상위 메뉴도 활성화
-                            setMenuItems(prevItems =>
-                              prevItems.map((prevItem, idx) =>
-                                idx === index
-                                  ? { ...prevItem, active: true }
-                                  : isMenuItem(prevItem)
-                                    ? { ...prevItem, active: false }
-                                    : prevItem,
-                              ),
-                            );
+
                           }}
                         >
                           {subItem.label}

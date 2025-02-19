@@ -82,7 +82,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       type: "item",
       icon: <FaCreditCard />,
       label: "결제 및 지출 관리",
-      link: "/admin/3",
+      link: "/admin/paymentanager",
       active: false,
     },
     {
@@ -167,9 +167,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <AdminHeader
               isOpen={isOpen}
               close={close}
-              className={`sticky top-0 right-0 z-50 flex items-center h-14 transition-transform duration-300 `}
+              className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
-            <main className="w-full p-4">{children}</main>
+            <main
+              className="flex w-full h-[100vh]" //
+            >
+              {children}
+            </main>
             <AdminFooter />
           </div>
         </>
