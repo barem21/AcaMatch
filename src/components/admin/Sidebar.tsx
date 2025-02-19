@@ -53,7 +53,7 @@ const Sidebar = ({ isOpen, close }: { isOpen: boolean; close: () => void }) => {
           isOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <div className="p-4 flex justify-between items-center border-b border-gray-700">
+        <div className="p-4 flex justify-between items-center h-14">
           <h1 className="text-xl font-bold">로고 AcaMatch</h1>
           <button onClick={() => close()}>
             <FiX className="w-6 h-6" />

@@ -17,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isLayoutVisible = !noLayoutPaths.includes(pathname);
   const isAdminPage = pathname.startsWith("/admin"); // `/admin` 페이지 감지
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const close = () => {
     setIsOpen(!isOpen);
@@ -36,18 +36,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <>
           <Sidebar isOpen={isOpen} close={close} />
           <div
-            className={`relative w-full transform transition-transform duration-300 ${
-              isOpen ? "translate-x-[256px]" : "translate-x-0"
+            className={`relative duration-300 ${
+              isOpen
+                ? "w-[calc(100%-256px)] translate-x-[256px]"
+                : "w-[100%] translate-x-0"
             }`}
           >
             <AdminHeader
               isOpen={isOpen}
               close={close}
-              className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
+              className={`sticky top-0 right-0 z-50 flex items-center h-14 transition-transform duration-300 `}
             />
-            <main className="w-full" style={{ backgroundColor: "#ccc" }}>
-              asda
-            </main>
+            <main className="w-full p-4">{children}</main>
           </div>
         </>
       ) : (

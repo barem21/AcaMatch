@@ -25,19 +25,22 @@ import MyPageUserInfo from "./pages/mypage/MyPageUserInfo";
 import MypageChild from "./pages/mypage/MypageChild";
 import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
-import AcademyAdd from "./pages/mypage/academy/AcademyAdd";
-import AcademyClassAdd from "./pages/mypage/academy/AcademyClassAdd";
-import AcademyClassEdit from "./pages/mypage/academy/AcademyClassEdit";
-import AcademyClassList from "./pages/mypage/academy/AcademyClassList";
-import AcademyEdit from "./pages/mypage/academy/AcademyEdit";
-import AcademyLike from "./pages/mypage/academy/AcademyLike";
-import AcademyList from "./pages/mypage/academy/AcademyList";
-import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
-import AcademyReview from "./pages/mypage/academy/AcademyReview";
-import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
-import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
-import DashBoard from "./pages/admin/DashBoard.tsx";
-import AcaManagement from "./pages/admin/AcaManagement.tsx";
+import AcademyClassAdd from "./pages/mypage/academy/AcademyClassAdd.jsx";
+import AcademyClassEdit from "./pages/mypage/academy/AcademyClassEdit.jsx";
+import AcademyClassList from "./pages/mypage/academy/AcademyClassList.jsx";
+import AcademyEdit from "./pages/mypage/academy/AcademyEdit.jsx";
+import AcademyLike from "./pages/mypage/academy/AcademyLike.jsx";
+//import AcademyAdd from "./pages/mypage/academy/AcademyAdd.jsx";
+//import AcademyList from "./pages/mypage/academy/AcademyList.jsx";
+import AcademyRecord from "./pages/mypage/academy/AcademyRecord.jsx";
+import AcademyReview from "./pages/mypage/academy/AcademyReview.jsx";
+import AcademyStudent from "./pages/mypage/academy/AcademyStudent.jsx";
+import AcademyTestList from "./pages/mypage/academy/AcademyTestList.jsx";
+
+import DashBoard from "./pages/admin/DashBoard";
+import AcaManagement from "./pages/admin/AcaManagement";
+import AcademyList from "./pages/admin/academy/AcademyList";
+import AcademyAdd from "./pages/admin/academy/AcademyAdd";
 
 function App() {
   useEffect(() => {
@@ -179,8 +182,15 @@ function App() {
               <Route path="/hotAcademy" element={<HotAcademy />} />
               {/* <Route path="/support" element={<Support />} /> */}
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
-              <Route path="/admin" element={<DashBoard />} />
-              <Route path="/acamanager" element={<AcaManagement />} />
+
+              <Route path="/admin">
+                <Route index element={<DashBoard />} />
+                <Route path="acamanager" element={<AcaManagement />} />
+
+                <Route path="academy" element={<AcademyList />} />
+                <Route path="academy/add" element={<AcademyAdd />} />
+              </Route>
+
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>
