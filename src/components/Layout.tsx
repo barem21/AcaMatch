@@ -170,11 +170,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
             <main
-              className="flex w-full h-[100vh]" //
+              className="flex w-full"
+              style={{
+                minHeight: "calc(100vh - 110px)",
+              }}
             >
               {children}
             </main>
-            <AdminFooter />
+            <AdminFooter className="w-full h-[52px] text-[#7081B9] p-4 text-[13px]" />
           </div>
         </>
       ) : (
@@ -192,7 +195,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {children}
           </main>
           {isLayoutVisible && !isAdminPage && (
-            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px]" />
+            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
           )}
         </div>
       )}
