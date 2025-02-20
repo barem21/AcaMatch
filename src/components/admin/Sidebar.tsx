@@ -111,12 +111,12 @@ const Sidebar: React.FC<{
         </div>
 
         <nav className="p-4">
-          <ul className="space-y-4">
+          <ul className="space-y-0">
             {menuItems.map((item, index) =>
               isMenuItem(item) ? (
                 <li key={index} className="flex flex-col">
                   <div
-                    className="flex justify-between items-center p-3 rounded-lg cursor-pointer"
+                    className="flex justify-between items-center p-3 pl-0 rounded-lg cursor-pointer"
                     onClick={() => {
                       handleMenuClick(index, item);
                       if (item.list) {
@@ -145,21 +145,19 @@ const Sidebar: React.FC<{
                     ) : null}
                   </div>
                   {openSubmenus[index] && item.list && (
-                    <ul className="pl-6 mt-2 space-y-2">
+                    <ul className="pl-6 mt-0 space-y-0">
                       {item.list.map((subItem, subIndex) => (
                         <li
                           key={subIndex}
-                          className={`text-[13px] p-2 rounded-md cursor-pointer ${
-                            pathname === subItem.link
-                              ? "text-white"
-                              : "text-gray-300"
+                          className={`text-[13px] p-2 rounded-md cursor-pointer text-white ${
+                            pathname !== subItem.link && "text-white opacity-50"
                           }`}
                           onClick={e => {
                             e.stopPropagation();
                             navigate(subItem.link);
                           }}
                         >
-                          {subItem.label}
+                          - {subItem.label}
                         </li>
                       ))}
                     </ul>

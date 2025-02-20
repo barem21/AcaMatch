@@ -12,7 +12,6 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
-import SideBar from "../../../components/SideBar";
 import dayjs from "dayjs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -32,6 +31,7 @@ const AcademyInfo = styled.div`
   }
   .ant-form-item-required::before {
     content: "" !important;
+    margin-inline-end: 0px !important;
   }
   .ant-form-item-required::after {
     content: "*" !important;
@@ -65,7 +65,7 @@ const AcademyInfo = styled.div`
       font-size: 1.25rem;
     }
     input {
-      height: 56px;
+      height: 32px;
     }
     textarea {
       padding: 15px 12px;
@@ -118,54 +118,14 @@ function AcademyClassEdit() {
   const acaId = searchParams.get("acaId");
   const classId = searchParams.get("classId");
 
-  const titleName = "마이페이지";
-  let menuItems = [];
-  switch (currentUserInfo.roleId) {
-    case 3: //학원 관계자
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: true, link: "/mypage" },
-        /*
-        {
-          label: "학원학생 관리",
-          isActive: false,
-          link: "/mypage/academy/student",
-        },
-        */
-        {
-          label: "학원리뷰 목록",
-          isActive: false,
-          link: "/mypage/academy/review",
-        },
-        { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-      ];
-      break;
-    case 2: //학부모
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: false, link: "/mypage" },
-        { label: "나의 리뷰 목록", isActive: true, link: "/mypage/review" },
-        { label: "학생 관리", isActive: false, link: "/mypage/child" },
-      ];
-      break;
-    default: //일반학생
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "나의 학원정보", isActive: false, link: "/mypage" },
-        { label: "나의 성적확인", isActive: false, link: "/mypage/record" },
-        { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
-        { label: "나의 리뷰 목록", isActive: true, link: "/mypage/review" },
-      ];
-  }
-
   const handleButton1Click = () => {
     setIsModalVisible(false);
-    navigate(`/mypage/academy/class?acaId=${acaId}`);
+    navigate(`../academy/class?acaId=${acaId}`);
   };
 
   const handleButton2Click = () => {
     setIsModalVisible(false);
-    navigate(`/mypage/academy/class?acaId=${acaId}`);
+    navigate(`../academy/class?acaId=${acaId}`);
   };
 
   const initialValues = {
@@ -218,7 +178,7 @@ function AcademyClassEdit() {
   };
 
   const onFinished = async values => {
-    console.log(values);
+    //console.log(values);
 
     const startDate = dayjs(values.classDate[0].$d).format("YYYY-MM-DD");
     const endDate = dayjs(values.classDate[1].$d).format("YYYY-MM-DD");
@@ -268,11 +228,13 @@ function AcademyClassEdit() {
   return (
     <AcademyInfo className="w-full  pb-12">
       <div className="flex gap-5 w-full justify-center align-top">
-        <SideBar menuItems={menuItems} titleName={titleName} />
-
         <div className="w-full">
-          <h1 className="title-font">강좌 수정</h1>
-          <div className="w-3/4">
+          <h1 className="title-admin-font">
+            강의 수정
+            <p>학원관리 &gt; 강의 관리 &gt; 강의 등록/수정</p>
+          </h1>
+
+          <div className="max-w-3xl p-3 pl-6 pr-6 border rounded-md">
             <Form
               form={form}
               onFinish={values => onFinished(values)}
@@ -287,7 +249,7 @@ function AcademyClassEdit() {
               >
                 <Input
                   type="text"
-                  className="input"
+                  className="input-admin-basic"
                   placeholder="강좌 이름을 입력해 주세요."
                 />
               </Form.Item>
@@ -325,7 +287,7 @@ function AcademyClassEdit() {
                 >
                   <TimePicker
                     placeholder="강좌 시작 시간"
-                    className="input"
+                    className="input-admin-basic"
                     format="HH:mm"
                   />
                 </Form.Item>
@@ -338,7 +300,7 @@ function AcademyClassEdit() {
                 >
                   <TimePicker
                     placeholder="강좌 종료 시간"
-                    className="input w-full"
+                    className="input-admin-basic w-full"
                     format="HH:mm"
                   />
                 </Form.Item>
@@ -366,26 +328,23 @@ function AcademyClassEdit() {
               >
                 <Input
                   type="text"
-                  className="input"
+                  className="input-admin-basic"
                   placeholder="가격을 입력해 주세요."
                 />
               </Form.Item>
 
-              <div className="flex justify-between gap-3 mb-10">
+              <div className="flex justify-end pt-3 border-t gap-3">
                 <button
                   type="button"
-                  className="w-1/5 h-14 border rounded-xl"
+                  className="btn-admin-cancel"
                   onClick={e => navigate(-1)}
                 >
                   취소하기
                 </button>
 
-                <Form.Item className="w-full">
-                  <Button
-                    htmlType="submit"
-                    className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
-                  >
-                    강좌 수정
+                <Form.Item className="mb-0">
+                  <Button htmlType="submit" className="btn-admin-ok">
+                    수정하기
                   </Button>
                 </Form.Item>
               </div>

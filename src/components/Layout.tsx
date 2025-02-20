@@ -53,16 +53,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       active: false,
       list: [
         {
-          label: "학원 등록 / 수정 / 삭제",
-          link: "/admin/1/1",
-        },
-        {
-          label: "강의 관리",
-          link: "/admin/1/2",
+          label: "학원 등록/수정",
+          link: "/admin/academy",
         },
         {
           label: "학원 승인",
-          link: "/admin/1/3",
+          link: "/admin/academy?state=0",
+        },
+        {
+          label: "강의 관리",
+          link: "/admin/academy/class",
         },
         {
           label: "프리미엄 학원 관리",
@@ -170,7 +170,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
             <main
-              className="flex w-full h-[100vh]" //
+              className="flex w-full p-4"
+              style={{ minHeight: "calc(100vh - 110px)" }}
             >
               {children}
             </main>

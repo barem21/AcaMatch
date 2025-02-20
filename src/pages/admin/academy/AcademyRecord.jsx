@@ -1,15 +1,22 @@
 import { UploadOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, message, Pagination, Upload, Radio } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Pagination,
+  Select,
+  Upload,
+  Radio,
+} from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FaPlusCircle } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
-import SideBar from "../../../components/SideBar";
 import AI from "../../../components/AI";
 import { Cookies } from "react-cookie";
 
@@ -17,6 +24,7 @@ function AcademyRecord() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
+  const [form3] = Form.useForm();
   const currentUserInfo = useRecoilValue(userInfo);
   const [testStudentList, setTestStudentList] = useState([]);
   const [testGradeId, setTestGradeId] = useState();
@@ -44,25 +52,6 @@ function AcademyRecord() {
   const acaId = searchParams.get("acaId");
   const classId = searchParams.get("classId");
   const subjectId = searchParams.get("subjectId");
-
-  const titleName = "마이페이지";
-  const menuItems = [
-    { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-    { label: "학원정보 관리", isActive: true, link: "/mypage/academy" },
-    /*
-    {
-      label: "학원학생 관리",
-      isActive: false,
-      link: "/mypage/academy/student",
-    },
-    */
-    {
-      label: "학원리뷰 목록",
-      isActive: false,
-      link: "/mypage/academy/review",
-    },
-    { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-  ];
 
   const RecordList = styled.div`
     .editModal button {
@@ -258,13 +247,6 @@ function AcademyRecord() {
     }
   };
 
-  /*
-  const initialValues = {
-    gradeId: testGradeId,
-    record: testRecord ? testRecord : 0,
-  };
-  */
-
   //첨부파일 처리
   const handleChange = info => {
     let newFileList = [...info.fileList];
@@ -393,8 +375,28 @@ function AcademyRecord() {
     }
   };
 
+  //학원 검색
+  const onFinishedFo = async values => {
+    console.log(values);
+
+    // 쿼리 문자열로 변환
+    const queryParams = new URLSearchParams(values).toString();
+    navigate(`?acaId=${acaId}&${queryParams}`); //쿼리스트링 url에 추가
+  };
+
+  const onChange = () => {
+    form3.submit();
+  };
+
   useEffect(() => {
     academyGetInfo();
+
+    //페이지 들어오면 ant design 처리용 기본값 세팅
+    form.setFieldsValue({
+      classId: "all",
+      search: "",
+      showCnt: 40,
+    });
   }, []);
 
   useEffect(() => {
@@ -410,32 +412,97 @@ function AcademyRecord() {
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
-      <SideBar menuItems={menuItems} titleName={titleName} />
-
       <RecordList className="w-full">
-        <h1 className="title-font flex justify-between align-middle">
+        <h1 className="title-admin-font">
           {academyInfo}의 수강생 목록
-          {/*"강좌명 &gt; 테스트 명"의 수강생 목록*/}
-          <div className="flex items-center gap-1">
-            <button
-              className="flex items-center gap-1 mr-5 text-sm font-normal"
-              onClick={() => handleStudentDownload()}
-            >
-              수강생 엑셀 다운로드
-              <FaPlusCircle />
-            </button>
-            <button
-              className="flex items-center gap-1 mr-5 text-sm font-normal"
-              onClick={e => handleScoreUpload()}
-            >
-              테스트 결과 일괄등록
-              <FaPlusCircle />
-            </button>
-          </div>
+          <p>
+            학원관리 &gt; 강좌 목록 &gt; 테스트 목록 &gt; 테스트 결과 등록/수정
+          </p>
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle pt-4 pb-4 border-b">
+          <Form form={form3} onFinish={values => onFinishedFo(values)}>
+            <div className="flex justify-between w-full p-3 border-b">
+              <div className="flex items-center gap-1">
+                <label className="w-24 text-sm">수강생 검색</label>
+                <Form.Item name="classId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="강좌 선택"
+                    optionFilterProp="label"
+                    className="select-admin-basic"
+                    // onChange={onChange}
+                    // onSearch={onSearch}
+                    options={[
+                      {
+                        value: "",
+                        label: "전체",
+                      },
+                      {
+                        value: 301,
+                        label: "고등 영어",
+                      },
+                      {
+                        value: 302,
+                        label: "영어 문법 기초 강좌",
+                      },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item name="search" className="mb-0">
+                  <Input
+                    placeholder="수강생 명을 입력해 주세요."
+                    className="input-admin-basic w-60"
+                  />
+                </Form.Item>
+                <Button htmlType="submit" className="btn-admin-basic">
+                  검색하기
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Form.Item name="showCnt" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="40개씩 보기"
+                    optionFilterProp="label"
+                    className="select-admin-basic"
+                    onChange={onChange}
+                    // onSearch={onSearch}
+                    options={[
+                      {
+                        value: 40,
+                        label: "40개씩 보기",
+                      },
+                      {
+                        value: 50,
+                        label: "50개씩 보기",
+                      },
+                      {
+                        value: 60,
+                        label: "60개씩 보기",
+                      },
+                    ]}
+                  />
+                </Form.Item>
+
+                <Button
+                  className="btn-admin-basic"
+                  onClick={() => handleStudentDownload()}
+                >
+                  + 수강생 엑셀 다운로드
+                </Button>
+
+                <Button
+                  className="btn-admin-basic"
+                  onClick={e => handleScoreUpload()}
+                >
+                  + 테스트 결과 일괄등록
+                </Button>
+              </div>
+            </div>
+          </Form>
+
+          <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
             <div className="flex items-center justify-center w-full">
               수강생 명
             </div>
@@ -462,15 +529,15 @@ function AcademyRecord() {
           {testStudentList?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle pt-4 pb-4 border-b"
+              className="loop-content flex justify-between align-middle p-2 border-b"
             >
               <div className="flex justify-start items-center w-full">
-                <div className="flex items-center gap-3 pl-4 cursor-pointer">
+                <div className="flex items-center gap-3 pl-3 cursor-pointer">
                   <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
                       src={
                         item.userPic && item.userPic !== "default_user.jpg"
-                          ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.userPic}`
+                          ? `http://112.222.157.157:5223/pic/user/${item.userId}/${item.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"

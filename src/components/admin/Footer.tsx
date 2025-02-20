@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <div>
-      <div className="flex justify-between">
+      <div className="flex justify-between p-4 border-t">
         <span>© 2025 AcaMatch</span>
         <span>Copyright by Acamatch. All Rights Reserved.</span>
       </div>
