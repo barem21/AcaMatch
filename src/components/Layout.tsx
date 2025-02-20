@@ -1,10 +1,4 @@
 import React, { ReactNode, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import Footer from "./footer/Footer";
-import Header from "./header/Header";
-import Sidebar from "./admin/Sidebar";
-import AdminHeader from "./admin/Header";
-import { FiHome } from "react-icons/fi";
 import {
   FaBullhorn,
   FaChalkboardTeacher,
@@ -12,7 +6,13 @@ import {
   FaShieldAlt,
   FaUserFriends,
 } from "react-icons/fa";
+import { FiHome } from "react-icons/fi";
+import { useLocation } from "react-router-dom";
 import AdminFooter from "./admin/Footer";
+import AdminHeader from "./admin/Header";
+import Sidebar from "./admin/Sidebar";
+import Footer from "./footer/Footer";
+import Header from "./header/Header";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -36,13 +36,13 @@ const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<(MenuItem | Divider)[]>([
     {
       type: "item",
       icon: <FiHome />,
       label: "대시보드",
-      link: "/admin/0",
+      link: "/admin",
       active: true,
     },
     {
@@ -53,16 +53,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       active: false,
       list: [
         {
-          label: "학원 등록/수정",
-          link: "/admin/academy",
-        },
-        {
-          label: "학원 승인",
-          link: "/admin/academy?state=0",
+          label: "학원 등록 / 수정 / 삭제",
+          link: "/admin/1/1",
         },
         {
           label: "강의 관리",
-          link: "/admin/academy/class",
+          link: "/admin/1/2",
+        },
+        {
+          label: "학원 승인",
+          link: "/admin/1/3",
         },
         {
           label: "프리미엄 학원 관리",
@@ -101,21 +101,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     },
   ]);
 
-  // 클릭된 항목만 active 상태로 변경하는 함수
-  const toggleActive = (index: number, link?: string) => {
-    setMenuItems(prevItems =>
-      prevItems.map((item, idx) => {
-        if (!isMenuItem(item)) return item;
+  // // 클릭된 항목만 active 상태로 변경하는 함수
+  // const toggleActive = (index: number, link?: string) => {
+  //   setMenuItems(prevItems =>
+  //     prevItems.map((item, idx) => {
+  //       if (!isMenuItem(item)) return item;
 
-        const isActive = idx === index;
-        return { ...item, active: isActive };
-      }),
-    );
+  //       const isActive = idx === index;
+  //       return { ...item, active: isActive };
+  //     }),
+  //   );
 
-    if (link) {
-      navigate(link);
-    }
-  };
+  //   if (link) {
+  //     navigate(link);
+  //   }
+  // };
 
   const { pathname } = useLocation();
 
@@ -170,8 +170,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
             <main
-              className="flex w-full p-4"
-              style={{ minHeight: "calc(100vh - 110px)" }}
+              className="flex w-full"
+              style={{
+                minHeight: "calc(100vh - 110px)",
+              }}
             >
               {children}
             </main>
