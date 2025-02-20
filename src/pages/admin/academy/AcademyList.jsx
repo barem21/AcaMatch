@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
-import { Button, Form, message, Pagination, Select } from "antd";
+import { Button, Form, Input, message, Pagination, Select } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
 import jwtAxios from "../../../apis/jwt";
@@ -69,11 +69,26 @@ function AcademyList() {
 
   //학원 검색
   const onFinished = async values => {
-    alert("search");
+    console.log(values);
+
+    // 쿼리 문자열로 변환
+    const queryParams = new URLSearchParams(values).toString();
+    navigate(`../academy?${queryParams}`); //쿼리스트링 url에 추가
+  };
+
+  const onChange = () => {
+    form.submit();
   };
 
   useEffect(() => {
     academyList();
+
+    //페이지 들어오면 ant design 처리용 기본값 세팅
+    form.setFieldsValue({
+      state: "all",
+      search: "",
+      showCnt: 40,
+    });
   }, [currentUserInfo]);
 
   useEffect(() => {
@@ -97,89 +112,108 @@ function AcademyList() {
               <div className="flex justify-between w-full p-3 border-b">
                 <div className="flex items-center gap-1">
                   <label className="w-24 text-sm">학원 검색</label>
-                  <Select
-                    showSearch
-                    placeholder="처리상태"
-                    optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
-                    options={[
-                      {
-                        value: "0",
-                        label: "대기중",
-                      },
-                      {
-                        value: "1",
-                        label: "등록완료",
-                      },
-                      {
-                        value: "2",
-                        label: "등록거부",
-                      },
-                    ]}
-                  />
-                  <input
-                    type="text"
-                    placeholder="검색어를 입력해 주세요."
-                    className="input-admin-basic"
-                  />
-                  <Button className="btn-admin-basic">검색하기</Button>
+
+                  <Form.Item name="state" className="mb-0">
+                    <Select
+                      showSearch
+                      placeholder="처리상태"
+                      optionFilterProp="label"
+                      className="select-admin-basic"
+                      name
+                      // onChange={onChange}
+                      // onSearch={onSearch}
+                      options={[
+                        {
+                          value: "all",
+                          label: "전체",
+                        },
+                        {
+                          value: 0,
+                          label: "승인대기",
+                        },
+                        {
+                          value: 1,
+                          label: "승인완료",
+                        },
+                        {
+                          value: 2,
+                          label: "승인거부",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item name="search" className="mb-0">
+                    <Input
+                      className="input-admin-basic w-60"
+                      placeholder="검색어를 입력해 주세요."
+                    />
+                  </Form.Item>
+
+                  <Button htmlType="submit" className="btn-admin-basic">
+                    검색하기
+                  </Button>
                 </div>
+
                 <div className="flex gap-2">
-                  <Select
-                    showSearch
-                    placeholder="40개씩 보기"
-                    optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
-                    options={[
-                      {
-                        value: "40",
-                        label: "40개씩 보기",
-                      },
-                      {
-                        value: "50",
-                        label: "50개씩 보기",
-                      },
-                      {
-                        value: "60",
-                        label: "60개씩 보기",
-                      },
-                    ]}
-                  />
+                  <Form.Item name="showCnt" className="mb-0">
+                    <Select
+                      showSearch
+                      placeholder="40개씩 보기"
+                      optionFilterProp="label"
+                      className="select-admin-basic"
+                      onChange={onChange}
+                      // onSearch={onSearch}
+                      options={[
+                        {
+                          value: 40,
+                          label: "40개씩 보기",
+                        },
+                        {
+                          value: 50,
+                          label: "50개씩 보기",
+                        },
+                        {
+                          value: 60,
+                          label: "60개씩 보기",
+                        },
+                      ]}
+                    />
+                  </Form.Item>
 
                   <Button
                     className="btn-admin-basic"
                     onClick={() => navigate("/admin/academy/add")}
                   >
-                    학원 신규등록
+                    + 학원 신규등록
                   </Button>
                 </div>
               </div>
             </Form>
 
             <div className="flex justify-between align-middle p-2 border-b">
-              <div className="flex items-center justify-center w-3/4">
+              <div className="flex items-center justify-center w-full">
                 학원명
               </div>
               <div className="flex items-center justify-center w-40">
                 등록일
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center w-48">
+                담당자
+              </div>
+              <div className="flex items-center justify-center w-52">
                 연락처
               </div>
-              <div className="flex items-center justify-center w-60">주소</div>
+              <div className="flex items-center justify-center w-96">주소</div>
+              <div className="flex items-center justify-center w-40">
+                신고횟수
+              </div>
               <div className="flex items-center justify-center w-40">
                 처리상태
               </div>
-              {/*
               <div className="flex items-center justify-center w-40">
                 강좌목록
               </div>
-              */}
-              <div className="flex items-center justify-center w-28">관리</div>
+              <div className="flex items-center justify-center w-36">관리</div>
             </div>
 
             {myAcademyList?.length === 0 && (
@@ -196,9 +230,9 @@ function AcademyList() {
             {myAcademyList?.map((item, index) => (
               <div
                 key={index}
-                className="loop-content flex justify-between align-middle p-2 border-b"
+                className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
               >
-                <div className="flex justify-start items-center w-3/4">
+                <div className="flex justify-start items-center w-full">
                   <div
                     className="flex items-center gap-3 cursor-pointer"
                     onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
@@ -220,33 +254,33 @@ function AcademyList() {
                 <div className="flex items-center justify-center text-center w-40">
                   {item.createdAt.substr(0, 10)}
                 </div>
-                <div className="flex items-center justify-center text-center w-40">
+                <div className="flex items-center justify-center w-48">
+                  홍길동
+                </div>
+                <div className="flex items-center justify-center text-center w-52">
                   010-0000-0000
                 </div>
-                <div className="flex items-center justify-center text-center w-60">
+                <div className="flex items-center justify-center text-center w-96">
                   대구광역시 수성구 범어로 100
                 </div>
+                <div className="flex items-center justify-center w-40">3회</div>
                 <div className="flex items-center justify-center w-40">
-                  <p className="w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
+                  <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
                     승인완료
                   </p>
                 </div>
-                {/*
                 <div className="flex items-center justify-center w-40">
                   <button
                     className="small_line_button"
-                    onClick={() =>
-                      navigate(`/mypage/academy/class?acaId=${item.acaId}`)
-                    }
+                    onClick={() => navigate(`class?acaId=${item.acaId}`)}
                   >
                     강좌목록
                   </button>
                 </div>
-                */}
-                <div className="flex gap-4 items-center justify-center w-28">
+                <div className="flex gap-4 items-center justify-center w-36">
                   <button
                     onClick={() =>
-                      navigate(`/mypage/academy/edit?acaId=${item.acaId}`)
+                      navigate(`../academy/edit?acaId=${item.acaId}`)
                     }
                   >
                     <FaPen className="w-3 text-gray-400" />

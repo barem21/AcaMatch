@@ -438,7 +438,7 @@ function AcademyAdd() {
                   className="input-admin-basic"
                   id="acaName"
                   maxLength={20}
-                  placeholder="학원 이름을 입력해 주세요."
+                  placeholder="사업자등록번호를 입력해 주세요."
                 />
               </Form.Item>
 
@@ -722,7 +722,7 @@ function AcademyAdd() {
                   취소하기
                 </button>
 
-                <Form.Item>
+                <Form.Item className="mb-0">
                   <Button
                     htmlType="submit"
                     className="btn-admin-ok"
@@ -821,14 +821,14 @@ function AcademyAdd() {
                 </button>
               </div>
 
-              <ul className="w-full max-h-32 border overflow-y-auto">
+              <ul className="w-full max-h-32 pr-2 overflow-y-auto">
                 {searchAcademyResult.length > 0 ? (
                   searchAcademyResult?.map((item, index) => (
                     <li
                       key={index}
                       className={
                         index % 2 === 0
-                          ? "p-2 bg-gray-100 cursor-pointer"
+                          ? "p-2 bg-gray-100 cursor-pointer rounded-md"
                           : "p-2 cursor-pointer"
                       }
                       onClick={() =>

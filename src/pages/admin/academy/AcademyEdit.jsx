@@ -18,13 +18,15 @@ const AcademyInfo = styled.div`
   .ant-form-item-label {
     display: flex;
     justify-content: flex-start;
-    padding-top: 14px;
   }
   .ant-form-item-label label {
     min-width: 130px !important;
+    color: #676d9c;
+    font-size: 13px;
   }
   .ant-form-item-required::before {
     content: "" !important;
+    margin-inline-end: 0px !important;
   }
   .ant-form-item-required::after {
     content: "*" !important;
@@ -58,7 +60,7 @@ const AcademyInfo = styled.div`
       font-size: 1.25rem;
     }
     input {
-      height: 56px;
+      height: 32px;
     }
     textarea {
       padding: 15px 12px;
@@ -115,25 +117,6 @@ const TagListSelect = styled.div`
     color: #fff;
   }
 `;
-
-const titleName = "마이페이지";
-const menuItems = [
-  { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-  { label: "학원정보 관리", isActive: true, link: "/mypage/academy" },
-  /*
-  {
-    label: "학원학생 관리",
-    isActive: false,
-    link: "/mypage/academy/student",
-  },
-  */
-  {
-    label: "학원리뷰 목록",
-    isActive: false,
-    link: "/mypage/academy/review",
-  },
-  { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-];
 
 function AcademyEdit() {
   const cookies = new Cookies();
@@ -273,7 +256,7 @@ function AcademyEdit() {
             uid: "1",
             name: res.data.resultData.acaPic,
             status: "done",
-            url: `http://112.222.157.156:5223/pic/academy/${res.data.resultData.acaId}/${res.data.resultData.acaPic}`,
+            url: `http://112.222.157.157:5223/pic/academy/${res.data.resultData.acaId}/${res.data.resultData.acaPic}`,
           },
         ]);
       }
@@ -386,13 +369,13 @@ function AcademyEdit() {
   return (
     <AcademyInfo className="w-full">
       <div className="flex gap-5 w-full justify-center pb-10">
-        <SideBar menuItems={menuItems} titleName={titleName} />
-
         <div className="w-full">
-          <h1 className="title-font flex justify-between align-middle">
+          <h1 className="title-admin-font">
             학원정보 수정
+            <p>학원관리 &gt; 학원정보 수정</p>
           </h1>
-          <div className="w-3/4">
+
+          <div className="max-w-3xl p-3 pl-6 pr-6 border rounded-md">
             <Form form={form} onFinish={values => onFinished(values)}>
               <Form.Item
                 name="acaName"
@@ -402,10 +385,27 @@ function AcademyEdit() {
                 ]}
               >
                 <Input
-                  className="input"
-                  id="acaName"
+                  className="input-admin-basic"
                   maxLength={20}
                   placeholder="학원 이름을 입력해 주세요."
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="business_number"
+                label="사업자등록번호"
+                rules={[
+                  {
+                    required: true,
+                    message: "사업자등록번호를 입력해 주세요.",
+                  },
+                ]}
+              >
+                <Input
+                  className="input-admin-basic"
+                  id="acaName"
+                  maxLength={20}
+                  placeholder="사업자등록번호를 입력해 주세요."
                 />
               </Form.Item>
 
@@ -419,8 +419,7 @@ function AcademyEdit() {
                   ]}
                 >
                   <Input
-                    className="input"
-                    id="acaZipcode"
+                    className="input-admin-basic"
                     maxLength={6}
                     placeholder="우편번호"
                     readOnly
@@ -429,7 +428,7 @@ function AcademyEdit() {
                 <Form.Item>
                   <button
                     type="button"
-                    className="min-w-[84px] h-14 bg-[#E8EEF3] rounded-xl font-bold text-sm"
+                    className="min-w-[84px] h-8 bg-[#E8EEF3] rounded-md text-[12px]"
                     onClick={() => handleAddressSearch()}
                   >
                     주소 검색
@@ -445,8 +444,7 @@ function AcademyEdit() {
                 ]}
               >
                 <Input
-                  className="input"
-                  id="acaAddr"
+                  className="input-admin-basic"
                   placeholder="학원 기본주소"
                   readOnly
                 />
@@ -460,8 +458,7 @@ function AcademyEdit() {
                 ]}
               >
                 <Input
-                  className="input"
-                  id="acaAddr2"
+                  className="input-admin-basic"
                   maxLength={20}
                   placeholder="학원 상세주소"
                 />
@@ -475,8 +472,7 @@ function AcademyEdit() {
                 ]}
               >
                 <Input
-                  className="input"
-                  id="acaPhone"
+                  className="input-admin-basic"
                   maxLength={13}
                   placeholder="학원 전화번호를 입력해 주세요."
                 />
@@ -492,7 +488,7 @@ function AcademyEdit() {
                 >
                   <TimePicker
                     placeholder="학원 시작 시간"
-                    className="input"
+                    className="input-admin-basic"
                     format="HH:mm"
                   />
                 </Form.Item>
@@ -505,7 +501,7 @@ function AcademyEdit() {
                 >
                   <TimePicker
                     placeholder="학원 종료 시간"
-                    className="input w-full"
+                    className="input-admin-basic w-full"
                     format="HH:mm"
                   />
                 </Form.Item>
@@ -513,8 +509,7 @@ function AcademyEdit() {
 
               <Form.Item name="teacherNum" label="강사 인원수">
                 <Input
-                  className="input"
-                  id="teacherNum"
+                  className="input-admin-basic"
                   maxLength={5}
                   placeholder="강사 인원수를 입력해 주세요."
                 />
@@ -530,8 +525,7 @@ function AcademyEdit() {
               <div className="flex gap-3 w-full">
                 <Form.Item label="태그 등록" className="w-full">
                   <Input
-                    className="input"
-                    id="academyTag"
+                    className="input-admin-basic"
                     placeholder="태그를 선택해 주세요."
                     onClick={() => handleTagSearch()}
                     readOnly
@@ -541,7 +535,7 @@ function AcademyEdit() {
                 <Form.Item>
                   <button
                     type="button"
-                    className="min-w-[84px] h-14 bg-[#E8EEF3] rounded-xl font-bold text-sm"
+                    className="min-w-[84px] h-8 bg-[#E8EEF3] rounded-md text-[12px]"
                     onClick={() => handleTagSearch()}
                   >
                     태그 검색
@@ -613,20 +607,17 @@ function AcademyEdit() {
                 </div>
               </Form.Item>
 
-              <div className="flex justify-between gap-3">
+              <div className="flex justify-end pt-3 border-t gap-3">
                 <button
                   type="button"
-                  className="w-1/5 h-14 border rounded-xl"
+                  className="btn-admin-cancel"
                   onClick={e => navigate(-1)}
                 >
                   취소하기
                 </button>
 
-                <Form.Item className="w-full">
-                  <Button
-                    htmlType="submit"
-                    className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
-                  >
+                <Form.Item className="mb-0">
+                  <Button htmlType="submit" className="btn-admin-ok">
                     학원정보 수정
                   </Button>
                 </Form.Item>

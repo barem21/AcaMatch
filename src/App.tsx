@@ -20,6 +20,7 @@ import ForgotPw from "./pages/member/ForgotPw";
 import LoginPage from "./pages/member/LoginPage";
 import SignupEnd from "./pages/member/SignupEnd";
 import SignupPage from "./pages/member/SignupPage";
+import SignupSnsPage from "./pages/member/SignupSnsPage";
 import MyPage from "./pages/mypage/MyPage";
 import MyPageLike from "./pages/mypage/MyPageLike";
 import MyPageRecord from "./pages/mypage/MyPageRecord";
@@ -28,22 +29,29 @@ import MyPageUserInfo from "./pages/mypage/MyPageUserInfo";
 import MypageChild from "./pages/mypage/MypageChild";
 import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
-// import AcademyAdd from "./pages/mypage/academy/AcademyAdd";
-import AcademyClassAdd from "./pages/mypage/academy/AcademyClassAdd";
-import AcademyClassEdit from "./pages/mypage/academy/AcademyClassEdit";
-import AcademyClassList from "./pages/mypage/academy/AcademyClassList";
-import AcademyEdit from "./pages/mypage/academy/AcademyEdit";
+//import AcademyAdd from "./pages/mypage/academy/AcademyAdd";
+//import AcademyClassAdd from "./pages/mypage/academy/AcademyClassAdd";
+//import AcademyClassEdit from "./pages/mypage/academy/AcademyClassEdit";
+//import AcademyClassList from "./pages/mypage/academy/AcademyClassList";
+//import AcademyEdit from "./pages/mypage/academy/AcademyEdit";
 import AcademyLike from "./pages/mypage/academy/AcademyLike";
-// import AcademyList from "./pages/mypage/academy/AcademyList";
-import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
+//import AcademyList from "./pages/mypage/academy/AcademyList";
+//import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
 import AcademyReview from "./pages/mypage/academy/AcademyReview";
-import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
-import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
-import AcademyList from "./pages/admin/academy/AcademyList.jsx";
-import AcademyAdd from "./pages/admin/academy/AcademyAdd.jsx";
+//import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
+//import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
 
 // import DashBoard from "./pages/admin/DashBoard";
 // import AcaManagement from "./pages/admin/AcaManagement";
+import AcademyList from "./pages/admin/academy/AcademyList";
+import AcademyAdd from "./pages/admin/academy/AcademyAdd";
+import AcademyEdit from "./pages/admin/academy/AcademyEdit";
+import AcademyClassList from "./pages/admin/academy/AcademyClassList";
+import AcademyClassAdd from "./pages/admin/academy/AcademyClassAdd";
+import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
+import AcademyStudent from "./pages/admin/academy/AcademyStudent";
+import AcademyTestList from "./pages/admin/academy/AcademyTestList";
+import AcademyRecord from "./pages/admin/academy/AcademyRecord";
 
 function App() {
   useEffect(() => {
@@ -123,6 +131,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/forgotPw" element={<ForgotPw />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/fe/redirect" element={<SignupSnsPage />} />
               <Route path="/signup/end" element={<SignupEnd />} />
               {/* <Route path="/ai" element={<AI />} /> */}
               <Route path="/mypage">
@@ -191,6 +200,16 @@ function App() {
                 <Route path="paymentanager" element={<Paymentanager />} />
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
+                <Route path="academy/edit" element={<AcademyEdit />} />
+                <Route path="academy/class" element={<AcademyClassList />} />
+                <Route path="academy/classAdd" element={<AcademyClassAdd />} />
+                <Route
+                  path="academy/classEdit"
+                  element={<AcademyClassEdit />}
+                />
+                <Route path="academy/student" element={<AcademyStudent />} />
+                <Route path="academy/testList" element={<AcademyTestList />} />
+                <Route path="academy/record" element={<AcademyRecord />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
