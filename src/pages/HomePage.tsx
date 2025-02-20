@@ -331,7 +331,7 @@ function HomePage() {
       <div className="w-full max-w-[990px]">
         <h2 className="text-2xl font-bold mb-6">인기 태그</h2>
         <div className="flex flex-wrap gap-5 justify-start items-center">
-          {popularTag.map((subject, index) => (
+          {popularTag?.map((subject, index) => (
             <div
               key={index}
               className="bg-brand-BTWhite hover:bg-brand-BTWhiteHover px-4 py-1.5 rounded-xl flex-row-center cursor-pointer"

@@ -175,7 +175,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
               {children}
             </main>
-            <AdminFooter />
+            <AdminFooter className="w-full h-[52px] text-[#7081B9] p-4 text-[13px]" />
           </div>
         </>
       ) : (
@@ -193,7 +193,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {children}
           </main>
           {isLayoutVisible && !isAdminPage && (
-            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px]" />
+            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
           )}
         </div>
       )}
