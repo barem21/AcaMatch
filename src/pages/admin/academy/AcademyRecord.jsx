@@ -392,8 +392,8 @@ function AcademyRecord() {
     academyGetInfo();
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
-    form.setFieldsValue({
-      classId: "all",
+    form3.setFieldsValue({
+      classId: classId ? parseInt(classId) : "all",
       search: "",
       showCnt: 40,
     });
@@ -435,7 +435,7 @@ function AcademyRecord() {
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: "",
+                        value: "all",
                         label: "전체",
                       },
                       {

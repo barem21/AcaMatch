@@ -53,20 +53,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       active: false,
       list: [
         {
-          label: "학원 등록 / 수정 / 삭제",
-          link: "/admin/1/1",
-        },
-        {
-          label: "강의 관리",
-          link: "/admin/1/2",
+          label: "학원 등록/수정",
+          link: "/admin/academy",
         },
         {
           label: "학원 승인",
-          link: "/admin/1/3",
+          link: "/admin/academy?state=0",
+        },
+        {
+          label: "강의 관리",
+          link: "/admin/academy/class",
         },
         {
           label: "프리미엄 학원 관리",
-          link: "/admin/1/4",
+          link: "/admin/academy/premium",
+        },
+        {
+          label: "프리미엄 학원 신청",
+          link: "/admin/academy/premium-req",
         },
       ],
     },
@@ -160,9 +164,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div
             className={`relative duration-300 ${
               isOpen
-                ? "w-[calc(100%-256px)] translate-x-[256px]"
-                : "w-[100%] translate-x-0"
+                ? "w-[calc(100%-256px)] left-[256px]"
+                : "w-[100%] left-[0px]"
             }`}
+            style={{ transition: "0.3s" }}
           >
             <AdminHeader
               isOpen={isOpen}
@@ -170,14 +175,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
             <main
-              className="flex w-full"
+              className="flex w-full p-4"
               style={{
-                minHeight: "calc(100vh - 110px)",
+                minHeight: "calc(100vh - 105px)",
               }}
             >
               {children}
             </main>
-            <AdminFooter className="w-full h-[52px] text-[#7081B9] p-4 text-[13px]" />
+            <AdminFooter className="w-full h-[52px] text-[#7081B9] p-4 border-t text-[13px]" />
           </div>
         </>
       ) : (

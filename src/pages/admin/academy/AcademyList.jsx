@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import { Button, Form, Input, message, Pagination, Select } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Cookies } from "react-cookie";
 import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
@@ -17,8 +17,9 @@ function AcademyList() {
   const [academyId, setAcademyId] = useState("");
   const [myAcademyList, setMyAcademyList] = useState([]);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  console.log(currentUserInfo);
+  const state = searchParams.get("state");
 
   //학원 목록
   const academyList = async () => {
@@ -85,7 +86,7 @@ function AcademyList() {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      state: "all",
+      state: state ? parseInt(state) : "all",
       search: "",
       showCnt: 40,
     });
@@ -190,7 +191,7 @@ function AcademyList() {
               </div>
             </Form>
 
-            <div className="flex justify-between align-middle p-2 border-b">
+            <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
               <div className="flex items-center justify-center w-full">
                 학원명
               </div>
