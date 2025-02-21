@@ -11,7 +11,6 @@ import { useRecoilValue } from "recoil";
 import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
-import SideBar from "../../../components/SideBar";
 import { Cookies } from "react-cookie";
 
 const AcademyInfo = styled.div`

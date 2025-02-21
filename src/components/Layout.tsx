@@ -53,6 +53,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       active: false,
       list: [
         {
+          label: "학원 등록/수정/삭제",
+          link: "/admin/academy",
+        },
+        {
+          label: "학원 등록 요청",
+          link: "/admin/academy?state=0",
           label: "학원 등록/수정",
           link: "/admin/academy",
         },
@@ -78,7 +84,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       type: "item",
       icon: <FaUserFriends />,
       label: "회원 관리",
-      link: "/admin/2",
+      link: "/admin/member",
       active: false,
     },
     { type: "divider" },
@@ -173,14 +179,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
             <main
-              className="flex w-full p-4"
+              className="flex w-full p-5"
               style={{
                 minHeight: "calc(100vh - 105px)",
               }}
             >
               {children}
             </main>
-            <AdminFooter className="w-full h-[52px] text-[#7081B9] p-4 border-t text-[13px]" />
+            <AdminFooter className="w-full h-[52px] border-t text-[#7081B9] p-4 text-[13px]" />
           </div>
         </>
       ) : (

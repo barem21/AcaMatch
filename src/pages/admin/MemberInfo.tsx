@@ -1,29 +1,25 @@
-import { PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
-
+import { Form, Button, Input, message, Upload, Image } from "antd";
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, message, Upload } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { Cookies } from "react-cookie";
-import { useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
+import axios from "axios";
 import jwtAxios from "../../apis/jwt";
-import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
-import SideBar from "../../components/SideBar";
-import { removeCookie } from "../../utils/cookie";
+import { useNavigate } from "react-router-dom";
 
-const MemberInfo = styled.div`
+const UserInfo = styled.div`
   .ant-form-item-label {
     display: flex;
     justify-content: flex-start;
-    padding-top: 14px;
   }
   .ant-form-item-label label {
     min-width: 130px !important;
+    color: #676d9c;
+    font-size: 13px;
   }
   .ant-form-item-required::before {
     content: "" !important;
+    margin-inline-end: 0px !important;
   }
   .ant-form-item-required::after {
     content: "*" !important;
@@ -57,7 +53,7 @@ const MemberInfo = styled.div`
       font-size: 1.25rem;
     }
     input {
-      height: 56px;
+      height: 32px;
     }
     textarea {
       padding: 15px 12px;
@@ -65,15 +61,15 @@ const MemberInfo = styled.div`
 
     .input,
     .ant-input-password {
-      border-radius: 12px;
+      border-radius: 4px;
     }
 
     span.readonly {
       display: flex;
       align-items: center;
-      height: 56px;
+      height: 32px;
       padding: 0px 11px;
-      border-radius: 12px;
+      border-radius: 4px;
       background-color: #f5f5f5;
       color: #666;
       font-size: 0.9rem;
@@ -105,50 +101,15 @@ const MemberInfo = styled.div`
   }
 `;
 
-function MyPageUserInfo() {
-  const cookies = new Cookies();
+function MemberInfo(): JSX.Element {
   const [form] = Form.useForm();
-  const [form2] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [nickNameCheck, setNickNameCheck] = useState(0);
   const [editMember, setEditMember] = useState({});
-  const currentUserInfo = useRecoilValue(userInfo);
-  //const accessToken = getCookie("accessToken");
-
   const navigate = useNavigate();
-
-  const titleName = "마이페이지";
-  let menuItems = [];
-  switch (currentUserInfo.roleId) {
-    case 2: //학부모
-      menuItems = [
-        { label: "회원정보 관리", isActive: true, link: "/mypage/user" },
-        { label: "자녀 관리", isActive: false, link: "/mypage/child" },
-        { label: "자녀 학원정보", isActive: false, link: "/mypage" },
-        { label: "자녀 성적확인", isActive: false, link: "/mypage/record" },
-        { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
-        { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
-      ];
-      break;
-    default: //일반학생
-      menuItems = [
-        { label: "회원정보 관리", isActive: true, link: "/mypage/user" },
-        { label: "나의 학원정보", isActive: false, link: "/mypage" },
-        { label: "보호자 정보", isActive: false, link: "/mypage/parent" },
-        { label: "나의 성적확인", isActive: false, link: "/mypage/record" },
-        { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
-        { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
-      ];
-  }
 
   //회원정보 조회
   const memberInfo = async () => {
-    if (!cookies.get("accessToken")) {
-      navigate("/log-in");
-      message.error("로그인이 필요한 서비스입니다.");
-      return;
-    }
     try {
       const res = await jwtAxios.get(`/api/user`);
       setEditMember(res.data.resultData);
@@ -204,7 +165,7 @@ function MyPageUserInfo() {
           uid: "1",
           name: editMember.userPic,
           status: "done",
-          url: `http://112.222.157.156:5223/pic/user/${editMember.userId}/${editMember.userPic}`,
+          url: `http://112.222.157.157:5223/pic/user/${editMember.userId}/${editMember.userPic}`,
         },
       ]);
     }
@@ -333,75 +294,26 @@ function MyPageUserInfo() {
     }
   };
 
-  //회원탈퇴 팝업창
-  const handleButton1Click2 = () => {
-    form2.resetFields(); //초기화
-    setIsModalVisible2(false);
-  };
-  const handleButton2Click2 = () => {
-    setIsModalVisible2(false);
-  };
-  const memberOut = () => {
-    setIsModalVisible2(true);
-  };
-
-  //로그아웃
-  const logOut = async () => {
-    try {
-      const res = await jwtAxios.post("/api/user/log-out", {});
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-    }
-  };
-
-  //회원탈퇴 실행
-  const onFinishedSe = async values => {
-    try {
-      const res = await jwtAxios.delete("/api/user", {
-        data: { pw: values.pw },
-      });
-      if (res.data.resultData === 1) {
-        message.success("회원탈퇴 완료되었습니다.");
-
-        // 로그아웃 처리 로직 추가
-        removeCookie("accessToken");
-        // 리코일 정보 삭제 아직 안함
-        logOut();
-        navigate("/");
-      } else {
-        message.error("회원탈퇴가 실패되었습니다.");
-      }
-    } catch (error) {
-      console.log(error);
-      if (error.response.data.resultMessage === "잘못된 파라미터입니다.") {
-        message.error("비밀번호가 잘못되었습니다. 다시 시도해 주세요.");
-      } else {
-        message.error("회원탈퇴가 실패되었습니다.");
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (!cookies.get("accessToken")) {
-      navigate("/log-in");
-      message.error("로그인이 필요한 서비스입니다.");
-    }
-  }, []);
-
   return (
-    <MemberInfo className="flex gap-5 w-full justify-center align-top">
-      <SideBar menuItems={menuItems} titleName={titleName} />
-
+    <UserInfo className="flex gap-5 w-full justify-center align-top">
       <div className="w-full mb-20">
-        <h1 className="title-font">회원정보 관리</h1>
-        <div className="w-3/5">
+        <h1 className="title-admin-font">
+          회원 관리
+          <p>회원 관리 &gt; 회원정보 수정</p>
+        </h1>
+
+        <div className="max-w-3xl p-3 pl-6 pr-6 border rounded-md">
           <Form form={form} onFinish={values => onFinished(values)}>
             <Form.Item
               name="user_id"
               label="이메일"
               rules={[{ required: true, message: "이메일을 입력해 주세요." }]}
             >
-              <Input type="text" className="input readonly" readOnly />
+              <Input
+                type="text"
+                className="input-admin-basic readonly"
+                readOnly
+              />
             </Form.Item>
 
             <Form.Item
@@ -418,7 +330,7 @@ function MyPageUserInfo() {
               ]}
             >
               <Input.Password
-                className="input"
+                className="input-admin-basic"
                 id="newPw"
                 maxLength={20}
                 placeholder="비밀번호를 입력해 주세요."
@@ -438,7 +350,7 @@ function MyPageUserInfo() {
               ]}
             >
               <Input.Password
-                className="input"
+                className="input-admin-basic"
                 id="newPw"
                 placeholder="신규 비밀번호를 입력해 주세요."
               />
@@ -452,7 +364,7 @@ function MyPageUserInfo() {
               ]}
             >
               <Input.Password
-                className="input"
+                className="input-admin-basic"
                 id="new_upw_check"
                 placeholder="신규 비밀번호를 다시 입력해 주세요."
               />
@@ -463,7 +375,11 @@ function MyPageUserInfo() {
               label="이름"
               rules={[{ required: true, message: "이름을 입력해 주세요." }]}
             >
-              <Input type="text" className="input readonly" readOnly />
+              <Input
+                type="text"
+                className="input-admin-basic readonly"
+                readOnly
+              />
             </Form.Item>
 
             <div className="flex gap-3 w-full">
@@ -474,7 +390,7 @@ function MyPageUserInfo() {
                 rules={[{ required: true, message: "닉네임을 입력해 주세요." }]}
               >
                 <Input
-                  className="input"
+                  className="input-admin-basic"
                   id="nick_name"
                   maxLength={20}
                   placeholder="닉네임을 입력해 주세요."
@@ -485,7 +401,7 @@ function MyPageUserInfo() {
               <Form.Item>
                 <button
                   type="button"
-                  className="min-w-[84px] h-14 bg-[#E8EEF3] rounded-xl font-bold text-sm"
+                  className="min-w-[84px] h-8 bg-[#E8EEF3] rounded-md text-sm"
                   onClick={() => sameCheck(form.getFieldValue("nickName"))}
                 >
                   중복확인
@@ -501,7 +417,7 @@ function MyPageUserInfo() {
               ]}
             >
               <Input
-                className="input"
+                className="input-admin-basic"
                 id="phone"
                 value={phoneNumber}
                 maxLength={13}
@@ -548,21 +464,16 @@ function MyPageUserInfo() {
               )}
             </Form.Item>
 
-            <div className="flex w-full gap-3">
-              <Form.Item className="w-40">
-                <Button
-                  className="w-full h-14 text-sm"
-                  onClick={e => memberOut()}
-                >
-                  회원탈퇴
-                </Button>
-              </Form.Item>
-
-              <Form.Item className="w-full">
-                <Button
-                  htmlType="submit"
-                  className="w-full h-14 bg-[#E8EEF3] font-bold text-sm"
-                >
+            <div className="flex justify-end pt-3 border-t gap-3">
+              <button
+                type="button"
+                className="btn-admin-cancel"
+                onClick={e => navigate(-1)}
+              >
+                취소하기
+              </button>
+              <Form.Item>
+                <Button htmlType="submit" className="btn-admin-ok">
                   회원정보 수정
                 </Button>
               </Form.Item>
@@ -599,65 +510,8 @@ function MyPageUserInfo() {
         button2Text={"확인"}
         modalWidth={400}
       />
-
-      <CustomModal
-        visible={isModalVisible2}
-        title={"회원탈퇴"}
-        content={
-          <div>
-            <div className="mb-5">
-              회원탈퇴하시면 사이트의 모든 정보가 삭제됩니다.
-              <br />
-              회원탈퇴하시겠습니까?
-            </div>
-
-            <Form form={form2} onFinish={values => onFinishedSe(values)}>
-              <Form.Item
-                name="pw"
-                rules={[
-                  {
-                    required: true,
-                    message: "비밀번호를 입력해 주세요.",
-                  },
-                ]}
-                className="mb-8"
-              >
-                <Input.Password
-                  maxLength={20}
-                  placeholder="회원 비밀번호 입력"
-                />
-              </Form.Item>
-
-              <div className="flex w-full gap-3 justify-between btn-wrap">
-                <Form.Item>
-                  <Button
-                    className="w-full h-14 text-sm"
-                    onClick={() => handleButton1Click2()}
-                  >
-                    취소하기
-                  </Button>
-                </Form.Item>
-
-                <Form.Item className="w-full">
-                  <Button
-                    htmlType="submit"
-                    className="w-full h-14 bg-[#E8EEF3] text-sm"
-                  >
-                    탈퇴하기
-                  </Button>
-                </Form.Item>
-              </div>
-            </Form>
-          </div>
-        }
-        onButton1Click={handleButton1Click2}
-        onButton2Click={handleButton2Click2}
-        button1Text={"취소하기"}
-        button2Text={"회원탈퇴"}
-        modalWidth={400}
-      />
-    </MemberInfo>
+    </UserInfo>
   );
 }
 
-export default MyPageUserInfo;
+export default MemberInfo;

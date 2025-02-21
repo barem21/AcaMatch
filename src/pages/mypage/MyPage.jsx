@@ -23,17 +23,7 @@ function MyPage() {
 
   const titleName = "마이페이지";
   let menuItems = [];
-  let mypageUrl = "";
   switch (currentUserInfo.roleId) {
-    case 3: //학원 관계자
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: true, link: "/mypage" },
-        { label: "리뷰 목록", isActive: false, link: "/mypage/academy/review" },
-        { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-      ];
-      mypageUrl = "/mypage/academy";
-      break;
     case 2: //학부모
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
@@ -43,7 +33,6 @@ function MyPage() {
         { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
         { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
       ];
-      mypageUrl = "/mypage";
       break;
     default: //일반학생
       menuItems = [
@@ -54,7 +43,6 @@ function MyPage() {
         { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
         { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
       ];
-      mypageUrl = "/mypage";
       break;
   }
   const scrollRef = useRef(null);
@@ -102,10 +90,6 @@ function MyPage() {
   const handleButton2Click = () => {
     setIsModalVisible(false);
   };
-
-  useEffect(() => {
-    navigate(mypageUrl); //학원 관계자는 마이페이지 메인 리다이렉션
-  }, []);
 
   useEffect(() => {
     myAcademyList(1);
