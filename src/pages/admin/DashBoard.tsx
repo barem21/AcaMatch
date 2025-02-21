@@ -102,7 +102,7 @@ function DashBoard() {
   );
 
   return (
-    <div className="flex m-[10px] gap-5 w-full h-[430px] justify-center align-top">
+    <div className=" m-[10px] gap-5 w-full h-[430px] justify-center align-top">
       <div className="w-3/4">
         <h1 className="title-admin-font">
           주요 통계 및 요약

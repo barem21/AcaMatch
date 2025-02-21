@@ -103,11 +103,10 @@ const Sidebar: React.FC<{
           isOpen ? "translate-x-0" : "-translate-x-64"
         }`}
       >
-        <div className="p-4 flex justify-between items-center h-14">
-          <h1 className="text-xl font-bold">로고 AcaMatch</h1>
-          <button onClick={close}>
-            <FiX className="w-6 h-6" />
-          </button>
+        <div className="p-4 flex justify-center items-center mx-auto h-14 w-full">
+          <h1 className="text-xl font-bold">
+            <img src="/logo6.png" className="w-[180px] h-[38px]" />
+          </h1>
         </div>
 
         <nav className="p-4">
