@@ -163,11 +163,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
           <div
             className={`relative duration-300 ${
-              isOpen
-                ? "w-[calc(100%-256px)] left-[256px]"
-                : "w-[100%] left-[0px]"
+              isOpen ? "w-[calc(100%-256px)] left-[256px]" : "w-[100%] left-0"
             }`}
-            style={{ transition: "0.3s" }}
+            style={{ transition: "0.3" }}
           >
             <AdminHeader
               isOpen={isOpen}

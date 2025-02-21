@@ -1,11 +1,11 @@
 import { useEffect } from "react";
-import { FiMenu } from "react-icons/fi";
-import jwtAxios from "../../apis/jwt";
 import { Cookies } from "react-cookie";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import userInfo from "../../atoms/userInfo";
 import { FaBell } from "react-icons/fa";
+import { FiMenu } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
+import jwtAxios from "../../apis/jwt";
+import userInfo from "../../atoms/userInfo";
 
 interface HeaderProps {
   className?: string;
