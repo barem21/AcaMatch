@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
 import { FaHeartCircleMinus } from "react-icons/fa6";
 
-
 const usedRandomNumbers = new Set();
 
 // Generate random unique number
@@ -42,14 +41,6 @@ function MyPageLike() {
   const titleName = "마이페이지";
   let menuItems = [];
   switch (currentUserInfo.roleId) {
-    case 3:
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: false, link: "/mypage" },
-        { label: "리뷰 목록", isActive: false, link: "/mypage/academy/review" },
-        { label: "좋아요 목록", isActive: true, link: "/mypage/academy/like" },
-      ];
-      break;
     case 2:
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },

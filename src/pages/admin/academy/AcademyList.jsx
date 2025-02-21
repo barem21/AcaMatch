@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import { Button, Form, Input, message, Pagination, Select } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Cookies } from "react-cookie";
 import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
@@ -17,8 +17,9 @@ function AcademyList() {
   const [academyId, setAcademyId] = useState("");
   const [myAcademyList, setMyAcademyList] = useState([]);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  console.log(currentUserInfo);
+  const state = searchParams.get("state");
 
   //학원 목록
   const academyList = async () => {
@@ -85,7 +86,7 @@ function AcademyList() {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      state: "all",
+      state: state ? parseInt(state) : "all",
       search: "",
       showCnt: 40,
     });
@@ -103,8 +104,8 @@ function AcademyList() {
       <div className="flex gap-5 w-full justify-center align-top">
         <div className="w-full">
           <h1 className="title-admin-font">
-            학원 관리
-            <p>학원관리 &gt; 학원 등록/수정/삭제</p>
+            학원 등록/수정/삭제
+            <p>학원 관리 &gt; 학원 등록/수정/삭제</p>
           </h1>
 
           <div className="board-wrap">
@@ -119,7 +120,6 @@ function AcademyList() {
                       placeholder="처리상태"
                       optionFilterProp="label"
                       className="select-admin-basic"
-                      name
                       // onChange={onChange}
                       // onSearch={onSearch}
                       options={[
@@ -190,28 +190,24 @@ function AcademyList() {
               </div>
             </Form>
 
-            <div className="flex justify-between align-middle p-2 border-b">
+            <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
               <div className="flex items-center justify-center w-full">
                 학원명
               </div>
               <div className="flex items-center justify-center w-40">
                 등록일
               </div>
-              <div className="flex items-center justify-center w-48">
+              <div className="flex items-center justify-center w-52">
+                학원 연락처
+              </div>
+              <div className="flex items-center justify-center w-96">
+                학원 주소
+              </div>
+              <div className="flex items-center justify-center w-40">
                 담당자
               </div>
-              <div className="flex items-center justify-center w-52">
-                연락처
-              </div>
-              <div className="flex items-center justify-center w-96">주소</div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center w-36">
                 신고횟수
-              </div>
-              <div className="flex items-center justify-center w-40">
-                처리상태
-              </div>
-              <div className="flex items-center justify-center w-40">
-                강좌목록
               </div>
               <div className="flex items-center justify-center w-36">관리</div>
             </div>
@@ -235,7 +231,7 @@ function AcademyList() {
                 <div className="flex justify-start items-center w-full">
                   <div
                     className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
+                    onClick={() => navigate(`class?acaId=${item.acaId}`)}
                   >
                     <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                       <img
@@ -254,29 +250,16 @@ function AcademyList() {
                 <div className="flex items-center justify-center text-center w-40">
                   {item.createdAt.substr(0, 10)}
                 </div>
-                <div className="flex items-center justify-center w-48">
-                  홍길동
-                </div>
                 <div className="flex items-center justify-center text-center w-52">
                   010-0000-0000
                 </div>
                 <div className="flex items-center justify-center text-center w-96">
                   대구광역시 수성구 범어로 100
                 </div>
-                <div className="flex items-center justify-center w-40">3회</div>
                 <div className="flex items-center justify-center w-40">
-                  <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
-                    승인완료
-                  </p>
+                  홍길동
                 </div>
-                <div className="flex items-center justify-center w-40">
-                  <button
-                    className="small_line_button"
-                    onClick={() => navigate(`class?acaId=${item.acaId}`)}
-                  >
-                    강좌목록
-                  </button>
-                </div>
+                <div className="flex items-center justify-center w-36">3회</div>
                 <div className="flex gap-4 items-center justify-center w-36">
                   <button
                     onClick={() =>

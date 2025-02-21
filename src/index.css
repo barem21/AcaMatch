@@ -108,6 +108,14 @@
   height: 10px;
   color: #444;
 }
+
+.ant-select-dropdown div {
+  font-size: 14px;
+}
+.ant-dropdown-menu-item span {
+  font-size: 14px !important;
+  padding: 6px 12px;
+}
 /* 관리자 전용 */
 
 .small_line_button {
@@ -163,8 +171,4 @@ body,
   width: 100%;
   height: 100%;
   overflow-x: hidden;
-}
-.ant-dropdown-menu-item span {
-  font-size: 14px !important;
-  padding: 6px 12px;
 }

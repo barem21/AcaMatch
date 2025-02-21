@@ -89,11 +89,6 @@ function AcademyClassList() {
     setIsModalVisible3(false);
   };
 
-  //학원 상세보기 이동
-  const detailAcademy = acaId => {
-    navigate(`/academy/detail?id=${acaId}`);
-  };
-
   //강의선택 안내 팝업창 오픈
   const errorMessage = () => {
     setIsModalVisible3(true);
@@ -138,7 +133,7 @@ function AcademyClassList() {
       <div className="w-full">
         <h1 className="title-admin-font">
           {academyInfo}의 강의목록
-          <p>학원관리 &gt; 학원 강의목록</p>
+          <p>학원 관리 &gt; 학원 강의목록</p>
         </h1>
 
         <div className="board-wrap">
@@ -241,6 +236,9 @@ function AcademyClassList() {
             <div className="flex items-center justify-center w-44">시작일</div>
             <div className="flex items-center justify-center w-44">종료일</div>
             <div className="flex items-center justify-center w-40">
+              교재 관리
+            </div>
+            <div className="flex items-center justify-center w-40">
               테스트 관리
             </div>
             <div className="flex items-center justify-center w-28">관리</div>
@@ -284,6 +282,18 @@ function AcademyClassList() {
               </div>
               <div className="flex items-center justify-center w-44">
                 {item.endDate}
+              </div>
+              <div className="flex items-center justify-center w-40">
+                <button
+                  className="small_line_button"
+                  onClick={() =>
+                    navigate(
+                      `../academy/textBook?acaId=${acaId}&classId=${item.classId}`,
+                    )
+                  }
+                >
+                  교재 목록
+                </button>
               </div>
               <div className="flex items-center justify-center w-40">
                 <button

@@ -29,20 +29,9 @@ import MyPageUserInfo from "./pages/mypage/MyPageUserInfo";
 import MypageChild from "./pages/mypage/MypageChild";
 import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
-//import AcademyAdd from "./pages/mypage/academy/AcademyAdd";
-//import AcademyClassAdd from "./pages/mypage/academy/AcademyClassAdd";
-//import AcademyClassEdit from "./pages/mypage/academy/AcademyClassEdit";
-//import AcademyClassList from "./pages/mypage/academy/AcademyClassList";
-//import AcademyEdit from "./pages/mypage/academy/AcademyEdit";
-import AcademyLike from "./pages/mypage/academy/AcademyLike";
-//import AcademyList from "./pages/mypage/academy/AcademyList";
-//import AcademyRecord from "./pages/mypage/academy/AcademyRecord";
-import AcademyReview from "./pages/mypage/academy/AcademyReview";
-//import AcademyStudent from "./pages/mypage/academy/AcademyStudent";
-//import AcademyTestList from "./pages/mypage/academy/AcademyTestList";
 
-// import DashBoard from "./pages/admin/DashBoard";
-// import AcaManagement from "./pages/admin/AcaManagement";
+import MemberList from "./pages/admin/MemberList";
+import MemberInfo from "./pages/admin/MemberInfo";
 import AcademyList from "./pages/admin/academy/AcademyList";
 import AcademyAdd from "./pages/admin/academy/AcademyAdd";
 import AcademyEdit from "./pages/admin/academy/AcademyEdit";
@@ -52,6 +41,11 @@ import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
 import AcademyStudent from "./pages/admin/academy/AcademyStudent";
 import AcademyTestList from "./pages/admin/academy/AcademyTestList";
 import AcademyRecord from "./pages/admin/academy/AcademyRecord";
+import AcademyPremium from "./pages/admin/academy/AcademyPremium";
+import AcademyPremiumReq from "./pages/admin/academy/AcademyPremiumReq";
+import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
+import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
+import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 
 function App() {
   useEffect(() => {
@@ -175,11 +169,6 @@ function App() {
                   path="/mypage/academy/record"
                   element={<AcademyRecord />}
                 />
-                <Route path="/mypage/academy/like" element={<AcademyLike />} />
-                <Route
-                  path="/mypage/academy/review"
-                  element={<AcademyReview />}
-                />
               </Route>
               <Route path="/academy">
                 <Route index element={<AcademySearch />} />
@@ -196,6 +185,8 @@ function App() {
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
+                <Route path="member" element={<MemberList />} />
+                <Route path="memberInfo" element={<MemberInfo />} />
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentanager" element={<Paymentanager />} />
                 <Route path="academy" element={<AcademyList />} />
@@ -210,6 +201,23 @@ function App() {
                 <Route path="academy/student" element={<AcademyStudent />} />
                 <Route path="academy/testList" element={<AcademyTestList />} />
                 <Route path="academy/record" element={<AcademyRecord />} />
+                <Route path="academy/premium" element={<AcademyPremium />} />
+                <Route
+                  path="academy/premiumReq"
+                  element={<AcademyPremiumReq />}
+                />
+                <Route
+                  path="academy/textbook"
+                  element={<AcademyTextbookList />}
+                />
+                <Route
+                  path="academy/textbookAdd"
+                  element={<AcademyTextbookAdd />}
+                />
+                <Route
+                  path="academy/textbookEdit"
+                  element={<AcademyTextbookEdit />}
+                />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -1,18 +1,15 @@
-import { UploadOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, message, Pagination, Upload } from "antd";
-import axios from "axios";
+import { Form, message, Pagination } from "antd";
 import { useEffect, useState } from "react";
-import { FaPlusCircle } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useRecoilValue } from "recoil";
 import { Cookies } from "react-cookie";
+import { FaPlusCircle } from "react-icons/fa";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
+import { AIText } from "../../components/AI";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
-import AI, { AIText } from "../../components/AI";
-import jwtAxios from "../../apis/jwt";
-import { useLocation } from "react-router-dom";
 
 function MyPageRecordDetail() {
   const cookies = new Cookies();
@@ -49,14 +46,6 @@ function MyPageRecordDetail() {
   const titleName = "마이페이지";
   let menuItems = [];
   switch (currentUserInfo.roleId) {
-    case 3: //학원 관계자
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: true, link: "/mypage" },
-        { label: "리뷰 목록", isActive: false, link: "/mypage/academy/review" },
-        { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-      ];
-      break;
     case 2: //학부모
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },

@@ -81,7 +81,7 @@ function AcademyStudent() {
       <div className="w-full">
         <h1 className="title-admin-font">
           {academyInfo}의 수강생 목록
-          <p>학원관리 &gt; 강좌목록 &gt; 수강생 목록</p>
+          <p>학원 관리 &gt; 학원 강의목록 &gt; 수강생 목록</p>
         </h1>
 
         <div className="board-wrap">
