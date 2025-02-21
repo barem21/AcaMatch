@@ -51,7 +51,7 @@ const LikeButton = ({
       setIsLoading(true);
 
       if (!checkIsAuthenticated()) {
-        navigate("/login");
+        navigate("/log-in");
         message.error("로그인이 필요한 서비스입니다.");
         return;
       }

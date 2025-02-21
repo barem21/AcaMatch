@@ -122,7 +122,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/log-in" element={<LoginPage />} />
               <Route path="/forgotPw" element={<ForgotPw />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/fe/redirect" element={<SignupSnsPage />} />

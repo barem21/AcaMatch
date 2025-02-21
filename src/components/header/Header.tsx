@@ -172,7 +172,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
   const isMypage = (link: string) => {
     if (link.startsWith("/mypage") && !cookies.get("accessToken")) {
-      navigate("/login");
+      navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
       return true; // 로그인 페이지로 이동했음을 나타냄
     }
@@ -272,7 +272,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 </MainButton>
                 <SecondaryButton
                   onClick={() => {
-                    navigate("/login");
+                    navigate("/log-in");
                   }}
                   className={`px-4 py-2 w-[85px] h-[40px]`}
                 >

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FiX, FiChevronDown, FiChevronRight } from "react-icons/fi";
+import React, { useEffect, useRef, useState } from "react";
+import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 
 // 메뉴 항목 타입 정의
@@ -26,7 +26,7 @@ const Sidebar: React.FC<{
   close: () => void;
   menuItems: (MenuItem | Divider)[];
   setMenuItems: React.Dispatch<React.SetStateAction<(MenuItem | Divider)[]>>;
-}> = ({ isOpen, close, menuItems, setMenuItems }) => {
+}> = ({ isOpen, menuItems, setMenuItems }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: number]: boolean }>(
@@ -36,7 +36,7 @@ const Sidebar: React.FC<{
 
   useEffect(() => {
     setMenuItems(prevItems =>
-      prevItems.map((item, index) => {
+      prevItems.map((item, _index) => {
         if (!isMenuItem(item)) return item;
         const isActive =
           (item.link && pathname.startsWith(item.link)) ||

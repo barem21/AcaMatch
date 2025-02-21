@@ -2,8 +2,6 @@ import { Button, DatePicker, Form, Pagination, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import CustomModal from "../../components/modal/Modal";
 
 interface AcademyList {
   acaName: string;
@@ -16,7 +14,7 @@ interface AcademyList {
 
 function PaymentManager() {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [academyList, setAcademyList] = useState<AcademyList[] | null>(null);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
@@ -56,15 +54,15 @@ function PaymentManager() {
   }, []);
 
   //학원 검색
-  const onFinished = async values => {
-    console.log("검색");
-  };
+  // const onFinished = async values => {
+  //   console.log("검색");
+  // };
 
   //학원삭제 팝업
-  const handleAcademyDelete = acaId => {
-    // setAcademyId(acaId);
-    // setIsModalVisible(true);
-  };
+  // const handleAcademyDelete = acaId => {
+  //   // setAcademyId(acaId);
+  //   // setIsModalVisible(true);
+  // };
 
   const handleStartChange = (date: Dayjs | null) => {
     setStartDate(date);
@@ -106,7 +104,8 @@ function PaymentManager() {
           </h1>
 
           <div className="board-wrap">
-            <Form form={form} onFinish={values => onFinished(values)}>
+            {/* <Form form={form} onFinish={values => onFinished(values)}> */}
+            <Form form={form}>
               <div className="flex justify-between w-full p-3 border-b">
                 <div className="flex items-center gap-1">
                   <label className="w-24 text-sm">주문 통합검색</label>
@@ -264,10 +263,10 @@ function PaymentManager() {
                 <div className="flex justify-start items-center w-3/4">
                   <div
                     className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
+                    // onClick={() => navigate(`/academ/y/detail?id=${item.acaId}`)}
                   >
                     <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                      <img
+                      {/* <img
                         src={
                           item.acaPic && item.acaPic !== "default_user.jpg"
                             ? `http://112.222.157.157:5223/pic/academy/${item.acaId}/${item.acaPic}`
@@ -275,7 +274,7 @@ function PaymentManager() {
                         }
                         className="max-w-fit max-h-full object-cover"
                         alt="academy"
-                      />
+                      /> */}
                     </div>
                     <div>
                       <p className="font-bold text-[13px]">{item.acaName}</p>
@@ -343,7 +342,7 @@ function PaymentManager() {
           </div>
         </div>
 
-        <CustomModal
+        {/* <CustomModal
           // visible={isModalVisible}
           title={"학원 삭제하기"}
           content={"선택하신 학원을 삭제하시겠습니까?"}
@@ -352,7 +351,7 @@ function PaymentManager() {
           button1Text={"취소하기"}
           button2Text={"삭제하기"}
           modalWidth={400}
-        />
+        /> */}
       </div>
     </>
   );

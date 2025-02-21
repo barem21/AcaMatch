@@ -59,10 +59,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           label: "학원 등록 요청",
           link: "/admin/academy?state=0",
+          label: "학원 등록/수정",
+          link: "/admin/academy",
+        },
+        {
+          label: "학원 승인",
+          link: "/admin/academy?state=0",
+        },
+        {
+          label: "강의 관리",
+          link: "/admin/academy/class",
         },
         {
           label: "프리미엄 학원 관리",
           link: "/admin/academy/premium",
+        },
+        {
+          label: "프리미엄 학원 신청",
+          link: "/admin/academy/premium-req",
         },
       ],
     },
@@ -115,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const { pathname } = useLocation();
 
-  const noLayoutPaths = ["/login", "/signup", "/signup/end", "/forgotPw"];
+  const noLayoutPaths = ["/log-in", "/signup", "/signup/end", "/forgotPw"];
   const isLayoutVisible = !noLayoutPaths.includes(pathname);
   const isAdminPage = pathname.startsWith("/admin");
 
@@ -182,7 +196,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
 
           <main
-            className="flex min-w-[990px] mx-auto max-w-[1280px]"
+            className=" min-w-[990px] mx-auto max-w-[1280px]"
             style={{
               minHeight: "calc(100vh - 164px)",
             }}

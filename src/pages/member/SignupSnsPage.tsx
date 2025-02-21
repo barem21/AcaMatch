@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 
 function SignupSnsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [_searchParams, _setSearchParams] = useSearchParams();
   //const acaId = searchParams.get("acaId");
   //const classId = searchParams.get("classId");
 

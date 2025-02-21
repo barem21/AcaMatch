@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Cookies } from "react-cookie";
 import { FaBell } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
@@ -13,7 +12,7 @@ interface HeaderProps {
   close: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
+const Header: React.FC<HeaderProps> = ({ className, close }) => {
   const setUserInfo = useSetRecoilState(userInfo);
   const cookies = new Cookies();
 
@@ -45,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ className, isOpen, close }) => {
     }
   }, [setUserInfo]);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return (
     <>
