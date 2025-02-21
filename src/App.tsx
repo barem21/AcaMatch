@@ -17,7 +17,7 @@ import AcaManagement from "./pages/admin/AcaManagement.tsx";
 import DashBoard from "./pages/admin/DashBoard.tsx";
 import Paymentanager from "./pages/admin/Paymentanager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
-import LoginPage from "./pages/member/LoginPage";
+import LoginPage from "./pages/member/loginPage";
 import SignupEnd from "./pages/member/SignupEnd";
 import SignupPage from "./pages/member/SignupPage";
 import SignupSnsPage from "./pages/member/SignupSnsPage";
@@ -128,7 +128,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/log-in" element={<LoginPage />} />
               <Route path="/forgotPw" element={<ForgotPw />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/fe/redirect" element={<SignupSnsPage />} />

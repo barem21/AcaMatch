@@ -119,7 +119,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const { pathname } = useLocation();
 
-  const noLayoutPaths = ["/login", "/signup", "/signup/end", "/forgotPw"];
+  const noLayoutPaths = ["/log-in", "/signup", "/signup/end", "/forgotPw"];
   const isLayoutVisible = !noLayoutPaths.includes(pathname);
   const isAdminPage = pathname.startsWith("/admin");
 
@@ -186,7 +186,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
 
           <main
-            className="flex min-w-[990px] mx-auto max-w-[1280px]"
+            className=" min-w-[990px] mx-auto max-w-[1280px]"
             style={{
               minHeight: "calc(100vh - 164px)",
             }}

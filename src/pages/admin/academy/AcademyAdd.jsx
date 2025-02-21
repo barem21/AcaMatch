@@ -381,7 +381,7 @@ function AcademyAdd() {
 
   useEffect(() => {
     if (!currentUserInfo.userId) {
-      navigate("/login");
+      navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
     }
   }, []);

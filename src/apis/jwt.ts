@@ -75,7 +75,7 @@ const failRes = async (error: AxiosError) => {
       }
     } catch (refreshError) {
       removeCookie("accessToken");
-      // window.location.href = "/login";
+      // window.location.href = "/log-in";
       return Promise.reject(refreshError);
     }
   }
@@ -104,7 +104,7 @@ const failRes = async (error: AxiosError) => {
       }
     } catch (refreshError) {
       removeCookie("accessToken");
-      // window.location.href = '/login';
+      // window.location.href = '/log-in';
       return Promise.reject(refreshError);
     }
   }
