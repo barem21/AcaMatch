@@ -17,7 +17,7 @@ import AcaManagement from "./pages/admin/AcaManagement.tsx";
 import DashBoard from "./pages/admin/DashBoard.tsx";
 import Paymentanager from "./pages/admin/Paymentanager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
-import LoginPage from "./pages/member/loginPage";
+import LoginPage from "./pages/member/LoginPage";
 import SignupEnd from "./pages/member/SignupEnd";
 import SignupPage from "./pages/member/SignupPage";
 import SignupSnsPage from "./pages/member/SignupSnsPage";

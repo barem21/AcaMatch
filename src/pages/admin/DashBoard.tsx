@@ -61,20 +61,6 @@ const lastMonthData: ChartData[] = [
   generateData("결제내역", 5, 300, 30),
 ];
 
-const chartData: Record<
-  WeekKey,
-  { id: string; label: string; value: number; color: string }[]
-> = {
-  이번주: [
-    { id: "완료", label: "완료", value: 60, color: "#377dff" },
-    { id: "미완료", label: "미완료", value: 40, color: "#A8C5FF" },
-  ],
-  지난주: [
-    { id: "완료", label: "완료", value: 70, color: "#377dff" },
-    { id: "미완료", label: "미완료", value: 30, color: "#A8C5FF" },
-  ],
-};
-
 const pieChartData: Record<
   CategoryKey,
   Record<WeekKey, { id: string; label: string; value: number; color: string }[]>
@@ -112,8 +98,9 @@ function DashBoard() {
   const [selectedData, setSelectedData] = useState<ChartData[]>(thisMonthData);
   const [selectedItem, setSelectedItem] = useState<string>("전체");
   const [selectedMonth, setSelectedMonth] = useState<MonthKey>("이번 달");
-  const [selectedTimeRange, setSelectedTimeRange] = useState<WeekKey>("이번주");
-  const [selectedCategory, setSelectedCategory] =
+  const [selectedTimeRange, _setSelectedTimeRange] =
+    useState<WeekKey>("이번주");
+  const [selectedCategory, _setSelectedCategory] =
     useState<CategoryKey>("최근 검색");
 
   const handleCategoryClick = (e: { key: string }) => {
@@ -247,7 +234,9 @@ function DashBoard() {
                       color: "#333",
                     }}
                   >
-                    {point.data.y}
+                    {point.data.y instanceof Date
+                      ? point.data.y.toLocaleString()
+                      : String(point.data.y)}
                   </div>
                 )}
               />
