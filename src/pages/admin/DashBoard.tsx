@@ -1,17 +1,11 @@
 import { DownOutlined } from "@ant-design/icons";
-import styled from "@emotion/styled";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
 import { Button, Dropdown, Menu } from "antd";
 import { useState } from "react";
-
-const StyledDropdown = styled.div`
-  /* background-color: #000; */
-  .ant-dropdown-menu-item {
-    font-size: 12px !important;
-    padding: 6px 12px;
-  }
-`;
+import { CiCalendarDate } from "react-icons/ci";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const COLORS = {
   학원수: "#F28C6A",
@@ -61,6 +55,18 @@ const lastMonthData: ChartData[] = [
   generateData("결제내역", 5, 300, 30),
 ];
 
+const academyApprovals = [
+  { date: "2024-02-15", name: "서울 학원", status: "대기중" },
+  { date: "2024-02-16", name: "부산 학원", status: "대기중" },
+  { date: "2024-02-17", name: "대구 학원", status: "대기중" },
+];
+
+const reportedUsers = [
+  { user: "user123", type: "욕설", count: 3, status: "미처리" },
+  { user: "user456", type: "스팸", count: 5, status: "처리 완료" },
+  { user: "user789", type: "부적절한 콘텐츠", count: 2, status: "미처리" },
+];
+
 const pieChartData: Record<
   CategoryKey,
   Record<WeekKey, { id: string; label: string; value: number; color: string }[]>
@@ -89,48 +95,102 @@ const pieChartData: Record<
   },
 };
 
+// 이번 주와 지난 주의 날짜 범위를 동적으로 생성하는 함수
+const getWeekRange = (weeksAgo: number = 0): string => {
+  const now = new Date();
+  const currentDay = now.getDay(); // 현재 요일 (0: 일요일, 1: 월요일, ... 6: 토요일)
+  const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay; // 월요일까지의 차이 계산
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday - weeksAgo * 7); // 해당 주의 월요일
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6); // 해당 주의 일요일
+
+  const formatDate = (date: Date) =>
+    `${date.getFullYear()} ${String(date.getMonth() + 1).padStart(2, "0")} ${String(date.getDate()).padStart(2, "0")}`;
+
+  return `${formatDate(monday)} ~ ${formatDate(sunday)}`;
+};
+
 const timePeriods: Record<WeekKey, string> = {
-  이번주: "2025 02 12 ~ 2025 02 19",
-  지난주: "2025 02 05 ~ 2025 02 11",
+  이번주: getWeekRange(0),
+  지난주: getWeekRange(1),
 };
 
 function DashBoard() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedItem, setSelectedItem] = useState<DataKey>(
+    (searchParams.get("category") as DataKey) || "학원수",
+  );
+  const [selectedMonth, setSelectedMonth] = useState<MonthKey>(
+    (searchParams.get("month") as MonthKey) || "이번 달",
+  );
+  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
+    (searchParams.get("pieCategory") as CategoryKey) || "최근 검색",
+  );
+  const [selectedTimeRange, setSelectedTimeRange] = useState<WeekKey>(
+    (searchParams.get("week") as WeekKey) || "이번주",
+  );
   const [selectedData, setSelectedData] = useState<ChartData[]>(thisMonthData);
-  const [selectedItem, setSelectedItem] = useState<string>("전체");
-  const [selectedMonth, setSelectedMonth] = useState<MonthKey>("이번 달");
-  const [selectedTimeRange, _setSelectedTimeRange] =
-    useState<WeekKey>("이번주");
-  const [selectedCategory, _setSelectedCategory] =
-    useState<CategoryKey>("최근 검색");
+  // const [selectedItem, setSelectedItem] = useState<string>("학원수");
+  // const [selectedMonth, setSelectedMonth] = useState<MonthKey>("이번 달");
+  const maxValue =
+    Math.ceil(
+      Math.max(...selectedData.flatMap(d => d.data.map(point => point.y))) /
+        100,
+    ) * 100;
+
+  // const [selectedTimeRange, _setSelectedTimeRange] =
+  //   useState<WeekKey>("이번주");
+  // const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
+  //   Object.keys(pieChartData)[0] as CategoryKey,
+  // );
+  useEffect(() => {
+    setSearchParams({
+      category: selectedItem,
+      month: selectedMonth,
+      pieCategory: selectedCategory,
+      week: selectedTimeRange,
+    });
+  }, [selectedItem, selectedMonth, selectedCategory, selectedTimeRange]);
 
   const handleCategoryClick = (e: { key: string }) => {
     setSelectedItem(e.key);
     const dataSource =
       selectedMonth === "이번 달" ? thisMonthData : lastMonthData;
-    setSelectedData(
-      e.key === "전체"
-        ? dataSource
-        : dataSource.filter(d => d.id === (e.key as DataKey)),
-    );
+    setSelectedData(dataSource.filter(d => d.id === (e.key as DataKey)));
   };
+
+  const pieData = pieChartData[selectedCategory]?.[selectedTimeRange] || [];
 
   const handleMonthClick = (e: { key: string }) => {
     const monthKey = e.key as MonthKey;
     setSelectedMonth(monthKey);
     const dataSource = monthKey === "이번 달" ? thisMonthData : lastMonthData;
-    setSelectedData(
-      selectedItem === "전체"
-        ? dataSource
-        : dataSource.filter(d => d.id === (selectedItem as DataKey)),
-    );
+    setSelectedData(dataSource.filter(d => d.id === (selectedItem as DataKey)));
+  };
+  // ResponsivePie용 카테고리 선택 이벤트
+  const handleCategoryClick2 = (e: { key: string }) => {
+    console.log("선택된 카테고리:", e.key);
+    if (pieChartData[e.key as CategoryKey]) {
+      setSelectedCategory(e.key as CategoryKey);
+    } else {
+      console.warn(`잘못된 카테고리 선택: ${e.key}`);
+    }
   };
 
   const categoryMenu = (
     <Menu onClick={handleCategoryClick}>
-      <Menu.Item key="전체">전체</Menu.Item>
       <Menu.Item key="학원수">학원수</Menu.Item>
       <Menu.Item key="회원수">회원수</Menu.Item>
       <Menu.Item key="결제내역">결제내역</Menu.Item>
+    </Menu>
+  );
+
+  const categoryMenu2 = (
+    <Menu onClick={handleCategoryClick2}>
+      <Menu.Item key="최근 검색">최근검색</Menu.Item>
+      <Menu.Item key="방문 통계">방문통계</Menu.Item>
     </Menu>
   );
 
@@ -141,17 +201,49 @@ function DashBoard() {
     </Menu>
   );
 
+  const handleTimeRangeClick = (e: { key: string }) => {
+    setSelectedTimeRange(e.key as WeekKey);
+  };
+
+  const timeRangeMenu = (
+    <Menu onClick={handleTimeRangeClick}>
+      <Menu.Item key="이번주">이번주</Menu.Item>
+      <Menu.Item key="지난주">지난주</Menu.Item>
+    </Menu>
+  );
+
+  const notices = [
+    { title: "공지사항 1", date: "2024-02-01" },
+    { title: "공지사항 2", date: "2024-02-05" },
+    { title: "공지사항 3", date: "2024-02-10" },
+  ];
+
+  const statsData = [
+    { id: 1, value: "₩1,200,000", label: "이번주 판매금액" },
+    { id: 2, value: "85건", label: "결제 완료건 수" },
+    { id: 3, value: "72%", label: "판매율" },
+    { id: 4, value: "AI 통계 분석", label: "" },
+  ];
+
+  useEffect(() => {
+    console.log("선택된 카테고리:", selectedCategory);
+    console.log("선택된 시간 범위:", selectedTimeRange);
+    console.log("차트 데이터:", pieData);
+
+    setSelectedData(selectedData.filter(data => data.id === "학원수"));
+  }, []);
+
   return (
-    <StyledDropdown className="m-[10px] gap-5 w-full h-[430px] justify-center align-top">
-      <h1 className="w-full title-admin-font">
+    <div className="m-[5px] mt-0 gap-5 w-full h-[430px] justify-center align-top">
+      <h1 className="w-full font-bold text-xl pb-3">
         주요 통계 및 요약
         <div className="flex">
           <p>결제 및 지출 관리 {"/"} </p> <p>&nbsp;대시보드</p>
         </div>
       </h1>
-      <div className="flex">
-        <div className="w-3/4">
-          <div className="board-wrap">
+      <div className="flex gap-[12px] w-full">
+        <div className="flex flex-col w-3/4 gap-[12px]">
+          <div className="w-full gap-0 border rounded-lg ">
             <div className="flex justify-between w-full p-3 border-b items-center">
               {/* <StyledDropdown> */}
               <Dropdown overlay={categoryMenu} trigger={["click"]}>
@@ -172,7 +264,7 @@ function DashBoard() {
               </Dropdown>
             </div>
 
-            <div style={{ height: "400px" }}>
+            <div style={{ height: "300px" }}>
               <ResponsiveLine
                 data={selectedData}
                 margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
@@ -201,8 +293,12 @@ function DashBoard() {
                   tickRotation: 0,
                   legendOffset: -40,
                   legendPosition: "middle",
+                  tickValues: Array.from(
+                    { length: maxValue / 100 + 1 },
+                    (_, i) => i * 100,
+                  ),
                 }}
-                colors={({ id }) => COLORS[id as DataKey]} // 타입 단언 추가
+                colors={({ id }) => COLORS[id as DataKey]}
                 lineWidth={4}
                 enablePoints={false}
                 useMesh={true}
@@ -242,47 +338,152 @@ function DashBoard() {
               />
             </div>
           </div>
+          <ul className="flex gap-[12px]">
+            {statsData.map(item => (
+              <li
+                key={item.id}
+                className="flex flex-col w-full h-[80px] rounded-lg justify-center items-center border border-[#E3EBF6]"
+              >
+                <span className="text-[18px] font-semibold">{item.value}</span>
+                {item.label && (
+                  <span className="text-[#A4ABC5] text-[13px]">
+                    {item.label}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
+        <div className="flex-col w-[394px]">
+          <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
+            <div className="flex justify-between w-full p-3 border-b items-center">
+              {/* 카테고리 선택 드롭다운 */}
+              <Dropdown overlay={categoryMenu2} trigger={["click"]}>
+                <Button type="text" className="flex justify-between w-[150px]">
+                  {selectedCategory} <DownOutlined />
+                </Button>
+              </Dropdown>
+              {/* 주 선택 드롭다운 */}
+              <Dropdown overlay={timeRangeMenu} trigger={["click"]}>
+                <Button
+                  type="text"
+                  size="small"
+                  style={{ fontSize: "10px", padding: "2px 8px" }}
+                  className="flex justify-between w-[120px]"
+                >
+                  {selectedTimeRange} <DownOutlined />
+                </Button>
+              </Dropdown>
+            </div>
 
-        <div className="w-1/4">
-          <div className="flex justify-between w-full p-3 border-b items-center">
-            {/* 카테고리 선택 드롭다운 */}
-            <Dropdown overlay={categoryMenu} trigger={["click"]}>
-              <Button type="text" className="flex justify-between w-[150px]">
-                {selectedCategory} <DownOutlined />
-              </Button>
-            </Dropdown>
+            <div style={{ height: "200px" }}>
+              <ResponsivePie
+                data={pieData}
+                margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
+                innerRadius={0.9}
+                padAngle={2}
+                cornerRadius={3}
+                colors={({ data }) => data.color}
+                enableArcLabels={false}
+              />
+            </div>
 
-            {/* 주 선택 드롭다운 */}
-            <Button
-              type="text"
-              size="small"
-              style={{ fontSize: "10px", padding: "2px 8px" }}
-              className="flex justify-between w-[120px]"
-            >
-              {selectedTimeRange} <DownOutlined />
-            </Button>
+            <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] text-gray-700 text-sm gap-[12px] font-semibold">
+              <CiCalendarDate size={"20px"} style={{ strokeWidth: 1 }} />
+              {timePeriods[selectedTimeRange]}
+            </div>
           </div>
-
-          <div style={{ height: "250px" }}>
-            <ResponsivePie
-              data={pieChartData[selectedCategory][selectedTimeRange] || []}
-              margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
-              innerRadius={0.9}
-              padAngle={2}
-              cornerRadius={3}
-              colors={({ data }) => data.color}
-              enableArcLabels={false}
-              // enableArcLinkLabels={false}
-            />
-          </div>
-
-          <div className="mt-2 flex justify-center items-center text-gray-700 text-sm">
-            {timePeriods[selectedTimeRange]}
+          <div className="border rounded-lg h-[120px]">
+            <div>
+              <ul className="flex mx-auto w-[350px] h-[30px] bg-[#F1F5FA]">
+                <li className="flex justify-center items-center w-[200px]">
+                  공지사항
+                </li>
+                <li className="flex justify-center items-center w-[200px]">
+                  일시
+                </li>
+              </ul>
+              {notices.map((notice, index) => (
+                <ul key={index} className="flex mx-auto w-[350px] h-[30px]">
+                  <li className="flex justify-center items-center w-[200px]">
+                    {notice.title}
+                  </li>
+                  <li className="flex justify-center items-center w-[200px]">
+                    {notice.date}
+                  </li>
+                </ul>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </StyledDropdown>
+      <div className="flex mt-[12px] gap-[12px] ">
+        <div className="border rounded-[4px]">
+          <span className="flex p-4 items-center w-[800px] h-[47px] text-[#303E67] border-b">
+            학원 승인 대기
+          </span>
+          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] ">
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              날짜
+            </li>
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              학원 명
+            </li>
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              요청상태
+            </li>
+          </ul>
+          {academyApprovals.map((item, index) => (
+            <ul key={index} className="flex mx-auto w-full h-[30px] border-b">
+              <li className="flex justify-center items-center w-1/3 text-[#242424]">
+                {item.date}
+              </li>
+              <li className="flex justify-center items-center w-1/3 text-[#242424]">
+                {item.name}
+              </li>
+              <li className="flex justify-center items-center w-1/3 text-[#242424]">
+                {item.status}
+              </li>
+            </ul>
+          ))}
+        </div>
+        <div className="border rounded-[4px]">
+          <span className="flex p-4 items-center w-[800px] h-[47px] border-b">
+            신고된 유저 목록
+          </span>
+          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA]">
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              유저정보
+            </li>
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              신고 유형
+            </li>
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              신고 횟수
+            </li>
+            <li className="flex justify-center items-center w-full text-[#303E67]">
+              처리상태
+            </li>
+          </ul>
+          {reportedUsers.map((user, index) => (
+            <ul key={index} className="flex mx-auto w-full h-[30px] border-b">
+              <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                {user.user}
+              </li>
+              <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                {user.type}
+              </li>
+              <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                {user.count}
+              </li>
+              <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                {user.status}
+              </li>
+            </ul>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 

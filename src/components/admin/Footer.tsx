@@ -7,11 +7,12 @@ const Footer: React.FC<FooterProps> = ({ className }) => {
       <div
         className={`${className}  flex justify-between text-[14px] items-center`}
       >
-        <span>© 2025 AcaMatch</span>
-        <span>Copyright by Acamatch. All Rights Reserved.</span>
+        <span className="text-[13px]">© 2025 AcaMatch</span>
+        <span className="text-[13px]">
+          Copyright by Acamatch. All Rights Reserved.
+        </span>
       </div>
     </div>
   );
 };
-
 export default Footer;

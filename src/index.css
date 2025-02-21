@@ -168,3 +168,6 @@ body,
   font-size: 14px !important;
   padding: 6px 12px;
 }
+.ant-btn-variant-text span {
+  font-size: 14px !important;
+}

@@ -49,7 +49,7 @@ function SignupEnd() {
         <div className={`${frameStyle} p-3`}>
           <MainButton
             className="w-[480px] h-12 bg-[#3B77D8] rounded-xl text-white font-bold"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/log-in")}
           >
             로그인
           </MainButton>
