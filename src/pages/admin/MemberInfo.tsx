@@ -173,10 +173,10 @@ function MemberInfo(): JSX.Element {
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, _setPhoneNumber] = useState("");
   const [fileList, setFileList] = useState([]);
 
-  const handleChange = info => {
+  const handleChange = (info: any) => {
     let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
@@ -202,7 +202,7 @@ function MemberInfo(): JSX.Element {
     setIsModalVisible(false);
   };
 
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     if (nickNameCheck === 2) {
       setIsModalVisible(true);
       //console.log("닉네임 확인이 필요합니다.");
@@ -251,7 +251,7 @@ function MemberInfo(): JSX.Element {
   };
 
   //닉네임 중복확인
-  const sameCheck = async nickName => {
+  const sameCheck = async (nickName: string) => {
     if (!nickName) {
       setIsModalVisible(true);
       setNickNameCheck(3);
@@ -278,7 +278,7 @@ function MemberInfo(): JSX.Element {
   };
 
   //휴대폰 번호 구분기호 자동입력
-  const handlePhoneNumber = e => {
+  const handlePhoneNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ""); // 숫자만 남기기
 
     if (value.length <= 3) {
@@ -468,7 +468,7 @@ function MemberInfo(): JSX.Element {
               <button
                 type="button"
                 className="btn-admin-cancel"
-                onClick={e => navigate(-1)}
+                onClick={() => navigate(-1)}
               >
                 취소하기
               </button>

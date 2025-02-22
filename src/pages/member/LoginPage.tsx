@@ -165,8 +165,40 @@ function LoginPage() {
                 onClick={() => navigate("/")}
                 className={`px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff] `}
               >
-                <img src="/btnG_Naver.png" className="w-[30px] h-[30px]" />
+                <img
+                  src="/oauth2/authorization/naver?redirect_uri=http://acamatch.site:5233/fe/redirect"
+                  className="w-[30px] h-[30px]"
+                />
                 <span className="flex mr-[25px]">네이버 로그인</span>
+              </SecondaryButton>
+
+              <SecondaryButton
+                onClick={() =>
+                  navigate(
+                    "/oauth2/authorization/google?redirect_uri=http://acamatch.site:5233/fe/redirect",
+                  )
+                }
+                className={`px-4 py-2 w-[480px] h-[40px] bg-[#e5e5e6] text-[#242424] `}
+              >
+                <img
+                  src="/Google_G_logo.svg.png"
+                  className="w-[20px] h-[20px] "
+                />
+                <span className="flex w-[93px] mr-[25px]">
+                  &nbsp;구글 로그인
+                </span>
+              </SecondaryButton>
+
+              <SecondaryButton
+                onClick={() =>
+                  navigate(
+                    "/oauth2/authorization/kakao?redirect_uri=http://acamatch.site:5233/fe/redirect",
+                  )
+                }
+                className={`px-4 py-2 w-[480px] h-[40px] text-[#242424] bg-[#fbe400] `}
+              >
+                <img src="/kakao-logo.png" className="w-[20px] h-[20px]" />
+                <span className="flex mr-[25px]">카카오 로그인</span>
               </SecondaryButton>
 
               {/* <SecondaryButton

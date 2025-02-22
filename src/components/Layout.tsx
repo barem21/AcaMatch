@@ -59,8 +59,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           label: "학원 등록 요청",
           link: "/admin/academy?state=0",
-          label: "학원 등록/수정",
-          link: "/admin/academy",
+          // label: "학원 등록/수정",
+          // link: "/admin/academy",
         },
         {
           label: "학원 승인",
@@ -129,7 +129,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const { pathname } = useLocation();
 
-  const noLayoutPaths = ["/log-in", "/signup", "/signup/end", "/forgotPw"];
+  const noLayoutPaths = [
+    "/log-in",
+    "/signup",
+    "/signup/end",
+    "/forgotPw",
+    "/fe/redirect",
+  ];
   const isLayoutVisible = !noLayoutPaths.includes(pathname);
   const isAdminPage = pathname.startsWith("/admin");
 

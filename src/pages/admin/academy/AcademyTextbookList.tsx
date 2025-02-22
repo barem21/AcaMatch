@@ -6,7 +6,7 @@ import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 function AcademyTextbookList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const acaId = searchParams.get("acaId");
   const classId = searchParams.get("classId");
 

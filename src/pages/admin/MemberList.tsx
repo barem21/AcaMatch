@@ -6,7 +6,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 function MemberList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
 
   const state = searchParams.get("state");
 

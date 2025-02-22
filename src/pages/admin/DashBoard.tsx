@@ -155,7 +155,7 @@ function DashBoard() {
   }, [selectedItem, selectedMonth, selectedCategory, selectedTimeRange]);
 
   const handleCategoryClick = (e: { key: string }) => {
-    setSelectedItem(e.key);
+    setSelectedItem(e.key as DataKey);
     const dataSource =
       selectedMonth === "이번 달" ? thisMonthData : lastMonthData;
     setSelectedData(dataSource.filter(d => d.id === (e.key as DataKey)));
@@ -433,6 +433,7 @@ function DashBoard() {
               요청상태
             </li>
           </ul>
+
           {academyApprovals.map((item, index) => (
             <ul key={index} className="flex mx-auto w-full h-[30px] border-b">
               <li className="flex justify-center items-center w-1/3 text-[#242424]">

@@ -133,7 +133,7 @@ function HomePage() {
       }
       return `/default_academy${randomNumbersRef.current[acaId]}.jpg`;
     }
-    return `http://112.222.157.156:5223/pic/academy/${acaId}/${pic}`;
+    return `http://112.222.157.157:5223/pic/academy/${acaId}/${pic}`;
   };
 
   const handleAcademyClick = (acaId: number) => {
