@@ -418,7 +418,7 @@ function DashBoard() {
         </div>
       </div>
       <div className="flex mt-[12px] gap-[12px] ">
-        <div className="border rounded-[4px]">
+        <div className="border border-b-[0] rounded-[4px]">
           <span className="flex p-4 items-center w-[800px] h-[47px] text-[#303E67] border-b">
             학원 승인 대기
           </span>
@@ -441,13 +441,16 @@ function DashBoard() {
               <li className="flex justify-center items-center w-1/3 text-[#242424]">
                 {item.name}
               </li>
+
               <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                {item.status}
+                <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
+                  {item.status}
+                </p>
               </li>
             </ul>
           ))}
         </div>
-        <div className="border rounded-[4px]">
+        <div className="border border-b-[0] rounded-[4px]">
           <span className="flex p-4 items-center w-[800px] h-[47px] border-b">
             신고된 유저 목록
           </span>
