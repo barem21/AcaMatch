@@ -94,13 +94,37 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       label: "결제 및 지출 관리",
       link: "/admin/paymentanager",
       active: false,
+      list: [
+        {
+          label: "학원별 결제 내역",
+          link: "/admin/paymentanager",
+        },
+        {
+          label: "학원별 매출 정산",
+          link: "/admin/acarevenue",
+        },
+      ],
     },
     {
       type: "item",
       icon: <FaBullhorn />,
       label: "공지 및 콘텐츠 관리",
-      link: "/admin/4",
+      link: "/admin/notice-content",
       active: false,
+      list: [
+        {
+          label: "공지사항 관리",
+          link: "/admin/notice-content",
+        },
+        {
+          label: "팝업 관리",
+          link: "/admin/popup-content",
+        },
+        {
+          label: "배너관리",
+          link: "/admin/banner-content",
+        },
+      ],
     },
     {
       type: "item",

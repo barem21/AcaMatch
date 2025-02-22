@@ -30,8 +30,8 @@ import MypageChild from "./pages/mypage/MypageChild";
 import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
 
-// import MemberList from "./pages/admin/MemberList";
-// import MemberInfo from "./pages/admin/MemberInfo";
+import MemberList from "./pages/admin/MemberList";
+import MemberInfo from "./pages/admin/MemberInfo";
 import AcademyList from "./pages/admin/academy/AcademyList";
 import AcademyAdd from "./pages/admin/academy/AcademyAdd";
 import AcademyEdit from "./pages/admin/academy/AcademyEdit";
@@ -41,11 +41,13 @@ import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
 import AcademyStudent from "./pages/admin/academy/AcademyStudent";
 import AcademyTestList from "./pages/admin/academy/AcademyTestList";
 import AcademyRecord from "./pages/admin/academy/AcademyRecord";
-// import AcademyPremium from "./pages/admin/academy/AcademyPremium";
+import AcademyPremium from "./pages/admin/academy/AcademyPremium";
 import AcademyPremiumReq from "./pages/admin/academy/AcademyPremiumReq";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
-// import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
-// import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
+import AcaRevenue from "./pages/admin/AcaRevenue.tsx";
+import NoticeContent from "./pages/admin/NoticeContent.tsx";
+import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
+import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 
 function App() {
   useEffect(() => {
@@ -185,10 +187,12 @@ function App() {
               {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
-                {/* <Route path="member" element={<MemberList />} /> */}
-                {/* <Route path="memberInfo" element={<MemberInfo />} /> */}
+                <Route path="member" element={<MemberList />} />
+                <Route path="memberInfo" element={<MemberInfo />} />
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentanager" element={<Paymentanager />} />
+                <Route path="acarevenue" element={<AcaRevenue />} />
+                <Route path="notice-content" element={<NoticeContent />} />
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
                 <Route path="academy/edit" element={<AcademyEdit />} />
@@ -201,7 +205,7 @@ function App() {
                 <Route path="academy/student" element={<AcademyStudent />} />
                 <Route path="academy/testList" element={<AcademyTestList />} />
                 <Route path="academy/record" element={<AcademyRecord />} />
-                {/* <Route path="academy/premium" element={<AcademyPremium />} /> */}
+                <Route path="academy/premium" element={<AcademyPremium />} />
                 <Route
                   path="academy/premiumReq"
                   element={<AcademyPremiumReq />}
@@ -212,13 +216,14 @@ function App() {
                 />
                 <Route
                   path="academy/textbookAdd"
-                  // element={<AcademyTextbookAdd />}
+                  element={<AcademyTextbookAdd />}
                 />
                 <Route
                   path="academy/textbookEdit"
-                  // element={<AcademyTextbookEdit />}
+                  element={<AcademyTextbookEdit />}
                 />
               </Route>
+              <Route path="/404" element={<NotFoundPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>
