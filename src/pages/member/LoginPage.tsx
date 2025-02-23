@@ -14,6 +14,12 @@ function LoginPage() {
   const setUserInfo = useSetRecoilState(userInfo);
   const [msg, setMsg] = useState("");
 
+  const handleOAuthLogin = (provider: "google" | "kakao" | "naver") => {
+    // const redirectUrl = "http://acamatch.site:5233/fe/redirect";
+    const redirectUrl = "http://localhost:5173/fe/redirect";
+    window.location.href = `/oauth2/authorization/${provider}?redirect_uri=${redirectUrl}`;
+  };
+
   const onFinish = async (values: any) => {
     try {
       const { remember, ...loginData } = values; // remember 값을 분리
@@ -98,6 +104,7 @@ function LoginPage() {
                 ]}
               >
                 <Input
+                  maxLength={254}
                   placeholder="이메일을 입력해주세요"
                   style={{ width: "480px", height: "56px" }}
                 />
@@ -155,50 +162,39 @@ function LoginPage() {
             <div className="flex flex-col items-center gap-[8px]">
               {/* 회원가입 버튼 */}
               <SecondaryButton
-                onClick={() => navigate("/signup")}
-                className={`px-4 py-2 w-[480px] h-[40px]`}
+                onClick={() => handleOAuthLogin("naver")}
+                className="px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff]"
               >
-                회원가입
+                <div className="flex items-center w-[140px] justify-between">
+                  <img src="btnG_Naver2.png" className="w-[30px] h-[30px]" />
+                  <span className="flex">네이버 로그인</span>
+                </div>
               </SecondaryButton>
 
               <SecondaryButton
-                onClick={() => navigate("/")}
-                className={`px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff] `}
+                onClick={() => handleOAuthLogin("google")}
+                className="px-4 py-2 w-[480px] h-[40px] bg-[#e5e5e6] text-[#242424]"
               >
-                <img
-                  src="/oauth2/authorization/naver?redirect_uri=http://acamatch.site:5233/fe/redirect"
-                  className="w-[30px] h-[30px]"
-                />
-                <span className="flex mr-[25px]">네이버 로그인</span>
+                <div className="flex items-center w-[140px] justify-between">
+                  <img
+                    src="/Google_G_logo.svg.png"
+                    className="w-[20px] h-[20px] ml-[5px]"
+                  />
+                  <span className="flex">구글 로그인</span>
+                </div>
               </SecondaryButton>
 
               <SecondaryButton
-                onClick={() =>
-                  navigate(
-                    "/oauth2/authorization/google?redirect_uri=http://acamatch.site:5233/fe/redirect",
-                  )
-                }
-                className={`px-4 py-2 w-[480px] h-[40px] bg-[#e5e5e6] text-[#242424] `}
+                onClick={() => handleOAuthLogin("kakao")}
+                className="px-4 py-2 w-[480px] h-[40px] text-[#242424] bg-[#fbe400]"
               >
-                <img
-                  src="/Google_G_logo.svg.png"
-                  className="w-[20px] h-[20px] "
-                />
-                <span className="flex w-[93px] mr-[25px]">
-                  &nbsp;구글 로그인
-                </span>
-              </SecondaryButton>
-
-              <SecondaryButton
-                onClick={() =>
-                  navigate(
-                    "/oauth2/authorization/kakao?redirect_uri=http://acamatch.site:5233/fe/redirect",
-                  )
-                }
-                className={`px-4 py-2 w-[480px] h-[40px] text-[#242424] bg-[#fbe400] `}
-              >
-                <img src="/kakao-logo.png" className="w-[20px] h-[20px]" />
-                <span className="flex mr-[25px]">카카오 로그인</span>
+                <div className="flex items-center w-[140px] justify-between">
+                  <img
+                    src="/kakao-logo.png"
+                    className="w-[20px] h-[20px] ml-[5px]"
+                  />
+                  <span className="flex">카카오 로그인</span>
+                </div>
               </SecondaryButton>
 
               {/* <SecondaryButton

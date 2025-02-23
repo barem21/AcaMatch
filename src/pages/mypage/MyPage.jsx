@@ -92,7 +92,9 @@ function MyPage() {
   };
 
   useEffect(() => {
-    myAcademyList(1);
+    if (currentUserInfo.userId !== "") {
+      myAcademyList(1);
+    }
   }, [currentUserInfo]);
 
   useEffect(() => {
