@@ -48,6 +48,8 @@ import AcaRevenue from "./pages/admin/AcaRevenue.tsx";
 import NoticeContent from "./pages/admin/NoticeContent.tsx";
 import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
 import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
+import PopupContent from "./pages/admin/PopupContent.tsx";
+import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
 
 function App() {
   useEffect(() => {
@@ -193,6 +195,8 @@ function App() {
                 <Route path="paymentanager" element={<Paymentanager />} />
                 <Route path="acarevenue" element={<AcaRevenue />} />
                 <Route path="notice-content" element={<NoticeContent />} />
+                <Route path="notice-content/add" element={<NoticeAdd />} />
+                <Route path="popup-content" element={<PopupContent />} />
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
                 <Route path="academy/edit" element={<AcademyEdit />} />

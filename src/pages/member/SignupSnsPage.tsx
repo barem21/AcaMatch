@@ -19,8 +19,6 @@ import MainButton from "../../components/button/MainButton";
 
 function SignupSnsPage() {
   const [searchParams, _setSearchParams] = useSearchParams();
-  //const acaId = searchParams.get("acaId");
-  //const classId = searchParams.get("classId");
   const navigate = useNavigate();
 
   const [checkedList, setCheckedList] = useState<string[]>([]);
@@ -30,15 +28,14 @@ function SignupSnsPage() {
   const [nickNameCheck, setNickNameCheck] = useState<number>(0);
   // const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSnsLoading, setIsSnsLoading] = useState(true);
+  const [email, setEmail] = useState<string | null>(
+    searchParams.get("email") ? searchParams.get("email") : "",
+  );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [modalMessage, setModalMessage] = useState(""); // 메시지 상태 추가
-
-  // const _accessToken = searchParams.get("access_token");
-  const userId = searchParams.get("user_id");
-  const nickName = searchParams.get("nick_name");
-  // const _profilePic = searchParams.get("pic");
 
   const LoadingWrap = styled.div`
     position: fixed;
@@ -63,15 +60,31 @@ function SignupSnsPage() {
   ];
 
   useEffect(() => {
-    // SNS 로그인 정보가 있는 경우 폼에 설정
-    if (userId) {
+    const emailFromQuery = searchParams.get("email");
+    console.log("Email from query:", emailFromQuery);
+
+    if (emailFromQuery) {
+      // 즉시 form 초기화
       form.setFieldsValue({
-        signUpType: "1", // SNS 회원가입 타입
-        nickName: nickName || "",
-        // 다른 필드들은 사용자가 직접 입력하도록 유지
+        email: emailFromQuery,
       });
+      setEmail(emailFromQuery);
     }
-  }, [form, userId, nickName]);
+
+    setIsSnsLoading(false);
+  }, []); // 의존성 배열을 비워서 컴포넌트 마운트 시에만 실행
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    setEmailCheck(0);
+    form.setFields([
+      {
+        name: "email",
+        value: newEmail,
+      },
+    ]);
+  };
 
   const handleChangePassword = () => {
     // 기본 비밀번호 입력값 알아내고
@@ -234,6 +247,9 @@ function SignupSnsPage() {
       setModalMessage("이메일 중복 확인 중 오류가 발생했습니다.");
     }
   };
+  if (isSnsLoading) {
+    return <p>로딩 중...</p>; // 로딩 중일 때 표시할 UI
+  }
 
   return (
     <>
@@ -263,7 +279,7 @@ function SignupSnsPage() {
             onFinish={values => onFinish(values)}
             className="flex flex-col justify-center mx-auto"
             initialValues={{
-              email: "",
+              email: searchParams.get("email") || "",
               password: "",
               confirmPassword: "",
               name: "",
@@ -281,18 +297,20 @@ function SignupSnsPage() {
                 <label className="text-[#D9534F]">*</label>
               </label>
               <Form.Item
-                name="roleId"
+                name="userRole"
                 rules={[
                   { required: true, message: "회원타입을 선택해주세요." },
                 ]}
               >
                 <div className="flex items-center w-full h-[56px]">
                   <Radio.Group
-                    className="flex gap-4"
+                    className="flex gap-[4px]"
                     options={[
-                      { value: 1, label: "학생" },
-                      { value: 2, label: "학부모" },
-                      { value: 3, label: "학원 관계자" },
+                      { value: "ADMIN", label: "관리자" },
+                      { value: "STUDENT", label: "학생" },
+                      { value: "PARENT", label: "학부모" },
+                      { value: "ACADEMY", label: "학원 관계자" },
+                      { value: "TEACHER", label: "교사" },
                     ]}
                   />
                 </div>
@@ -314,10 +332,20 @@ function SignupSnsPage() {
                 ]}
               >
                 <div className="flex items-center w-full gap-[12px]">
-                  <CustomInput
+                  <Input
                     placeholder="이메일을 입력해주세요"
                     width="351px"
-                    onChange={() => setEmailCheck(0)} // 입력값 변경시 체크 초기화
+                    style={{
+                      width: "351px",
+                      height: "56px",
+                      borderRadius: "12px",
+                      fontSize: "14px",
+                    }}
+                    value={email ? email : ""}
+                    onChange={e => {
+                      handleEmailChange(e);
+                      setEmailCheck(0);
+                    }} // 입력값 변경시 체크 초기화
                   />
                 </div>
               </Form.Item>

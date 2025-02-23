@@ -96,7 +96,7 @@ function PaymentManager() {
 
   return (
     <>
-      <div className="flex m-[10px] gap-5 w-full justify-center align-top">
+      <div className="flex gap-5 w-full justify-center align-top">
         <div className="w-full">
           <h1 className="title-admin-font">
             학원별 결제 내역 (학원비/교제구매)

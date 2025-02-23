@@ -1,4 +1,4 @@
-import { Form, Pagination, Select } from "antd";
+import { Button, Form, Pagination, Select } from "antd";
 import { useEffect } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -56,6 +56,12 @@ const NoticeContent = () => {
               </div>
 
               <div className="flex gap-2">
+                <Button
+                  className="btn-admin-basic"
+                  onClick={() => navigate("/admin/notice-content/add")}
+                >
+                  + 공지사항 등록
+                </Button>
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     placeholder="40개씩 보기"
@@ -84,26 +90,25 @@ const NoticeContent = () => {
           </Form>
 
           <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
-            <div className="flex items-center justify-center w-[50%]">제목</div>
-            <div className="flex items-center justify-center w-[200px]">
+            <div className="flex items-center justify-center w-[100%]">
+              제목
+            </div>
+            <div className="flex items-center justify-center min-w-[200px]">
               작성일
             </div>
-            <div className="flex items-center justify-center w-[132px]">
+            <div className="flex items-center justify-center min-w-[100px]">
               작성자
             </div>
-            <div className="flex items-center justify-center w-[100px]">
+            <div className="flex items-center justify-center min-w-[100px]">
               수정하기
             </div>
-            <div className="flex items-center justify-center w-[132px]">
-              주문내역
-            </div>
-            <div className="flex items-center justify-center w-[72px]">
+            <div className="flex items-center justify-center min-w-[72px]">
               삭제
             </div>
           </div>
 
           <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-[50%]">
+            <div className="flex justify-start items-center w-[100%]">
               <div className="flex items-center gap-3 cursor-pointer">
                 <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                   <img
@@ -120,27 +125,20 @@ const NoticeContent = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-center text-center w-[200px]">
-              2025-01-01 ~ 2025-01-31
+            <div className="flex items-center justify-center text-center min-w-[200px]">
+              2025-01-01
             </div>
-            <div className="flex items-center justify-center text-center w-[100px]">
-              125,000원
+            <div className="flex items-center justify-center text-center min-w-[100px]">
+              관리자
             </div>
-            <div className="flex items-center justify-center w-[132px]">
-              <p
-                className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center bg-[#f8a57d]`}
-              >
-                정산완료
-              </p>
-            </div>
-            <div className="flex items-center justify-center w-[132px]">
+            <div className="flex items-center justify-center min-w-[100px]">
               <p
                 className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300`}
               >
-                주문내역
+                수정하기
               </p>
             </div>
-            <div className="flex gap-4 items-center justify-center w-[72px]">
+            <div className="flex gap-4 items-center justify-center min-w-[72px]">
               <button>
                 <FaRegTrashAlt className="w-3 text-gray-400" />
               </button>

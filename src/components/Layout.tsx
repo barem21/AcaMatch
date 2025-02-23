@@ -225,14 +225,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite" />
           )}
 
-          <main
-            className=" min-w-[990px] mx-auto max-w-[1280px]"
-            style={{
-              minHeight: "calc(100vh - 164px)",
-            }}
-          >
-            {children}
-          </main>
+          {isLayoutVisible ? (
+            <main
+              className={"flex min-w-[990px] mx-auto max-w-[1280px]"}
+              style={{ minHeight: "calc(100vh - 164px)" }}
+            >
+              {children}
+            </main>
+          ) : (
+            <main>{children}</main>
+          )}
           {isLayoutVisible && !isAdminPage && (
             <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
           )}
