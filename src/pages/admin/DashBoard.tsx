@@ -242,7 +242,7 @@ function DashBoard() {
         </div>
       </h1>
       <div className="flex gap-[12px] w-full">
-        <div className="flex flex-col w-3/4 gap-[12px]">
+        <div className="flex flex-col w-[calc(100%-412px)] gap-[12px]">
           <div className="w-full gap-0 border rounded-lg ">
             <div className="flex justify-between w-full p-3 border-b items-center">
               {/* <StyledDropdown> */}
@@ -354,8 +354,9 @@ function DashBoard() {
             ))}
           </ul>
         </div>
-        <div className="flex-col w-[394px]">
-          <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
+        <div className="flex-col w-full max-w-[394px]">
+          <div className="w-full mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
+            {/* <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]"> */}
             <div className="flex justify-between w-full p-3 border-b items-center">
               {/* 카테고리 선택 드롭다운 */}
               <Dropdown overlay={categoryMenu2} trigger={["click"]}>

@@ -19,12 +19,21 @@ interface LayoutProps {
 }
 
 interface MenuItem {
-  type?: "item"; // 기본 값 설정
+  type?: "item";
   icon: JSX.Element;
   label: string;
   link?: string;
   active: boolean;
-  list?: { label: string; link: string }[];
+  list?: {
+    label: string;
+    link: string;
+    active?: boolean;
+    subList?: {
+      label: string;
+      link: string;
+      active?: boolean;
+    }[];
+  }[];
 }
 
 interface Divider {
@@ -115,6 +124,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           label: "공지사항 관리",
           link: "/admin/notice-content",
+          subList: [
+            {
+              label: "공지사항 목록",
+              link: "/admin/notice-content",
+            },
+            {
+              label: "공지사항 등록",
+              link: "/admin/notice-content/add",
+            },
+            {
+              label: "공지사항 수정",
+              link: "/admin/notice-content/edit",
+            },
+          ],
         },
         {
           label: "팝업 관리",
@@ -178,11 +201,43 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       prevItems.map(item => {
         if (!isMenuItem(item)) return item;
 
-        const isActive =
-          (item.link && pathname.startsWith(item.link)) ||
-          (item.list?.some(subItem => pathname === subItem.link) ?? false);
+        // 🟢 [1] 최상위 메뉴 활성화 여부 확인
+        const isItemActive =
+          pathname === item.link || pathname.startsWith(item.link || "");
 
-        return { ...item, active: isActive };
+        // 🟢 [2] 서브메뉴 활성화 여부 확인
+        let isParentActive = isItemActive;
+        const updatedList = item.list?.map(subItem => {
+          const isSubActive =
+            pathname === subItem.link || pathname.startsWith(subItem.link);
+
+          // 🟢 [3] 하위 서브메뉴(subList)가 있다면 활성화 여부 확인
+          const updatedSubList = subItem.subList?.map(sub => {
+            const isSubListActive =
+              pathname === sub.link || pathname.startsWith(sub.link);
+            return { ...sub, active: isSubListActive };
+          });
+
+          // 🟢 하위 서브메뉴가 하나라도 활성화되어 있다면 부모도 활성화
+          const isSubListActive =
+            updatedSubList?.some(sub => sub.active) || false;
+
+          if (isSubActive || isSubListActive) {
+            isParentActive = true;
+          }
+
+          return {
+            ...subItem,
+            active: isSubActive || isSubListActive,
+            subList: updatedSubList,
+          };
+        });
+
+        return {
+          ...item,
+          active: isParentActive,
+          list: updatedList,
+        };
       }),
     );
   }, [pathname]);
