@@ -207,7 +207,7 @@ function AcademyArrow(): JSX.Element {
         onButton1Click={handleButton1Click}
         onButton2Click={handleButton2Click}
         button1Text={"취소하기"}
-        button2Text={"등록하기"}
+        button2Text={"저장하기"}
         modalWidth={400}
       />
     </div>

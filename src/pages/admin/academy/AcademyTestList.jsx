@@ -20,6 +20,7 @@ function AcademyTestList() {
   const [resultMessage, setResultMessage] = useState("");
   const [academyInfo, setAcademyInfo] = useState("");
   const [radioValue, setRadioValue] = useState(1);
+  const [classList, setClassList] = useState([]);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -69,16 +70,22 @@ function AcademyTestList() {
   const handleButton1Click = () => {
     setIsModalVisible(false);
   };
-
   const handleButton2Click = () => {
-    form.submit();
-    setIsModalVisible(false);
+    const subjectName = form.getFieldValue("subjectName");
+
+    if (!subjectName) {
+      message.error("시험제목을 입력해 주세요.");
+    } else {
+      setIsModalVisible(false);
+      form.submit();
+      form.resetFields(); //초기화
+      //목록 다시 불러오기 한번 실행
+    }
   };
 
   const handleButton1Click2 = () => {
     setIsModal2Visible(false);
   };
-
   const handleButton2Click2 = () => {
     setIsModal2Visible(false);
   };
@@ -158,6 +165,26 @@ function AcademyTestList() {
   }, []);
 
   useEffect(() => {
+    //강좌 목록
+    const academyClassList = async () => {
+      try {
+        const res = await axios.get(
+          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
+        );
+        const formatted = res.data.resultData.map(item => ({
+          value: item.classId,
+          label: item.className,
+        }));
+        setClassList(formatted);
+        //console.log(res.data.resultData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    academyClassList();
+  }, []);
+
+  useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
@@ -185,20 +212,7 @@ function AcademyTestList() {
                     className="select-admin-basic"
                     // onChange={onChange}
                     // onSearch={onSearch}
-                    options={[
-                      {
-                        value: "all",
-                        label: "전체",
-                      },
-                      {
-                        value: 301,
-                        label: "고등 영어",
-                      },
-                      {
-                        value: 302,
-                        label: "영어 문법 기초 강좌",
-                      },
-                    ]}
+                    options={classList}
                   />
                 </Form.Item>
                 <Form.Item name="search" className="mb-0">
@@ -359,7 +373,7 @@ function AcademyTestList() {
                   />
                 </Form.Item>
 
-                <div className="flex w-full mt-3 pb-5">
+                <div className="flex w-full mt-3">
                   <Form.Item
                     name="subjectName"
                     className="w-full"
@@ -374,6 +388,7 @@ function AcademyTestList() {
                   </Form.Item>
                 </div>
 
+                {/*
                 <div className="flex w-full gap-3 justify-between">
                   <Form.Item>
                     <Button
@@ -393,6 +408,7 @@ function AcademyTestList() {
                     </Button>
                   </Form.Item>
                 </div>
+                */}
               </Form>
             </AddTest>
           }
@@ -409,6 +425,7 @@ function AcademyTestList() {
           content={
             <div className="addOk">
               {resultMessage}
+              {/*
               <button
                 type="button"
                 onClick={() => setIsModal2Visible(false)}
@@ -416,12 +433,13 @@ function AcademyTestList() {
               >
                 닫기
               </button>
+              */}
             </div>
           }
           onButton1Click={handleButton1Click2}
           onButton2Click={handleButton2Click2}
-          button1Text={"취소하기"}
-          button2Text={"등록하기"}
+          button1Text={"창닫기"}
+          button2Text={"확인완료"}
           modalWidth={400}
         />
       </TestList>
