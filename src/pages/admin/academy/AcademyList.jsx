@@ -28,7 +28,7 @@ function AcademyList() {
         `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
       );
       setMyAcademyList(res.data.resultData);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -188,7 +188,6 @@ function AcademyList() {
               </div>
             </div>
           </Form>
-
           <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
             <div className="flex items-center justify-center w-full">
               학원명
@@ -207,12 +206,7 @@ function AcademyList() {
             <div className="flex items-center justify-center w-36">관리</div>
           </div>
 
-          {myAcademyList?.length === 0 && (
-            <div className="p-4 text-center border-b">
-              등록된 학원이 없습니다.
-            </div>
-          )}
-          {myAcademyList === null && (
+          {!myAcademyList && (
             <div className="p-4 text-center border-b">
               등록된 학원이 없습니다.
             </div>

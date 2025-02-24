@@ -284,7 +284,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {isLayoutVisible ? (
             <main
-              className={"flex min-w-[990px] mx-auto max-w-[1280px]"}
+              className={"flex w-full min-w-[990px] mx-auto max-w-[1280px]"}
               style={{ minHeight: "calc(100vh - 164px)" }}
             >
               {children}

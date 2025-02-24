@@ -146,35 +146,7 @@ function App() {
                   element={<MyPageRecordDetail />}
                 />
               </Route>
-              <Route path="/mypage/academy">
-                <Route index element={<AcademyList />} />
-                <Route
-                  path="/mypage/academy/class"
-                  element={<AcademyClassList />}
-                />
-                <Route path="/mypage/academy/add" element={<AcademyAdd />} />
-                <Route path="/mypage/academy/Edit" element={<AcademyEdit />} />
-                <Route
-                  path="/mypage/academy/classEdit"
-                  element={<AcademyClassEdit />}
-                />
-                <Route
-                  path="/mypage/academy/classAdd"
-                  element={<AcademyClassAdd />}
-                />
-                <Route
-                  path="/mypage/academy/student"
-                  element={<AcademyStudent />}
-                />
-                <Route
-                  path="/mypage/academy/testList"
-                  element={<AcademyTestList />}
-                />
-                <Route
-                  path="/mypage/academy/record"
-                  element={<AcademyRecord />}
-                />
-              </Route>
+
               <Route path="/academy">
                 <Route index element={<AcademySearch />} />
                 <Route path="detail" element={<AcademyDetail />} />
@@ -186,8 +158,7 @@ function App() {
                 <Route path="inquiry/detail" element={<InquiryDetail />} />
               </Route>
               <Route path="/hotAcademy" element={<HotAcademy />} />
-              {/* <Route path="/support" element={<Support />} /> */}
-              {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
+
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />

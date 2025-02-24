@@ -85,13 +85,16 @@ function AcademyClassList() {
   };
 
   const onFinished = async values => {
-    console.log(values);
-
-    // 쿼리 문자열로 변환
-    const queryParams = new URLSearchParams(values).toString();
+    //console.log(values);
+    const queryParams = new URLSearchParams(values).toString(); // 쿼리 문자열로 변환
     navigate(`../academy/class?${queryParams}`); //쿼리스트링 url에 추가
 
-    academyClassList();
+    try {
+      const res = await axios.get(`/api/acaClass?acaId=${values.acaId}&page=1`);
+      setClassList(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onChange = () => {
@@ -171,6 +174,7 @@ function AcademyClassList() {
                   검색하기
                 </Button>
               </div>
+
               <div className="flex gap-2">
                 <Form.Item name="showCnt" className="mb-0">
                   <Select

@@ -1,12 +1,14 @@
 import { Button, Form, Input, Pagination, Select } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
+import axios from "axios";
 
 function AcademyTextbookList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
+  const [classList, setClassList] = useState([]);
   const acaId = searchParams.get("acaId");
   const classId = searchParams.get("classId");
 
@@ -32,6 +34,26 @@ function AcademyTextbookList(): JSX.Element {
     });
   }, []);
 
+  useEffect(() => {
+    //강좌 목록
+    const academyClassList = async () => {
+      try {
+        const res = await axios.get(
+          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
+        );
+        const formatted = res.data.resultData.map(item => ({
+          value: item.classId,
+          label: item.className,
+        }));
+        setClassList(formatted);
+        //console.log(res.data.resultData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    academyClassList();
+  }, []);
+
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
@@ -53,24 +75,7 @@ function AcademyTextbookList(): JSX.Element {
                     className="select-admin-basic"
                     // onChange={onChange}
                     // onSearch={onSearch}
-                    options={[
-                      {
-                        value: "all",
-                        label: "전체",
-                      },
-                      {
-                        value: 301,
-                        label: "고등 영어",
-                      },
-                      {
-                        value: 302,
-                        label: "영어 문법 기초 강좌",
-                      },
-                      {
-                        value: 303,
-                        label: "중등 영어",
-                      },
-                    ]}
+                    options={classList}
                   />
                 </Form.Item>
 
