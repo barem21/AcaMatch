@@ -100,206 +100,200 @@ function AcademyList() {
   }, []);
 
   return (
-    <>
-      <div className="flex gap-5 w-full justify-center align-top">
-        <div className="w-full">
-          <h1 className="title-admin-font">
-            학원 등록/수정/삭제
-            <p>학원 관리 &gt; 학원 등록/수정/삭제</p>
-          </h1>
+    <div className="flex gap-5 w-full justify-center align-top">
+      <div className="w-full">
+        <h1 className="title-admin-font">
+          학원 등록/수정/삭제
+          <p>학원 관리 &gt; 학원 등록/수정/삭제</p>
+        </h1>
 
-          <div className="board-wrap">
-            <Form form={form} onFinish={values => onFinished(values)}>
-              <div className="flex justify-between w-full p-3 border-b">
-                <div className="flex items-center gap-1">
-                  <label className="w-24 text-sm">학원 검색</label>
+        <div className="board-wrap">
+          <Form form={form} onFinish={values => onFinished(values)}>
+            <div className="flex justify-between w-full p-3 border-b">
+              <div className="flex items-center gap-1">
+                <label className="w-24 text-sm">학원 검색</label>
 
-                  <Form.Item name="state" className="mb-0">
-                    <Select
-                      showSearch
-                      placeholder="처리상태"
-                      optionFilterProp="label"
-                      className="select-admin-basic"
-                      // onChange={onChange}
-                      // onSearch={onSearch}
-                      options={[
-                        {
-                          value: "all",
-                          label: "전체",
-                        },
-                        {
-                          value: 0,
-                          label: "승인대기",
-                        },
-                        {
-                          value: 1,
-                          label: "승인완료",
-                        },
-                        {
-                          value: 2,
-                          label: "승인거부",
-                        },
-                      ]}
-                    />
-                  </Form.Item>
-                  <Form.Item name="search" className="mb-0">
-                    <Input
-                      className="input-admin-basic w-60"
-                      placeholder="검색어를 입력해 주세요."
-                    />
-                  </Form.Item>
+                <Form.Item name="state" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="처리상태"
+                    optionFilterProp="label"
+                    className="select-admin-basic"
+                    // onChange={onChange}
+                    // onSearch={onSearch}
+                    options={[
+                      {
+                        value: "all",
+                        label: "전체",
+                      },
+                      {
+                        value: 0,
+                        label: "승인대기",
+                      },
+                      {
+                        value: 1,
+                        label: "승인완료",
+                      },
+                      {
+                        value: 2,
+                        label: "승인거부",
+                      },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item name="search" className="mb-0">
+                  <Input
+                    className="input-admin-basic w-60"
+                    placeholder="검색어를 입력해 주세요."
+                  />
+                </Form.Item>
 
-                  <Button htmlType="submit" className="btn-admin-basic">
-                    검색하기
-                  </Button>
-                </div>
+                <Button htmlType="submit" className="btn-admin-basic">
+                  검색하기
+                </Button>
+              </div>
 
-                <div className="flex gap-2">
-                  <Form.Item name="showCnt" className="mb-0">
-                    <Select
-                      showSearch
-                      placeholder="40개씩 보기"
-                      optionFilterProp="label"
-                      className="select-admin-basic"
-                      onChange={onChange}
-                      // onSearch={onSearch}
-                      options={[
-                        {
-                          value: 40,
-                          label: "40개씩 보기",
-                        },
-                        {
-                          value: 50,
-                          label: "50개씩 보기",
-                        },
-                        {
-                          value: 60,
-                          label: "60개씩 보기",
-                        },
-                      ]}
-                    />
-                  </Form.Item>
+              <div className="flex gap-2">
+                <Form.Item name="showCnt" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="40개씩 보기"
+                    optionFilterProp="label"
+                    className="select-admin-basic"
+                    onChange={onChange}
+                    // onSearch={onSearch}
+                    options={[
+                      {
+                        value: 40,
+                        label: "40개씩 보기",
+                      },
+                      {
+                        value: 50,
+                        label: "50개씩 보기",
+                      },
+                      {
+                        value: 60,
+                        label: "60개씩 보기",
+                      },
+                    ]}
+                  />
+                </Form.Item>
 
-                  <Button
-                    className="btn-admin-basic"
-                    onClick={() => navigate("/admin/academy/add")}
-                  >
-                    + 학원 신규등록
-                  </Button>
-                </div>
+                <Button
+                  className="btn-admin-basic"
+                  onClick={() => navigate("/admin/academy/add")}
+                >
+                  + 학원 신규등록
+                </Button>
               </div>
-            </Form>
-
-            <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
-              <div className="flex items-center justify-center w-full">
-                학원명
-              </div>
-              <div className="flex items-center justify-center w-40">
-                등록일
-              </div>
-              <div className="flex items-center justify-center w-52">
-                학원 연락처
-              </div>
-              <div className="flex items-center justify-center w-96">
-                학원 주소
-              </div>
-              <div className="flex items-center justify-center w-40">
-                담당자
-              </div>
-              <div className="flex items-center justify-center w-36">
-                신고횟수
-              </div>
-              <div className="flex items-center justify-center w-36">관리</div>
             </div>
+          </Form>
 
-            {myAcademyList?.length === 0 && (
-              <div className="p-4 text-center border-b">
-                등록된 학원이 없습니다.
-              </div>
-            )}
-            {myAcademyList === null && (
-              <div className="p-4 text-center border-b">
-                등록된 학원이 없습니다.
-              </div>
-            )}
+          <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
+            <div className="flex items-center justify-center w-full">
+              학원명
+            </div>
+            <div className="flex items-center justify-center w-40">등록일</div>
+            <div className="flex items-center justify-center w-52">
+              학원 연락처
+            </div>
+            <div className="flex items-center justify-center w-96">
+              학원 주소
+            </div>
+            <div className="flex items-center justify-center w-40">담당자</div>
+            <div className="flex items-center justify-center w-36">
+              신고횟수
+            </div>
+            <div className="flex items-center justify-center w-36">관리</div>
+          </div>
 
-            {myAcademyList?.map((item, index) => (
-              <div
-                key={index}
-                className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
-              >
-                <div className="flex justify-start items-center w-full">
-                  <div
-                    className="flex items-center gap-3 cursor-pointer"
-                    onClick={() => navigate(`class?acaId=${item.acaId}`)}
-                  >
-                    <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                      <img
-                        src={
-                          item.acaPic && item.acaPic !== "default_user.jpg"
-                            ? `http://112.222.157.157:5223/pic/academy/${item.acaId}/${item.acaPic}`
-                            : "/aca_image_1.png"
-                        }
-                        className="max-w-fit max-h-full object-cover"
-                        alt=" /"
-                      />
-                    </div>
-                    {item?.acaName}
+          {myAcademyList?.length === 0 && (
+            <div className="p-4 text-center border-b">
+              등록된 학원이 없습니다.
+            </div>
+          )}
+          {myAcademyList === null && (
+            <div className="p-4 text-center border-b">
+              등록된 학원이 없습니다.
+            </div>
+          )}
+
+          {myAcademyList?.map((item, index) => (
+            <div
+              key={index}
+              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+            >
+              <div className="flex justify-start items-center w-full">
+                <div
+                  className="flex items-center gap-3 cursor-pointer"
+                  onClick={() => navigate(`class?acaId=${item.acaId}`)}
+                >
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.acaPic && item.acaPic !== "default_user.jpg"
+                          ? `http://112.222.157.157:5223/pic/academy/${item.acaId}/${item.acaPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
                   </div>
-                </div>
-                <div className="flex items-center justify-center text-center w-40">
-                  {item.createdAt.substr(0, 10)}
-                </div>
-                <div className="flex items-center justify-center text-center w-52">
-                  010-0000-0000
-                </div>
-                <div className="flex items-center justify-center text-center w-96">
-                  대구광역시 수성구 범어로 100
-                </div>
-                <div className="flex items-center justify-center w-40">
-                  홍길동
-                </div>
-                <div className="flex items-center justify-center w-36">3회</div>
-                <div className="flex gap-4 items-center justify-center w-36">
-                  <button
-                    onClick={() =>
-                      navigate(`../academy/edit?acaId=${item.acaId}`)
-                    }
-                  >
-                    <FaPen className="w-3 text-gray-400" />
-                  </button>
-                  <button
-                    //onClick={e => DeleteAcademy(item.acaId)}
-                    onClick={e => handleAcademyDelete(item.acaId)}
-                  >
-                    <FaRegTrashAlt className="w-3 text-gray-400" />
-                  </button>
+                  {item?.acaName}
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="flex justify-center items-center m-6 mb-10">
-            <Pagination
-              defaultCurrent={1}
-              total={myAcademyList?.length}
-              showSizeChanger={false}
-            />
-          </div>
+              <div className="flex items-center justify-center text-center w-40">
+                {item.createdAt.substr(0, 10)}
+              </div>
+              <div className="flex items-center justify-center text-center w-52">
+                010-0000-0000
+              </div>
+              <div className="flex items-center justify-center text-center w-96">
+                대구광역시 수성구 범어로 100
+              </div>
+              <div className="flex items-center justify-center w-40">
+                홍길동
+              </div>
+              <div className="flex items-center justify-center w-36">3회</div>
+              <div className="flex gap-4 items-center justify-center w-36">
+                <button
+                  onClick={() =>
+                    navigate(`../academy/edit?acaId=${item.acaId}`)
+                  }
+                >
+                  <FaPen className="w-3 text-gray-400" />
+                </button>
+                <button
+                  //onClick={e => DeleteAcademy(item.acaId)}
+                  onClick={e => handleAcademyDelete(item.acaId)}
+                >
+                  <FaRegTrashAlt className="w-3 text-gray-400" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
-        <CustomModal
-          visible={isModalVisible}
-          title={"학원 삭제하기"}
-          content={"선택하신 학원을 삭제하시겠습니까?"}
-          onButton1Click={handleButton1Click}
-          onButton2Click={handleButton2Click}
-          button1Text={"취소하기"}
-          button2Text={"삭제하기"}
-          modalWidth={400}
-        />
+        <div className="flex justify-center items-center m-6 mb-10">
+          <Pagination
+            defaultCurrent={1}
+            total={myAcademyList?.length}
+            showSizeChanger={false}
+          />
+        </div>
       </div>
-    </>
+
+      <CustomModal
+        visible={isModalVisible}
+        title={"학원 삭제하기"}
+        content={"선택하신 학원을 삭제하시겠습니까?"}
+        onButton1Click={handleButton1Click}
+        onButton2Click={handleButton2Click}
+        button1Text={"취소하기"}
+        button2Text={"삭제하기"}
+        modalWidth={400}
+      />
+    </div>
   );
 }
 

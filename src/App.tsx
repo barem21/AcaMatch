@@ -33,6 +33,7 @@ import MypageReview from "./pages/mypage/MypageReview";
 import MemberList from "./pages/admin/MemberList";
 import MemberInfo from "./pages/admin/MemberInfo";
 import AcademyList from "./pages/admin/academy/AcademyList";
+import AcademyArrow from "./pages/admin/academy/AcademyArrow";
 import AcademyAdd from "./pages/admin/academy/AcademyAdd";
 import AcademyEdit from "./pages/admin/academy/AcademyEdit";
 import AcademyClassList from "./pages/admin/academy/AcademyClassList";
@@ -198,6 +199,7 @@ function App() {
                 <Route path="notice-content/add" element={<NoticeAdd />} />
                 <Route path="popup-content" element={<PopupContent />} />
                 <Route path="academy" element={<AcademyList />} />
+                <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
                 <Route path="academy/edit" element={<AcademyEdit />} />
                 <Route path="academy/class" element={<AcademyClassList />} />
@@ -211,7 +213,7 @@ function App() {
                 <Route path="academy/record" element={<AcademyRecord />} />
                 <Route path="academy/premium" element={<AcademyPremium />} />
                 <Route
-                  path="academy/premiumReq"
+                  path="academy/premium-req"
                   element={<AcademyPremiumReq />}
                 />
                 <Route
