@@ -15,10 +15,14 @@ function LoginPage() {
   const [msg, setMsg] = useState("");
 
   const handleOAuthLogin = (provider: "google" | "kakao" | "naver") => {
-    // const redirectUrl = "http://acamatch.site:5233/fe/redirect";
+    // const redirectUrl = "http://acamatch.site:5233/fe/redirect";  // 이전 코드
     const redirectUrl = "http://localhost:5173/fe/redirect";
-    window.location.href = `/oauth2/authorization/${provider}?redirect_uri=${redirectUrl}`;
+    // const redirectUrl = "http://acamatch.site:5233/fe/redirect";
+    const backendUrl = "http://acamatch.site:5233";
+    const authUrl = `${backendUrl}/oauth2/authorization/${provider}?redirect_uri=${redirectUrl}`;
+    window.location.href = authUrl;
   };
+  // http://acamatch.site:5233/oauth2/authorization/google?redirect_uri=http://localhost:5173/fe/redirect
 
   const onFinish = async (values: any) => {
     try {
@@ -161,6 +165,12 @@ function LoginPage() {
 
             <div className="flex flex-col items-center gap-[8px]">
               {/* 회원가입 버튼 */}
+              <SecondaryButton
+                onClick={() => navigate("/signup")}
+                className={`px-4 py-2 w-[480px] h-[40px]`}
+              >
+                회원가입
+              </SecondaryButton>
               <SecondaryButton
                 onClick={() => handleOAuthLogin("naver")}
                 className="px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff]"

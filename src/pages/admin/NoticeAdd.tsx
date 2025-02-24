@@ -1,8 +1,7 @@
-import { Button, Form, Input, Pagination, Select } from "antd";
-import { useEffect } from "react";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "@emotion/styled";
+import { Button, Form, Input } from "antd";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const InputWrapper = styled.div`
   width: 100%;
@@ -30,9 +29,9 @@ const NoticeAdd = () => {
     navigate(`?${queryParams}`); //쿼리스트링 url에 추가
   };
 
-  const onChange = () => {
-    form.submit();
-  };
+  // const onChange = () => {
+  //   form.submit();
+  // };
 
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
