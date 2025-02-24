@@ -65,22 +65,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           label: "학원 등록/수정/삭제",
           link: "/admin/academy",
         },
+        /*
         {
           label: "학원 등록 요청",
           link: "/admin/academy?state=0",
           // label: "학원 등록/수정",
           // link: "/admin/academy",
         },
+        */
         {
-          label: "학원 승인",
-          link: "/admin/academy?state=0",
+          label: "학원 등록 승인(관리자 전용)",
+          link: "/admin/academy/arrow",
         },
         {
           label: "강의 관리",
           link: "/admin/academy/class",
         },
         {
-          label: "프리미엄 학원 관리",
+          label: "프리미엄 학원 관리(관리자 전용?)",
           link: "/admin/academy/premium",
         },
         {
