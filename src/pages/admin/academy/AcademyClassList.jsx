@@ -17,27 +17,17 @@ function AcademyClassList() {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [classList, setClassList] = useState([]);
-  const [academyInfo, setAcademyInfo] = useState("");
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const acaId = searchParams.get("acaId");
 
-  //학원정보 가져오기
-  const academyGetInfo = async () => {
-    try {
-      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
-      setAcademyInfo(res.data.resultData.acaName);
-      //console.log(res.data.resultData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   //강좌 목록
   const academyClassList = async () => {
     try {
-      const res = await axios.get(`/api/acaClass?acaId=${acaId}&page=1`);
+      const res = await axios.get(
+        `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
+      );
       setClassList(res.data.resultData);
       //console.log(res.data.resultData);
     } catch (error) {
@@ -96,23 +86,27 @@ function AcademyClassList() {
 
   const onFinished = async values => {
     //console.log(values);
-
-    // 쿼리 문자열로 변환
-    const queryParams = new URLSearchParams(values).toString();
+    const queryParams = new URLSearchParams(values).toString(); // 쿼리 문자열로 변환
     navigate(`../academy/class?${queryParams}`); //쿼리스트링 url에 추가
+
+    try {
+      const res = await axios.get(`/api/acaClass?acaId=${values.acaId}&page=1`);
+      setClassList(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onChange = () => {
     form.submit();
+    academyClassList();
   };
 
   useEffect(() => {
     academyClassList();
-  }, [currentUserInfo]);
+  }, []);
 
   useEffect(() => {
-    academyGetInfo();
-
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
       acaId: acaId ? parseInt(acaId) : "",
@@ -132,7 +126,7 @@ function AcademyClassList() {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          {academyInfo}의 강의목록
+          강의목록
           <p>학원 관리 &gt; 학원 강의목록</p>
         </h1>
 
@@ -148,7 +142,7 @@ function AcademyClassList() {
                     optionFilterProp="label"
                     className="select-admin-basic"
                     //onChange={onChange}
-                    // onSearch={onSearch}
+                    //onSearch={onSearch}
                     options={[
                       {
                         value: "",
@@ -159,11 +153,11 @@ function AcademyClassList() {
                         label: "대구 ABC상아탑 학원",
                       },
                       {
-                        value: "2",
+                        value: 2,
                         label: "in서울 입시학원",
                       },
                       {
-                        value: "3",
+                        value: 3,
                         label: "가나다 어학원",
                       },
                     ]}
@@ -180,6 +174,7 @@ function AcademyClassList() {
                   검색하기
                 </Button>
               </div>
+
               <div className="flex gap-2">
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
@@ -230,7 +225,7 @@ function AcademyClassList() {
 
           <div className="flex justify-between align-middle p-2 border-b">
             <div className="flex items-center justify-center w-full">
-              강의 명
+              강의 제목
             </div>
             <div className="flex items-center justify-center w-40">강사명</div>
             <div className="flex items-center justify-center w-44">시작일</div>
@@ -266,7 +261,7 @@ function AcademyClassList() {
                 >
                   <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
-                      src={`http://112.222.157.157:5223/pic/academy/${acaId}/${item.acaPic}`}
+                      src={`http://112.222.157.157:5233/pic/academy/${acaId}/${item.acaPic}`}
                       alt=""
                       className="max-w-fit max-h-full object-cover"
                     />

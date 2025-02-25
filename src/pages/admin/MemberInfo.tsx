@@ -138,23 +138,11 @@ function MemberInfo(): JSX.Element {
     return Promise.resolve();
   };
 
-  const { email, name, nickName, phone, birth, userPic } = editMember;
-
   useEffect(() => {
     memberInfo();
   }, []);
 
   useEffect(() => {
-    if (editMember && Object.keys(editMember).length > 0) {
-      form.setFieldsValue({
-        user_id: editMember.email,
-        name: editMember.name,
-        nickName: editMember.nickName,
-        phone: editMember.phone,
-        birth: editMember.birth,
-        pic: editMember.userPic,
-      });
-    }
     if (
       editMember?.userPic &&
       editMember.userPic !== "null" &&
@@ -182,7 +170,7 @@ function MemberInfo(): JSX.Element {
     // maxCount로 인해 하나의 파일만 유지
     newFileList = newFileList.slice(-1);
 
-    console.log("newFileList : ", newFileList);
+    //console.log("newFileList : ", newFileList);
 
     // 파일 상태 업데이트
     setFileList(newFileList);

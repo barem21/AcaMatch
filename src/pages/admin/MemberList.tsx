@@ -1,14 +1,24 @@
 import { Button, Form, Input, Pagination, Select } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import CustomModal from "../../components/modal/Modal";
 
 function MemberList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const state = searchParams.get("state");
+
+  //회원삭제 팝업
+  const handleButton1Click = () => {
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = () => {
+    setIsModalVisible(false);
+  };
 
   const onFinished = async (values: any) => {
     console.log(values);
@@ -50,6 +60,7 @@ function MemberList(): JSX.Element {
                     placeholder="전체"
                     optionFilterProp="label"
                     className="select-admin-basic"
+                    style={{ minWidth: "110px" }}
                     // onChange={onChange}
                     // onSearch={onSearch}
                     options={[
@@ -169,7 +180,7 @@ function MemberList(): JSX.Element {
               <button onClick={() => navigate(`../memberInfo?userId=0`)}>
                 <FaPen className="w-3 text-gray-400" />
               </button>
-              <button>
+              <button onClick={() => setIsModalVisible(true)}>
                 <FaRegTrashAlt className="w-3 text-gray-400" />
               </button>
             </div>
@@ -180,6 +191,17 @@ function MemberList(): JSX.Element {
           <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
         </div>
       </div>
+
+      <CustomModal
+        visible={isModalVisible}
+        title={"회원 탈퇴"}
+        content={"선택한 회원을 탈퇴시키겠습니까?"}
+        onButton1Click={handleButton1Click}
+        onButton2Click={handleButton2Click}
+        button1Text={"취소하기"}
+        button2Text={"탈퇴처리"}
+        modalWidth={400}
+      />
     </div>
   );
 }

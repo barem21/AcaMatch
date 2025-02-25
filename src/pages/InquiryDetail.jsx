@@ -9,7 +9,21 @@ import userInfo from "../atoms/userInfo";
 import { Button, Form } from "antd";
 import axios from "axios";
 
+/* 채팅관련 */
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+/* 채팅관련 */
+
 function InquiryDetail() {
+  /* 채팅관련 */
+  const [chatRoomId, setChatRoomId] = useState(1); // 초기 채팅방 ID 설정
+  const [senderType, setSenderType] = useState("USER_TO_ACADEMY"); // 기본 보내는 유형
+  const [messageInput, setMessageInput] = useState(""); // 메시지 입력 값
+  const [messages, setMessages] = useState([]); // 메시지 목록
+  const [stompClient, setStompClient] = useState(null); // STOMP 클라이언트
+  const [subscription, setSubscription] = useState(null); // 구독
+  /* 채팅관련 */
+
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [chatMessages, setChatMessages] = useState([]);
@@ -91,8 +105,126 @@ function InquiryDetail() {
     document.querySelector("#chat-list-wrap").scrollTo(0, 1500);
   }, [chatMessages]);
 
+  /* 채팅관련 */
+  useEffect(() => {
+    // WebSocket 연결 함수
+    const connectWebSocket = chatRoomId => {
+      if (stompClient) {
+        stompClient.deactivate(); // 기존 연결 종료
+      }
+
+      // SockJS 연결 및 STOMP 클라이언트 생성
+      const socket = new SockJS("http://localhost:8080/ws");
+      const client = new Client({
+        brokerURL: "ws://localhost:8080/ws",
+        connectHeaders: {},
+        debug: str => console.log(str),
+        onConnect: () => {
+          console.log("Connected to WebSocket");
+
+          // 기존 구독이 있다면 해제
+          if (subscription) {
+            subscription.unsubscribe();
+          }
+
+          // 새로운 채팅방 ID로 구독 설정
+          const newSubscription = client.subscribe(
+            `/queue/${chatRoomId}`,
+            message => {
+              const receivedMessage = JSON.parse(message.body);
+              setMessages(prevMessages => [
+                ...prevMessages,
+                `${receivedMessage.senderType}: ${receivedMessage.message}`,
+              ]);
+            },
+          );
+
+          setSubscription(newSubscription);
+        },
+      });
+
+      client.activate(); // 연결 활성화
+      setStompClient(client);
+    };
+
+    // 처음 연결
+    connectWebSocket(chatRoomId);
+
+    // 채팅방 ID 변경 감지 이벤트
+    return () => {
+      if (stompClient) {
+        stompClient.deactivate();
+      }
+    };
+  }, [chatRoomId, stompClient, subscription]);
+
+  // 메시지 전송 함수
+  const sendMessage = () => {
+    if (!chatRoomId || !messageInput) {
+      alert("채팅방 ID와 메시지를 입력하세요!");
+      return;
+    }
+
+    const messagePayload = {
+      chatRoomId: parseInt(chatRoomId, 10),
+      senderType: senderType,
+      message: messageInput,
+    };
+
+    if (stompClient) {
+      stompClient.publish({
+        destination: "/app/send",
+        body: JSON.stringify(messagePayload),
+      });
+    }
+
+    // 메시지 입력 초기화
+    setMessageInput("");
+  };
+  /* 채팅관련 */
+
   return (
     <div className="flex gap-5 w-full justify-center align-top">
+      {/* 채팅관련 */}
+      <div>
+        <label>채팅방 ID:</label>
+        <input
+          type="number"
+          value={chatRoomId}
+          onChange={e => setChatRoomId(e.target.value)}
+          placeholder="채팅방 ID 입력"
+        />
+
+        <label>보내는 유형:</label>
+        <select
+          value={senderType}
+          onChange={e => setSenderType(e.target.value)}
+        >
+          <option value="USER_TO_ACADEMY">USER_TO_ACADEMY</option>
+          <option value="ACADEMY_TO_USER">ACADEMY_TO_USER</option>
+        </select>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          value={messageInput}
+          onChange={e => setMessageInput(e.target.value)}
+          placeholder="메시지 입력"
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+
+      <div>
+        <h3>Messages</h3>
+        <div id="messages">
+          {messages.map((msg, index) => (
+            <p key={index}>{msg}</p>
+          ))}
+        </div>
+      </div>
+      {/* 채팅관련 */}
+
       <SideBar menuItems={menuItems} titleName={titleName} />
       <div className="flex flex-col w-full mb-16">
         <h1 className="title-font">1:1 학원별 문의</h1>

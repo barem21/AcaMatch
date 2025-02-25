@@ -33,6 +33,7 @@ import MypageReview from "./pages/mypage/MypageReview";
 import MemberList from "./pages/admin/MemberList";
 import MemberInfo from "./pages/admin/MemberInfo";
 import AcademyList from "./pages/admin/academy/AcademyList";
+import AcademyArrow from "./pages/admin/academy/AcademyArrow";
 import AcademyAdd from "./pages/admin/academy/AcademyAdd";
 import AcademyEdit from "./pages/admin/academy/AcademyEdit";
 import AcademyClassList from "./pages/admin/academy/AcademyClassList";
@@ -146,35 +147,7 @@ function App() {
                   element={<MyPageRecordDetail />}
                 />
               </Route>
-              <Route path="/mypage/academy">
-                <Route index element={<AcademyList />} />
-                <Route
-                  path="/mypage/academy/class"
-                  element={<AcademyClassList />}
-                />
-                <Route path="/mypage/academy/add" element={<AcademyAdd />} />
-                <Route path="/mypage/academy/Edit" element={<AcademyEdit />} />
-                <Route
-                  path="/mypage/academy/classEdit"
-                  element={<AcademyClassEdit />}
-                />
-                <Route
-                  path="/mypage/academy/classAdd"
-                  element={<AcademyClassAdd />}
-                />
-                <Route
-                  path="/mypage/academy/student"
-                  element={<AcademyStudent />}
-                />
-                <Route
-                  path="/mypage/academy/testList"
-                  element={<AcademyTestList />}
-                />
-                <Route
-                  path="/mypage/academy/record"
-                  element={<AcademyRecord />}
-                />
-              </Route>
+
               <Route path="/academy">
                 <Route index element={<AcademySearch />} />
                 <Route path="detail" element={<AcademyDetail />} />
@@ -186,8 +159,7 @@ function App() {
                 <Route path="inquiry/detail" element={<InquiryDetail />} />
               </Route>
               <Route path="/hotAcademy" element={<HotAcademy />} />
-              {/* <Route path="/support" element={<Support />} /> */}
-              {/* <Route path="/support/faq" element={<SupportFaq />} /> */}
+
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
@@ -200,6 +172,7 @@ function App() {
                 <Route path="notice-content/view" element={<NoticeView />} />
                 <Route path="popup-content" element={<PopupContent />} />
                 <Route path="academy" element={<AcademyList />} />
+                <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
                 <Route path="academy/edit" element={<AcademyEdit />} />
                 <Route path="academy/class" element={<AcademyClassList />} />
@@ -213,7 +186,7 @@ function App() {
                 <Route path="academy/record" element={<AcademyRecord />} />
                 <Route path="academy/premium" element={<AcademyPremium />} />
                 <Route
-                  path="academy/premiumReq"
+                  path="academy/premium-req"
                   element={<AcademyPremiumReq />}
                 />
                 <Route

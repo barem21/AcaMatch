@@ -1,16 +1,33 @@
 import { Button, Form, Input, Pagination, Select } from "antd";
+import { useNavigate } from "react-router-dom";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { FaPen, FaRegTrashAlt } from "react-icons/fa";
-import axios from "axios";
+import CustomModal from "../../../components/modal/Modal";
+//import CustomModal from "../../../components/modal/Modal";
 
-function AcademyTextbookList(): JSX.Element {
+function AcademyArrow(): JSX.Element {
   const [form] = Form.useForm();
+  const [form2] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, _setSearchParams] = useSearchParams();
-  const [classList, setClassList] = useState([]);
-  const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  //학원등록 거부사유
+  const handleButton1Click = (): void => {
+    form2.resetFields(); //초기화
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = (): void => {
+    const reject = form2.getFieldValue("reject");
+
+    if (!reject) {
+      alert("거부사유를 입력해 주세요.");
+    } else {
+      setIsModalVisible(false);
+      form2.submit();
+      form2.resetFields(); //초기화
+      //목록 다시 불러오기 한번 실행
+    }
+  };
 
   //학원 검색
   const onFinished = async (values: any) => {
@@ -18,67 +35,49 @@ function AcademyTextbookList(): JSX.Element {
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`../academy/textBook?acaId=${acaId}&${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`../academy/arrow?${queryParams}`); //쿼리스트링 url에 추가
+  };
+
+  const AcademyArrowChange = (e: any) => {
+    if (parseInt(e.target.value) === 2) {
+      //alert("거부사유 입력");
+      setIsModalVisible(true);
+    }
   };
 
   const onChange = () => {
     form.submit();
   };
 
+  //학원등록 승인삭제 팝업
+  const handleAcademyDelete = () => {};
+
+  //학원등록 거부사유 처리
+  const onFinishedSe = async (values: any) => {
+    console.log(values);
+  };
+
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      classId: classId ? parseInt(classId) : "all",
       search: "",
       showCnt: 40,
     });
-  }, []);
-
-  useEffect(() => {
-    //강좌 목록
-    const academyClassList = async () => {
-      try {
-        const res = await axios.get(
-          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
-        );
-        const formatted = res.data.resultData.map(item => ({
-          value: item.classId,
-          label: item.className,
-        }));
-        setClassList(formatted);
-        //console.log(res.data.resultData);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    academyClassList();
   }, []);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          교재 관리
-          <p>학원 관리 &gt; 학원 강의목록 &gt; 교재 관리</p>
+          학원등록 승인
+          <p>학원 관리 &gt; 학원등록 승인</p>
         </h1>
 
         <div className="board-wrap">
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-24 text-sm">교재 검색</label>
-                <Form.Item name="classId" className="mb-0">
-                  <Select
-                    showSearch
-                    placeholder="학원 선택"
-                    optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
-                    options={classList}
-                  />
-                </Form.Item>
-
+                <label className="w-24 text-sm">학원 검색</label>
                 <Form.Item name="search" className="mb-0">
                   <Input
                     className="input-admin-basic w-60"
@@ -116,29 +115,24 @@ function AcademyTextbookList(): JSX.Element {
                     ]}
                   />
                 </Form.Item>
-
-                <Button
-                  className="btn-admin-basic"
-                  onClick={() =>
-                    navigate(
-                      `../academy/textbookAdd?acaId=${acaId}&classId=${classId}`,
-                    )
-                  }
-                >
-                  + 교재 신규등록
-                </Button>
               </div>
             </div>
           </Form>
 
           <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
             <div className="flex items-center justify-center w-full">
-              교재명
+              학원명
             </div>
             <div className="flex items-center justify-center w-40">등록일</div>
-            <div className="flex items-center justify-center w-40">수량</div>
-            <div className="flex items-center justify-center w-40">가격</div>
-            <div className="flex items-center justify-center w-36">관리</div>
+            <div className="flex items-center justify-center w-52">
+              학원 연락처
+            </div>
+            <div className="flex items-center justify-center w-96">
+              학원 주소
+            </div>
+            <div className="flex items-center justify-center w-40">등록자</div>
+            <div className="flex items-center justify-center w-36">처리</div>
+            <div className="flex items-center justify-center w-36">삭제</div>
           </div>
 
           <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
@@ -146,32 +140,40 @@ function AcademyTextbookList(): JSX.Element {
               <div className="flex items-center gap-3 cursor-pointer">
                 <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                   <img
-                    src={"/aca_image_1.png"}
+                    src="/aca_image_1.png"
                     className="max-w-fit max-h-full object-cover"
                     alt=" /"
                   />
                 </div>
-                원숭이도 이해?!할 수 있는 초등영어
+                대구 ABC상아탑 학원
               </div>
             </div>
             <div className="flex items-center justify-center text-center w-40">
-              2025-01-01
+              2025-02-24
             </div>
-            <div className="flex items-center justify-center w-40">1개</div>
+            <div className="flex items-center justify-center text-center w-52">
+              010-0000-0000
+            </div>
+            <div className="flex items-center justify-center text-center w-96">
+              대구광역시 수성구 범어로 100
+            </div>
+            <div className="flex items-center justify-center w-40">홍길동</div>
             <div className="flex items-center justify-center w-40">
-              25,000원
+              <select
+                className="p-1 border rounded-lg"
+                onChange={e => AcademyArrowChange(e)}
+              >
+                <option value="">선택</option>
+                <option value="0">승인대기</option>
+                <option value="1">승인완료</option>
+                <option value="2">승인거부</option>
+              </select>
             </div>
             <div className="flex gap-4 items-center justify-center w-36">
               <button
-                onClick={() =>
-                  navigate(
-                    `../academy/textbookEdit?acaId=${acaId}&classId=${classId}`,
-                  )
-                }
+                //onClick={e => DeleteAcademy(item.acaId)}
+                onClick={() => handleAcademyDelete()}
               >
-                <FaPen className="w-3 text-gray-400" />
-              </button>
-              <button>
                 <FaRegTrashAlt className="w-3 text-gray-400" />
               </button>
             </div>
@@ -182,8 +184,34 @@ function AcademyTextbookList(): JSX.Element {
           <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
         </div>
       </div>
+
+      <CustomModal
+        visible={isModalVisible}
+        title={"학원등록 거부사유"}
+        content={
+          <Form form={form2} onFinish={values => onFinishedSe(values)}>
+            <Form.Item
+              name="reject"
+              className="mb-0"
+              rules={[
+                { required: true, message: "등록 거부사유를 입력해주세요." },
+              ]}
+            >
+              <Input
+                className="w-full input-admin-basic"
+                placeholder="학원등록 거부사유를 입력해 주세요."
+              />
+            </Form.Item>
+          </Form>
+        }
+        onButton1Click={handleButton1Click}
+        onButton2Click={handleButton2Click}
+        button1Text={"취소하기"}
+        button2Text={"저장하기"}
+        modalWidth={400}
+      />
     </div>
   );
 }
 
-export default AcademyTextbookList;
+export default AcademyArrow;
