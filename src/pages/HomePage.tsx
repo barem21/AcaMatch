@@ -246,7 +246,7 @@ function HomePage() {
     <div className="flex flex-col items-center px-4 py-[36px] gap-8 mx-auto">
       {/* 메인 베너 */}
       <div
-        className="w-[990px] h-[480px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative"
+        className="w-[990px] h-[480px] max-[640px]:w-[360px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner.jpg)`,
           backgroundSize: "cover",

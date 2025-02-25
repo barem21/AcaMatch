@@ -180,7 +180,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   };
   return (
     <header className={className}>
-      <div className="w-[1280px] flex items-center justify-between mx-auto  ">
+      <div className="w-[1280px] max-[640px]:w-[360px] flex items-center justify-between mx-auto">
         <img
           src="/logo2.png"
           className="w-[160px] cursor-pointer mr-[full]"
@@ -189,7 +189,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           }}
         />
 
-        <div className="flex items-center gap-[30px]">
+        <div className="flex items-center gap-[30px] max-[640px]:hidden">
           <ul className="flex items-center gap-[30px]">
             {menuItems.map((item, index) => (
               <li
@@ -282,6 +282,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             )}
           </div>
         </div>
+        <button>≡</button>
       </div>
     </header>
   );

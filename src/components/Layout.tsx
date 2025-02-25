@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       type: "item",
       icon: <FaChalkboardTeacher />,
       label: "학원 관리",
-      link: "/admin/1/1",
+      link: "/admin/academy",
       active: false,
       list: [
         {
@@ -78,7 +78,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         },
         {
           label: "학원 승인",
-          link: "/admin/academy?state=0",
+          link: "/admin/academy/arrow",
           active: false,
         },
         {
@@ -260,7 +260,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [pathname]);
 
   return (
-    <div className="flex">
+    <div className="flex mobile-width">
       {isAdminPage ? (
         <>
           <Sidebar
@@ -294,12 +294,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       ) : (
         <div className="flex flex-col flex-1">
           {isLayoutVisible && !isAdminPage && (
-            <Header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite" />
+            <Header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite mobile-width" />
           )}
 
           {isLayoutVisible ? (
             <main
-              className={"flex min-w-[990px] mx-auto max-w-[1280px]"}
+              className={
+                "flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
+              }
               style={{ minHeight: "calc(100vh - 164px)" }}
             >
               {children}
