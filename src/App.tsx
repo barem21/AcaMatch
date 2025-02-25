@@ -52,6 +52,7 @@ import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import PopupContent from "./pages/admin/PopupContent.tsx";
 import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
 import NoticeView from "./pages/admin/NoticeView.tsx";
+import PopupAdd from "./pages/admin/PopupAdd.tsx";
 
 function App() {
   useEffect(() => {
@@ -171,6 +172,7 @@ function App() {
                 <Route path="notice-content/add" element={<NoticeAdd />} />
                 <Route path="notice-content/view" element={<NoticeView />} />
                 <Route path="popup-content" element={<PopupContent />} />
+                <Route path="popup-content/add" element={<PopupAdd />} />
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
