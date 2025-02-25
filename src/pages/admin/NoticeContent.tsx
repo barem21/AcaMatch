@@ -1,33 +1,111 @@
 import { Button, Form, Pagination, Select } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+import jwtAxios from "../../apis/jwt";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
+import { message } from "antd";
+
+// 게시글 타입 정의
+interface BoardItem {
+  boardId: number;
+  userId: number;
+  boardName: string;
+  createdAt: string;
+  name: string;
+}
+
 const NoticeContent = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
+  const [boardList, setBoardList] = useState<BoardItem[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(40);
+  const [searchText, setSearchText] = useState("");
+  const { userId } = useRecoilValue(userInfo);
 
-  const state = searchParams.get("state");
+  const fetchBoardList = async (
+    page: number,
+    size: number,
+    search?: string,
+  ) => {
+    try {
+      const response = await jwtAxios.get(`/api/board`, {
+        params: {
+          boardId: 1,
+          page: page,
+          size: size,
+          search: search,
+        },
+      });
+      const filteredData = response.data.resultData.filter(
+        (item: BoardItem | null): item is BoardItem => item !== null,
+      );
+      setBoardList(filteredData);
+    } catch (error) {
+      console.error("Error fetching board list:", error);
+    }
+  };
 
   const onFinished = async (values: any) => {
     console.log(values);
-
-    // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`?${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`?${queryParams}`);
   };
 
-  const onChange = () => {
+  const onChange = (value: number) => {
+    setPageSize(value);
+    fetchBoardList(currentPage, value);
     form.submit();
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchBoardList(page, pageSize);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchText(value);
+    fetchBoardList(currentPage, pageSize, value);
+  };
+
+  const selectOptions = boardList.map(item => ({
+    value: item.boardId,
+    label: item.boardName,
+  }));
+
+  const handleDelete = async (boardId: number) => {
+    try {
+      const response = await jwtAxios.delete("/api/board", {
+        params: {
+          boardId: boardId,
+          userId: userId,
+        },
+      });
+
+      if (response.data.resultMessage) {
+        message.success("게시글이 삭제되었습니다.");
+        fetchBoardList(currentPage, pageSize);
+      }
+    } catch (error) {
+      console.error("Error deleting board:", error);
+      message.error("게시글 삭제에 실패했습니다.");
+    }
+  };
+
   useEffect(() => {
-    //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      state: state ? parseInt(state) : "all",
+      state: searchParams.get("state")
+        ? parseInt(searchParams.get("state")!)
+        : "항목을 검색해 주세요",
       search: "",
-      showCnt: 40,
+      showCnt: pageSize,
     });
+    fetchBoardList(currentPage, pageSize);
   }, []);
 
   return (
@@ -43,14 +121,20 @@ const NoticeContent = () => {
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-28 text-sm">공지사항 통합검색</label>
-
                 <Form.Item name="state" className="mb-0">
                   <Select
-                    placeholder="검색어를 입력하세요"
+                    showSearch
+                    placeholder="공지사항을 검색하세요"
                     optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
+                    className="select-admin-basic w-[300px]"
+                    onChange={handleSearch}
+                    onSearch={handleSearch}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={selectOptions}
                   />
                 </Form.Item>
               </div>
@@ -107,48 +191,61 @@ const NoticeContent = () => {
             </div>
           </div>
 
-          <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-[100%] h-[56px]">
-              <div className="flex items-center gap-3 cursor-pointer">
-                <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                  <img
-                    src={"/aca_image_1.png"}
-                    className="max-w-fit max-h-full object-cover"
-                    alt=" /"
-                  />
-                </div>
-                <div onClick={() => navigate("/admin/notice-content/view")}>
-                  <h4>은빛피아노미술학원</h4>
-                  <p className="text-[#1761FD] text-[12px]">
-                    [대구 광역시 수성구 범어동]
-                  </p>
+          {boardList.map(item => (
+            <div
+              key={item.boardId}
+              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+            >
+              <div className="flex justify-start items-center w-[100%] h-[56px]">
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <div
+                    onClick={() =>
+                      navigate(`/admin/notice-content/view/${item.boardId}`)
+                    }
+                  >
+                    <h4>{item?.boardName}</h4>
+                  </div>
                 </div>
               </div>
+              <div className="flex items-center justify-center text-center min-w-[200px]">
+                {item.createdAt}
+              </div>
+              <div className="flex items-center justify-center text-center min-w-[200px]">
+                {item.name}
+              </div>
+              <div className="flex items-center justify-center min-w-[132px]">
+                <p
+                  className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
+                  onClick={() =>
+                    navigate(`/admin/notice-content/add/${item.boardId}`)
+                  }
+                >
+                  수정하기
+                </p>
+              </div>
+              <div className="flex gap-4 items-center justify-center min-w-[72px]">
+                <button
+                  onClick={() => {
+                    if (window.confirm("정말 삭제하시겠습니까?")) {
+                      handleDelete(item.boardId);
+                    }
+                  }}
+                >
+                  <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center justify-center text-center min-w-[200px]">
-              2025-01-01
-            </div>
-            <div className="flex items-center justify-center text-center min-w-[200px]">
-              관리자
-            </div>
-            <div className="flex items-center justify-center min-w-[132px]">
-              <p
-                className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer`}
-                onClick={() => navigate("/admin/notice-content/add")}
-              >
-                수정하기
-              </p>
-            </div>
-            <div className="flex gap-4 items-center justify-center min-w-[72px]">
-              <button>
-                <FaRegTrashAlt className="w-3 text-gray-400" />
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">
-          <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
+          <Pagination
+            current={currentPage}
+            total={totalItems}
+            pageSize={pageSize}
+            onChange={handlePageChange}
+            showSizeChanger={false}
+          />
         </div>
       </div>
     </div>

@@ -34,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ className, close }) => {
             roleId: response.data.resultData.roleId, // roleId를 문자열로 변환
             userId: response.data.resultData.userId, // userId를 문자열로 변환
           };
+          console.log(userData);
 
           setUserInfo(userData); // Recoil 상태 업데이트
         } catch (error) {
