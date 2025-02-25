@@ -53,6 +53,19 @@ function InquiryDetail() {
     }
   `;
 
+  //채팅방 개설
+  const makeChat = async () => {
+    try {
+      const res = await axios.get(
+        `/api/chat/aca-id=${acaId}&user-id=${userId}`,
+      );
+      //setAcademyName(res.data.resultData.acaName);
+      console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   //학원정보 가져오기
   const academyGetInfo = async () => {
     try {
@@ -95,6 +108,7 @@ function InquiryDetail() {
 
   useEffect(() => {
     myMtomDetail();
+    makeChat(); //채팅방 개설 실행
   }, []);
 
   useEffect(() => {
@@ -114,9 +128,9 @@ function InquiryDetail() {
       }
 
       // SockJS 연결 및 STOMP 클라이언트 생성
-      const socket = new SockJS("http://localhost:8080/ws");
+      const socket = new SockJS("http://acamatch.site:5233/ws");
       const client = new Client({
-        brokerURL: "ws://localhost:8080/ws",
+        brokerURL: "ws://acamatch.site:5233/ws",
         connectHeaders: {},
         debug: str => console.log(str),
         onConnect: () => {

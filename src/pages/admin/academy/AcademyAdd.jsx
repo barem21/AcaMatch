@@ -130,7 +130,9 @@ function AcademyAdd() {
   const [academyArea, setAcademyArea] = useState(""); //지역선택
   const [academyKeyword, setAcademyKeyword] = useState(""); //학원검색 키워드
   const [searchAcademyResult, setSearchAcademyResult] = useState([]); //학원검색 결과
-  const [fileList, setFileList] = useState([]);
+  //const [fileList, setFileList] = useState([]);
+  //const [fileList2, setFileList2] = useState([]);
+  //const [fileList3, setFileList3] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentUserInfo = useRecoilValue(userInfo);
@@ -232,18 +234,62 @@ function AcademyAdd() {
 
   //첨부파일 처리
   const handleChange = info => {
-    let newFileList = [...info.fileList];
+    //const newFileList = [...info.fileList];
+    //console.log(newFileList);
 
     // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
+    //newFileList = newFileList.slice(-1);
 
     // 파일 상태 업데이트
-    setFileList(newFileList);
+    //setFileList(newFileList);
+
+    console.log("파일 선택됨:", info.file.originFileObj);
+    form.setFieldValue("pics", info.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
       console.log("파일 선택됨:", info.file.originFileObj);
-      form.setFieldValue("pic", info.file.originFileObj);
+      form.setFieldValue("pics", info.file.originFileObj);
+    }
+  };
+
+  //사업자등록증 파일 처리
+  const handle1Change = info2 => {
+    //let newFileList2 = [...info2.fileList];
+
+    // maxCount로 인해 하나의 파일만 유지
+    //newFileList2 = newFileList2.slice(-1);
+
+    // 파일 상태 업데이트
+    //setFileList2(newFileList2);
+
+    console.log("파일 선택됨:", info2.file.originFileObj);
+    form.setFieldValue("businessLicensePic", info2.file.originFileObj);
+
+    // 선택된 파일이 있으면 콘솔에 출력
+    if (info2.file.status === "done" && info2.file.originFileObj) {
+      console.log("파일 선택됨:", info2.file.originFileObj);
+      form.setFieldValue("businessLicensePic", info2.file.originFileObj);
+    }
+  };
+
+  //학원등록증 파일 처리
+  const handle2Change = info3 => {
+    //let newFileList3 = [...info3.fileList];
+
+    // maxCount로 인해 하나의 파일만 유지
+    //newFileList3 = newFileList3.slice(-1);
+
+    // 파일 상태 업데이트
+    //setFileList3(newFileList3);
+
+    console.log("파일 선택됨:", info3.file.originFileObj);
+    form.setFieldValue("operationLicensePic", info3.file.originFileObj);
+
+    // 선택된 파일이 있으면 콘솔에 출력
+    if (info3.file.status === "done" && info3.file.originFileObj) {
+      console.log("파일 선택됨:", info3.file.originFileObj);
+      form.setFieldValue("operationLicensePic", info3.file.originFileObj);
     }
   };
 
@@ -304,6 +350,8 @@ function AcademyAdd() {
   };
 
   const onFinished = async values => {
+    console.log(values);
+
     if (isSubmitting) return; // 이미 제출 중이면 추가 제출을 막음
     setIsSubmitting(true); // 제출 중 상태로 설정
     try {
@@ -314,7 +362,13 @@ function AcademyAdd() {
 
       // pic이 있는 경우에만 추가
       if (values.pic) {
-        formData.append("pic", values.pic);
+        formData.append("pics", values.pic);
+      }
+      if (values.businessLicensePic) {
+        formData.append("businessLicensePic", values.businessLicensePic);
+      }
+      if (values.operationLicensePic) {
+        formData.append("operationLicensePic", values.operationLicensePic);
       }
 
       const reqData = {
@@ -323,15 +377,17 @@ function AcademyAdd() {
         acaName: values.acaName,
         acaPhone: values.acaPhone,
         comment: values.comment,
-        teacherNum: values.teacherNum,
+        teacherNum: parseInt(values.teacherNum),
         openTime: startTimes,
         closeTime: endTimes,
-        addressDto: {
-          address: values.address,
-          detailAddress: values.detailAddress,
-          postNum: values.postNum,
-        },
+        address: values.address,
+        detailAddress: values.detailAddress,
+        postNum: values.postNum,
         tagIdList: selectedItems.map(item => parseInt(item, 10)),
+        teacherNum: values.teacherNum,
+        businessName: values.businessName,
+        businessNumber: values.businessNumber,
+        corporateNumber: values.corporateNumber,
         //tagIdList: [1, 3],
       };
 
@@ -423,24 +479,6 @@ function AcademyAdd() {
                   </button>
                 </Form.Item>
               </div>
-
-              <Form.Item
-                name="business_number"
-                label="사업자등록번호"
-                rules={[
-                  {
-                    required: true,
-                    message: "사업자등록번호를 입력해 주세요.",
-                  },
-                ]}
-              >
-                <Input
-                  className="input-admin-basic"
-                  id="acaName"
-                  maxLength={20}
-                  placeholder="사업자등록번호를 입력해 주세요."
-                />
-              </Form.Item>
 
               <div className="flex gap-3 w-full">
                 <Form.Item
@@ -564,7 +602,6 @@ function AcademyAdd() {
                 <Form.Item label="태그 등록" className="w-full">
                   <Input
                     className="input-admin-basic"
-                    id="academyTag"
                     placeholder="태그를 선택해 주세요."
                     onClick={() => handleTagSearch()}
                     readOnly
@@ -581,6 +618,48 @@ function AcademyAdd() {
                   </button>
                 </Form.Item>
               </div>
+
+              <Form.Item
+                name="businessName"
+                label="상호"
+                rules={[
+                  {
+                    required: true,
+                    message: "상호를 입력해 주세요.",
+                  },
+                ]}
+              >
+                <Input
+                  className="input-admin-basic"
+                  maxLength={20}
+                  placeholder="상호를 입력해 주세요."
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="businessNumber"
+                label="사업자등록번호"
+                rules={[
+                  {
+                    required: true,
+                    message: "사업자등록번호를 입력해 주세요.",
+                  },
+                ]}
+              >
+                <Input
+                  className="input-admin-basic"
+                  maxLength={20}
+                  placeholder="사업자등록번호를 입력해 주세요."
+                />
+              </Form.Item>
+
+              <Form.Item name="corporateNumber" label="법인번호">
+                <Input
+                  className="input-admin-basic"
+                  maxLength={20}
+                  placeholder="법인번호를 입력해 주세요."
+                />
+              </Form.Item>
 
               {selectedItems && (
                 <div className="w-full pl-32 pb-6">
@@ -609,7 +688,7 @@ function AcademyAdd() {
               )}
 
               <Form.Item
-                name="business_pic"
+                name="businessLicensePic"
                 label="사업자등록증"
                 rules={[
                   {
@@ -622,7 +701,7 @@ function AcademyAdd() {
                   <Upload
                     listType="picture-card"
                     maxCount={1}
-                    onChange={handleChange}
+                    onChange={handle1Change}
                     showUploadList={{ showPreviewIcon: false }}
                   >
                     <button
@@ -647,7 +726,7 @@ function AcademyAdd() {
               </Form.Item>
 
               <Form.Item
-                name="operation_lience_pic"
+                name="operationLicensePic"
                 label="학원등록증"
                 rules={[
                   {
@@ -660,7 +739,7 @@ function AcademyAdd() {
                   <Upload
                     listType="picture-card"
                     maxCount={1}
-                    onChange={handleChange}
+                    onChange={handle2Change}
                     showUploadList={{ showPreviewIcon: false }}
                   >
                     <button
@@ -684,11 +763,11 @@ function AcademyAdd() {
                 </div>
               </Form.Item>
 
-              <Form.Item name="pic" label="학원 이미지">
+              <Form.Item name="pics" label="학원 이미지">
                 <div>
                   <Upload
                     listType="picture-card"
-                    maxCount={1}
+                    maxCount={5}
                     onChange={handleChange}
                     showUploadList={{ showPreviewIcon: false }}
                   >
