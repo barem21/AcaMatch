@@ -117,7 +117,7 @@ const NoticeContent = () => {
                     alt=" /"
                   />
                 </div>
-                <div>
+                <div onClick={() => navigate("/admin/notice-content/view")}>
                   <h4>은빛피아노미술학원</h4>
                   <p className="text-[#1761FD] text-[12px]">
                     [대구 광역시 수성구 범어동]
@@ -133,7 +133,8 @@ const NoticeContent = () => {
             </div>
             <div className="flex items-center justify-center min-w-[100px]">
               <p
-                className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300`}
+                className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer`}
+                onClick={() => navigate("/admin/notice-content/add")}
               >
                 수정하기
               </p>

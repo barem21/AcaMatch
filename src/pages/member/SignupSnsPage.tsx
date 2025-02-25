@@ -16,6 +16,7 @@ import { SecondaryButton } from "../../components/modal/Modal";
 import { FadeLoader } from "react-spinners";
 import styled from "@emotion/styled";
 import MainButton from "../../components/button/MainButton";
+import { setCookie } from "../../utils/cookie";
 
 function SignupSnsPage() {
   const [searchParams, _setSearchParams] = useSearchParams();
@@ -31,6 +32,9 @@ function SignupSnsPage() {
   const [isSnsLoading, setIsSnsLoading] = useState(true);
   const [email, setEmail] = useState<string | null>(
     searchParams.get("email") ? searchParams.get("email") : "",
+  );
+  const [userId, setUserId] = useState<number>(
+    Number(searchParams.get("user_id")) || 0,
   );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -61,7 +65,24 @@ function SignupSnsPage() {
 
   useEffect(() => {
     const emailFromQuery = searchParams.get("email");
+    const userIdFromQuery = searchParams.get("user_id");
+    const needMoreData = searchParams.get("need_more_data");
+    const accessToken = searchParams.get("access_token");
     console.log("Email from query:", emailFromQuery);
+
+    if (needMoreData === "false" && accessToken) {
+      // 액세스 토큰을 쿠키에 저장
+      setCookie("accessToken", accessToken, {
+        path: "/",
+        secure: true,
+        sameSite: "strict",
+        // expires: new Date(new Date().getTime() + 60 * 60 * 1000) // 1시간 후 만료 (필요에 따라 조정)
+      });
+
+      // 메인 페이지로 이동
+      navigate("/");
+      return;
+    }
 
     if (emailFromQuery) {
       // 즉시 form 초기화
@@ -70,9 +91,12 @@ function SignupSnsPage() {
       });
       setEmail(emailFromQuery);
     }
+    if (userIdFromQuery) {
+      setUserId(Number(userIdFromQuery));
+    }
 
     setIsSnsLoading(false);
-  }, []); // 의존성 배열을 비워서 컴포넌트 마운트 시에만 실행
+  }, [navigate, searchParams]); // 의존성 배열을 비워서 컴포넌트 마운트 시에만 실행
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
@@ -131,17 +155,45 @@ function SignupSnsPage() {
       return;
     }
 
-    if (emailCheck !== 2) {
-      message.error("이메일 중복 확인이 필요합니다.");
+    // 필수 체크 항목 확인
+    if (checkedList.length < 2) {
+      message.error("필수 약관에 모두 동의해주세요.");
+      setModalMessage("필수 약관에 모두 동의해주세요.");
+      setIsModalVisible(true);
       return;
     }
 
+    // 이메일, 닉네임 중복 체크 확인
     if (nickNameCheck !== 2) {
       message.error("닉네임 중복 확인이 필요합니다.");
+      setModalMessage("닉네임 중복 확인이 필요합니다.");
+      setIsModalVisible(true);
       return;
     }
 
-    // console.log("Form values:", { ...restValues, birth: formattedBirthday }); // Include formatted birthday in the logged values
+    // API 요청 데이터 형식에 맞게 가공
+    const requestData = {
+      userId: userId, // URL에서 가져온 user_id 사용
+      userRole: values.userRole,
+      name: values.name,
+      phone: values.phone,
+      birth: values.birth.format("YYYY-MM-DD"),
+      nickName: values.nickName,
+      upw: values.upw,
+    };
+
+    // API 호출
+    const response = await axios.post(
+      "/api/user/simple-login-user-data",
+      requestData,
+    );
+
+    if (response.data.success) {
+      message.success("회원가입이 완료되었습니다.");
+      navigate("/login"); // 로그인 페이지로 이동
+    } else {
+      throw new Error(response.data.message || "회원가입 실패");
+    }
 
     try {
       setIsLoading(true);
@@ -242,9 +294,9 @@ function SignupSnsPage() {
       console.log("이메일 체크 상태:", emailCheck);
     } catch (error) {
       console.error("에러 발생:", error);
-      message.error("이메일 중복 확인 중 오류가 발생했습니다.");
+      message.error("이미 사용중인 이메일입니다.");
       setIsModalVisible(true);
-      setModalMessage("이메일 중복 확인 중 오류가 발생했습니다.");
+      setModalMessage("이미 사용중인 이메일입니다.");
     }
   };
   if (isSnsLoading) {
@@ -306,7 +358,6 @@ function SignupSnsPage() {
                   <Radio.Group
                     className="flex gap-[4px]"
                     options={[
-                      { value: "ADMIN", label: "관리자" },
                       { value: "STUDENT", label: "학생" },
                       { value: "PARENT", label: "학부모" },
                       { value: "ACADEMY", label: "학원 관계자" },
@@ -318,43 +369,23 @@ function SignupSnsPage() {
             </div>
 
             {/* 입력 필드들 */}
+            {/* 이메일 필드 */}
             <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
                 이메일 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
-              <Form.Item
-                name="email"
-                className="mb-0"
-                rules={[
-                  { required: true, message: "이메일을 입력해주세요." },
-                  { type: "email", message: "유효한 이메일을 입력해주세요." },
-                ]}
-              >
-                <div className="flex items-center w-full gap-[12px]">
-                  <Input
-                    placeholder="이메일을 입력해주세요"
-                    width="351px"
-                    style={{
-                      width: "351px",
-                      height: "56px",
-                      borderRadius: "12px",
-                      fontSize: "14px",
-                    }}
-                    value={email ? email : ""}
-                    onChange={e => {
-                      handleEmailChange(e);
-                      setEmailCheck(0);
-                    }} // 입력값 변경시 체크 초기화
-                  />
-                </div>
+              <Form.Item name="email" className="mb-0" initialValue={email}>
+                <Input
+                  disabled // 이메일 필드 비활성화
+                  value={email || ""}
+                  className="w-[448px] h-[56px] bg-gray-100" // 비활성화된 상태를 시각적으로 표시
+                  style={{
+                    cursor: "not-allowed", // 커서 스타일 변경
+                    color: "#666", // 텍스트 색상을 회색으로
+                  }}
+                />
               </Form.Item>
-              <SecondaryButton
-                onClick={checkEmail}
-                className="w-[84px] h-[56px]"
-              >
-                중복확인
-              </SecondaryButton>
             </div>
             <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">

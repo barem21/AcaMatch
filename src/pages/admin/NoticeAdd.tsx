@@ -6,7 +6,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 const InputWrapper = styled.div`
   width: 100%;
   .ant-input {
-    width: 1208px;
     height: 40px;
     border-radius: 4px;
   }
@@ -51,12 +50,12 @@ const NoticeAdd = () => {
 
         <div className="board-wrap">
           <Form form={form} onFinish={values => onFinished(values)}>
-            <div className="flex justify-between p-2 border-b">
+            <div className=" justify-between p-2 border-b">
               <div className="flex items-center gap-1">
                 <label className="min-w-[100px] text-sm">제목</label>
                 <InputWrapper>
                   <Form.Item name="title" className="m-0">
-                    <Input />
+                    <Input className="block w-full" />
                   </Form.Item>
                 </InputWrapper>
               </div>
@@ -71,7 +70,7 @@ const NoticeAdd = () => {
                 </Form.Item>
               </div>
             </div>
-            <div className="flex justify-end pt-3 gap-3">
+            <div className="flex justify-end p-3 gap-3 border-b">
               <button
                 type="button"
                 className="btn-admin-cancel"
