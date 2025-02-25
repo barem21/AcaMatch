@@ -33,6 +33,12 @@
   @apply text-[14px];
 }
 
+/* 반응형 모바일 사이즈 */
+.mobile-width {
+  @apply max-[640px]:block;
+}
+/* 반응형 모바일 사이즈 */
+
 /* 관리자 전용 */
 .title-admin-font {
   @apply font-bold text-xl pt-3 pb-3;

@@ -101,11 +101,16 @@ const UserInfo = styled.div`
   }
 `;
 
+interface MemberInfo {
+  resultMessage: string;
+  resultData;
+}
+
 function MemberInfo(): JSX.Element {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [nickNameCheck, setNickNameCheck] = useState(0);
-  const [editMember, setEditMember] = useState({});
+  const [editMember, setEditMember] = useState<MemberInfo>({});
   const navigate = useNavigate();
 
   //회원정보 조회
@@ -415,7 +420,7 @@ function MemberInfo(): JSX.Element {
             </Form.Item>
 
             <Form.Item name="birth" label="생년월일">
-              <span className="readonly w-full">{editMember.birth}</span>
+              <span className="readonly w-full">{editMember?.birth}</span>
             </Form.Item>
 
             <Form.Item name="pic" label="프로필 이미지">

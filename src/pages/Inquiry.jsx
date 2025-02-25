@@ -17,6 +17,8 @@ function Inquiry() {
 
   const acaId = searchParams.get("acaId");
 
+  console.log(userId);
+
   const titleName = "고객지원";
   const menuItems = [
     { label: "FAQ", isActive: false, link: "/support" },
@@ -39,13 +41,14 @@ function Inquiry() {
   const handleButton2Click = () => {
     setIsModalVisible(false);
   };
+
   //1:1 문의 목록 호출
   const myMtomList = async () => {
     try {
       const res = await jwtAxios.get(
         roleId === 3
-          ? `/api/chat?aca-id=${acaId}`
-          : `/api/chat?user-id=${userId}`,
+          ? `/api/chat-room?aca-id=${acaId}`
+          : `/api/chat-room?user-id=${userId}`,
         ``,
       );
       // console.log(acaId);
