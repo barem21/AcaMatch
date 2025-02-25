@@ -74,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     // console.log(currentUserInfo.userId);
 
     // console.log(
-    //   "✅ SSE 연결 시도:",
+    //   "SSE 연결 시도:",
     //   `/api/notifications/subscribe/${currentUserInfo.userId}`,
     // );
 
@@ -83,27 +83,27 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     );
 
     eventSource.onopen = () => {
-      // console.log("🟢 SSE 연결 성공!");
+      // console.log(" SSE 연결 성공!");
     };
 
     eventSource.onmessage = () => {
-      // console.log("🔔 새 알림 수신:", event.data);
+      // console.log("새 알림 수신:", event.data);
       try {
         // const data = JSON.parse(event.data);
         setCookie("message", "true", { path: "/" });
         setNotifications(_ => ["읽지 않은 메시지가 있습니다."]);
       } catch (error) {
-        console.error("❌ JSON 파싱 오류:", error);
+        console.error("JSON 파싱 오류:", error);
       }
     };
 
     eventSource.onerror = error => {
-      console.error("❌ SSE 오류 발생:", error);
+      console.error("SSE 오류 발생:", error);
       eventSource.close();
     };
 
     return () => {
-      console.log("🔴 SSE 연결 종료");
+      console.log("SSE 연결 종료");
       eventSource.close();
     };
   }, [currentUserInfo.userId]);

@@ -18,15 +18,12 @@ interface Academy {
   starAvg: number;
 }
 interface BestAcademy {
-  acaId?: number;
-  acaName?: string;
-  tagNames?: string;
-  subject?: string;
-  description?: string;
-  reviews?: string;
-  questionsAnswered?: string;
-  link?: string;
-  image?: string;
+  subject: string;
+  description: string;
+  reviews: string;
+  questionsAnswered: string;
+  link: string;
+  image: string;
 }
 
 interface Tag {
@@ -58,40 +55,7 @@ function HomePage() {
   // const [loading, setLoading] = useState(true); // 로딩 상태 추가
 
   const [popularTag, setPopularTag] = useState<Tag[]>([]);
-  const [bestAcademyCards, setBestAcademyCards] = useState<BestAcademy[]>([
-    {
-      subject: "수학 학원",
-      description: "Math, Algebra, Calculus",
-      reviews: "5.0 (123 reviews)",
-      questionsAnswered: "12,000 questions answered",
-      link: "/",
-      image: "/default-academy.png",
-    },
-    {
-      subject: "과학 학원",
-      description: "Physics, Chemistry",
-      reviews: "4.9 (87 reviews)",
-      questionsAnswered: "9,000 questions answered",
-      link: "/",
-      image: "/default-academy.png",
-    },
-    {
-      subject: "영어 학원",
-      description: "English, Grammar, ESL",
-      reviews: "4.8 (56 reviews)",
-      questionsAnswered: "7,500 questions answered",
-      link: "/",
-      image: "/default-academy.png",
-    },
-    {
-      subject: "외국어 학원",
-      description: "Spanish, French, Italian",
-      reviews: "4.7 (34 reviews)",
-      questionsAnswered: "6,000 questions answered",
-      link: "/",
-      image: "/default-academy.png",
-    },
-  ]);
+  const [bestAcademyCards, setBestAcademyCards] = useState<BestAcademy[]>([]);
 
   const serviceStats = [
     {
@@ -237,11 +201,12 @@ function HomePage() {
 
         const updatedCards: BestAcademy[] = response.data.resultData.map(
           (item: any) => ({
-            acaId: item.acaId,
-            acaName: item.acaName || "학원명",
+            subject: item.acaName || "학원명",
+            description: item.tagNames || "태그 정보 없음",
             reviews: `${item.starAvg.toFixed(1)} (${item.reviewCount} reviews)`,
+            questionsAnswered: item.questionsAnswered || "질문 정보 없음",
+            link: "/",
             image: getAcademyImageUrl(item.acaId, item.acaPic), // 이미지 URL 변환
-            tagNames: item.tagNames,
           }),
         );
 
@@ -331,119 +296,127 @@ function HomePage() {
       <div className="w-full max-w-[990px]">
         <h2 className="text-2xl font-bold mb-6">인기 태그</h2>
         <div className="flex flex-wrap gap-5 justify-start items-center">
-          {popularTag?.map((subject, index) => (
-            <div
-              key={index}
-              className="bg-brand-BTWhite hover:bg-brand-BTWhiteHover px-4 py-1.5 rounded-xl flex-row-center cursor-pointer"
-              onClick={() =>
-                navigate(`academy?tagName=${subject.tagName}&page=1&size=10`)
-              }
-            >
-              <span className="text-sm font-medium">{subject.tagName}</span>
-            </div>
-          ))}
+          {popularTag && popularTag.length > 0 ? (
+            popularTag.map((subject, index) => (
+              <div
+                key={index}
+                className="bg-brand-BTWhite hover:bg-brand-BTWhiteHover px-4 py-1.5 rounded-xl flex-row-center cursor-pointer"
+                onClick={() =>
+                  navigate(`academy?tagName=${subject.tagName}&page=1&size=10`)
+                }
+              >
+                <span className="text-sm font-medium">{subject.tagName}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">인기 태그가 존재하지 않습니다.</p>
+          )}
         </div>
       </div>
       <div className="w-full max-w-[990px]">
         <h2 className="text-2xl font-bold mb-6">이 학원 어떠신가요?</h2>
-        <div className="grid grid-cols-5 gap-6">
-          {defaultAcademies.map(academy => (
-            <div
-              key={academy.acaId}
-              className="flex flex-col gap-4 cursor-pointer"
-              onClick={() => {
-                handleAcademyClick(academy.acaId);
-                // console.log(academy.acaId);
-              }}
-            >
-              <img
-                src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
-                alt={academy.acaName}
-                // effect="blur"
-                className="w-full h-[178px] rounded-xl object-cover"
-                // placeholderSrc="/image-placeholder.jpg" // 로딩 중 표시될 저해상도 이미지
-                // wrapperClassName="w-full h-[186px]"
-              />
-              <div>
-                <h3 className="font-medium text-base text-[#242424] truncate">
-                  {academy.acaName}
-                </h3>
-                <p className="text-sm text-[#507A95] truncate">
-                  {/* {academy.address} */}
-                  {academy.tagNames || "태그 정보 없음"}
-                </p>
-                <p className="text-sm text-[#507A95]">
-                  {academy.starAvg?.toFixed(1)}&nbsp; ({academy.reviewCount}{" "}
-                  reviews)
-                </p>
+        {defaultAcademies && defaultAcademies.length > 0 ? (
+          <div className="grid grid-cols-5 gap-6">
+            {defaultAcademies.map(academy => (
+              <div
+                key={academy.acaId}
+                className="flex flex-col gap-4 cursor-pointer"
+                onClick={() => {
+                  handleAcademyClick(academy.acaId);
+                  // console.log(academy.acaId);
+                }}
+              >
+                <img
+                  src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
+                  alt={academy.acaName}
+                  // effect="blur"
+                  className="w-full h-[178px] rounded-xl object-cover"
+                  // placeholderSrc="/image-placeholder.jpg" // 로딩 중 표시될 저해상도 이미지
+                  // wrapperClassName="w-full h-[186px]"
+                />
+                <div>
+                  <h3 className="font-medium text-base text-[#242424] truncate">
+                    {academy.acaName}
+                  </h3>
+                  <p className="text-sm text-[#507A95] truncate">
+                    {/* {academy.address} */}
+                    {academy.tagNames || "태그 정보 없음"}
+                  </p>
+                  <p className="text-sm text-[#507A95]">
+                    {academy.starAvg?.toFixed(1)}&nbsp; ({academy.reviewCount}{" "}
+                    reviews)
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">추천할 학원이 존재하지 않습니다.</p>
+        )}
       </div>
 
       {/* 서비스 현황 */}
       <div className="w-full max-w-[990px]">
         <h2 className="text-2xl font-bold font-lexend mb-7">서비스 현황</h2>
-        <div className="grid grid-cols-3 gap-6">
-          {service.map((stat, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-3 p-4 bg-[#F8FAFB] border border-[#D1DDE6] rounded-lg"
-            >
-              <stat.icon className="w-6 h-6 text-[#242424]" />
-              <div>
-                <h3 className="text-base font-bold text-[#242424]">
-                  {stat.title}
-                </h3>
-                <p className="text-sm text-[#507A95]">{stat.count}</p>
+        {service && service.length > 0 ? (
+          <div className="grid grid-cols-3 gap-6">
+            {service.map((stat, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-3 p-4 bg-[#F8FAFB] border border-[#D1DDE6] rounded-lg"
+              >
+                <stat.icon className="w-6 h-6 text-[#242424]" />
+                <div>
+                  <h3 className="text-base font-bold text-[#242424]">
+                    {stat.title}
+                  </h3>
+                  <p className="text-sm text-[#507A95]">{stat.count}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">서비스 현황 정보가 존재하지 않습니다.</p>
+        )}
       </div>
 
       {/* 화제가 되고 있는 학원 */}
       <div className="w-full max-w-[990px]">
         <h2 className="text-2xl font-bold mb-7">화제가 되고 있는 학원</h2>
-        <div className="grid grid-cols-4 gap-6">
-          {/* {loading ? (
-            // 로딩 중일 때 스켈레톤 표시
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          ) : ( */}
-          {/* // 데이터 로딩 완료 시 실제 카드 표시 */}
-          {bestAcademyCards.map((card, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-4 cursor-pointer"
-              onClick={() => handleAcademyClick(Number(card.acaId))}
-            >
-              <img
-                className="h-56 bg-gray-200 rounded-xl object-cover"
-                // src={card.image}
-                src={card.image}
-                alt={card.acaName}
-              />
-              <div className="flex flex-col">
-                <h3 className="font-medium text-base text-[#242424  ]">
-                  {card.acaName}
-                </h3>
-                <div className="text-sm text-[#507A95]">
-                  <p className="text-[14px] line-clamp-1">{card.tagNames}</p>
-                  <p className="text-[14px] line-clamp-1">{card.reviews}</p>
-                  {/* <p>{card.questionsAnswered}</p> */}
+        {bestAcademyCards && bestAcademyCards.length > 0 ? (
+          <div className="grid grid-cols-4 gap-6">
+            {bestAcademyCards.map((card, index) => (
+              <div
+                key={index}
+                className="flex flex-col gap-4 cursor-pointer"
+                onClick={() => handleAcademyClick(Number(card.acaId))}
+              >
+                <img
+                  className="h-56 bg-gray-200 rounded-xl object-cover"
+                  src={card.image}
+                  alt={card.subject}
+                />
+                <div className="flex flex-col">
+                  <h3 className="font-medium text-base text-[#242424]">
+                    {card.subject || "학원명 없음"}
+                  </h3>
+                  <div className="text-sm text-[#507A95]">
+                    <p className="text-[14px] line-clamp-1">
+                      {card.description || "태그 정보 없음"}
+                    </p>
+                    <p className="text-[14px] line-clamp-1">
+                      {card.reviews || "리뷰 정보 없음"}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-          {/* )} */}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">
+            화제가 되고 있는 학원이 존재하지 않습니다.
+          </p>
+        )}
       </div>
     </div>
   );

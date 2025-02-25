@@ -1,4 +1,4 @@
-import { Form, Pagination, Select } from "antd";
+import { Button, Form, Pagination, Select } from "antd";
 import { useEffect } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -46,6 +46,12 @@ const PopupContent = () => {
               </div>
 
               <div className="flex gap-2">
+                <Button
+                  className="btn-admin-basic"
+                  onClick={() => navigate("/admin/popup-content/add")}
+                >
+                  + 팝업창 등록
+                </Button>
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     placeholder="40개씩 보기"
@@ -74,7 +80,9 @@ const PopupContent = () => {
           </Form>
 
           <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
-            <div className="flex items-center justify-center w-[75%]">제목</div>
+            <div className="flex items-center justify-center w-[100%]">
+              제목
+            </div>
             <div className="flex items-center justify-center w-[200px]">
               시작일
             </div>
@@ -90,7 +98,7 @@ const PopupContent = () => {
           </div>
 
           <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-[75%] h-[60px]">
+            <div className="flex justify-start items-center w-[100%] h-[56px]">
               <div className="flex items-center gap-3 cursor-pointer">
                 <div>
                   <h4>관리자 팝업입니다.</h4>

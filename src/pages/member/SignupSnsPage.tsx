@@ -18,6 +18,17 @@ import styled from "@emotion/styled";
 import MainButton from "../../components/button/MainButton";
 import { setCookie } from "../../utils/cookie";
 
+interface FormValues {
+  birth: dayjs.Dayjs;
+  email: string;
+  upw: string;
+  confirmPassword: string;
+  name: string;
+  nickName: string;
+  phone: string;
+  userRole: string;
+}
+
 function SignupSnsPage() {
   const [searchParams, _setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -25,7 +36,6 @@ function SignupSnsPage() {
   const [checkedList, setCheckedList] = useState<string[]>([]);
   const [form] = Form.useForm();
 
-  const [emailCheck, setEmailCheck] = useState<number>(0); // 0: 미확인, 1: 중복, 2: 사용가능
   const [nickNameCheck, setNickNameCheck] = useState<number>(0);
   // const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,8 +84,8 @@ function SignupSnsPage() {
       // 액세스 토큰을 쿠키에 저장
       setCookie("accessToken", accessToken, {
         path: "/",
-        secure: true,
-        sameSite: "strict",
+        // secure: true,
+        // sameSite: "strict",
         // expires: new Date(new Date().getTime() + 60 * 60 * 1000) // 1시간 후 만료 (필요에 따라 조정)
       });
 
@@ -97,18 +107,6 @@ function SignupSnsPage() {
 
     setIsSnsLoading(false);
   }, [navigate, searchParams]); // 의존성 배열을 비워서 컴포넌트 마운트 시에만 실행
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-    setEmailCheck(0);
-    form.setFields([
-      {
-        name: "email",
-        value: newEmail,
-      },
-    ]);
-  };
 
   const handleChangePassword = () => {
     // 기본 비밀번호 입력값 알아내고
@@ -142,63 +140,48 @@ function SignupSnsPage() {
     setCheckedList(list);
   };
 
-  const onFinish = async (values: Record<string, unknown>) => {
-    const { birthday } = values as { birthday: string }; // Type assertion to ensure birthday is a string
-    const formattedBirthday = dayjs(birthday).format("YYYY-MM-DD");
-    const { confirmPassword, ...restValues } = values as {
-      confirmPassword?: string;
-      [key: string]: unknown;
-    };
+  const onFinish = async (values: FormValues) => {
     if (!checkAll) {
-      // 또는 checkedList.length !== plainOptions.length
       message.error("전체 약관에 동의해주세요.");
       return;
     }
 
-    // 필수 체크 항목 확인
-    if (checkedList.length < 2) {
-      message.error("필수 약관에 모두 동의해주세요.");
-      setModalMessage("필수 약관에 모두 동의해주세요.");
-      setIsModalVisible(true);
-      return;
-    }
-
-    // 이메일, 닉네임 중복 체크 확인
-    if (nickNameCheck !== 2) {
-      message.error("닉네임 중복 확인이 필요합니다.");
-      setModalMessage("닉네임 중복 확인이 필요합니다.");
-      setIsModalVisible(true);
-      return;
-    }
+    const formattedBirthday = values.birth.format("YYYY-MM-DD");
 
     // API 요청 데이터 형식에 맞게 가공
     const requestData = {
-      userId: userId, // URL에서 가져온 user_id 사용
+      userId: userId,
       userRole: values.userRole,
       name: values.name,
       phone: values.phone,
-      birth: values.birth.format("YYYY-MM-DD"),
+      birth: formattedBirthday,
       nickName: values.nickName,
-      upw: values.upw,
+      upw: "Qwer@1234",
     };
 
-    // API 호출
-    const response = await axios.post(
-      "/api/user/simple-login-user-data",
-      requestData,
-    );
+    try {
+      // API 호출
+      const response = await axios.post(
+        "/api/user/simple-login-user-data",
+        requestData,
+      );
 
-    if (response.data.success) {
-      message.success("회원가입이 완료되었습니다.");
-      navigate("/login"); // 로그인 페이지로 이동
-    } else {
-      throw new Error(response.data.message || "회원가입 실패");
+      if (response.data.resultData) {
+        console.log(response.data.resultData);
+        message.success("회원가입이 완료되었습니다.");
+        navigate("/log-in"); // 로그인 페이지로 이동
+      } else {
+        message.error(response.data.message || "회원가입에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("회원가입 중 오류 발생:", error);
+      message.error("회원가입 처리 중 오류가 발생했습니다.");
     }
 
     try {
       setIsLoading(true);
       await axios.post("/api/user/sign-up", {
-        ...restValues,
+        ...values,
         birthday: formattedBirthday,
         signUpType: 0,
       });
@@ -255,50 +238,6 @@ function SignupSnsPage() {
     setIsModalVisible(true);
   };
 
-  // 이메일 중복 체크 함수도 동일하게 수정
-  const checkEmail = async () => {
-    const email = form.getFieldValue("email");
-
-    if (!email) {
-      message.error("이메일을 입력해주세요.");
-      setModalMessage("이메일을 입력해주세요.");
-      return;
-    }
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailRegex.test(email)) {
-      message.error("유효한 이메일을 입력해주세요.");
-      setModalMessage("유효한 이메일을 입력해주세요.");
-      setIsModalVisible(true);
-      return;
-    }
-
-    try {
-      const res = await axios.get(
-        `/api/user/check-duplicate/email?text=${email}`,
-      );
-      console.log("이메일 중복 체크 응답:", res.data);
-
-      if (res.data.resultData === 1) {
-        console.log("사용 가능한 이메일입니다");
-        message.success("사용 가능한 이메일입니다.");
-        setEmailCheck(2);
-        setModalMessage("사용 가능한 이메일입니다.");
-      } else {
-        console.log("이미 사용중인 이메일입니다");
-        message.error("이미 사용중인 이메일입니다.");
-        setEmailCheck(1);
-        setModalMessage("이미 사용중인 이메일입니다.");
-      }
-      setIsModalVisible(true);
-
-      console.log("이메일 체크 상태:", emailCheck);
-    } catch (error) {
-      console.error("에러 발생:", error);
-      message.error("이미 사용중인 이메일입니다.");
-      setIsModalVisible(true);
-      setModalMessage("이미 사용중인 이메일입니다.");
-    }
-  };
   if (isSnsLoading) {
     return <p>로딩 중...</p>; // 로딩 중일 때 표시할 UI
   }
@@ -387,7 +326,7 @@ function SignupSnsPage() {
                 />
               </Form.Item>
             </div>
-            <div className="flex gap-[12px] h-[80px]">
+            {/* <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
                 비밀번호 &nbsp;
                 <label className="text-[#D9534F]">*</label>
@@ -424,8 +363,8 @@ function SignupSnsPage() {
                   }}
                 />
               </Form.Item>
-            </div>
-            <div className="flex gap-[12px] h-[80px]">
+            </div> */}
+            {/* <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
                 비밀번호 확인 &nbsp;
                 <label className="text-[#D9534F]">*</label>
@@ -454,10 +393,6 @@ function SignupSnsPage() {
                 ]}
               >
                 <div className="flex items-center w-full gap-[12px]">
-                  {/* <label className="flex text-[16px] w-[120px] font-[500]">
-              비밀번호 확인 &nbsp;
-              <label className="text-[#D9534F]">*</label>
-            </label> */}
                   <Input.Password
                     maxLength={16}
                     className="ant-form-item-control-input-content"
@@ -471,7 +406,7 @@ function SignupSnsPage() {
                   />
                 </div>
               </Form.Item>
-            </div>
+            </div> */}
             <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
                 이름 &nbsp;

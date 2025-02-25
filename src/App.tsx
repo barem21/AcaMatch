@@ -30,29 +30,31 @@ import MypageChild from "./pages/mypage/MypageChild";
 import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
 
-import MemberList from "./pages/admin/MemberList";
-import MemberInfo from "./pages/admin/MemberInfo";
-import AcademyList from "./pages/admin/academy/AcademyList";
-import AcademyArrow from "./pages/admin/academy/AcademyArrow";
-import AcademyAdd from "./pages/admin/academy/AcademyAdd";
-import AcademyEdit from "./pages/admin/academy/AcademyEdit";
-import AcademyClassList from "./pages/admin/academy/AcademyClassList";
-import AcademyClassAdd from "./pages/admin/academy/AcademyClassAdd";
-import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
-import AcademyStudent from "./pages/admin/academy/AcademyStudent";
-import AcademyTestList from "./pages/admin/academy/AcademyTestList";
-import AcademyRecord from "./pages/admin/academy/AcademyRecord";
-import AcademyPremium from "./pages/admin/academy/AcademyPremium";
-import AcademyPremiumReq from "./pages/admin/academy/AcademyPremiumReq";
-import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import AcaRevenue from "./pages/admin/AcaRevenue.tsx";
-import NoticeContent from "./pages/admin/NoticeContent.tsx";
-import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
-import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
-import PopupContent from "./pages/admin/PopupContent.tsx";
+import BannerContent from "./pages/admin/BannerContent.tsx";
+// import MemberInfo from "./pages/admin/MemberInfo";
+import MemberList from "./pages/admin/MemberList";
 import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
+import NoticeContent from "./pages/admin/NoticeContent.tsx";
 import NoticeView from "./pages/admin/NoticeView.tsx";
 import PopupAdd from "./pages/admin/PopupAdd.tsx";
+import PopupContent from "./pages/admin/PopupContent.tsx";
+import AcademyAdd from "./pages/admin/academy/AcademyAdd";
+import AcademyArrow from "./pages/admin/academy/AcademyArrow";
+import AcademyClassAdd from "./pages/admin/academy/AcademyClassAdd";
+import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
+import AcademyClassList from "./pages/admin/academy/AcademyClassList";
+import AcademyEdit from "./pages/admin/academy/AcademyEdit";
+import AcademyList from "./pages/admin/academy/AcademyList";
+import AcademyPremium from "./pages/admin/academy/AcademyPremium";
+import AcademyPremiumReq from "./pages/admin/academy/AcademyPremiumReq";
+import AcademyRecord from "./pages/admin/academy/AcademyRecord";
+import AcademyStudent from "./pages/admin/academy/AcademyStudent";
+import AcademyTestList from "./pages/admin/academy/AcademyTestList";
+import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
+// import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
+import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
+import BannerView from "./pages/admin/BannerView.tsx";
 
 function App() {
   useEffect(() => {
@@ -164,7 +166,7 @@ function App() {
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
-                <Route path="memberInfo" element={<MemberInfo />} />
+                {/* <Route path="memberInfo" element={<MemberInfo />} /> */}
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentanager" element={<Paymentanager />} />
                 <Route path="acarevenue" element={<AcaRevenue />} />
@@ -173,6 +175,8 @@ function App() {
                 <Route path="notice-content/view" element={<NoticeView />} />
                 <Route path="popup-content" element={<PopupContent />} />
                 <Route path="popup-content/add" element={<PopupAdd />} />
+                <Route path="banner-content" element={<BannerContent />} />
+                <Route path="banner-content/view" element={<BannerView />} />
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
@@ -199,10 +203,10 @@ function App() {
                   path="academy/textbookAdd"
                   element={<AcademyTextbookAdd />}
                 />
-                <Route
+                {/* <Route
                   path="academy/textbookEdit"
                   element={<AcademyTextbookEdit />}
-                />
+                /> */}
               </Route>
               <Route path="/404" element={<NotFoundPage />} />
               <Route path="*" element={<NotFoundPage />} />

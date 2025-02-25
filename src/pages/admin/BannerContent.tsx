@@ -1,8 +1,8 @@
-import { Button, Form, Pagination, Select } from "antd";
+import { Form, Pagination, Select } from "antd";
 import { useEffect } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
-const NoticeContent = () => {
+const BannerContent = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
@@ -29,39 +29,24 @@ const NoticeContent = () => {
       showCnt: 40,
     });
   }, []);
-
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          공지사항 관리
-          <p>공지 및 콘텐츠 관리 {">"} 공지사항 관리</p>
+          프리미엄 학원 배너 관리
+          <p>공지 및 콘텐츠 관리 {">"} 배너 관리</p>
         </h1>
 
         <div className="board-wrap">
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-28 text-sm">공지사항 통합검색</label>
-
-                <Form.Item name="state" className="mb-0">
-                  <Select
-                    placeholder="검색어를 입력하세요"
-                    optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
-                  />
-                </Form.Item>
+                <label className="text-sm">
+                  프리미엄 학원 등록개수 : 총 N건
+                </label>
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  className="btn-admin-basic"
-                  onClick={() => navigate("/admin/notice-content/add")}
-                >
-                  + 공지사항 등록
-                </Button>
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     placeholder="40개씩 보기"
@@ -93,16 +78,16 @@ const NoticeContent = () => {
             <div className="flex items-center justify-center w-[100%]">
               제목
             </div>
-            <div className="flex items-center justify-center min-w-[200px]">
-              작성일
+            <div className="flex items-center justify-center w-[200px]">
+              시작일
             </div>
-            <div className="flex items-center justify-center min-w-[200px]">
-              작성자
+            <div className="flex items-center justify-center w-[200px]">
+              종료일
             </div>
-            <div className="flex items-center justify-center min-w-[132px]">
-              수정하기
+            <div className="flex items-center justify-center w-[132px]">
+              상세보기
             </div>
-            <div className="flex items-center justify-center min-w-[72px]">
+            <div className="flex items-center justify-center w-[72px]">
               삭제
             </div>
           </div>
@@ -110,36 +95,26 @@ const NoticeContent = () => {
           <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
             <div className="flex justify-start items-center w-[100%] h-[56px]">
               <div className="flex items-center gap-3 cursor-pointer">
-                <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                  <img
-                    src={"/aca_image_1.png"}
-                    className="max-w-fit max-h-full object-cover"
-                    alt=" /"
-                  />
-                </div>
-                <div onClick={() => navigate("/admin/notice-content/view")}>
-                  <h4>은빛피아노미술학원</h4>
-                  <p className="text-[#1761FD] text-[12px]">
-                    [대구 광역시 수성구 범어동]
-                  </p>
+                <div>
+                  <h4>대구 ABC 상아탑 학원</h4>
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-center text-center min-w-[200px]">
+            <div className="flex items-center justify-center text-center w-[200px]">
               2025-01-01
             </div>
-            <div className="flex items-center justify-center text-center min-w-[200px]">
-              관리자
+            <div className="flex items-center justify-center text-center w-[200px]">
+              2025-01-31
             </div>
-            <div className="flex items-center justify-center min-w-[132px]">
+            <div className="flex items-center justify-center w-[132px]">
               <p
                 className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer`}
-                onClick={() => navigate("/admin/notice-content/add")}
+                onClick={() => navigate("/admin/banner-content/view")}
               >
-                수정하기
+                상세보기
               </p>
             </div>
-            <div className="flex gap-4 items-center justify-center min-w-[72px]">
+            <div className="flex gap-4 items-center justify-center w-[72px]">
               <button>
                 <FaRegTrashAlt className="w-3 text-gray-400" />
               </button>
@@ -155,4 +130,4 @@ const NoticeContent = () => {
   );
 };
 
-export default NoticeContent;
+export default BannerContent;

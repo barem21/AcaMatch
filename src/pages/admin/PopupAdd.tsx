@@ -1,115 +1,26 @@
 import { Form, Button, Input, message, Upload, DatePicker, Radio } from "antd";
-import styled from "@emotion/styled";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import jwtAxios from "../../apis/jwt";
 import { useNavigate } from "react-router-dom";
-
-const FormWrapper = styled.div`
-  .title-admin-font {
-    // ... existing title styles if any ...
-  }
-`;
-
-const StyledForm = styled(Form)`
-  .ant-form-item-label {
-    display: flex;
-    justify-content: flex-start;
-  }
-  .ant-form-item-label label {
-    min-width: 130px !important;
-    color: #676d9c;
-    font-size: 13px;
-  }
-  .ant-form-item-required::before {
-    display: none !important;
-    content: "" !important;
-    margin-inline-end: 0px !important;
-  }
-  .ant-form-item-required::after {
-    display: none !important;
-    content: "" !important;
-  }
-  .ant-form-item-label label::after {
-    content: "";
-  }
-`;
-
-const StyledFormItem = styled(Form.Item)`
-  .ant-form-item-control-input-content {
-    .input-wrap {
-      display: flex;
-      justify-content: flex-start;
-      gap: 15px;
-      align-items: center;
-    }
-    .flex-start {
-      align-items: flex-start;
-    }
-    label {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 130px !important;
-    }
-    label span {
-      height: 24px;
-      margin-left: 5px;
-    }
-  }
-`;
-
-const StyledInput = styled(Input)`
-  height: 32px;
-  border-radius: 4px;
-`;
-
-const StyledTextArea = styled(Input.TextArea)`
-  padding: 15px 12px;
-`;
-
-const StyledDatePicker = styled(DatePicker)`
-  .ant-picker {
-    padding: 0px 11px;
-  }
-`;
-
-const StyledUpload = styled(Upload)`
-  .ant-upload-list-item {
-    border: 1px solid #3b77d8 !important;
-  }
-`;
-
-const StyledRadioGroup = styled(Radio.Group)`
-  .ant-radio-wrapper {
-    font-size: 13px;
-    color: #676d9c;
-    margin-right: 20px;
-  }
-
-  .ant-radio-inner {
-    border-color: #3b77d8;
-
-    &:after {
-      background-color: #3b77d8;
-    }
-  }
-
-  .ant-radio-checked .ant-radio-inner {
-    border-color: #3b77d8;
-  }
-`;
+import dayjs from "dayjs";
 
 const PopupAdd = () => {
   const [form] = Form.useForm();
-  const [registrationType, setRegistrationType] = useState("image"); // 'image' or 'direct'
-  const [fileList, setFileList] = useState([]);
+  const [registrationType, setRegistrationType] = useState("image");
+  const [fileList, _setFileList] = useState([]);
   const navigate = useNavigate();
+
+  const initialValues = {
+    registrationType: "image",
+    startDate: dayjs(),
+    endDate: dayjs(),
+  };
 
   const handleChange = (info: any) => {
     let newFileList = [...info.fileList];
     newFileList = newFileList.slice(-1);
-    setFileList(newFileList);
+    // setFileList(newFileList);
 
     if (info.file.status === "done" && info.file.originFileObj) {
       form.setFieldValue("popupImage", info.file.originFileObj);
@@ -154,60 +65,81 @@ const PopupAdd = () => {
   };
 
   return (
-    <FormWrapper className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full mb-20">
         <h1 className="title-admin-font">
           팝업창 관리
           <p>공지 및 콘텐츠 관리 &gt; 팝업창 관리</p>
         </h1>
 
-        <div className="max-w-3xl p-3 pl-6 pr-6 border rounded-md">
-          <StyledForm form={form} onFinish={values => onFinished(values)}>
-            <StyledFormItem
+        <div className="w-full p-3 px-6 border rounded-md">
+          <Form
+            form={form}
+            initialValues={initialValues}
+            onFinish={values => onFinished(values)}
+            className="[&_.ant-form-item-label]:flex [&_.ant-form-item-label]:justify-start
+                     [&_.ant-form-item-label_label]:min-w-[130px] [&_.ant-form-item-label_label]:text-[#676d9c] [&_.ant-form-item-label_label]:text-[13px]
+                     [&_.ant-form-item-required::before]:hidden [&_.ant-form-item-required::after]:hidden
+                     [&_.ant-form-item-label_label::after]:content-['']"
+          >
+            <Form.Item
               name="title"
               label="제목"
               rules={[{ required: true, message: "제목을 입력해 주세요." }]}
+              className="[&_.ant-form-item-control-input-content_.input-wrap]:flex 
+                         [&_.ant-form-item-control-input-content_.input-wrap]:justify-start 
+                         [&_.ant-form-item-control-input-content_.input-wrap]:gap-[15px] 
+                         [&_.ant-form-item-control-input-content_.input-wrap]:items-center p-3 pl-0 pt-0 border-b"
             >
-              <StyledInput
-                className="input-admin-basic"
+              <Input
+                className="h-[32px] rounded-[4px] input-admin-basic"
                 placeholder="제목을 입력해 주세요."
               />
-            </StyledFormItem>
-
-            <Form.Item
-              name="startDate"
-              label="시작일"
-              rules={[{ required: true, message: "시작일을 선택해 주세요." }]}
-            >
-              <StyledDatePicker className="w-full" />
             </Form.Item>
 
-            <Form.Item
-              name="endDate"
-              label="종료일"
-              rules={[{ required: true, message: "종료일을 선택해 주세요." }]}
-            >
-              <StyledDatePicker className="w-full" />
-            </Form.Item>
+            <div className="flex gap-[12px] border-b">
+              <Form.Item
+                name="startDate"
+                label="시작일"
+                rules={[{ required: true, message: "시작일을 선택해 주세요." }]}
+              >
+                <DatePicker className="w-full [&_.ant-picker]:p-0 [&_.ant-picker]:px-[11px]" />
+              </Form.Item>
+
+              <Form.Item
+                name="endDate"
+                label="종료일"
+                rules={[{ required: true, message: "종료일을 선택해 주세요." }]}
+              >
+                <DatePicker className="w-full [&_.ant-picker]:p-0 [&_.ant-picker]:px-[11px]" />
+              </Form.Item>
+            </div>
 
             <Form.Item
               name="registrationType"
               label="등록방식"
               rules={[{ required: true, message: "등록방식을 선택해 주세요." }]}
+              className="p-3 pl-0 pr-0 border-b"
             >
-              <Radio.Group onChange={e => setRegistrationType(e.target.value)}>
-                <Radio value="image">이미지 첨부</Radio>
+              <Radio.Group
+                onChange={e => setRegistrationType(e.target.value)}
+                className=" [&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
+                           [&_.ant-radio-wrapper_span]:text-[13px]"
+              >
+                <Radio value="image" className="w-[100px]">
+                  이미지 첨부
+                </Radio>
                 <Radio value="direct">직접 입력</Radio>
               </Radio.Group>
             </Form.Item>
 
             {registrationType === "image" && (
-              <StyledFormItem
+              <Form.Item
                 name="popupImage"
                 label="팝업 이미지"
                 rules={[{ required: true, message: "이미지를 첨부해 주세요." }]}
               >
-                <StyledUpload
+                <Upload
                   listType="picture-card"
                   maxCount={1}
                   showUploadList={{ showPreviewIcon: false }}
@@ -218,30 +150,28 @@ const PopupAdd = () => {
                       onSuccess?.("ok");
                     }, 0);
                   }}
+                  className="[&_.ant-upload-list-item]:border [&_.ant-upload-list-item]:border-[#3b77d8]"
                 >
-                  <button
-                    style={{ border: 0, background: "none" }}
-                    type="button"
-                  >
+                  <button type="button" className="border-0 bg-transparent">
                     <PlusOutlined />
-                    <div style={{ marginTop: 8 }}>Upload</div>
+                    <div className="mt-2">Upload</div>
                   </button>
-                </StyledUpload>
-              </StyledFormItem>
+                </Upload>
+              </Form.Item>
             )}
 
             {registrationType === "direct" && (
-              <StyledFormItem
+              <Form.Item
                 name="content"
                 label="팝업 내용"
                 rules={[{ required: true, message: "내용을 입력해 주세요." }]}
               >
-                <StyledTextArea
-                  className="input-admin-basic"
+                <Input.TextArea
+                  className="p-[15px] input-admin-basic"
                   rows={6}
                   placeholder="팝업 내용을 입력해 주세요."
                 />
-              </StyledFormItem>
+              </Form.Item>
             )}
 
             <div className="flex justify-end pt-3 border-t gap-3">
@@ -258,10 +188,10 @@ const PopupAdd = () => {
                 </Button>
               </Form.Item>
             </div>
-          </StyledForm>
+          </Form>
         </div>
       </div>
-    </FormWrapper>
+    </div>
   );
 };
 

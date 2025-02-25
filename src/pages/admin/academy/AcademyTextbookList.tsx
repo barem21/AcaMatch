@@ -41,7 +41,7 @@ function AcademyTextbookList(): JSX.Element {
         const res = await axios.get(
           `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
         );
-        const formatted = res.data.resultData.map(item => ({
+        const formatted = res.data.resultData.map((item: any) => ({
           value: item.classId,
           label: item.className,
         }));
