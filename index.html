@@ -5,6 +5,11 @@
     <link rel="icon" href="favicon.png" type="image/x-icon" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AcaMatch</title>
+    <script>
+      if (typeof global === "undefined") {
+        var global = window; // global을 window로 설정
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -19,22 +19,26 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
+interface SubMenuItem {
+  label: string;
+  link: string;
+  active: boolean;
+  subList?: SubListItem[];
+}
+
+interface SubListItem {
+  label: string;
+  link: string;
+  active: boolean;
+}
+
 interface MenuItem {
   type?: "item";
   icon: JSX.Element;
   label: string;
   link?: string;
   active: boolean;
-  list?: {
-    label: string;
-    link: string;
-    active?: boolean;
-    subList?: {
-      label: string;
-      link: string;
-      active?: boolean;
-    }[];
-  }[];
+  list?: SubMenuItem[];
 }
 
 interface Divider {

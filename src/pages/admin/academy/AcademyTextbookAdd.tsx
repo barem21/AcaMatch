@@ -4,7 +4,7 @@ import { Button, Form, Image, Input, Upload } from "antd";
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -100,20 +100,20 @@ function AcademyTextbookAdd(): JSX.Element {
   const navigate = useNavigate();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const [fileList, setFileList] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
+  // const [fileList, setFileList] = useState([]);
+  // const [searchParams, setSearchParams] = useSearchParams();
+  // const acaId = searchParams.get("acaId");
+  // const classId = searchParams.get("classId");
 
   //첨부파일 처리
-  const handleChange = info => {
-    let newFileList = [...info.fileList];
+  const handleChange = (info: any) => {
+    // let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
+    // newFileList = newFileList.slice(-1);
 
     // 파일 상태 업데이트
-    setFileList(newFileList);
+    // setFileList(newFileList);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {

@@ -96,10 +96,10 @@ const NoticeContent = () => {
             <div className="flex items-center justify-center min-w-[200px]">
               작성일
             </div>
-            <div className="flex items-center justify-center min-w-[100px]">
+            <div className="flex items-center justify-center min-w-[200px]">
               작성자
             </div>
-            <div className="flex items-center justify-center min-w-[100px]">
+            <div className="flex items-center justify-center min-w-[132px]">
               수정하기
             </div>
             <div className="flex items-center justify-center min-w-[72px]">
@@ -108,7 +108,7 @@ const NoticeContent = () => {
           </div>
 
           <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-[100%]">
+            <div className="flex justify-start items-center w-[100%] h-[56px]">
               <div className="flex items-center gap-3 cursor-pointer">
                 <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                   <img
@@ -128,10 +128,10 @@ const NoticeContent = () => {
             <div className="flex items-center justify-center text-center min-w-[200px]">
               2025-01-01
             </div>
-            <div className="flex items-center justify-center text-center min-w-[100px]">
+            <div className="flex items-center justify-center text-center min-w-[200px]">
               관리자
             </div>
-            <div className="flex items-center justify-center min-w-[100px]">
+            <div className="flex items-center justify-center min-w-[132px]">
               <p
                 className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer`}
                 onClick={() => navigate("/admin/notice-content/add")}

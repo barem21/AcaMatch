@@ -44,6 +44,7 @@ function AcademyRecord() {
   const [errorMessage, setErrorMessage] = useState("");
   const [academyInfo, setAcademyInfo] = useState();
   const [aiHistoryList, setaiHistoryList] = useState([]);
+  const [myAcademyTestList, setMyAcademyTestList] = useState([]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
@@ -381,7 +382,7 @@ function AcademyRecord() {
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`?acaId=${acaId}&${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`?acaId=${acaId}&classId=${classId}&${queryParams}`); //쿼리스트링 url에 추가
   };
 
   const onChange = () => {
@@ -393,7 +394,7 @@ function AcademyRecord() {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form3.setFieldsValue({
-      classId: classId ? parseInt(classId) : "all",
+      subjectId: subjectId ? parseInt(subjectId) : "all",
       search: "",
       showCnt: 40,
     });
@@ -402,6 +403,26 @@ function AcademyRecord() {
   useEffect(() => {
     academyStudentList();
   }, [currentUserInfo]);
+
+  useEffect(() => {
+    //과목별 등록된 테스트 목록 가져오기
+    const academyTestList = async () => {
+      try {
+        const res = await axios.get(
+          `/api/grade/status?acaId=${acaId}&classId=${classId}`,
+        );
+        const formatted = res.data.resultData.map(item => ({
+          value: item.subjectId,
+          label: item.subjectName,
+        }));
+        setMyAcademyTestList(formatted);
+        //console.log(res.data.resultData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    academyTestList();
+  }, []);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
@@ -414,7 +435,7 @@ function AcademyRecord() {
     <div className="flex gap-5 w-full justify-center align-top">
       <RecordList className="w-full">
         <h1 className="title-admin-font">
-          {academyInfo}의 수강생 목록
+          {academyInfo}의 테스트 결과 등록/수정
           <p>
             학원관리 &gt; 강좌 목록 &gt; 테스트 목록 &gt; 테스트 결과 등록/수정
           </p>
@@ -425,7 +446,7 @@ function AcademyRecord() {
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-24 text-sm">수강생 검색</label>
-                <Form.Item name="classId" className="mb-0">
+                <Form.Item name="subjectId" className="mb-0">
                   <Select
                     showSearch
                     placeholder="강좌 선택"
@@ -433,20 +454,7 @@ function AcademyRecord() {
                     className="select-admin-basic"
                     // onChange={onChange}
                     // onSearch={onSearch}
-                    options={[
-                      {
-                        value: "all",
-                        label: "전체",
-                      },
-                      {
-                        value: 301,
-                        label: "고등 영어",
-                      },
-                      {
-                        value: 302,
-                        label: "영어 문법 기초 강좌",
-                      },
-                    ]}
+                    options={myAcademyTestList}
                   />
                 </Form.Item>
                 <Form.Item name="search" className="mb-0">

@@ -37,6 +37,18 @@
 .title-admin-font {
   @apply font-bold text-xl pt-3 pb-3;
 }
+
+.layout-header {
+  @apply sticky top-0 left-0 right-0 z-50 flex items-center bg-white border-b border-brand-BTWhite;
+  height: 59px;
+}
+
+@screen md {
+  .layout-header {
+    height: 64px;
+  }
+}
+
 .title-admin-font p {
   line-height: 140%;
   color: #7381bb;
