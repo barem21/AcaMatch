@@ -67,16 +67,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           link: "/admin/academy",
           active: false,
         },
-        /*
         {
           label: "학원 등록 요청",
           link: "/admin/academy?state=0",
           active: false,
         },
-        */
         {
-          label: "학원 등록 승인(관리자 전용)",
-          link: "/admin/academy/arrow",
+          label: "학원 승인",
+          link: "/admin/academy?state=0",
+          active: false,
         },
         {
           label: "강의 관리",
@@ -84,7 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           active: false,
         },
         {
-          label: "프리미엄 학원 관리(관리자 전용?)",
+          label: "프리미엄 학원 관리",
           link: "/admin/academy/premium",
           active: false,
         },
@@ -136,12 +135,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {
               label: "공지사항 목록",
               link: "/admin/notice-content",
+              active: false,
+            },
+            {
+              label: "공지사항 보기",
+              link: "/admin/notice-content/view",
+              active: false,
             },
             {
               label: "공지사항 등록",
               link: "/admin/notice-content/add",
               active: false,
-
             },
             {
               label: "공지사항 수정",
@@ -149,6 +153,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               active: false,
             },
           ],
+          active: false,
         },
         {
           label: "팝업 관리",
@@ -220,7 +225,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             pathname === subItem.link || pathname.startsWith(subItem.link);
 
           // [3] 하위 서브메뉴(subList)가 있다면 활성화 여부 확인
+          const updatedSubList = subItem.subList?.map(sub => {
+            const isSubListActive =
+              pathname === sub.link || pathname.startsWith(sub.link);
+            return { ...sub, active: isSubListActive };
+          });
 
+          // 하위 서브메뉴가 하나라도 활성화되어 있다면 부모도 활성화
           const isSubListActive =
             updatedSubList?.some(sub => sub.active) || false;
 
@@ -284,7 +295,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {isLayoutVisible ? (
             <main
-              className={"flex w-full min-w-[990px] mx-auto max-w-[1280px]"}
+              className={"flex min-w-[990px] mx-auto max-w-[1280px]"}
               style={{ minHeight: "calc(100vh - 164px)" }}
             >
               {children}
