@@ -15,7 +15,7 @@ function NotFoundPage() {
         <div className={`${frameStyle} p-3`}>
           <div className="w-full h-[218px] bg-white rounded-xl flex items-center justify-center overflow-hidden">
             <img
-              src="/404.jpg"
+              src="/404_1.png"
               alt="mail"
               className="w-auto h-auto max-w-full object-contain"
             />

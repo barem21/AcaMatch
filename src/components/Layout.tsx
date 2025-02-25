@@ -13,18 +13,28 @@ import AdminHeader from "./admin/Header";
 import Sidebar from "./admin/Sidebar";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
+import { getCookie, setCookie } from "../utils/cookie";
 
 interface LayoutProps {
   children?: ReactNode;
 }
 
 interface MenuItem {
-  type?: "item"; // 기본 값 설정
+  type?: "item";
   icon: JSX.Element;
   label: string;
   link?: string;
   active: boolean;
-  list?: { label: string; link: string }[];
+  list?: {
+    label: string;
+    link: string;
+    active?: boolean;
+    subList?: {
+      label: string;
+      link: string;
+      active?: boolean;
+    }[];
+  }[];
 }
 
 interface Divider {
@@ -43,7 +53,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <FiHome />,
       label: "대시보드",
       link: "/admin",
-      active: true,
+      active: false,
     },
     {
       type: "item",
@@ -55,28 +65,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           label: "학원 등록/수정/삭제",
           link: "/admin/academy",
+          active: false,
         },
         {
           label: "학원 등록 요청",
           link: "/admin/academy?state=0",
-          // label: "학원 등록/수정",
-          // link: "/admin/academy",
+          active: false,
         },
         {
           label: "학원 승인",
           link: "/admin/academy?state=0",
+          active: false,
         },
         {
           label: "강의 관리",
           link: "/admin/academy/class",
+          active: false,
         },
         {
           label: "프리미엄 학원 관리",
           link: "/admin/academy/premium",
+          active: false,
         },
         {
           label: "프리미엄 학원 신청",
           link: "/admin/academy/premium-req",
+          active: false,
         },
       ],
     },
@@ -98,10 +112,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           label: "학원별 결제 내역",
           link: "/admin/paymentanager",
+          active: false,
         },
         {
           label: "학원별 매출 정산",
           link: "/admin/acarevenue",
+          active: false,
         },
       ],
     },
@@ -115,14 +131,39 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {
           label: "공지사항 관리",
           link: "/admin/notice-content",
+          subList: [
+            {
+              label: "공지사항 목록",
+              link: "/admin/notice-content",
+              active: false,
+            },
+            {
+              label: "공지사항 보기",
+              link: "/admin/notice-content/view",
+              active: false,
+            },
+            {
+              label: "공지사항 등록",
+              link: "/admin/notice-content/add",
+              active: false,
+            },
+            {
+              label: "공지사항 수정",
+              link: "/admin/notice-content/edit",
+              active: false,
+            },
+          ],
+          active: false,
         },
         {
           label: "팝업 관리",
           link: "/admin/popup-content",
+          active: false,
         },
         {
           label: "배너관리",
           link: "/admin/banner-content",
+          active: false,
         },
       ],
     },
@@ -134,22 +175,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       active: false,
     },
   ]);
-
-  // // 클릭된 항목만 active 상태로 변경하는 함수
-  // const toggleActive = (index: number, link?: string) => {
-  //   setMenuItems(prevItems =>
-  //     prevItems.map((item, idx) => {
-  //       if (!isMenuItem(item)) return item;
-
-  //       const isActive = idx === index;
-  //       return { ...item, active: isActive };
-  //     }),
-  //   );
-
-  //   if (link) {
-  //     navigate(link);
-  //   }
-  // };
 
   const { pathname } = useLocation();
 
@@ -163,10 +188,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isLayoutVisible = !noLayoutPaths.includes(pathname);
   const isAdminPage = pathname.startsWith("/admin");
 
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(() => {
+    return getCookie("isOpen") ? getCookie("isOpen") === "true" : true;
+  });
 
   const close = () => {
-    setIsOpen(!isOpen);
+    const newValue = isOpen;
+    setIsOpen(!newValue);
+    setCookie("isOpen", String(newValue), {
+      path: "/",
+      // 쿠키 옵션 추가
+      expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1년
+      sameSite: "strict",
+    });
   };
 
   useEffect(() => {
@@ -178,11 +212,45 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       prevItems.map(item => {
         if (!isMenuItem(item)) return item;
 
-        const isActive =
-          (item.link && pathname.startsWith(item.link)) ||
-          (item.list?.some(subItem => pathname === subItem.link) ?? false);
+        // [1] 최상위 메뉴 활성화 여부 확인
+        const isItemActive =
+          item.link === "/admin"
+            ? pathname === "/admin" // 대시보드인 경우 정확히 일치할 때만 활성화
+            : pathname === item.link || pathname.startsWith(item.link || "");
 
-        return { ...item, active: isActive };
+        // [2] 서브메뉴 활성화 여부 확인
+        let isParentActive = isItemActive;
+        const updatedList = item.list?.map(subItem => {
+          const isSubActive =
+            pathname === subItem.link || pathname.startsWith(subItem.link);
+
+          // [3] 하위 서브메뉴(subList)가 있다면 활성화 여부 확인
+          const updatedSubList = subItem.subList?.map(sub => {
+            const isSubListActive =
+              pathname === sub.link || pathname.startsWith(sub.link);
+            return { ...sub, active: isSubListActive };
+          });
+
+          // 하위 서브메뉴가 하나라도 활성화되어 있다면 부모도 활성화
+          const isSubListActive =
+            updatedSubList?.some(sub => sub.active) || false;
+
+          if (isSubActive || isSubListActive) {
+            isParentActive = true;
+          }
+
+          return {
+            ...subItem,
+            active: isSubActive || isSubListActive,
+            subList: updatedSubList,
+          };
+        });
+
+        return {
+          ...item,
+          active: isParentActive,
+          list: updatedList,
+        };
       }),
     );
   }, [pathname]);

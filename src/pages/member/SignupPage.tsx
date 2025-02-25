@@ -212,9 +212,9 @@ function SignupPage() {
       console.log("이메일 체크 상태:", emailCheck);
     } catch (error) {
       console.error("에러 발생:", error);
-      message.error("이메일 중복 확인 중 오류가 발생했습니다.");
+      message.error("이미 사용중인 이메일입니다.");
       setIsModalVisible(true);
-      setModalMessage("이메일 중복 확인 중 오류가 발생했습니다.");
+      setModalMessage("이미 사용중인 이메일입니다.");
     }
   };
 
@@ -281,18 +281,19 @@ function SignupPage() {
                 <label className="text-[#D9534F]">*</label>
               </label>
               <Form.Item
-                name="roleId"
+                name="userRole"
                 rules={[
                   { required: true, message: "회원타입을 선택해주세요." },
                 ]}
               >
                 <div className="flex items-center w-full h-[56px]">
                   <Radio.Group
-                    className="flex gap-4"
+                    className="flex gap-[4px]"
                     options={[
-                      { value: 1, label: "학생" },
-                      { value: 2, label: "학부모" },
-                      { value: 3, label: "학원 관계자" },
+                      { value: "STUDENT", label: "학생" },
+                      { value: "PARENT", label: "학부모" },
+                      { value: "ACADEMY", label: "학원 관계자" },
+                      { value: "TEACHER", label: "교사" },
                     ]}
                   />
                 </div>

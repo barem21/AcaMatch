@@ -9,7 +9,7 @@ interface MenuItem {
   label: string;
   link?: string;
   active: boolean;
-  list?: { label: string; link: string }[];
+  list?: { label: string; link: string; active: boolean }[];
 }
 
 interface Divider {
@@ -38,11 +38,26 @@ const Sidebar: React.FC<{
     setMenuItems(prevItems =>
       prevItems.map((item, _index) => {
         if (!isMenuItem(item)) return item;
-        const isActive =
-          (item.link && pathname.startsWith(item.link)) ||
-          (item.list?.some(subItem => pathname === subItem.link) ?? false);
 
-        return { ...item, active: isActive };
+        // 서브메뉴 active 상태 업데이트
+        const updatedList = item.list?.map(subItem => ({
+          ...subItem,
+          active: pathname === subItem.link,
+        }));
+
+        // 메인 메뉴 active 상태 업데이트
+        const isActive =
+          (item.link === "/admin" && pathname === "/admin") || // 대시보드 특별 처리
+          (item.link &&
+            item.link !== "/admin" &&
+            pathname.startsWith(item.link)) ||
+          (updatedList?.some(subItem => subItem.active) ?? false);
+
+        return {
+          ...item,
+          active: isActive,
+          list: updatedList,
+        };
       }),
     );
   }, [pathname, setMenuItems]);
@@ -105,7 +120,7 @@ const Sidebar: React.FC<{
       >
         <div className="p-4 flex justify-center items-center mx-auto h-14 w-full">
           <h1 className="text-xl font-bold">
-            <img src="/logo6.png" className="w-[180px] h-[38px]" />
+            <img src="/logo8.png" className="w-[180px] h-[38px]" />
           </h1>
         </div>
 
@@ -149,7 +164,7 @@ const Sidebar: React.FC<{
                         <li
                           key={subIndex}
                           className={`text-[13px] p-2 rounded-md cursor-pointer text-white ${
-                            pathname !== subItem.link && "text-white opacity-50"
+                            !subItem.active && "text-white opacity-50"
                           }`}
                           onClick={e => {
                             e.stopPropagation();
