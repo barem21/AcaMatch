@@ -234,7 +234,7 @@ function DashBoard() {
   }, []);
 
   return (
-    <div className="m-[5px] mt-0 gap-5 w-full h-[430px] justify-center align-top">
+    <div className="box-border m-[5px] mt-0 gap-5 w-full max-w-full h-[430px] justify-center align-top">
       <h1 className="w-full font-bold text-xl pb-3">
         주요 통계 및 요약
         <div className="flex">
@@ -266,6 +266,7 @@ function DashBoard() {
 
             <div style={{ height: "300px" }}>
               <ResponsiveLine
+                key={`${selectedMonth}-${selectedItem}`}
                 data={selectedData}
                 margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
                 xScale={{ type: "point" }}
@@ -354,7 +355,7 @@ function DashBoard() {
             ))}
           </ul>
         </div>
-        <div className="flex-col w-full max-w-[394px]">
+        <div className="flex-col w-[calc(100%-1193px)] max-w-[394px] 2xl:max-w-[402px]">
           <div className="w-full mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
             {/* <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]"> */}
             <div className="flex justify-between w-full p-3 border-b items-center">
@@ -419,8 +420,8 @@ function DashBoard() {
         </div>
       </div>
       <div className="flex mt-[12px] gap-[12px] ">
-        <div className="border border-b-[0] rounded-[4px]">
-          <span className="flex p-4 items-center w-[800px] h-[47px] text-[#303E67] border-b">
+        <div className="w-full border border-b-[0] rounded-[4px]">
+          <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
             학원 승인 대기
           </span>
           <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] ">
@@ -452,8 +453,8 @@ function DashBoard() {
             </ul>
           ))}
         </div>
-        <div className="border border-b-[0] rounded-[4px]">
-          <span className="flex p-4 items-center w-[800px] h-[47px] border-b">
+        <div className="w-full border border-b-[0] rounded-[4px]">
+          <span className="flex p-4 items-center w-full h-[47px] border-b">
             신고된 유저 목록
           </span>
           <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA]">

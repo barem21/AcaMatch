@@ -13,7 +13,7 @@ const InputWrapper = styled.div`
     width: 100%;
   }
 `;
-const NoticeAdd = () => {
+const NoticeView = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
@@ -44,7 +44,7 @@ const NoticeAdd = () => {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          공지사항 관리
+          공지사항 보기
           <p>공지 및 콘텐츠 관리 {">"} 공지사항 관리</p>
         </h1>
 
@@ -54,21 +54,14 @@ const NoticeAdd = () => {
               <div className="flex items-center gap-1">
                 <label className="min-w-[100px] text-sm">제목</label>
                 <InputWrapper>
-                  <Form.Item name="title" className="m-0">
-                    <Input className="block w-full" />
+                  <Form.Item name="title" className="m-0 text-[#666]">
+                    제목입니다.
                   </Form.Item>
                 </InputWrapper>
               </div>
             </div>
-            <div className=" flex p-2 pl-3 border-b">
-              <div className="flex items-center h-[460px] my-auto">
-                <label className=" w-[100px] text-sm">내용</label>
-              </div>
-              <div className="w-full">
-                <Form.Item name="content" className="w-full m-0">
-                  <Input.TextArea rows={20} style={{ width: "100%" }} />
-                </Form.Item>
-              </div>
+            <div className=" flex p-2 pl-3 border-b h-[600px] text-[#666]">
+              내용입니다
             </div>
             <div className="flex justify-end p-3 gap-3 border-b">
               <button
@@ -76,7 +69,7 @@ const NoticeAdd = () => {
                 className="btn-admin-cancel"
                 onClick={() => navigate(-1)}
               >
-                취소하기
+                삭제하기
               </button>
 
               <Form.Item className="mb-0">
@@ -85,9 +78,16 @@ const NoticeAdd = () => {
                   className="btn-admin-ok"
                   //   disabled={isSubmitting}
                 >
-                  등록하기
+                  수정하기
                 </Button>
               </Form.Item>
+              <button
+                type="button"
+                className="h-[30px] px-[10px] bg-[#ececec] rounded-[4px] text-[#242424] text-[12px]"
+                onClick={() => navigate(-1)}
+              >
+                목록으로
+              </button>
             </div>
           </Form>
         </div>
@@ -96,4 +96,4 @@ const NoticeAdd = () => {
   );
 };
 
-export default NoticeAdd;
+export default NoticeView;
