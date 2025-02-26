@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ className, close }) => {
           // 서버에서 받은 데이터 매핑
           const userData = {
             name: response.data.resultData.name, // 서버에서 받은 name
-            roleId: response.data.resultData.roleId, // roleId를 문자열로 변환
+            roleId: response.data.resultData.userRole, // roleId를 문자열로 변환
             userId: response.data.resultData.userId, // userId를 문자열로 변환
           };
           console.log(userData);
