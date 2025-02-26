@@ -1,19 +1,16 @@
 import React, { ReactNode, useEffect, useState } from "react";
-import {
-  FaBullhorn,
-  FaChalkboardTeacher,
-  FaCreditCard,
-  FaShieldAlt,
-  FaUserFriends,
-} from "react-icons/fa";
-import { FiHome } from "react-icons/fi";
 import { useLocation } from "react-router-dom";
+import { adminMenuItems, Divider } from "../constants/adminMenuItems";
+import { getCookie, setCookie } from "../utils/cookie";
 import AdminFooter from "./admin/Footer";
 import AdminHeader from "./admin/Header";
 import Sidebar from "./admin/Sidebar";
+import BannerLayout from "./BannerLayout";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
-import { getCookie, setCookie } from "../utils/cookie";
+import { useRecoilValue } from "recoil";
+import { userInfo } from "../atoms/userInfo";
+import { getMenuItems } from "../constants/adminMenuItems";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -41,144 +38,14 @@ interface MenuItem {
   list?: SubMenuItem[];
 }
 
-interface Divider {
-  type: "divider";
-}
 // MenuItem인지 확인하는 타입 가드 함수
 const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
   return (item as MenuItem).label !== undefined;
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  // const navigate = useNavigate();
-  const [menuItems, setMenuItems] = useState<(MenuItem | Divider)[]>([
-    {
-      type: "item",
-      icon: <FiHome />,
-      label: "대시보드",
-      link: "/admin",
-      active: false,
-    },
-    {
-      type: "item",
-      icon: <FaChalkboardTeacher />,
-      label: "학원 관리",
-      link: "/admin/academy",
-      active: false,
-      list: [
-        {
-          label: "학원 등록/수정/삭제",
-          link: "/admin/academy",
-          active: false,
-        },
-        {
-          label: "학원 등록 요청",
-          link: "/admin/academy?state=0",
-          active: false,
-        },
-        {
-          label: "학원 승인",
-          link: "/admin/academy/arrow",
-          active: false,
-        },
-        {
-          label: "강의 관리",
-          link: "/admin/academy/class",
-          active: false,
-        },
-        {
-          label: "프리미엄 학원 관리",
-          link: "/admin/academy/premium",
-          active: false,
-        },
-        {
-          label: "프리미엄 학원 신청",
-          link: "/admin/academy/premium-req",
-          active: false,
-        },
-      ],
-    },
-    {
-      type: "item",
-      icon: <FaUserFriends />,
-      label: "회원 관리",
-      link: "/admin/member",
-      active: false,
-    },
-    { type: "divider" },
-    {
-      type: "item",
-      icon: <FaCreditCard />,
-      label: "결제 및 지출 관리",
-      link: "/admin/paymentanager",
-      active: false,
-      list: [
-        {
-          label: "학원별 결제 내역",
-          link: "/admin/paymentanager",
-          active: false,
-        },
-        {
-          label: "학원별 매출 정산",
-          link: "/admin/acarevenue",
-          active: false,
-        },
-      ],
-    },
-    {
-      type: "item",
-      icon: <FaBullhorn />,
-      label: "공지 및 콘텐츠 관리",
-      link: "/admin/notice-content",
-      active: false,
-      list: [
-        {
-          label: "공지사항 관리",
-          link: "/admin/notice-content",
-          subList: [
-            {
-              label: "공지사항 목록",
-              link: "/admin/notice-content",
-              active: false,
-            },
-            {
-              label: "공지사항 보기",
-              link: "/admin/notice-content/view",
-              active: false,
-            },
-            {
-              label: "공지사항 등록",
-              link: "/admin/notice-content/add",
-              active: false,
-            },
-            {
-              label: "공지사항 수정",
-              link: "/admin/notice-content/edit",
-              active: false,
-            },
-          ],
-          active: false,
-        },
-        {
-          label: "팝업 관리",
-          link: "/admin/popup-content",
-          active: false,
-        },
-        {
-          label: "배너관리",
-          link: "/admin/banner-content",
-          active: false,
-        },
-      ],
-    },
-    {
-      type: "item",
-      icon: <FaShieldAlt />,
-      label: "사이트 운영 및 보안",
-      link: "/admin/5",
-      active: false,
-    },
-  ]);
+  const currentUserInfo = useRecoilValue(userInfo);
+  const [menuItems, setMenuItems] = useState<(MenuItem | Divider)[]>([]);
 
   const { pathname } = useLocation();
 
@@ -210,6 +77,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useEffect(() => {
+    // roleId에 따라 메뉴 아이템 설정
+    const items = getMenuItems(currentUserInfo.roleId);
+    setMenuItems(items);
+  }, [currentUserInfo.roleId]);
 
   useEffect(() => {
     setMenuItems(prevItems =>
@@ -280,6 +153,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               close={close}
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
+
             <main
               className="flex w-full p-5"
               style={{
@@ -298,14 +172,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
 
           {isLayoutVisible ? (
-            <main
-              className={
-                "flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
-              }
-              style={{ minHeight: "calc(100vh - 164px)" }}
-            >
-              {children}
-            </main>
+            <div className="flex ">
+              <BannerLayout position="left" />
+              <main
+                className={
+                  "flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
+                  // "flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
+                }
+                style={{ minHeight: "calc(100vh - 164px)" }}
+              >
+                {children}
+              </main>
+              <BannerLayout position="right" />
+            </div>
           ) : (
             <main>{children}</main>
           )}

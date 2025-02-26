@@ -6,6 +6,8 @@ import axios from "axios";
 import jwtAxios from "../../apis/jwt";
 import CustomModal from "../../components/modal/Modal";
 import { useNavigate } from "react-router-dom";
+import type { RcFile, UploadProps } from "antd/es/upload";
+import type { UploadFile } from "antd/es/upload/interface";
 
 const UserInfo = styled.div`
   .ant-form-item-label {
@@ -101,20 +103,40 @@ const UserInfo = styled.div`
   }
 `;
 
-interface MemberInfo {
-  resultMessage: string;
-  resultData;
+interface MemberInfoType {
+  email?: string;
+  name?: string;
+  nickName?: string;
+  phone?: string;
+  birth?: string;
+  userPic?: string;
+  userId?: number;
+}
+
+interface FormValues {
+  user_id: string;
+  currentPw: string;
+  newPw: string;
+  name: string;
+  nickName: string;
+  phone: string;
+  birth: string;
+  pic?: RcFile;
 }
 
 function MemberInfo(): JSX.Element {
-  const [form] = Form.useForm();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [nickNameCheck, setNickNameCheck] = useState(0);
-  const [editMember, setEditMember] = useState<MemberInfo>({});
+  const [form] = Form.useForm<FormValues>();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [nickNameCheck, setNickNameCheck] = useState<number>(0);
+  const [editMember, setEditMember] = useState<MemberInfoType>({});
   const navigate = useNavigate();
+  const [previewOpen, setPreviewOpen] = useState<boolean>(false);
+  const [previewImage, setPreviewImage] = useState<string>("");
+  const [phoneNumber, _setPhoneNumber] = useState<string>("");
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   //회원정보 조회
-  const memberInfo = async () => {
+  const memberInfo = async (): Promise<void> => {
     try {
       const res = await jwtAxios.get(`/api/user`);
       setEditMember(res.data.resultData);
@@ -124,7 +146,7 @@ function MemberInfo(): JSX.Element {
       form.setFieldsValue({
         user_id: res.data.resultData.email,
         name: res.data.resultData.name,
-        nick_name: res.data.resultData.nickName,
+        nickName: res.data.resultData.nickName,
         phone: res.data.resultData.phone,
         birth: res.data.resultData.birth,
         pic: res.data.resultData.userPic,
@@ -135,7 +157,7 @@ function MemberInfo(): JSX.Element {
   };
 
   // 비밀번호와 비밀번호 확인이 일치하는지 검사하는 커스텀 유효성 검사 함수
-  const validateConfirmPassword = (_, value) => {
+  const validateConfirmPassword = (_: any, value: string): Promise<void> => {
     const password = form.getFieldValue("newPw"); // 'password' 필드의 값 가져오기
     if (value && value !== password) {
       return Promise.reject(new Error("비밀번호가 일치하지 않습니다."));
@@ -164,38 +186,26 @@ function MemberInfo(): JSX.Element {
     }
   }, [editMember, form]);
 
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
-  const [phoneNumber, _setPhoneNumber] = useState("");
-  const [fileList, setFileList] = useState([]);
-
-  const handleChange = (info: any) => {
+  const handleChange: UploadProps["onChange"] = info => {
     let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
     newFileList = newFileList.slice(-1);
-
-    //console.log("newFileList : ", newFileList);
-
-    // 파일 상태 업데이트
     setFileList(newFileList);
 
-    // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
       console.log("파일 선택됨:", info.file.originFileObj);
       form.setFieldValue("pic", info.file.originFileObj);
     }
   };
 
-  const handleButton1Click = () => {
+  const handleButton1Click = (): void => {
     setIsModalVisible(false);
   };
 
-  const handleButton2Click = () => {
+  const handleButton2Click = (): void => {
     setIsModalVisible(false);
   };
 
-  const onFinished = async (values: any) => {
+  const onFinished = async (values: FormValues): Promise<void> => {
     if (nickNameCheck === 2) {
       setIsModalVisible(true);
       //console.log("닉네임 확인이 필요합니다.");
@@ -244,7 +254,7 @@ function MemberInfo(): JSX.Element {
   };
 
   //닉네임 중복확인
-  const sameCheck = async (nickName: string) => {
+  const sameCheck = async (nickName: string): Promise<void> => {
     if (!nickName) {
       setIsModalVisible(true);
       setNickNameCheck(3);
@@ -271,7 +281,7 @@ function MemberInfo(): JSX.Element {
   };
 
   //휴대폰 번호 구분기호 자동입력
-  const handlePhoneNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoneNumber = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value.replace(/\D/g, ""); // 숫자만 남기기
 
     if (value.length <= 3) {
@@ -508,4 +518,3 @@ function MemberInfo(): JSX.Element {
 }
 
 export default MemberInfo;
-

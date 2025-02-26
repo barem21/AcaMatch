@@ -55,9 +55,8 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             userId: response.data.resultData.userId, // userId를 문자열로 변환
           };
 
-          // console.log(response);
-
           setUserInfo(userData); // Recoil 상태 업데이트
+          console.log(userData);
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         }
