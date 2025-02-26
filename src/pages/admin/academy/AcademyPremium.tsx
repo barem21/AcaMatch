@@ -113,7 +113,7 @@ function AcademyPremium(): JSX.Element {
 
                 <Button
                   className="btn-admin-basic"
-                  onClick={() => navigate("../academy/premiumReq")}
+                  onClick={() => navigate("../academy/premium-req")}
                 >
                   + 프리미엄 학원 신청
                 </Button>
