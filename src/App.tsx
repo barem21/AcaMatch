@@ -32,7 +32,7 @@ import MypageReview from "./pages/mypage/MypageReview";
 
 import AcaRevenue from "./pages/admin/AcaRevenue.tsx";
 import BannerContent from "./pages/admin/BannerContent.tsx";
-// import MemberInfo from "./pages/admin/MemberInfo";
+import MemberInfo from "./pages/admin/MemberInfo";
 import MemberList from "./pages/admin/MemberList";
 import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
 import NoticeContent from "./pages/admin/NoticeContent.tsx";
@@ -167,7 +167,7 @@ function App() {
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
-                {/* <Route path="memberInfo" element={<MemberInfo />} /> */}
+                <Route path="memberInfo" element={<MemberInfo />} />
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentanager" element={<Paymentanager />} />
                 <Route path="acarevenue" element={<AcaRevenue />} />
