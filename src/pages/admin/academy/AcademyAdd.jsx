@@ -225,7 +225,7 @@ function AcademyAdd() {
           type="checkbox"
           id={`checkbox-${item.tagId}`}
           checked={selectedItems.includes(item.tagId)}
-          onChange={() => handleCheckbox2Change(item.tagId)}
+          onChange={() => handleCheckbox2Change(item.tagName)}
         />
         <label htmlFor={`checkbox-${item.tagId}`}>{item.tagName}</label>
       </div>
@@ -244,12 +244,12 @@ function AcademyAdd() {
     //setFileList(newFileList);
 
     console.log("파일 선택됨:", info.file.originFileObj);
-    form.setFieldValue("pics", info.file.originFileObj);
+    form.setFieldValue("acaPic", info.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
       console.log("파일 선택됨:", info.file.originFileObj);
-      form.setFieldValue("pics", info.file.originFileObj);
+      form.setFieldValue("acaPic", info.file.originFileObj);
     }
   };
 
@@ -361,8 +361,8 @@ function AcademyAdd() {
       const formData = new FormData();
 
       // pic이 있는 경우에만 추가
-      if (values.pic) {
-        formData.append("pics", values.pic);
+      if (values.acaPic) {
+        formData.append("pics", values.acaPic);
       }
       if (values.businessLicensePic) {
         formData.append("businessLicensePic", values.businessLicensePic);
@@ -373,7 +373,7 @@ function AcademyAdd() {
 
       const reqData = {
         userId: currentUserInfo.userId,
-        dongId: 3,
+        //dongId: 3,
         acaName: values.acaName,
         acaPhone: values.acaPhone,
         comment: values.comment,
@@ -383,11 +383,13 @@ function AcademyAdd() {
         address: values.address,
         detailAddress: values.detailAddress,
         postNum: values.postNum,
-        tagIdList: selectedItems.map(item => parseInt(item, 10)),
+        tagNameList: "미술", //selectedItems.map(item => parseInt(item, 10)),
         teacherNum: values.teacherNum,
         businessName: values.businessName,
         businessNumber: values.businessNumber,
         corporateNumber: values.corporateNumber,
+        acaAgree: 0,
+        premium: 0,
         //tagIdList: [1, 3],
       };
 
@@ -763,7 +765,7 @@ function AcademyAdd() {
                 </div>
               </Form.Item>
 
-              <Form.Item name="pics" label="학원 이미지">
+              <Form.Item name="acaPic" label="학원 이미지">
                 <div>
                   <Upload
                     listType="picture-card"
@@ -863,7 +865,11 @@ function AcademyAdd() {
           <AcademyListSelect>
             <form onSubmit={handleAcademySearchForm}>
               <div className="flex justify-center items-center mb-5 gap-2">
-                <select name="ATPT_OFCDC_SC_CODE" onChange={handleChangeArea}>
+                <select
+                  name="ATPT_OFCDC_SC_CODE"
+                  className="pl-3 pr-3 border rounded-xl h-[56px]"
+                  onChange={handleChangeArea}
+                >
                   <option value="Z00">지역</option>
                   <option value="B10">서울</option>
                   <option value="C10">부산</option>
