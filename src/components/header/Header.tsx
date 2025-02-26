@@ -51,13 +51,12 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           // 서버에서 받은 데이터 매핑
           const userData = {
             name: response.data.resultData.name, // 서버에서 받은 name
-            roleId: response.data.resultData.roleId, // roleId를 문자열로 변환
+            roleId: response.data.resultData.userRole, // roleId를 문자열로 변환
             userId: response.data.resultData.userId, // userId를 문자열로 변환
           };
 
-          // console.log(response);
-
           setUserInfo(userData); // Recoil 상태 업데이트
+          console.log(userData);
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         }

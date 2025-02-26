@@ -243,10 +243,10 @@ function HomePage() {
   // );
 
   return (
-    <div className="flex flex-col items-center px-4 py-[36px] gap-8 mx-auto">
+    <div className="flex flex-col w-full items-center px-4 py-[36px] gap-8 mx-auto">
       {/* 메인 베너 */}
       <div
-        className="w-[990px] h-[480px] max-[640px]:w-[360px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative"
+        className="w-[1280px] h-[540px] max-[640px]:w-[360px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner.jpg)`,
           backgroundSize: "cover",
@@ -293,7 +293,7 @@ function HomePage() {
       </div>
 
       {/* 인기 태그 */}
-      <div className="w-full max-w-[990px]">
+      <div className="w-full ">
         <h2 className="text-2xl font-bold mb-6">인기 태그</h2>
         <div className="flex flex-wrap gap-5 justify-start items-center">
           {popularTag && popularTag.length > 0 ? (
@@ -313,7 +313,7 @@ function HomePage() {
           )}
         </div>
       </div>
-      <div className="w-full max-w-[990px]">
+      <div className="w-full ">
         <h2 className="text-2xl font-bold mb-6">이 학원 어떠신가요?</h2>
         {defaultAcademies && defaultAcademies.length > 0 ? (
           <div className="grid grid-cols-5 gap-6">
@@ -356,7 +356,7 @@ function HomePage() {
       </div>
 
       {/* 서비스 현황 */}
-      <div className="w-full max-w-[990px]">
+      <div className="w-full ">
         <h2 className="text-2xl font-bold font-lexend mb-7">서비스 현황</h2>
         {service && service.length > 0 ? (
           <div className="grid grid-cols-3 gap-6">
@@ -381,7 +381,7 @@ function HomePage() {
       </div>
 
       {/* 화제가 되고 있는 학원 */}
-      <div className="w-full max-w-[990px]">
+      <div className="w-full ">
         <h2 className="text-2xl font-bold mb-7">화제가 되고 있는 학원</h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <div className="grid grid-cols-4 gap-6">
