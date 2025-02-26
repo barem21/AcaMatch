@@ -28,20 +28,18 @@ const NoticeContent = () => {
   const [searchText, setSearchText] = useState("");
   const { userId } = useRecoilValue(userInfo);
 
-  const fetchBoardList = async (
-    page: number,
-    size: number,
-    search?: string,
-  ) => {
+  const fetchBoardList = async (page: number, size: number) => {
+    if (!userId) return;
+
     try {
       const response = await jwtAxios.get(`/api/board`, {
         params: {
-          boardId: 1,
+          userId: userId,
           page: page,
           size: size,
-          search: search,
         },
       });
+      console.log(userId);
       const filteredData = response.data.resultData.filter(
         (item: BoardItem | null): item is BoardItem => item !== null,
       );
@@ -70,7 +68,7 @@ const NoticeContent = () => {
 
   const handleSearch = (value: string) => {
     setSearchText(value);
-    fetchBoardList(currentPage, pageSize, value);
+    fetchBoardList(currentPage, pageSize);
   };
 
   const selectOptions = boardList.map(item => ({
@@ -98,15 +96,17 @@ const NoticeContent = () => {
   };
 
   useEffect(() => {
-    form.setFieldsValue({
-      state: searchParams.get("state")
-        ? parseInt(searchParams.get("state")!)
-        : "항목을 검색해 주세요",
-      search: "",
-      showCnt: pageSize,
-    });
-    fetchBoardList(currentPage, pageSize);
-  }, []);
+    if (userId) {
+      form.setFieldsValue({
+        state: searchParams.get("state")
+          ? parseInt(searchParams.get("state")!)
+          : "항목을 검색해 주세요",
+        search: "",
+        showCnt: pageSize,
+      });
+      fetchBoardList(currentPage, pageSize);
+    }
+  }, [userId]);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -200,7 +200,9 @@ const NoticeContent = () => {
                 <div className="flex items-center gap-3 cursor-pointer">
                   <div
                     onClick={() =>
-                      navigate(`/admin/notice-content/view/${item.boardId}`)
+                      navigate(
+                        `/admin/notice-content/view?boardId=${item.boardId}`,
+                      )
                     }
                   >
                     <h4>{item?.boardName}</h4>
@@ -217,7 +219,9 @@ const NoticeContent = () => {
                 <p
                   className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
                   onClick={() =>
-                    navigate(`/admin/notice-content/add/${item.boardId}`)
+                    navigate(
+                      `/admin/notice-content/add?boardId=${item.boardId}`,
+                    )
                   }
                 >
                   수정하기

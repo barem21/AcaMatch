@@ -15,8 +15,8 @@ function LoginPage() {
   const [msg, setMsg] = useState("");
 
   const handleOAuthLogin = (provider: "google" | "kakao" | "naver") => {
-    const redirectUrl = "http://acamatch.site:5233/fe/redirect"; // 이전 코드
-    // const redirectUrl = "http://localhost:5173/fe/redirect";
+    // const redirectUrl = "http://acamatch.site:5233/fe/redirect"; // 이전 코드
+    const redirectUrl = "http://localhost:5173/fe/redirect";
     // const redirectUrl = "http://acamatch.site:5233/fe/redirect";
     const backendUrl = "http://acamatch.site:5233";
     const authUrl = `${backendUrl}/oauth2/authorization/${provider}?redirect_uri=${redirectUrl}`;

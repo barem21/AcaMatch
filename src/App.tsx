@@ -55,6 +55,7 @@ import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
 // import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import BannerView from "./pages/admin/BannerView.tsx";
+import CheckIn from "./pages/admin/teacher/CheckIn.tsx.tsx";
 
 function App() {
   useEffect(() => {
@@ -177,6 +178,9 @@ function App() {
                 <Route path="popup-content/add" element={<PopupAdd />} />
                 <Route path="banner-content" element={<BannerContent />} />
                 <Route path="banner-content/view" element={<BannerView />} />
+                <Route path="teacher">
+                  <Route path="checkIn" element={<CheckIn />} />
+                </Route>
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />

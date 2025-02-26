@@ -1,84 +1,112 @@
 import styled from "@emotion/styled";
-import { Button, Form, Input } from "antd";
-import { useEffect } from "react";
+import { Button, Form, Input, message } from "antd";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import userInfo from "../../atoms/userInfo";
-import { message } from "antd";
-import axios from "axios";
 import jwtAxios from "../../apis/jwt";
+import userInfo from "../../atoms/userInfo";
 
-const InputWrapper = styled.div`
-  width: 100%;
-  .ant-input {
-    height: 40px;
-    border-radius: 4px;
-  }
-  .ant-form-item {
-    width: 100%;
-  }
-`;
+// const InputWrapper = styled.div`
+//   width: 100%;
+//   .ant-input {
+//     height: 40px;
+//     border-radius: 4px;
+//   }
+//   .ant-form-item {
+//     width: 100%;
+//   }
+// `;
 const NoticeAdd = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, _setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { userId } = useRecoilValue(userInfo);
+  const boardId = searchParams.get("boardId");
+  const isEdit = !!boardId;
 
-  const state = searchParams.get("state");
+  const fetchBoardDetail = async () => {
+    if (!userId || !boardId) return;
+
+    try {
+      const response = await jwtAxios.get(`/api/board`, {
+        params: {
+          userId: userId,
+          page: 1,
+          size: 40,
+        },
+      });
+
+      const boardDetail = response.data.resultData.filter(
+        (item: any) => item !== null && item.boardId === Number(boardId),
+      )[0];
+
+      if (boardDetail) {
+        form.setFieldsValue({
+          title: boardDetail.boardName,
+          content: boardDetail.boardComment,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching board detail:", error);
+    }
+  };
 
   const onFinished = async (values: any) => {
     try {
-      const postData = {
-        userId: userId,
-        boardName: values.title,
-        boardComment: values.content,
-      };
-
-      console.log("Request Data:", postData); // 요청 데이터 확인
-
-      // FormData로 변환하여 전송
       const formData = new FormData();
       formData.append("userId", (userId ?? -1).toString());
       formData.append("boardName", values.title);
       formData.append("boardComment", values.content);
 
-      const response = await jwtAxios.post("/api/board", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // Content-Type 변경
-        },
-      });
+      let response;
 
-      console.log("Response:", response.data); // 응답 데이터 확인
+      if (isEdit) {
+        // 수정 시 PUT 요청
+        formData.append("boardId", boardId!);
+        response = await jwtAxios.put("/api/board", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        // 신규 등록 시 POST 요청
+        response = await jwtAxios.post("/api/board", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
 
       if (response.data.resultMessage) {
-        message.success("공지사항이 등록되었습니다.");
+        message.success(
+          isEdit ? "공지사항이 수정되었습니다." : "공지사항이 등록되었습니다.",
+        );
         navigate("/admin/notice-content");
       }
     } catch (error) {
-      console.error("Error details:", error.response?.data); // 에러 상세 정보 확인
-      message.error("공지사항 등록에 실패했습니다.");
+      console.error("Error details:", error.response?.data);
+      message.error(
+        isEdit
+          ? "공지사항 수정에 실패했습니다."
+          : "공지사항 등록에 실패했습니다.",
+      );
     }
   };
 
-  // const onChange = () => {
-  //   form.submit();
-  // };
-
   useEffect(() => {
-    //페이지 들어오면 ant design 처리용 기본값 세팅
-    form.setFieldsValue({
-      state: state ? parseInt(state) : "all",
-      search: "",
-      showCnt: 40,
-    });
-  }, []);
+    if (isEdit) {
+      fetchBoardDetail();
+    }
+  }, [boardId, userId]);
+
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          공지사항 등록
+          공지사항 {isEdit ? "수정" : "등록"}
           <p>
-            공지 및 콘텐츠 관리 {">"} 공지사항 관리 {">"} 공지사항 등록
+            공지 및 콘텐츠 관리 {">"} 공지사항 관리 {">"} 공지사항{" "}
+            {isEdit ? "수정" : "등록"}
           </p>
         </h1>
 
@@ -124,7 +152,7 @@ const NoticeAdd = () => {
                 취소하기
               </button>
               <Button htmlType="submit" className="btn-admin-ok">
-                등록하기
+                {isEdit ? "수정하기" : "등록하기"}
               </Button>
             </div>
           </Form>

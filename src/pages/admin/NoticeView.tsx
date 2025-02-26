@@ -1,7 +1,10 @@
 import styled from "@emotion/styled";
-import { Button, Form } from "antd";
-import { useEffect } from "react";
+import { Button, Form, message } from "antd";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import jwtAxios from "../../apis/jwt";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 
 const InputWrapper = styled.div`
   width: 100%;
@@ -13,33 +16,75 @@ const InputWrapper = styled.div`
     width: 100%;
   }
 `;
+
+interface BoardItem {
+  boardId: number;
+  userId: number;
+  boardComment: string;
+  boardName: string;
+  createdAt: string;
+  name: string;
+}
+
 const NoticeView = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, _setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const boardId = searchParams.get("boardId");
+  const [boardDetail, setBoardDetail] = useState<BoardItem | null>(null);
+  const { userId } = useRecoilValue(userInfo);
 
-  const state = searchParams.get("state");
+  const fetchBoardDetail = async () => {
+    if (!userId) return;
 
-  const onFinished = async (values: any) => {
-    console.log(values);
+    try {
+      const response = await jwtAxios.get(`/api/board`, {
+        params: {
+          userId: userId,
+          page: 1,
+          size: 10,
+        },
+      });
 
-    // 쿼리 문자열로 변환
-    const queryParams = new URLSearchParams(values).toString();
-    navigate(`?${queryParams}`); //쿼리스트링 url에 추가
+      const filteredData = response.data.resultData.filter(
+        (item: BoardItem | null): item is BoardItem =>
+          item !== null && item.boardId === Number(boardId),
+      )[0]; // 첫 번째 항목만 가져옴
+      console.log(response);
+
+      setBoardDetail(filteredData);
+    } catch (error) {
+      console.error("Error fetching board detail:", error);
+    }
   };
 
-  // const onChange = () => {
-  //   form.submit();
-  // };
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      const response = await jwtAxios.delete("/api/board", {
+        params: {
+          boardId: boardId,
+          userId: userId,
+        },
+      });
+
+      if (response.data.resultMessage) {
+        message.success("게시글이 삭제되었습니다.");
+        navigate(-1);
+      }
+    } catch (error) {
+      console.error("Error deleting board:", error);
+      message.error("게시글 삭제에 실패했습니다.");
+    }
+  };
 
   useEffect(() => {
-    //페이지 들어오면 ant design 처리용 기본값 세팅
-    form.setFieldsValue({
-      state: state ? parseInt(state) : "all",
-      search: "",
-      showCnt: 40,
-    });
-  }, []);
+    if (boardId && userId) {
+      fetchBoardDetail();
+    }
+  }, [boardId, userId]);
+
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
@@ -49,38 +94,38 @@ const NoticeView = () => {
         </h1>
 
         <div className="board-wrap">
-          <Form form={form} onFinish={values => onFinished(values)}>
-            <div className=" justify-between p-2 border-b">
+          <Form form={form}>
+            <div className="justify-between p-2 border-b">
               <div className="flex items-center gap-1">
                 <label className="min-w-[100px] text-sm">제목</label>
                 <InputWrapper>
                   <Form.Item name="title" className="m-0 text-[#666]">
-                    제목입니다.
+                    {boardDetail?.boardName}
                   </Form.Item>
                 </InputWrapper>
               </div>
             </div>
-            <div className=" flex p-2 pl-3 border-b h-[600px] text-[#666]">
-              내용입니다
+            <div className="flex p-2 pl-3 border-b h-[600px] text-[#666]">
+              {boardDetail?.boardComment}
             </div>
             <div className="flex justify-end p-3 gap-3 border-b">
               <button
                 type="button"
                 className="btn-admin-cancel"
-                onClick={() => navigate(-1)}
+                onClick={handleDelete}
               >
                 삭제하기
               </button>
 
-              <Form.Item className="mb-0">
-                <Button
-                  htmlType="submit"
-                  className="btn-admin-ok"
-                  //   disabled={isSubmitting}
-                >
-                  수정하기
-                </Button>
-              </Form.Item>
+              <Button
+                className="btn-admin-ok"
+                onClick={() =>
+                  navigate(`/admin/notice-content/add?boardId=${boardId}`)
+                }
+              >
+                수정하기
+              </Button>
+
               <button
                 type="button"
                 className="h-[30px] px-[10px] bg-[#ececec] rounded-[4px] text-[#242424] text-[12px]"

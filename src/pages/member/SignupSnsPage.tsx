@@ -169,7 +169,13 @@ function SignupSnsPage() {
       if (response.data.resultData) {
         console.log(response.data.resultData);
         message.success("회원가입이 완료되었습니다.");
-        navigate("/log-in"); // 로그인 페이지로 이동
+        const accessToken = searchParams.get("access_token");
+        if (accessToken) {
+          setCookie("accessToken", accessToken, {
+            path: "/",
+          });
+        }
+        navigate("/");
       } else {
         message.error(response.data.message || "회원가입에 실패했습니다.");
       }
