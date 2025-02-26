@@ -130,9 +130,9 @@ function AcademyAdd() {
   const [academyArea, setAcademyArea] = useState(""); //지역선택
   const [academyKeyword, setAcademyKeyword] = useState(""); //학원검색 키워드
   const [searchAcademyResult, setSearchAcademyResult] = useState([]); //학원검색 결과
-  //const [fileList, setFileList] = useState([]);
-  //const [fileList2, setFileList2] = useState([]);
-  //const [fileList3, setFileList3] = useState([]);
+  const [fileList, setFileList] = useState([]);
+  const [fileList2, setFileList2] = useState([]);
+  const [fileList3, setFileList3] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentUserInfo = useRecoilValue(userInfo);
@@ -234,34 +234,33 @@ function AcademyAdd() {
 
   //첨부파일 처리
   const handleChange = info => {
-    //const newFileList = [...info.fileList];
-    //console.log(newFileList);
+    let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
-    //newFileList = newFileList.slice(-1);
+    newFileList = newFileList.slice(-1);
 
     // 파일 상태 업데이트
-    //setFileList(newFileList);
+    setFileList(newFileList);
 
     console.log("파일 선택됨:", info.file.originFileObj);
-    form.setFieldValue("acaPic", info.file.originFileObj);
+    form.setFieldValue("pics", info.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
       console.log("파일 선택됨:", info.file.originFileObj);
-      form.setFieldValue("acaPic", info.file.originFileObj);
+      form.setFieldValue("pics", info.file.originFileObj);
     }
   };
 
   //사업자등록증 파일 처리
   const handle1Change = info2 => {
-    //let newFileList2 = [...info2.fileList];
+    let newFileList2 = [...info2.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
-    //newFileList2 = newFileList2.slice(-1);
+    newFileList2 = newFileList2.slice(-1);
 
     // 파일 상태 업데이트
-    //setFileList2(newFileList2);
+    setFileList2(newFileList2);
 
     console.log("파일 선택됨:", info2.file.originFileObj);
     form.setFieldValue("businessLicensePic", info2.file.originFileObj);
@@ -275,13 +274,13 @@ function AcademyAdd() {
 
   //학원등록증 파일 처리
   const handle2Change = info3 => {
-    //let newFileList3 = [...info3.fileList];
+    let newFileList3 = [...info3.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
-    //newFileList3 = newFileList3.slice(-1);
+    newFileList3 = newFileList3.slice(-1);
 
     // 파일 상태 업데이트
-    //setFileList3(newFileList3);
+    setFileList3(newFileList3);
 
     console.log("파일 선택됨:", info3.file.originFileObj);
     form.setFieldValue("operationLicensePic", info3.file.originFileObj);
@@ -332,18 +331,18 @@ function AcademyAdd() {
   //검색결과 적용
   const settingData = (
     acaName,
-    postNum,
-    address,
-    detailAddress,
+    //postNum,
+    //address,
+    //detailAddress,
     acaPhone,
     comment,
   ) => {
     //데이터를 받아온 즉시 form 값 설정
     form.setFieldsValue({
       acaName: acaName,
-      postNum: postNum,
-      address: address,
-      detailAddress: detailAddress,
+      //postNum: postNum,
+      //address: address,
+      //detailAddress: detailAddress,
       acaPhone: acaPhone,
       comment: comment,
     });
@@ -361,8 +360,8 @@ function AcademyAdd() {
       const formData = new FormData();
 
       // pic이 있는 경우에만 추가
-      if (values.acaPic) {
-        formData.append("pics", values.acaPic);
+      if (values.pics) {
+        formData.append("pics", values.pics);
       }
       if (values.businessLicensePic) {
         formData.append("businessLicensePic", values.businessLicensePic);
@@ -372,7 +371,7 @@ function AcademyAdd() {
       }
 
       const reqData = {
-        userId: currentUserInfo.userId,
+        userId: parseInt(currentUserInfo.userId),
         //dongId: 3,
         acaName: values.acaName,
         acaPhone: values.acaPhone,
@@ -383,13 +382,10 @@ function AcademyAdd() {
         address: values.address,
         detailAddress: values.detailAddress,
         postNum: values.postNum,
-        tagNameList: "미술", //selectedItems.map(item => parseInt(item, 10)),
-        teacherNum: values.teacherNum,
+        tagNameList: ["미술"], //selectedItems.map(item => parseInt(item, 10)),
         businessName: values.businessName,
         businessNumber: values.businessNumber,
         corporateNumber: values.corporateNumber,
-        acaAgree: 0,
-        premium: 0,
         //tagIdList: [1, 3],
       };
 
@@ -408,7 +404,7 @@ function AcademyAdd() {
       const res = await jwtAxios.post("/api/academy", formData, header);
       //console.log(res.data.resultData);
       if (res.data.resultData === 1) {
-        navigate("/mypage/academy");
+        navigate("../academy");
         message.success("학원등록이 완료되었습니다.");
         return;
       }
@@ -765,7 +761,7 @@ function AcademyAdd() {
                 </div>
               </Form.Item>
 
-              <Form.Item name="acaPic" label="학원 이미지">
+              <Form.Item name="pics" label="학원 이미지">
                 <div>
                   <Upload
                     listType="picture-card"
@@ -919,9 +915,9 @@ function AcademyAdd() {
                       onClick={() =>
                         settingData(
                           item.ACA_NM,
-                          item.FA_RDNZC,
-                          item.FA_RDNMA,
-                          item.FA_RDNDA,
+                          //item.FA_RDNZC,
+                          //item.FA_RDNMA,
+                          //item.FA_RDNDA,
                           item.FA_TELNO,
                           item.REALM_SC_NM,
                         )
