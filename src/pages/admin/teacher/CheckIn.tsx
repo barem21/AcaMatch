@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Select, Form, message } from "antd";
+import { Select, Form, message, Checkbox } from "antd";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import koLocale from "@fullcalendar/core/locales/ko";
 import userInfo from "../../../atoms/userInfo";
 import jwtAxios from "../../../apis/jwt";
+import type { CheckboxChangeEvent } from "antd/es/checkbox";
 
 interface BoardItem {
   boardId: number;
@@ -29,6 +30,7 @@ const CheckIn = () => {
   const [boardList, setBoardList] = useState<BoardItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
+  const [checkedList, setCheckedList] = useState<number[]>([]);
 
   // 학원 목록 조회
   const fetchBoardList = async () => {
@@ -101,6 +103,14 @@ const CheckIn = () => {
     }
   };
 
+  const onCheckboxChange = (index: number) => (e: CheckboxChangeEvent) => {
+    if (e.target.checked) {
+      setCheckedList([...checkedList, index]);
+    } else {
+      setCheckedList(checkedList.filter(item => item !== index));
+    }
+  };
+
   useEffect(() => {
     if (userId) {
       fetchBoardList();
@@ -142,8 +152,8 @@ const CheckIn = () => {
             </div>
           </Form>
 
-          <div className="p-4">
-            <div className="w-[800px] mx-auto">
+          <div className="p-4 pb-0 pt-0 flex gap-4 justify-center border-b">
+            <div className="justify-center w-[1200px] pt-2">
               <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
@@ -155,13 +165,53 @@ const CheckIn = () => {
                   center: "title",
                   right: "dayGridMonth",
                 }}
-                height="auto"
+                height="620px"
                 eventContent={eventInfo => {
                   return (
                     <div className="p-1 text-xs">{eventInfo.event.title}</div>
                   );
                 }}
               />
+            </div>
+            <div className="flex flex-col w-[300px] h-[640px] border-l border-[#EEEEEE]">
+              {/* 헤더 */}
+              <div className="flex flex-col justify-center px-5 h-20 border-b border-[#EEEEEE]">
+                <h2 className="text-base font-medium leading-10 flex items-center tracking-wide uppercase text-[#303E67]">
+                  수강생 목록 및 일괄 출석처리
+                </h2>
+              </div>
+
+              {/* 수강생 목록 */}
+              <div className="flex flex-col flex-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-row items-center px-5 h-10 gap-2.5"
+                  >
+                    <Checkbox
+                      onChange={onCheckboxChange(index)}
+                      checked={checkedList.includes(index)}
+                      className="flex justify-center items-center"
+                    />
+                    <span className="flex items-center h-10 text-sm font-medium tracking-wide uppercase text-[#666666]">
+                      홍길동
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 하단 버튼 */}
+              <div className="flex justify-center items-center px-5 h-20 bg-[#303E67]">
+                <button
+                  className="w-full h-10 font-bold text-base leading-10 flex items-center justify-center tracking-wide uppercase text-white"
+                  onClick={() => {
+                    console.log("선택된 학생들:", checkedList);
+                    // 여기에 출석 처리 로직 추가
+                  }}
+                >
+                  출석정보 저장하기
+                </button>
+              </div>
             </div>
           </div>
         </div>
