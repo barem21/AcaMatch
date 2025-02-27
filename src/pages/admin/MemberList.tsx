@@ -1,6 +1,5 @@
 import { Button, Form, Input, Pagination, Select } from "antd";
 import { useEffect, useState } from "react";
-import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../components/modal/Modal";
 
@@ -143,7 +142,7 @@ function MemberList(): JSX.Element {
             <div className="flex items-center justify-center w-36">
               신고횟수
             </div>
-            <div className="flex items-center justify-center w-36">관리</div>
+            {/*<div className="flex items-center justify-center w-36">관리</div>*/}
           </div>
 
           <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
@@ -176,6 +175,8 @@ function MemberList(): JSX.Element {
             </div>
             <div className="flex items-center justify-center w-40">홍길동</div>
             <div className="flex items-center justify-center w-36">3회</div>
+
+            {/*
             <div className="flex gap-4 items-center justify-center w-36">
               <button onClick={() => navigate(`../memberInfo?userId=0`)}>
                 <FaPen className="w-3 text-gray-400" />
@@ -184,6 +185,7 @@ function MemberList(): JSX.Element {
                 <FaRegTrashAlt className="w-3 text-gray-400" />
               </button>
             </div>
+            */}
           </div>
         </div>
 

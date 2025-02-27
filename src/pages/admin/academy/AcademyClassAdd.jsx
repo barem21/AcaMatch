@@ -122,12 +122,12 @@ function AcademyClassAdd() {
 
   const handleButton1Click = () => {
     setIsModalVisible(false);
-    navigate(`/mypage/academy/class?acaId=${acaId}`);
+    navigate(`../academy/class?acaId=${acaId}`);
   };
 
   const handleButton2Click = () => {
     setIsModalVisible(false);
-    navigate(`/mypage/academy/class?acaId=${acaId}`);
+    navigate(`../academy/class?acaId=${acaId}`);
   };
 
   const initialValues = {

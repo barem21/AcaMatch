@@ -121,6 +121,12 @@ function MyPageUserInfo() {
   const titleName = "마이페이지";
   let menuItems = [];
   switch (currentUserInfo.roleId) {
+    case 3: //학원관계자
+      menuItems = [
+        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
+        { label: "학원 관리자", isActive: false, link: "/admin" },
+      ];
+      break;
     case 2: //학부모
       menuItems = [
         { label: "회원정보 관리", isActive: true, link: "/mypage/user" },

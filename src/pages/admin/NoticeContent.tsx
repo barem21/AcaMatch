@@ -1,12 +1,10 @@
-import { Button, Form, Pagination, Select } from "antd";
+import { Button, Form, message, Pagination, Select } from "antd";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
-import jwtAxios from "../../apis/jwt";
 import { useRecoilValue } from "recoil";
+import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
-import { message } from "antd";
 
 // 게시글 타입 정의
 interface BoardItem {

@@ -1,10 +1,11 @@
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, Upload } from "antd";
+import { Button, Form, Image, Input, message, Upload } from "antd";
+import axios from "axios";
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -100,30 +101,52 @@ function AcademyTextbookAdd(): JSX.Element {
   const navigate = useNavigate();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  // const [fileList, setFileList] = useState([]);
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // const acaId = searchParams.get("acaId");
-  // const classId = searchParams.get("classId");
+  const [fileList, setFileList] = useState([]);
+  const [searchParams] = useSearchParams();
+  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "", 0);
 
   //첨부파일 처리
   const handleChange = (info: any) => {
-    // let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    // newFileList = newFileList.slice(-1);
-
-    // 파일 상태 업데이트
-    // setFileList(newFileList);
-
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info.file.status === "done" && info.file.originFileObj) {
-      console.log("파일 선택됨:", info.file.originFileObj);
-      form.setFieldValue("pic", info.file.originFileObj);
-    }
+    form.setFieldValue("file", info.file.originFileObj);
   };
 
-  const onFinished = (values: any) => {
+  const onFinished = async (values: any) => {
     console.log(values);
+    try {
+      const formData = new FormData(); // pic이 있는 경우에만 추가
+      if (values.file) {
+        formData.append("file", values.file);
+      }
+      const reqData = {
+        bookName: values.bookName,
+        bookPrice: parseInt(values.bookPrice),
+        bookComment: values.bookComment,
+        manager: values.manager,
+        classId: classId,
+        bookAmount: parseInt(values.bookAmount),
+      };
+
+      //JSON 형태로 데이터를 만들어 formData에 추가
+      formData.append(
+        "req",
+        new Blob([JSON.stringify(reqData)], { type: "application/json" }),
+      );
+
+      const header = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      const res = await axios.post(`/api/book`, formData, header);
+      if (res.data.resultData === 1) {
+        message.success("교재 등록이 완료되었습니다.");
+        navigate(`../academy/textBook?acaId=${acaId}&classId=${classId}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -150,8 +173,9 @@ function AcademyTextbookAdd(): JSX.Element {
                   placeholder="담당자 이름을 입력해 주세요."
                 />
               </Form.Item>
+
               <Form.Item
-                name="className"
+                name="bookName"
                 label="교재 이름"
                 rules={[
                   { required: true, message: "교재 이름을 입력해 주세요." },
@@ -165,7 +189,7 @@ function AcademyTextbookAdd(): JSX.Element {
               </Form.Item>
 
               <Form.Item
-                name="quantity"
+                name="bookAmount"
                 label="수량"
                 rules={[{ required: true, message: "수량을 입력해 주세요." }]}
               >
@@ -177,7 +201,7 @@ function AcademyTextbookAdd(): JSX.Element {
               </Form.Item>
 
               <Form.Item
-                name="price"
+                name="bookPrice"
                 label="가격"
                 rules={[{ required: true, message: "가격을 입력해 주세요." }]}
               >
@@ -188,7 +212,7 @@ function AcademyTextbookAdd(): JSX.Element {
                 />
               </Form.Item>
 
-              <Form.Item name="pic" label="교재 이미지">
+              <Form.Item name="file" label="교재 이미지">
                 <div>
                   <Upload
                     listType="picture-card"
@@ -218,7 +242,7 @@ function AcademyTextbookAdd(): JSX.Element {
               </Form.Item>
 
               <Form.Item
-                name="classComment"
+                name="bookComment"
                 label="교재 소개글"
                 className="h-44"
                 rules={[

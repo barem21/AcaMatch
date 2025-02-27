@@ -16,14 +16,20 @@ function MyPage() {
   const [mypageAcademyList, setMypageAcademyList] = useState([]); //내 학원 내역
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const currentUserInfo = useRecoilValue(userInfo);
+  const { roleId, userId } = useRecoilValue(userInfo);
   const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
   const pageSize = 10;
 
   const titleName = "마이페이지";
   let menuItems = [];
-  switch (currentUserInfo.roleId) {
+  switch (roleId) {
+    case 3: //학원관계자
+      menuItems = [
+        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
+        { label: "학원 관리자", isActive: false, link: "/admin" },
+      ];
+      break;
     case 2: //학부모
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
@@ -55,8 +61,8 @@ function MyPage() {
 
   const myAcademyList = async page => {
     //자녀목록 호출
-    let checkUserId = currentUserInfo.userId; //기본은 본인 아이디
-    if (currentUserInfo.roleId === 2) {
+    let checkUserId = userId; //기본은 본인 아이디
+    if (roleId === 2) {
       //학부모는 자녀 정보 필요
       try {
         const ress = await jwtAxios.get("/api/user/relationship/list/1");
@@ -69,7 +75,7 @@ function MyPage() {
     try {
       //나(자녀)의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${checkUserId}&role=${currentUserInfo.roleId}&page=${page}&size=100`,
+        `/api/joinClass?userId=${checkUserId}&role=${roleId}&page=${page}&size=100`,
       );
 
       console.log(res.data.resultData);
@@ -92,17 +98,17 @@ function MyPage() {
   };
 
   useEffect(() => {
-    if (currentUserInfo.userId !== "") {
+    if (userId !== "") {
       myAcademyList(1);
     }
-  }, [currentUserInfo]);
+  }, [userId]);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
     }
-  }, [currentUserInfo]);
+  }, [userId]);
 
   // useEffect(() => {
   //   if (!currentUserInfo.userId) {
@@ -110,6 +116,12 @@ function MyPage() {
   //     message.error("로그인이 필요한 서비스입니다.");
   //   }
   // }, []);
+
+  useEffect(() => {
+    if (roleId === 3) {
+      navigate("/mypage/user");
+    }
+  }, []);
 
   const handlePageChange = page => {
     setCurrentPage(page);
@@ -133,7 +145,7 @@ function MyPage() {
 
       <div className="w-full">
         <h1 className="title-font">
-          {currentUserInfo.roleId === 2 ? "자녀" : "나의"} 학원정보
+          {roleId === 2 ? "자녀" : "나의"} 학원정보
         </h1>
 
         <div className="board-wrap">

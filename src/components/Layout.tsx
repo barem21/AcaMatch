@@ -1,6 +1,8 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { adminMenuItems, Divider } from "../constants/adminMenuItems";
+import { useRecoilValue } from "recoil";
+import { userInfo } from "../atoms/userInfo";
+import { Divider, getMenuItems } from "../constants/adminMenuItems";
 import { getCookie, setCookie } from "../utils/cookie";
 import AdminFooter from "./admin/Footer";
 import AdminHeader from "./admin/Header";
@@ -8,9 +10,6 @@ import Sidebar from "./admin/Sidebar";
 import BannerLayout from "./BannerLayout";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
-import { useRecoilValue } from "recoil";
-import { userInfo } from "../atoms/userInfo";
-import { getMenuItems } from "../constants/adminMenuItems";
 
 interface LayoutProps {
   children?: ReactNode;

@@ -1,9 +1,10 @@
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, TimePicker, Upload } from "antd";
+import { Button, Form, Image, Input, message, TimePicker, Upload } from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import { Cookies } from "react-cookie";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -11,7 +12,6 @@ import { useRecoilValue } from "recoil";
 import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
-import { Cookies } from "react-cookie";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -117,6 +117,18 @@ const TagListSelect = styled.div`
   }
 `;
 
+interface tagListType {
+  tagId: number;
+  tagName: string;
+}
+
+interface fileListType {
+  uid: number;
+  name: string;
+  status: string;
+  url: string;
+}
+
 function AcademyEdit() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
@@ -127,18 +139,17 @@ function AcademyEdit() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [tagKeyword, setTagKeyword] = useState(""); //태그검색 키워드
-  const [tagList, setTagList] = useState([]); //태그목록(전체/검색결과)
-  const [selectedItems, setSelectedItems] = useState([]); //선택한 태그값
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [fileList, setFileList] = useState([]);
+  const [tagList, setTagList] = useState<tagListType[]>([]); //태그목록(전체/검색결과)
+  const [selectedItems, setSelectedItems] = useState<number[]>([]); //선택한 태그값
+  const [searchParams] = useSearchParams();
+  const [fileList, setFileList] = useState<fileListType[]>([]);
 
-  const acaId = searchParams.get("acaId");
-  const currentUserInfo = useRecoilValue(userInfo);
+  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
+  const { userId } = useRecoilValue(userInfo);
   const navigate = useNavigate();
-  //console.log(currentUserInfo);
 
   // 체크박스 클릭 시 선택/해제 처리
-  const handleCheckbox2Change = value => {
+  const handleCheckbox2Change = (value: any) => {
     setSelectedItems(
       prevSelectedItems =>
         prevSelectedItems.includes(value)
@@ -148,7 +159,7 @@ function AcademyEdit() {
   };
 
   // 선택한 항목 제거
-  const handleRemoveItem = value => {
+  const handleRemoveItem = (value: any) => {
     setSelectedItems(prevSelectedItems =>
       prevSelectedItems.filter(item => item !== value),
     );
@@ -233,15 +244,15 @@ function AcademyEdit() {
   const academyGetInfo = async () => {
     try {
       const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
-      //console.log("aca_info : ", res.data.resultData);
+      console.log("aca_info : ", res.data.resultData);
 
       // 데이터를 받아온 즉시 form 값 설정
       form.setFieldsValue({
         acaId: res.data.resultData.acaId,
         acaName: res.data.resultData.acaName,
-        address: res.data.resultData.addressDto.address,
-        detailAddress: res.data.resultData.addressDto.detailAddress,
-        postNum: res.data.resultData.addressDto.postNum,
+        //address: res.data.resultData.addressDto.address,
+        //detailAddress: res.data.resultData.addressDto.detailAddress,
+        //postNum: res.data.resultData.addressDto.postNum,
         acaPhone: res.data.resultData.acaPhone,
         openTime: dayjs(res.data.resultData.openTime.substr(0, 5), "HH:mm"),
         closeTime: dayjs(res.data.resultData.closeTime.substr(0, 5), "HH:mm"),
@@ -252,10 +263,10 @@ function AcademyEdit() {
       if (res.data.resultData.acaPic) {
         setFileList([
           {
-            uid: "1",
+            uid: 1,
             name: res.data.resultData.acaPic,
             status: "done",
-            url: `http://112.222.157.157:5223/pic/academy/${res.data.resultData.acaId}/${res.data.resultData.acaPic}`,
+            url: `http://112.222.157.157:5233/pic/academy/${res.data.resultData.acaId}/${res.data.resultData.acaPic}`,
           },
         ]);
       }
@@ -265,23 +276,17 @@ function AcademyEdit() {
   };
 
   //첨부파일 처리
-  const handleChange = info => {
-    let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
+  const handleChange = (info: any) => {
+    const newFileList = [...info.fileList];
 
     // 파일 상태 업데이트
     setFileList(newFileList);
 
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info.file.status === "done" && info.file.originFileObj) {
-      //console.log("파일 선택됨:", info.file.originFileObj);
-      form.setFieldValue("pic", info.file.originFileObj);
-    }
+    console.log("파일 선택됨:", info.file.originFileObj);
+    form.setFieldValue("pics", info.file.originFileObj);
   };
 
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     try {
       const startTimes = dayjs(values.openTime.$d).format("HH:mm");
       const endTimes = dayjs(values.closeTime.$d).format("HH:mm");
@@ -295,7 +300,7 @@ function AcademyEdit() {
 
       const reqData = {
         acaId: acaId,
-        userId: currentUserInfo.userId,
+        userId: userId,
         dongId: 3,
         acaName: values.acaName,
         acaPhone: values.acaPhone,
@@ -356,7 +361,7 @@ function AcademyEdit() {
 
   useEffect(() => {
     academyGetInfo();
-  }, [currentUserInfo]);
+  }, []);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
@@ -506,7 +511,13 @@ function AcademyEdit() {
                 </Form.Item>
               </div>
 
-              <Form.Item name="teacherNum" label="강사 인원수">
+              <Form.Item
+                name="teacherNum"
+                label="강사 인원수"
+                rules={[
+                  { required: true, message: "강사 인원수를 입력해 주세요." },
+                ]}
+              >
                 <Input
                   className="input-admin-basic"
                   maxLength={5}
@@ -514,7 +525,14 @@ function AcademyEdit() {
                 />
               </Form.Item>
 
-              <Form.Item name="comment" label="학원 소개글" className="h-44">
+              <Form.Item
+                name="comment"
+                label="학원 소개글"
+                className="h-44"
+                rules={[
+                  { required: true, message: "학원 소개글을 입력해 주세요." },
+                ]}
+              >
                 <ReactQuill
                   placeholder="소개글을 작성해 주세요."
                   className="h-32"
@@ -522,7 +540,7 @@ function AcademyEdit() {
               </Form.Item>
 
               <div className="flex gap-3 w-full">
-                <Form.Item label="태그 등록" className="w-full">
+                <Form.Item label="태그 등록 *" className="w-full">
                   <Input
                     className="input-admin-basic"
                     placeholder="태그를 선택해 주세요."
@@ -554,7 +572,7 @@ function AcademyEdit() {
                           key={value}
                           className="flex justify-center items-center"
                         >
-                          {selectedTags.tagName}
+                          {selectedTags?.tagName}
                           <button
                             onClick={() => handleRemoveItem(value)}
                             className="size-5 ml-2 border border-gray-300 rounded-full text-xs"
@@ -568,11 +586,17 @@ function AcademyEdit() {
                 </div>
               )}
 
-              <Form.Item name="pic" label="학원 이미지">
+              <Form.Item
+                name="pics"
+                label="학원 이미지"
+                rules={[
+                  { required: true, message: "학원 이미지를 첨부해 주세요." },
+                ]}
+              >
                 <div>
                   <Upload
                     listType="picture-card"
-                    maxCount={1}
+                    maxCount={5}
                     onChange={handleChange}
                     showUploadList={{ showPreviewIcon: false }}
                     fileList={fileList}
@@ -610,7 +634,7 @@ function AcademyEdit() {
                 <button
                   type="button"
                   className="btn-admin-cancel"
-                  onClick={e => navigate(-1)}
+                  onClick={() => navigate(-1)}
                 >
                   취소하기
                 </button>

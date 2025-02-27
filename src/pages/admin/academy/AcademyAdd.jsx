@@ -768,6 +768,13 @@ function AcademyAdd() {
                     maxCount={5}
                     onChange={handleChange}
                     showUploadList={{ showPreviewIcon: false }}
+                    fileList={fileList}
+                    customRequest={({ onSuccess }) => {
+                      // 자동 업로드 방지
+                      setTimeout(() => {
+                        onSuccess?.("ok");
+                      }, 0);
+                    }}
                   >
                     <button
                       style={{ border: 0, background: "none" }}

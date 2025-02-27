@@ -52,7 +52,7 @@ import AcademyRecord from "./pages/admin/academy/AcademyRecord";
 import AcademyStudent from "./pages/admin/academy/AcademyStudent";
 import AcademyTestList from "./pages/admin/academy/AcademyTestList";
 import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
-// import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
+import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import BannerView from "./pages/admin/BannerView.tsx";
 import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
@@ -208,10 +208,10 @@ function App() {
                   path="academy/textbookAdd"
                   element={<AcademyTextbookAdd />}
                 />
-                {/* <Route
+                <Route
                   path="academy/textbookEdit"
                   element={<AcademyTextbookEdit />}
-                /> */}
+                />
               </Route>
               <Route path="/404" element={<NotFoundPage />} />
               <Route path="*" element={<NotFoundPage />} />

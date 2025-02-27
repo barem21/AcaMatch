@@ -5,7 +5,7 @@ import { CiSearch } from "react-icons/ci";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/CustomInput ";
-import MainButton from "../components/button/MainButton";
+import MainButton from "../components/button/Mainbutton";
 
 interface Academy {
   acaId: number;
