@@ -9,10 +9,12 @@ import {
 
 export interface MenuItem {
   type: "item";
-  icon: JSX.Element;
+  icon?: JSX.Element;
   label: string;
   link: string;
-  active: boolean;
+  active?: boolean;
+  isActive?: boolean;
+  expanded?: boolean;
   list?: SubMenuItem[];
 }
 
@@ -20,6 +22,7 @@ export interface SubMenuItem {
   label: string;
   link: string;
   active: boolean;
+  expanded?: boolean;
   subList?: SubMenuItem[];
 }
 
@@ -233,6 +236,15 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
 ];
 
 // roleId에 따라 메뉴 반환하는 함수
-export const getMenuItems = (roleId: number) => {
-  return roleId === 0 ? adminMenuItems : academyMenuItems;
+export const getMenuItems = (
+  roleId: string | number | null,
+): (MenuItem | Divider)[] => {
+  if (roleId === null) {
+    return []; // roleId가 null인 경우 빈 배열 반환
+  }
+
+  // roleId를 숫자로 변환
+  const role = typeof roleId === "string" ? parseInt(roleId, 10) : roleId;
+
+  return role === 0 ? adminMenuItems : academyMenuItems;
 };

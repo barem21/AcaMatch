@@ -43,7 +43,9 @@ const SideBar: React.FC<SideBarProps> = ({
           <div
             key={index}
             onClick={() => {
-              navigate(item.link);
+              if ("link" in item) {
+                navigate(item.link);
+              }
             }}
             className={`flex items-center p-2 px-5 gap-3 rounded-xl text-sm font-medium cursor-pointer ${
               item.isActive ? "bg-gray-200 font-bold" : "bg-white"
