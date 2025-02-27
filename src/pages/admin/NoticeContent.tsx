@@ -13,6 +13,7 @@ interface BoardItem {
   boardName: string;
   createdAt: string;
   name: string;
+  totalCount: number;
 }
 
 const NoticeContent = () => {
@@ -23,27 +24,35 @@ const NoticeContent = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(40);
-  const [searchText, setSearchText] = useState("");
+  const [_searchText, setSearchText] = useState("");
   const { userId } = useRecoilValue(userInfo);
 
   const fetchBoardList = async (page: number, size: number) => {
     if (!userId) return;
 
     try {
-      const response = await jwtAxios.get(`/api/board`, {
+      const response = await jwtAxios.get(`/api/board/list`, {
         params: {
           userId: userId,
           page: page,
           size: size,
         },
       });
-      console.log(userId);
-      const filteredData = response.data.resultData.filter(
+
+      const { resultData } = response.data;
+
+      if (resultData && resultData.length > 0) {
+        setTotalItems(resultData[0].totalCount);
+      }
+
+      const filteredData = resultData.filter(
         (item: BoardItem | null): item is BoardItem => item !== null,
       );
+
       setBoardList(filteredData);
     } catch (error) {
       console.error("Error fetching board list:", error);
+      message.error("공지사항 목록을 불러오는데 실패했습니다.");
     }
   };
 

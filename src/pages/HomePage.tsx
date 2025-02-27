@@ -18,6 +18,7 @@ interface Academy {
   starAvg: number;
 }
 interface BestAcademy {
+  acaId: number;
   subject: string;
   description: string;
   reviews: string;
@@ -201,12 +202,13 @@ function HomePage() {
 
         const updatedCards: BestAcademy[] = response.data.resultData.map(
           (item: any) => ({
+            acaId: item.acaId,
             subject: item.acaName || "학원명",
             description: item.tagNames || "태그 정보 없음",
             reviews: `${item.starAvg.toFixed(1)} (${item.reviewCount} reviews)`,
             questionsAnswered: item.questionsAnswered || "질문 정보 없음",
             link: "/",
-            image: getAcademyImageUrl(item.acaId, item.acaPic), // 이미지 URL 변환
+            image: getAcademyImageUrl(item.acaId, item.acaPic),
           }),
         );
 

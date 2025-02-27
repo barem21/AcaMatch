@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { Button, Form, message } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import DOMPurify from "dompurify";
 import jwtAxios from "../../apis/jwt";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
@@ -17,13 +18,10 @@ const InputWrapper = styled.div`
   }
 `;
 
-interface BoardItem {
+interface BoardDetail {
   boardId: number;
-  userId: number;
-  boardComment: string;
   boardName: string;
-  createdAt: string;
-  name: string;
+  boardComment: string;
 }
 
 const NoticeView = () => {
@@ -31,30 +29,29 @@ const NoticeView = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const boardId = searchParams.get("boardId");
-  const [boardDetail, setBoardDetail] = useState<BoardItem | null>(null);
+  const [boardDetail, setBoardDetail] = useState<BoardDetail | null>(null);
   const { userId } = useRecoilValue(userInfo);
 
   const fetchBoardDetail = async () => {
-    if (!userId) return;
+    if (!boardId || !userId) return;
 
     try {
       const response = await jwtAxios.get(`/api/board`, {
         params: {
+          boardId: boardId,
           userId: userId,
-          page: 1,
-          size: 10,
         },
       });
 
-      const filteredData = response.data.resultData.filter(
-        (item: BoardItem | null): item is BoardItem =>
-          item !== null && item.boardId === Number(boardId),
-      )[0]; // 첫 번째 항목만 가져옴
-      console.log(response);
-
-      setBoardDetail(filteredData);
+      const { resultData } = response.data;
+      setBoardDetail({
+        boardId: resultData.boardId,
+        boardName: resultData.boardName,
+        boardComment: resultData.boardComment,
+      });
     } catch (error) {
       console.error("Error fetching board detail:", error);
+      message.error("게시글을 불러오는데 실패했습니다.");
     }
   };
 
@@ -106,7 +103,12 @@ const NoticeView = () => {
               </div>
             </div>
             <div className="flex p-2 pl-3 border-b h-[600px] text-[#666]">
-              {boardDetail?.boardComment}
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(boardDetail?.boardComment || ""),
+                }}
+                className="whitespace-pre-line"
+              />
             </div>
             <div className="flex justify-end p-3 gap-3 border-b">
               <button
@@ -119,9 +121,16 @@ const NoticeView = () => {
 
               <Button
                 className="btn-admin-ok"
-                onClick={() =>
-                  navigate(`/admin/notice-content/add?boardId=${boardId}`)
-                }
+                onClick={() => {
+                  if (boardDetail) {
+                    const params = new URLSearchParams({
+                      boardId: boardId!,
+                      boardName: boardDetail.boardName,
+                      boardComment: boardDetail.boardComment,
+                    }).toString();
+                    navigate(`/admin/notice-content/add?${params}`);
+                  }
+                }}
               >
                 수정하기
               </Button>

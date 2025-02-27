@@ -49,7 +49,7 @@ const CustomScrollbar = styled.div`
 const styles = {
   container: "flex w-full",
   content: {
-    wrapper: "flex flex-col gap-[12px] mt-[32px]",
+    wrapper: "flex flex-col gap-[12px] mt-[32px] relative",
     imageContainer: "flex items-center justify-center px-[16px] py-[12px]",
     image: "w-[928px] h-[320px] bg-gray-500 rounded-[12px]",
     mainContent: "w-[940px] flex flex-col gap-[12px] mx-auto",
@@ -59,8 +59,9 @@ const styles = {
     title: "font-bold text-3xl text-brand-default text-start",
   },
   tab: {
-    container: "flex flex-row justify-between items-center h-[63px]",
-    item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[43px] border-b-2",
+    container:
+      "flex flex-row justify-between items-end h-[63px] sticky top-[64px] bg-white z-[100]",
+    item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[40px] border-b-2",
     activeTab: "border-brand-BTBlue",
     inactiveTab: "border-[#F0F0F0]",
     text: "text-[16px] leading-[40px] text-center",
@@ -89,6 +90,129 @@ const styles = {
     map: "w-full h-[450px] mb-[100px]",
   },
 };
+
+// LinkModal props 타입 정의
+interface LinkModalProps {
+  acaId: string | null;
+}
+
+const LinkModal: React.FC<LinkModalProps> = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLink, setIsLink] = useState(false);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  // 모달 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      setTimeout(() => {
+        window.addEventListener("click", handleClickOutside);
+      }, 0);
+    }
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleModalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleCopy = async () => {
+    setIsLink(true);
+    try {
+      // 현재 브라우저의 URL을 그대로 복사
+      const currentURL = window.location.href;
+      await navigator.clipboard.writeText(currentURL);
+      message.success("링크가 복사되었습니다!");
+    } catch (error) {
+      message.error("링크 복사에 실패했습니다.");
+    }
+  };
+
+  const snsSendProc = (type: string) => {
+    const shareTitle = "학원 상세정보 공유하기";
+    const currentURL = window.location.href;
+    let href = "";
+
+    switch (type) {
+      case "FB":
+        href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}&t=${encodeURIComponent(shareTitle)}`;
+        break;
+      case "TW":
+        href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(currentURL)}`;
+        break;
+      case "NB":
+        href = `https://share.naver.com/web/shareView?url=${encodeURIComponent(currentURL)}&title=${encodeURIComponent(shareTitle)}`;
+        break;
+    }
+
+    if (href) {
+      window.open(href, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  return (
+    <div className="relative inline-block">
+      {/* 모달을 여는 버튼 */}
+      <button
+        onClick={e => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+      >
+        <FaShare color="#507A95" />
+      </button>
+
+      {/* 모달 */}
+      {isOpen && (
+        <div className="absolute right-0 flex justify-center items-center z-1">
+          <div
+            ref={modalRef}
+            onClick={handleModalClick}
+            className="bg-white p-5 rounded-lg shadow-lg w-64"
+          >
+            <h2 className="text-lg font-semibold mb-3">공유하기</h2>
+            <div className="flex justify-around gap-3">
+              <button onClick={() => snsSendProc("FB")}>
+                <FaFacebookF className="text-blue-600 text-3xl" />
+              </button>
+              <button onClick={() => snsSendProc("TW")}>
+                <FaXTwitter className="text-blue-400 text-3xl" />
+              </button>
+              <button onClick={() => snsSendProc("NB")}>
+                <SiNaver className="text-green-500 text-3xl" />
+              </button>
+              <button onClick={handleCopy}>
+                <FaLink
+                  className={`text-gray-600 text-3xl ${isLink ? "text-green-400" : ""}`}
+                />
+              </button>
+            </div>
+
+            {/* 닫기 버튼 */}
+            <button
+              onClick={() => setIsOpen(false)}
+              className="mt-4 w-full bg-gray-200 py-2 rounded-md"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AcademyDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -145,6 +269,9 @@ const AcademyDetail = () => {
   // };
 
   const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
+
+  // 스크롤 참조 추가
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchAcademyData = async () => {
@@ -215,6 +342,11 @@ const AcademyDetail = () => {
     }
 
     setSearchParams(newParams);
+
+    // 탭 클릭 시 상단으로 스크롤
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -287,7 +419,7 @@ const AcademyDetail = () => {
   }
 
   return (
-    <div className={styles.container}>
+    <div ref={scrollRef} className={styles.container}>
       <div className={styles.content.wrapper}>
         <div className={styles.header.wrapper}>
           <h1 className={styles.header.title}>학원 상세보기</h1>
@@ -341,7 +473,7 @@ const AcademyDetail = () => {
                   {/* <button onClick={handleCopy}>
                     <FaShare color="#507A95" />
                   </button> */}
-                  <LinkModal />
+                  <LinkModal acaId={acaId} />
                 </div>
               </h2>
               <div className={styles.academy.description}>
@@ -508,118 +640,3 @@ const AcademyDetail = () => {
 };
 
 export default AcademyDetail;
-
-const LinkModal = ({ projectId }: { projectId?: string }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLink, setIsLink] = useState(false);
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
-  // ✅ 모달 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      setTimeout(() => {
-        window.addEventListener("click", handleClickOutside);
-      }, 0);
-    }
-
-    return () => {
-      window.removeEventListener("click", handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const handleModalClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  const handleCopy = async () => {
-    setIsLink(true);
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      message.success("링크가 복사되었습니다!");
-    } catch (error) {
-      message.error("링크 복사에 실패했습니다.");
-    }
-  };
-
-  const snsSendProc = (type: string) => {
-    const shareTitle = "공유하기";
-    const shareURL = `http://localhost:5173/share/view?projectId=${projectId}`;
-    let href = "";
-
-    switch (type) {
-      case "FB":
-        href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL)}&t=${encodeURIComponent(shareTitle)}`;
-        break;
-      case "TW":
-        href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareURL)}`;
-        break;
-      case "NB":
-        href = `https://share.naver.com/web/shareView?url=${encodeURIComponent(shareURL)}&title=${encodeURIComponent(shareTitle)}`;
-        break;
-    }
-
-    if (href) {
-      window.open(href, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  return (
-    <div className="relative inline-block">
-      {/* 모달을 여는 버튼 */}
-      <button
-        onClick={e => {
-          e.stopPropagation();
-          setIsOpen(true);
-        }}
-      >
-        <FaShare color="#507A95" />
-      </button>
-
-      {/* 모달 */}
-      {isOpen && (
-        <div className="absolute right-0 flex justify-center items-center z-50">
-          <div
-            ref={modalRef}
-            onClick={handleModalClick}
-            className="bg-white p-5 rounded-lg shadow-lg w-64"
-          >
-            <h2 className="text-lg font-semibold mb-3">공유하기</h2>
-            <div className="flex justify-around gap-3">
-              <button onClick={() => snsSendProc("FB")}>
-                <FaFacebookF className="text-blue-600 text-3xl" />
-              </button>
-              <button onClick={() => snsSendProc("TW")}>
-                <FaXTwitter className="text-blue-400 text-3xl" />
-              </button>
-              <button onClick={() => snsSendProc("NB")}>
-                <SiNaver className="text-green-500 text-3xl" />
-              </button>
-              <button onClick={handleCopy}>
-                <FaLink
-                  className={`text-gray-600 text-3xl ${isLink ? "text-green-400" : ""}`}
-                />
-              </button>
-            </div>
-
-            {/* 닫기 버튼 */}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="mt-4 w-full bg-gray-200 py-2 rounded-md"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};

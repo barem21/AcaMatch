@@ -1,10 +1,10 @@
 import { Button, Form, Input, message } from "antd";
 import { useEffect } from "react";
+import ReactQuill from "react-quill";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
-import ReactQuill from "react-quill";
 
 // const InputWrapper = styled.div`
 //   width: 100%;
@@ -28,18 +28,29 @@ const NoticeAdd = () => {
     if (!userId || !boardId) return;
 
     try {
+      // URL 파라미터에서 직접 데이터 가져오기
+      const urlParams = new URLSearchParams(window.location.search);
+      const boardName = urlParams.get("boardName");
+      const boardComment = urlParams.get("boardComment");
+
+      // URL에 데이터가 있는 경우 해당 데이터 사용
+      if (boardName && boardComment) {
+        form.setFieldsValue({
+          title: decodeURIComponent(boardName),
+          content: decodeURIComponent(boardComment),
+        });
+        return;
+      }
+
+      // URL에 데이터가 없는 경우 API 호출
       const response = await jwtAxios.get(`/api/board`, {
         params: {
+          boardId: boardId,
           userId: userId,
-          page: 1,
-          size: 40,
         },
       });
 
-      const boardDetail = response.data.resultData.filter(
-        (item: any) => item !== null && item.boardId === Number(boardId),
-      )[0];
-
+      const boardDetail = response.data.resultData;
       if (boardDetail) {
         form.setFieldsValue({
           title: boardDetail.boardName,
@@ -48,6 +59,7 @@ const NoticeAdd = () => {
       }
     } catch (error) {
       console.error("Error fetching board detail:", error);
+      message.error("게시글을 불러오는데 실패했습니다.");
     }
   };
 
@@ -85,7 +97,7 @@ const NoticeAdd = () => {
         navigate("/admin/notice-content");
       }
     } catch (error) {
-      console.error("Error details:", error.response?.data);
+      console.error("Error details:", error);
       message.error(
         isEdit
           ? "공지사항 수정에 실패했습니다."
