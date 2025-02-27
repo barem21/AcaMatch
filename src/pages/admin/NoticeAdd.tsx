@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
+import ReactQuill from "react-quill";
 
 // const InputWrapper = styled.div`
 //   width: 100%;
@@ -76,6 +77,7 @@ const NoticeAdd = () => {
           },
         });
       }
+      console.log(response);
 
       if (response.data.resultMessage) {
         message.success(
@@ -128,16 +130,21 @@ const NoticeAdd = () => {
               </div>
             </div>
             <div className="flex justify-between p-2 border-b">
-              <div className="flex items-center gap-1 w-full">
+              <div className="flex gap-1 w-full h-[545px]">
                 <label className="min-w-[100px] text-sm">내용</label>
                 <Form.Item
                   name="content"
                   className="w-full m-0"
                   rules={[{ required: true, message: "내용을 입력해주세요" }]}
                 >
-                  <Input.TextArea
+                  {/* <Input.TextArea
                     rows={20}
                     placeholder="내용을 입력해주세요"
+                    style={{ width: "100%" }}
+                  /> */}
+                  <ReactQuill
+                    placeholder="내용을 작성해 주세요."
+                    className="h-[500px]"
                     style={{ width: "100%" }}
                   />
                 </Form.Item>
