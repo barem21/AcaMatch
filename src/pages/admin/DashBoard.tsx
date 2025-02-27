@@ -6,6 +6,9 @@ import { useState } from "react";
 import { CiCalendarDate } from "react-icons/ci";
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import jwtAxios from "../../apis/jwt";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 
 const COLORS = {
   학원수: "#F28C6A",
@@ -117,6 +120,16 @@ const timePeriods: Record<WeekKey, string> = {
   지난주: getWeekRange(1),
 };
 
+// BoardItem 인터페이스 추가
+interface BoardItem {
+  boardId: number;
+  userId: number;
+  boardName: string;
+  createdAt: string;
+  name: string;
+  totalCount: number;
+}
+
 function DashBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedItem, setSelectedItem] = useState<DataKey>(
@@ -132,19 +145,20 @@ function DashBoard() {
     (searchParams.get("week") as WeekKey) || "이번주",
   );
   const [selectedData, setSelectedData] = useState<ChartData[]>(thisMonthData);
-  // const [selectedItem, setSelectedItem] = useState<string>("학원수");
-  // const [selectedMonth, setSelectedMonth] = useState<MonthKey>("이번 달");
+  const [notices, setNotices] = useState<BoardItem[]>([]);
   const maxValue =
     Math.ceil(
       Math.max(...selectedData.flatMap(d => d.data.map(point => point.y))) /
         100,
     ) * 100;
+  const { userId } = useRecoilValue(userInfo);
 
-  // const [selectedTimeRange, _setSelectedTimeRange] =
-  //   useState<WeekKey>("이번주");
-  // const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
-  //   Object.keys(pieChartData)[0] as CategoryKey,
-  // );
+  const statsData = [
+    { id: 1, value: "₩1,200,000", label: "이번주 판매금액" },
+    { id: 2, value: "85건", label: "결제 완료건 수" },
+    { id: 3, value: "72%", label: "판매율" },
+  ];
+
   useEffect(() => {
     setSearchParams({
       category: selectedItem,
@@ -212,18 +226,33 @@ function DashBoard() {
     </Menu>
   );
 
-  const notices = [
-    { title: "공지사항 1", date: "2024-02-01" },
-    { title: "공지사항 2", date: "2024-02-05" },
-    { title: "공지사항 3", date: "2024-02-10" },
-  ];
+  // 공지사항 데이터를 가져오는 함수
+  const fetchNotices = async () => {
+    if (!userId) return;
+    try {
+      const response = await jwtAxios.get(`/api/board/list`, {
+        params: {
+          userId: userId,
+          page: 1,
+          size: 3, // 최대 3개만 가져오기
+        },
+      });
+      console.log(response.data);
 
-  const statsData = [
-    { id: 1, value: "₩1,200,000", label: "이번주 판매금액" },
-    { id: 2, value: "85건", label: "결제 완료건 수" },
-    { id: 3, value: "72%", label: "판매율" },
-    { id: 4, value: "AI 통계 분석", label: "" },
-  ];
+      const { resultData } = response.data;
+      const filteredData = resultData
+        .filter((item: BoardItem | null): item is BoardItem => item !== null)
+        .slice(0, 3); // 최대 3개로 제한
+
+      setNotices(filteredData);
+    } catch (error) {
+      console.error("Error fetching notices:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotices();
+  }, []);
 
   useEffect(() => {
     console.log("선택된 카테고리:", selectedCategory);
@@ -340,7 +369,7 @@ function DashBoard() {
             </div>
           </div>
           <ul className="flex gap-[12px]">
-            {statsData.map(item => (
+            {statsData?.map(item => (
               <li
                 key={item.id}
                 className="flex flex-col w-full h-[80px] rounded-lg justify-center items-center border border-[#E3EBF6]"
@@ -408,10 +437,15 @@ function DashBoard() {
               {notices.map((notice, index) => (
                 <ul key={index} className="flex mx-auto w-[350px] h-[30px]">
                   <li className="flex justify-center items-center w-[200px]">
-                    {notice.title}
+                    <span
+                      className="truncate max-w-[180px]"
+                      title={notice.boardName}
+                    >
+                      {notice.boardName}
+                    </span>
                   </li>
                   <li className="flex justify-center items-center w-[200px]">
-                    {notice.date}
+                    {notice.createdAt}
                   </li>
                 </ul>
               ))}

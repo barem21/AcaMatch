@@ -2,8 +2,14 @@ import { Pagination } from "antd";
 import { useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
 import SideBar from "../components/SideBar";
-import { MenuItem } from "../constants/adminMenuItems";
 
+// MenuItem 인터페이스 정의
+interface MenuItem {
+  type?: string;
+  label: string;
+  isActive: boolean;
+  link: string;
+}
 function Support() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10; // 페이지당 10개 항목

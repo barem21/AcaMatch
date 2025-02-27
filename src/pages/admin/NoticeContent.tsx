@@ -40,6 +40,7 @@ const NoticeContent = () => {
       });
 
       const { resultData } = response.data;
+      console.log(resultData);
 
       if (resultData && resultData.length > 0) {
         setTotalItems(resultData[0].totalCount);

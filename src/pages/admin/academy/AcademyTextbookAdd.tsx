@@ -101,7 +101,7 @@ function AcademyTextbookAdd(): JSX.Element {
   const navigate = useNavigate();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const [fileList, setFileList] = useState([]);
+  // const [fileList, setFileList] = useState([]);
   const [searchParams] = useSearchParams();
   const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
   const classId: number = parseInt(searchParams.get("classId") || "", 0);

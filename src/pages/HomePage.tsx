@@ -6,6 +6,11 @@ import { LiaUserFriendsSolid } from "react-icons/lia";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/CustomInput ";
 import MainButton from "../components/button/Mainbutton";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 interface Academy {
   acaId: number;
@@ -358,8 +363,30 @@ function HomePage() {
       </div>
 
       {/* 베너 */}
-      <div className="w-full max-w-[990px] bg-red-500 rounded-xl">
-        <div className="w-full h-[200px] bg-blue-500 rounded-xl"></div>
+      <div className="w-full max-w-[990px]">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          spaceBetween={30}
+          slidesPerView={1}
+          // navigation
+          pagination={{ clickable: true }}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+          }}
+          loop={true}
+          className="rounded-xl"
+        >
+          <SwiperSlide>
+            <div className="w-full h-[200px] bg-blue-500 rounded-xl"></div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="w-full h-[200px] bg-red-500 rounded-xl"></div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div className="w-full h-[200px] bg-green-500 rounded-xl"></div>
+          </SwiperSlide>
+        </Swiper>
       </div>
 
       {/* 서비스 현황 */}

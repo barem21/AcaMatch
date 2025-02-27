@@ -7,15 +7,14 @@ import { FiMenu } from "react-icons/fi";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
-import { Divider, MenuItem } from "../../constants/adminMenuItems";
 import CustomModal from "../modal/Modal";
 
 interface HeaderProps {
   className?: string;
   close: () => void;
-  isOpen: boolean;
-  menuItems: (MenuItem | Divider)[];
-  setMenuItems: React.Dispatch<React.SetStateAction<(MenuItem | Divider)[]>>;
+  // isOpen: boolean;
+  // menuItems: (MenuItem | Divider)[];
+  // setMenuItems: React.Dispatch<React.SetStateAction<(MenuItem | Divider)[]>>;
 }
 
 const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {

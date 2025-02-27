@@ -34,6 +34,15 @@ interface SubListItem {
   active: boolean;
 }
 
+interface MenuItem {
+  type?: "item";
+  icon: JSX.Element;
+  label: string;
+  link?: string;
+  active: boolean;
+  list?: { label: string; link: string; active: boolean }[];
+}
+
 // MenuItem인지 확인하는 타입 가드 함수
 const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
   return (item as MenuItem).label !== undefined;
@@ -175,7 +184,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex mobile-width">
+    <div className="flex mobile-width" ref={mainRef}>
       {isAdminPage ? (
         <>
           <Sidebar
@@ -191,7 +200,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             style={{ transition: "0.3" }}
           >
             <AdminHeader
-              isOpen={isOpen}
+              // isOpen={isOpen}
               close={close}
               className={`sticky top-0 right-0 z-50 flex items-center h-[53px] transition-transform duration-300 `}
             />
@@ -219,7 +228,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {/* <BannerLayout position="left" /> */}
               <div className="w-[280px]"></div>
               <main
-                ref={mainRef}
                 className="flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
                 style={{ minHeight: "calc(100vh - 164px)" }}
               >

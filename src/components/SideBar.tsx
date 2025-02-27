@@ -1,7 +1,9 @@
 import React, { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
+// MenuItem 인터페이스 정의
 interface MenuItem {
+  type?: string;
   label: string;
   isActive: boolean;
   link: string;
