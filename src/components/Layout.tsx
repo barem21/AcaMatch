@@ -2,7 +2,12 @@ import React, { ReactNode, useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { userInfo } from "../atoms/userInfo";
-import { Divider, getMenuItems } from "../constants/adminMenuItems";
+import {
+  adminMenuItems,
+  MenuItem,
+  Divider,
+  getMenuItems,
+} from "../constants/adminMenuItems";
 import { getCookie, setCookie } from "../utils/cookie";
 import AdminFooter from "./admin/Footer";
 import AdminHeader from "./admin/Header";
@@ -29,15 +34,6 @@ interface SubListItem {
   active: boolean;
 }
 
-interface MenuItem {
-  type?: "item";
-  icon: JSX.Element;
-  label: string;
-  link?: string;
-  active: boolean;
-  list?: SubMenuItem[];
-}
-
 // MenuItem인지 확인하는 타입 가드 함수
 const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
   return (item as MenuItem).label !== undefined;
@@ -45,9 +41,11 @@ const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const currentUserInfo = useRecoilValue(userInfo);
-  const [menuItems, setMenuItems] = useState<(MenuItem | Divider)[]>([]);
-
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const [menuItems, setMenuItems] = useState<(MenuItem | Divider)[]>(() => {
+    const roleId = currentUserInfo?.roleId;
+    return getMenuItems(roleId);
+  });
 
   const noLayoutPaths = [
     "/log-in",
@@ -56,8 +54,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     "/forgotPw",
     "/fe/redirect",
   ];
-  const isLayoutVisible = !noLayoutPaths.includes(pathname);
-  const isAdminPage = pathname.startsWith("/admin");
+  const isLayoutVisible = !noLayoutPaths.includes(location.pathname);
+  const isAdminPage = location.pathname.startsWith("/admin");
 
   const [isOpen, setIsOpen] = useState(() => {
     return getCookie("isOpen") ? getCookie("isOpen") === "true" : true;
@@ -78,61 +76,97 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [location.pathname]);
+
+  const checkPathMatch = (path: string) => {
+    if (path === "/admin") {
+      return location.pathname === "/admin";
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  const shouldExpand = (item: MenuItem) => {
+    // 메인 메뉴 자체가 활성화된 경우
+    if (checkPathMatch(item.link)) return true;
+
+    // 서브 메뉴 중 하나라도 활성화된 경우
+    const hasActiveSubItem = item.list?.some(subItem => {
+      if (checkPathMatch(subItem.link)) return true;
+      return subItem.subList?.some(subListItem =>
+        checkPathMatch(subListItem.link),
+      );
+    });
+
+    return !!hasActiveSubItem;
+  };
+
+  const handleMenuClick = (item: MenuItem | SubMenuItem) => {
+    const updatedItems = menuItems.map(menuItem => {
+      if (!isMenuItem(menuItem)) return menuItem;
+
+      if (menuItem.link === item.link) {
+        return { ...menuItem, expanded: !menuItem.expanded };
+      }
+
+      const updatedList = menuItem.list?.map(subItem => {
+        if (subItem.link === item.link) {
+          return { ...subItem, expanded: !subItem.expanded };
+        }
+        return subItem;
+      });
+
+      return { ...menuItem, list: updatedList };
+    });
+
+    setMenuItems(updatedItems);
+  };
 
   useEffect(() => {
-    // roleId에 따라 메뉴 아이템 설정
-    const items = getMenuItems(currentUserInfo.roleId);
-    setMenuItems(items);
-  }, [currentUserInfo.roleId]);
+    const initialItems =
+      currentUserInfo.roleId === 0
+        ? adminMenuItems
+        : getMenuItems(currentUserInfo.roleId);
 
-  useEffect(() => {
-    setMenuItems(prevItems =>
-      prevItems.map(item => {
-        if (!isMenuItem(item)) return item;
+    const updatedItems = initialItems.map(item => {
+      if (item.type === "divider") return item;
 
-        // [1] 최상위 메뉴 활성화 여부 확인
-        const isItemActive =
-          item.link === "/admin"
-            ? pathname === "/admin" // 대시보드인 경우 정확히 일치할 때만 활성화
-            : pathname === item.link || pathname.startsWith(item.link || "");
+      const isMainActive = checkPathMatch(item.link);
+      const shouldBeExpanded = shouldExpand(item);
 
-        // [2] 서브메뉴 활성화 여부 확인
-        let isParentActive = isItemActive;
-        const updatedList = item.list?.map(subItem => {
-          const isSubActive =
-            pathname === subItem.link || pathname.startsWith(subItem.link);
+      const updatedList = item.list?.map(subItem => {
+        const updatedSubList = subItem.subList?.map(subListItem => ({
+          ...subListItem,
+          active: checkPathMatch(subListItem.link),
+        }));
 
-          // [3] 하위 서브메뉴(subList)가 있다면 활성화 여부 확인
-          const updatedSubList = subItem.subList?.map(sub => {
-            const isSubListActive =
-              pathname === sub.link || pathname.startsWith(sub.link);
-            return { ...sub, active: isSubListActive };
-          });
-
-          // 하위 서브메뉴가 하나라도 활성화되어 있다면 부모도 활성화
-          const isSubListActive =
-            updatedSubList?.some(sub => sub.active) || false;
-
-          if (isSubActive || isSubListActive) {
-            isParentActive = true;
-          }
-
-          return {
-            ...subItem,
-            active: isSubActive || isSubListActive,
-            subList: updatedSubList,
-          };
-        });
+        const isSubActive =
+          checkPathMatch(subItem.link) ||
+          updatedSubList?.some(subListItem => subListItem.active);
 
         return {
-          ...item,
-          active: isParentActive,
-          list: updatedList,
+          ...subItem,
+          active: isSubActive,
+          expanded: isSubActive || shouldBeExpanded,
+          subList: updatedSubList,
         };
-      }),
-    );
-  }, [pathname]);
+      });
+
+      const isAnySubActive = updatedList?.some(
+        subItem =>
+          subItem.active ||
+          subItem.subList?.some(subListItem => subListItem.active),
+      );
+
+      return {
+        ...item,
+        active: isMainActive || isAnySubActive,
+        expanded: shouldBeExpanded || isMainActive || isAnySubActive,
+        list: updatedList,
+      };
+    });
+
+    setMenuItems(updatedItems);
+  }, [currentUserInfo.roleId, location.pathname]);
 
   const handleScrollToTop = () => {
     if (mainRef.current) {

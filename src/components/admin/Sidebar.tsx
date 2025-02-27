@@ -26,89 +26,45 @@ const Sidebar: React.FC<{
   close: () => void;
   menuItems: (MenuItem | Divider)[];
   setMenuItems: React.Dispatch<React.SetStateAction<(MenuItem | Divider)[]>>;
-}> = ({ isOpen, menuItems, setMenuItems }) => {
+}> = ({ isOpen, menuItems }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: number]: boolean }>(
     {},
   );
-  const isFirstLoad = useRef(true);
 
+  // 초기 렌더링 시 현재 경로에 해당하는 메뉴 열기
   useEffect(() => {
-    setMenuItems(prevItems =>
-      prevItems.map((item, _index) => {
-        if (!isMenuItem(item)) return item;
-
-        // 서브메뉴 active 상태 업데이트
-        const updatedList = item.list?.map(subItem => ({
-          ...subItem,
-          active: pathname === subItem.link,
-        }));
-
-        // 메인 메뉴 active 상태 업데이트
-        const isActive =
-          (item.link === "/admin" && pathname === "/admin") || // 대시보드 특별 처리
-          (item.link &&
-            item.link !== "/admin" &&
-            pathname.startsWith(item.link)) ||
-          (updatedList?.some(subItem => subItem.active) ?? false);
-
-        return {
-          ...item,
-          active: isActive,
-          list: updatedList,
-        };
-      }),
-    );
-  }, [pathname, setMenuItems]);
-
-  useEffect(() => {
-    if (!isFirstLoad.current) return;
-
     const newOpenSubmenus: { [key: number]: boolean } = {};
     menuItems.forEach((item, index) => {
-      if (isMenuItem(item) && item.list) {
-        const isSubmenuActive = item.list.some(subItem =>
-          pathname.startsWith(subItem.link),
-        );
-        if (isSubmenuActive) {
+      if (isMenuItem(item)) {
+        // 메인 메뉴 경로 체크
+        if (item.link && pathname.startsWith(item.link)) {
+          newOpenSubmenus[index] = true;
+        }
+        // 서브메뉴 경로 체크
+        if (item.list?.some(subItem => pathname.startsWith(subItem.link))) {
           newOpenSubmenus[index] = true;
         }
       }
     });
-
     setOpenSubmenus(newOpenSubmenus);
-    isFirstLoad.current = false;
-  }, [menuItems, pathname]);
+  }, [pathname, menuItems]);
 
   const toggleSubmenu = (index: number) => {
     setOpenSubmenus(prevState => ({
-      ...Object.keys(prevState).reduce(
-        (acc, key) => {
-          acc[parseInt(key)] = false;
-          return acc;
-        },
-        {} as { [key: number]: boolean },
-      ),
+      ...prevState,
       [index]: !prevState[index],
     }));
   };
 
   const handleMenuClick = (index: number, item: MenuItem) => {
-    setMenuItems(prevItems =>
-      prevItems.map((prevItem, idx) => {
-        if (!isMenuItem(prevItem)) return prevItem;
-        return { ...prevItem, active: idx === index };
-      }),
-    );
-
     if (item.list && item.list.length > 0) {
+      toggleSubmenu(index);
       navigate(item.list[0].link);
     } else if (item.link) {
       navigate(item.link);
     }
-
-    setOpenSubmenus({});
   };
 
   return (

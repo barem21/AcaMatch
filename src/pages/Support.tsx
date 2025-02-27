@@ -2,6 +2,7 @@ import { Pagination } from "antd";
 import { useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
 import SideBar from "../components/SideBar";
+import { MenuItem } from "../constants/adminMenuItems";
 
 function Support() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,9 +11,19 @@ function Support() {
   const [openItems, setOpenItems] = useState<number[]>([]); // 열린 항목들의 인덱스 배열
 
   const titleName = "고객지원";
-  const menuItems = [
-    { label: "FAQ", isActive: true, link: "/support" },
-    { label: "1 : 1 문의", isActive: false, link: "/support/inquiryList" },
+  const menuItems: MenuItem[] = [
+    {
+      type: "item",
+      label: "공지사항",
+      isActive: true,
+      link: "/support",
+    },
+    {
+      type: "item",
+      label: "1 : 1 문의",
+      isActive: false,
+      link: "/support/inquiryList",
+    },
   ];
 
   const faqData: {

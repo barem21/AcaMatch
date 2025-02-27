@@ -108,16 +108,16 @@ function SignupSnsPage() {
     setIsSnsLoading(false);
   }, [navigate, searchParams]); // 의존성 배열을 비워서 컴포넌트 마운트 시에만 실행
 
-  const handleChangePassword = () => {
-    // 기본 비밀번호 입력값 알아내고
-    // const pw = form.getFieldValue("password");
-    // 비교 비밀번호 입력값 알아내고, 비교한다.
-    const pwConfirm = form.getFieldValue("passwordConfirm");
-    if (pwConfirm) {
-      // 비교 비밀 번호 있으면 비교하겠다.
-      // setMatch(pw === pwConfirm);
-    }
-  };
+  // const handleChangePassword = () => {
+  //   // 기본 비밀번호 입력값 알아내고
+  //   // const pw = form.getFieldValue("password");
+  //   // 비교 비밀번호 입력값 알아내고, 비교한다.
+  //   const pwConfirm = form.getFieldValue("passwordConfirm");
+  //   if (pwConfirm) {
+  //     // 비교 비밀 번호 있으면 비교하겠다.
+  //     // setMatch(pw === pwConfirm);
+  //   }
+  // };
 
   const checkAll = plainOptions.length === checkedList.length;
   const indeterminate: boolean =
