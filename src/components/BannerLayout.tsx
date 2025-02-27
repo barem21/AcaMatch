@@ -6,9 +6,9 @@ interface BannerLayoutProps {
 
 const BannerLayout = ({ position }: BannerLayoutProps) => {
   return (
-    <div className="hidden md:block w-[280px] h-[100%]">
+    <div className="hidden md:block w-[280px] h-[100%] ">
       <div
-        className={` ${position === "left" ? "sticky top-[100px] p-4  pr-0" : "pl-0"} space-y-4`}
+        className={`flex ${position === "right" ? "sticky top-[100px] p-4 pl-0" : "pr-0 "} space-y-4 justify-end items-center`}
       >
         <Advertisement id="1" />
       </div>

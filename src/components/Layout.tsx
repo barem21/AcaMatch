@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { userInfo } from "../atoms/userInfo";
@@ -10,6 +10,7 @@ import Sidebar from "./admin/Sidebar";
 import BannerLayout from "./BannerLayout";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
+import ScrollButton from "./ScrollButton";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -73,6 +74,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     });
   };
 
+  const mainRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
@@ -131,6 +134,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     );
   }, [pathname]);
 
+  const handleScrollToTop = () => {
+    if (mainRef.current) {
+      mainRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="flex mobile-width">
       {isAdminPage ? (
@@ -154,6 +163,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
 
             <main
+              ref={mainRef}
               className="flex w-full p-5"
               style={{
                 minHeight: "calc(100vh - 105px)",
@@ -165,19 +175,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </>
       ) : (
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 relative">
           {isLayoutVisible && !isAdminPage && (
             <Header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite mobile-width" />
           )}
 
           {isLayoutVisible ? (
-            <div className="flex ">
-              <BannerLayout position="left" />
+            <div className="flex">
+              {/* <BannerLayout position="left" /> */}
+              <div className="w-[280px]"></div>
               <main
-                className={
-                  "flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
-                  // "flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
-                }
+                ref={mainRef}
+                className="flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
                 style={{ minHeight: "calc(100vh - 164px)" }}
               >
                 {children}
@@ -190,6 +199,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {isLayoutVisible && !isAdminPage && (
             <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
           )}
+          <ScrollButton onScrollToTop={handleScrollToTop} />
         </div>
       )}
     </div>

@@ -3,10 +3,10 @@ interface AdvertisementProps {
   height?: number;
 }
 
-const Advertisement = ({ id, height = 600 }: AdvertisementProps) => {
+const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
   return (
     <div
-      className="w-full bg-gray-100 rounded-lg"
+      className="w-1/2 bg-gray-100 rounded-lg"
       style={{ height: `${height}px` }}
     >
       <div className="w-full h-full flex items-center justify-center">
