@@ -15,7 +15,7 @@ import CustomInput from "../../components/CustomInput ";
 import { SecondaryButton } from "../../components/modal/Modal";
 import { FadeLoader } from "react-spinners";
 import styled from "@emotion/styled";
-import MainButton from "../../components/button/MainButton";
+import MainButton from "../../components/button/Mainbutton";
 import { setCookie } from "../../utils/cookie";
 
 interface FormValues {
@@ -107,17 +107,6 @@ function SignupSnsPage() {
 
     setIsSnsLoading(false);
   }, [navigate, searchParams]); // 의존성 배열을 비워서 컴포넌트 마운트 시에만 실행
-
-  // const handleChangePassword = () => {
-  //   // 기본 비밀번호 입력값 알아내고
-  //   // const pw = form.getFieldValue("password");
-  //   // 비교 비밀번호 입력값 알아내고, 비교한다.
-  //   const pwConfirm = form.getFieldValue("passwordConfirm");
-  //   if (pwConfirm) {
-  //     // 비교 비밀 번호 있으면 비교하겠다.
-  //     // setMatch(pw === pwConfirm);
-  //   }
-  // };
 
   const checkAll = plainOptions.length === checkedList.length;
   const indeterminate: boolean =
@@ -332,6 +321,7 @@ function SignupSnsPage() {
                 />
               </Form.Item>
             </div>
+
             {/* <div className="flex gap-[12px] h-[80px]">
               <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
                 비밀번호 &nbsp;

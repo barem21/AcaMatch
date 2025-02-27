@@ -4,13 +4,47 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 import axios from "axios";
 
+interface classListType {
+  acaPic: string;
+  acaPics: string;
+  classId: number;
+  className: string;
+  endDate: string;
+  name: string;
+  startDate: string;
+}
+
+interface textBookListType {
+  bookAmount: number;
+  bookComment: string;
+  bookId: number;
+  bookName: string;
+  bookPic: string;
+  bookPrice: number;
+  classId: number;
+  manager: string;
+}
+
 function AcademyTextbookList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
-  const [classList, setClassList] = useState([]);
-  const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
+  const [classList, setClassList] = useState<classListType[]>([]);
+  const [textBookList, setTextBookList] = useState<textBookListType[]>([]);
+
+  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+
+  //교재목록 호출
+  const getTextBookList = async () => {
+    try {
+      const res = await axios.get(`/api/book/getBookList/${classId}`);
+      //console.log(res.data.resultData);
+      setTextBookList(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   //학원 검색
   const onFinished = async (values: any) => {
@@ -28,7 +62,7 @@ function AcademyTextbookList(): JSX.Element {
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      classId: classId ? parseInt(classId) : "all",
+      classId: classId ? classId : "all",
       search: "",
       showCnt: 40,
     });
@@ -52,6 +86,7 @@ function AcademyTextbookList(): JSX.Element {
       }
     };
     academyClassList();
+    getTextBookList();
   }, []);
 
   return (
@@ -135,47 +170,58 @@ function AcademyTextbookList(): JSX.Element {
             <div className="flex items-center justify-center w-full">
               교재명
             </div>
-            <div className="flex items-center justify-center w-40">등록일</div>
+            <div className="flex items-center justify-center w-40">담당자</div>
             <div className="flex items-center justify-center w-40">수량</div>
             <div className="flex items-center justify-center w-40">가격</div>
             <div className="flex items-center justify-center w-36">관리</div>
           </div>
 
-          <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-full">
-              <div className="flex items-center gap-3 cursor-pointer">
-                <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                  <img
-                    src={"/aca_image_1.png"}
-                    className="max-w-fit max-h-full object-cover"
-                    alt=" /"
-                  />
+          {textBookList.map((item, index) => (
+            <div
+              key={index}
+              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+            >
+              <div className="flex justify-start items-center w-full">
+                <div className="flex items-center gap-3">
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.bookPic && item.bookPic !== "default_user.jpg"
+                          ? `http://112.222.157.157:5233/pic/book/${item.bookId}/${item.bookPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
+                  </div>
+                  {item.bookName}
                 </div>
-                원숭이도 이해?!할 수 있는 초등영어
+              </div>
+              <div className="flex items-center justify-center text-center w-40">
+                {item.manager}
+              </div>
+              <div className="flex items-center justify-center w-40">
+                {item.bookAmount}개
+              </div>
+              <div className="flex items-center justify-center w-40">
+                {item.bookPrice.toLocaleString()}원
+              </div>
+              <div className="flex gap-4 items-center justify-center w-36">
+                <button
+                  onClick={() =>
+                    navigate(
+                      `../academy/textbookEdit?acaId=${acaId}&classId=${classId}&bookId=${item.bookId}`,
+                    )
+                  }
+                >
+                  <FaPen className="w-3 text-gray-400" />
+                </button>
+                <button>
+                  <FaRegTrashAlt className="w-3 text-gray-400" />
+                </button>
               </div>
             </div>
-            <div className="flex items-center justify-center text-center w-40">
-              2025-01-01
-            </div>
-            <div className="flex items-center justify-center w-40">1개</div>
-            <div className="flex items-center justify-center w-40">
-              25,000원
-            </div>
-            <div className="flex gap-4 items-center justify-center w-36">
-              <button
-                onClick={() =>
-                  navigate(
-                    `../academy/textbookEdit?acaId=${acaId}&classId=${classId}`,
-                  )
-                }
-              >
-                <FaPen className="w-3 text-gray-400" />
-              </button>
-              <button>
-                <FaRegTrashAlt className="w-3 text-gray-400" />
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">

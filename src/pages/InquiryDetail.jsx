@@ -19,7 +19,6 @@ function InquiryDetail() {
   const [stompClient, setStompClient] = useState(null);
   //const [messages, setMessages] = useState([]);
   const [chatRoomId, setChatRoomId] = useState(0);
-  const [senderType, setSenderType] = useState("USER_TO_ACADEMY");
   const [messageInput, setMessageInput] = useState("");
   /* 채팅관련 */
 
@@ -27,30 +26,18 @@ function InquiryDetail() {
   const navigate = useNavigate();
   const [chatMessages, setChatMessages] = useState([]);
   const [academyName, setAcademyName] = useState();
-  const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
+  const { roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
   const [searchParams, setSearchParams] = useSearchParams();
   const acaId = searchParams.get("acaId");
-  //const userId = searchParams.get("userId");
+  const userId = searchParams.get("userId");
 
   const scrollRef = useRef(null); //scroll을 내릴 div
 
   const titleName = "고객지원";
   const menuItems = [
     { label: "FAQ", isActive: false, link: "/support" },
-    { label: "1 : 1 문의", isActive: true, link: "/support/inquiry" },
+    { label: "1 : 1 문의", isActive: true, link: "/support/inquiryList" },
   ];
-
-  const SendMessage = styled.div`
-    .ant-form-item-additional {
-      margin-top: 10px;
-    }
-    .ant-form-item-explain-error {
-      padding-left: 12px;
-    }
-    .ant-btn {
-      border: none !important;
-    }
-  `;
 
   //채팅방 개설
   const makeChat = async () => {
@@ -69,26 +56,14 @@ function InquiryDetail() {
     try {
       const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
       setAcademyName(res.data.resultData.acaName);
-      //console.log(res.data.resultData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  //1:1 문의 내용 호출
-  const myMtomDetail = async () => {
-    try {
-      const res = await jwtAxios.get(`/api/chat/${chatRoomId}`);
       console.log(res.data.resultData);
-      form.resetFields(); //초기화
-      setChatMessages(res.data.resultData);
+      alert("ok");
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
-    myMtomDetail();
     makeChat(); //채팅방 개설 실행
   }, []);
 
@@ -102,6 +77,19 @@ function InquiryDetail() {
 
   /* 채팅관련 */
   useEffect(() => {
+    //1:1 채팅내용 호출
+    const myMtomDetail = async () => {
+      try {
+        const res = await jwtAxios.get(`/api/chat/${chatRoomId}`);
+        //form.resetFields(); //초기화
+        setChatMessages(res.data.resultData);
+        console.log(res.data.resultData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    myMtomDetail();
+
     const socket = new SockJS("http://acamatch.site:5233/ws");
     const client = Stomp.over(socket);
 
@@ -110,7 +98,7 @@ function InquiryDetail() {
 
       // 기존 구독 해제
       if (stompClient !== null) {
-        stompClient.disconnect();
+        //stompClient.disconnect();
       }
 
       // 새로운 채팅방 ID로 구독 설정
@@ -118,26 +106,16 @@ function InquiryDetail() {
         `/queue/${chatRoomId}`,
         response => {
           const message = JSON.parse(response.body);
-
-          /*
-          setMessages(prevMessages => [
-            ...prevMessages,
-            `${message.senderType}: ${message.message}`,
-          ]);
-          */
-
           myMtomDetail(); //대화목록 갱신
         },
       );
-
       setStompClient(client);
-      //console.log(`Subscribed to /queue/${chatRoomId}`);
     });
 
     // 컴포넌트가 언마운트 될 때 WebSocket 연결 종료
     return () => {
       if (client) {
-        client.disconnect();
+        //client.disconnect();
       }
     };
   }, [chatRoomId]); // chatRoomId가 변경될 때마다 연결을 새로 설정
@@ -145,13 +123,13 @@ function InquiryDetail() {
   // 메시지 전송 함수
   const sendMessage = () => {
     if (!chatRoomId || !messageInput.trim()) {
-      alert("채팅방 ID와 메시지를 입력하세요!");
+      alert("채팅방 ID/채팅 메시지를 확인해 주세요!");
       return;
     }
 
     const messagePayload = {
       chatRoomId: parseInt(chatRoomId, 10),
-      senderType: senderType,
+      senderType: roleId === 3 ? "ACADEMY_TO_USER" : "USER_TO_ACADEMY",
       message: messageInput.trim(),
     };
 
@@ -162,42 +140,17 @@ function InquiryDetail() {
     // 메시지 입력창 초기화
     setMessageInput("");
   };
+  const handlerSendMessage = e => {
+    // 엔터 키가 눌렸을 때만 처리
+    if (e.key === "Enter") {
+      e.preventDefault(); // 엔터 키 기본 동작을 방지 (예: 폼 제출)
+      sendMessage();
+    }
+  };
   /* 채팅관련 */
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
-      {/* 채팅관련 */}
-      <div style={{ background: "#eee" }}>
-        <p>채팅방 ID : {chatRoomId}</p>
-        <p>
-          <label>보내는 유형:</label>
-          {roleId === 3 ? (
-            <input type="text" value="ACADEMY_TO_USER" />
-          ) : (
-            <input type="text" value="USER_TO_ACADEMY" />
-          )}
-        </p>
-
-        <input
-          type="text"
-          value={messageInput}
-          onChange={e => setMessageInput(e.target.value)}
-          placeholder="메시지 입력"
-        />
-        <button onClick={sendMessage}>Send</button>
-
-        {/*
-        <div id="messages">
-          {messages.map((message, index) => (
-            <p key={index}>
-              <b>{message}</b>
-            </p>
-          ))}
-        </div>
-        */}
-      </div>
-      {/* 채팅관련 */}
-
       <SideBar menuItems={menuItems} titleName={titleName} />
       <div className="flex flex-col w-full mb-16">
         <h1 className="title-font">1:1 학원별 문의</h1>
@@ -300,38 +253,24 @@ function InquiryDetail() {
               </div>
             </CustomScrollbar>
 
-            {/* 입력창 영역 - 하단 고정 */}
-            <SendMessage className="p-4 bg-gray-200">
-              <Form form={form} onFinish={values => onFinished(values)}>
-                <div className="relative">
-                  <Form.Item
-                    name="message"
-                    className="w-full"
-                    rules={[
-                      {
-                        required: true,
-                        message: "보내실 메시지를 입력해 주세요.",
-                      },
-                      {
-                        pattern: /^[a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ\s=,\-@]*$/, // 알파벳, 숫자, 한글, 공백만 허용
-                        message: "특수문자는 사용하실 수 없습니다.",
-                      },
-                    ]}
-                  >
-                    <input
-                      maxLength={100}
-                      placeholder="내용을 입력해 주세요."
-                      className="w-full p-3 rounded-lg bg-gray-100 focus:outline-none"
-                    />
-                  </Form.Item>
-                  <Form.Item className="absolute right-[10px] top-[9px]">
-                    <Button htmlType="submit">
-                      <VscSend size={24} />
-                    </Button>
-                  </Form.Item>
-                </div>
-              </Form>
-            </SendMessage>
+            <div className="p-4 bg-gray-200">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={messageInput}
+                  onChange={e => setMessageInput(e.target.value)}
+                  placeholder="내용을 입력해 주세요."
+                  onKeyDown={handlerSendMessage}
+                  className="w-full p-3 rounded-lg bg-gray-100 focus:outline-none"
+                />
+                <button
+                  onClick={sendMessage}
+                  className="absolute right-[10px] top-[8px] p-1 pl-4 pr-4 bg-white rounded-lg"
+                >
+                  <VscSend size={24} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

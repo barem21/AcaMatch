@@ -6,18 +6,16 @@ import jwtAxios from "../apis/jwt";
 import userInfo from "../atoms/userInfo";
 import CustomModal from "../components/modal/Modal";
 import SideBar from "../components/SideBar";
-import { Cookies } from "react-cookie";
 
 function Inquiry() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
+  const { roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
   const [academyData, setAcademyData] = useState([]); // 초기값을 빈 배열로 설정
   const [searchParams, setSearchParams] = useSearchParams();
 
   const acaId = searchParams.get("acaId");
-
-  console.log(userId);
+  const userId = searchParams.get("userId");
 
   const titleName = "고객지원";
   const menuItems = [
@@ -47,8 +45,8 @@ function Inquiry() {
     try {
       const res = await jwtAxios.get(
         roleId === 3
-          ? `/api/chat-room?aca-id=${acaId}`
-          : `/api/chat-room?user-id=${userId}`,
+          ? `/api/chat/chat-room?aca-id=${acaId}`
+          : `/api/chat/chat-room?user-id=${userId}`,
         ``,
       );
       // console.log(acaId);
@@ -132,7 +130,7 @@ function Inquiry() {
                 </div>
                 <div className="flex min-w-[15%] justify-center items-center p-4">
                   <span className="text-[14px] text-brand-placeholder">
-                    {academy.createdAt.substr(0, 10)}
+                    {academy.createdAt?.substr(0, 10)}
                   </span>
                 </div>
                 {/*

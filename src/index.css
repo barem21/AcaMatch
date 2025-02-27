@@ -134,6 +134,15 @@
   font-size: 14px !important;
   padding: 6px 12px;
 }
+.ql-snow .ql-editor h1 em {
+  font-size: 40px;
+}
+.ql-snow .ql-editor h2 em {
+  font-size: 32px;
+}
+.ql-snow .ql-editor h3 em {
+  font-size: 24px;
+}
 /* 관리자 전용 */
 
 .small_line_button {

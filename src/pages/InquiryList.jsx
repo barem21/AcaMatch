@@ -15,6 +15,8 @@ function InquiryList() {
   const [myAcademyList, setMyAcademyList] = useState([]);
   const cookies = new Cookies();
 
+  console.log(userId);
+
   const titleName = "고객지원";
   const menuItems = [
     { label: "FAQ", isActive: false, link: "/support" },
@@ -67,7 +69,7 @@ function InquiryList() {
 
   useEffect(() => {
     if (roleId !== 3) {
-      navigate("/support/inquiry");
+      navigate(`/support/inquiry?userId=${userId}`);
     } else {
       academyList();
     }
@@ -95,7 +97,9 @@ function InquiryList() {
                 <div
                   className="flex justify-center items-center cursor-pointer"
                   onClick={() =>
-                    navigate(`/support/inquiry?acaId=${academy.acaId}`)
+                    navigate(
+                      `/support/inquiry?acaId=${academy.acaId}&userId=${userId}`,
+                    )
                   }
                 >
                   <div className="flex justify-center items-center w-14 h-14 mr-3 rounded-xl bg-gray-300 overflow-hidden">

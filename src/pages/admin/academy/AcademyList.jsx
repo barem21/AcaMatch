@@ -28,7 +28,7 @@ function AcademyList() {
         `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
       );
       setMyAcademyList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -226,7 +226,7 @@ function AcademyList() {
                     <img
                       src={
                         item.acaPic && item.acaPic !== "default_user.jpg"
-                          ? `http://112.222.157.157:5223/pic/academy/${item.acaId}/${item.acaPic}`
+                          ? `http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
