@@ -4,7 +4,7 @@ import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
-import MainButton from "../button/Mainbutton";
+import MainButton from "../button/MainButton";
 import { SecondaryButton } from "./Modal";
 import { useNavigate } from "react-router-dom";
 import { Review } from "../../pages/academyDetail/types";

@@ -1,10 +1,9 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
-import { useSwiper } from "swiper/react";
-import "swiper/css";
 import { useRef } from "react";
-import type { Swiper as SwiperType } from "swiper";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import type { Swiper as SwiperType } from "swiper";
+import { Autoplay } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+// import "swiper/css";
 
 interface AdvertisementProps {
   id: string;

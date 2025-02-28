@@ -8,6 +8,7 @@ import koLocale from "@fullcalendar/core/locales/ko";
 import userInfo from "../../../atoms/userInfo";
 import jwtAxios from "../../../apis/jwt";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
+import dayjs from "dayjs";
 
 interface BoardItem {
   boardId: number;
@@ -32,42 +33,62 @@ const CheckIn = () => {
   const [selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
   const [checkedList, setCheckedList] = useState<number[]>([]);
 
-  // 학원 목록 조회
-  const fetchBoardList = async () => {
-    if (!userId) return;
-
-    try {
-      const response = await jwtAxios.get(`/api/board`, {
-        params: { userId },
-      });
-      const filteredData = response.data.resultData.filter(
-        (item: BoardItem | null): item is BoardItem => item !== null,
-      );
-      setBoardList(filteredData);
-    } catch (error) {
-      console.error("Error fetching board list:", error);
-      message.error("학원 목록을 불러오는데 실패했습니다.");
-    }
+  // 현재 날짜 기준으로 해당 월의 시작일과 종료일 계산
+  const getCurrentMonthRange = () => {
+    const startDate = dayjs().startOf("month").format("YYYY-MM-DD");
+    const endDate = dayjs().endOf("month").format("YYYY-MM-DD");
+    return { startDate, endDate };
   };
 
   // 출석 데이터 조회
-  const fetchAttendanceData = async (academyId: number) => {
+  const fetchAttendanceData = async () => {
+    const { startDate, endDate } = getCurrentMonthRange();
+    const academyId = 2;
+    const classId = 2;
+
     try {
       const response = await jwtAxios.get(`/api/attendance`, {
         params: {
-          academyId,
-          userId,
+          acaId: academyId,
+          classId: classId,
+          startDate: startDate,
+          endDate: endDate,
         },
       });
 
-      // 서버에서 받은 출석 데이터를 FullCalendar 이벤트 형식으로 변환
-      const attendanceEvents = response.data.map((attendance: any) => ({
-        title: attendance.studentName,
-        start: attendance.date,
-        end: attendance.date,
-        backgroundColor:
-          attendance.status === "present" ? "#4CAF50" : "#FF5252",
-      }));
+      const attendanceData = response.data.resultData;
+
+      if (!Array.isArray(attendanceData)) {
+        console.error("Invalid response format:", response.data);
+        message.error("출석 데이터를 올바르게 불러올 수 없습니다.");
+        return;
+      }
+
+      const attendanceEvents: Event[] = attendanceData.map((record: any) => {
+        let statusText = "";
+        let color = "#D3D3D3"; // 기본 회색
+
+        if (record.absent > 0) {
+          statusText = "결석";
+          color = "#FF5252"; // 빨간색
+        } else if (record.earlyLeave > 0) {
+          statusText = "조퇴";
+          color = "#2979FF"; // 파란색
+        } else if (record.late > 0) {
+          statusText = "지각";
+          color = "#FFC107"; // 노란색
+        } else if (record.present > 0) {
+          statusText = "출석";
+          color = "#4CAF50"; // 초록색
+        }
+
+        return {
+          title: `${record.className} (${statusText})`,
+          start: record.attendanceDate,
+          end: record.attendanceDate,
+          backgroundColor: color,
+        };
+      });
 
       setEvents(attendanceEvents);
     } catch (error) {
@@ -75,33 +96,32 @@ const CheckIn = () => {
       message.error("출석 데이터를 불러오는데 실패했습니다.");
     }
   };
-
   const handleAcademyChange = (value: number) => {
     setSelectedAcademy(value);
     fetchAttendanceData(value);
   };
 
-  const handleDateClick = async (info: any) => {
-    if (!selectedAcademy) {
-      message.warning("학원을 먼저 선택해주세요.");
-      return;
-    }
+  // const handleDateClick = async (info: any) => {
+  //   if (!selectedAcademy) {
+  //     message.warning("학원을 먼저 선택해주세요.");
+  //     return;
+  //   }
 
-    // 출석 체크 로직 구현
-    try {
-      await jwtAxios.post("/api/attendance", {
-        academyId: selectedAcademy,
-        date: info.dateStr,
-        userId,
-      });
+  //   // 출석 체크 로직 구현
+  //   try {
+  //     await jwtAxios.post("/api/attendance", {
+  //       academyId: selectedAcademy,
+  //       date: info.dateStr,
+  //       userId,
+  //     });
 
-      fetchAttendanceData(selectedAcademy);
-      message.success("출석이 등록되었습니다.");
-    } catch (error) {
-      console.error("Error marking attendance:", error);
-      message.error("출석 등록에 실패했습니다.");
-    }
-  };
+  //     fetchAttendanceData(selectedAcademy);
+  //     message.success("출석이 등록되었습니다.");
+  //   } catch (error) {
+  //     console.error("Error marking attendance:", error);
+  //     message.error("출석 등록에 실패했습니다.");
+  //   }
+  // };
 
   const onCheckboxChange = (index: number) => (e: CheckboxChangeEvent) => {
     if (e.target.checked) {
@@ -112,10 +132,14 @@ const CheckIn = () => {
   };
 
   useEffect(() => {
-    if (userId) {
-      fetchBoardList();
-    }
-  }, [userId]);
+    fetchAttendanceData();
+  }, []);
+
+  // useEffect(() => {
+  //   if (userId) {
+  //     fetchBoardList();
+  //   }
+  // }, [userId]);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -130,6 +154,25 @@ const CheckIn = () => {
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-28 text-sm">학원 선택</label>
+                <Form.Item name="academy" className="mb-0 mr-[10px]">
+                  <Select
+                    showSearch
+                    placeholder="학원을 선택하세요"
+                    optionFilterProp="label"
+                    className="select-admin-basic w-[300px]"
+                    onChange={handleAcademyChange}
+                    filterOption={(input, option) =>
+                      (option?.label ?? "")
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    options={boardList.map(item => ({
+                      value: item.boardId,
+                      label: item.boardName,
+                    }))}
+                  />
+                </Form.Item>
+                <label className="w-28 text-sm">강좌 선택</label>
                 <Form.Item name="academy" className="mb-0">
                   <Select
                     showSearch
@@ -159,7 +202,6 @@ const CheckIn = () => {
                 initialView="dayGridMonth"
                 locale={koLocale}
                 events={events}
-                dateClick={handleDateClick}
                 headerToolbar={{
                   left: "prev,next today",
                   center: "title",

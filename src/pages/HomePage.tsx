@@ -5,7 +5,7 @@ import { CiSearch } from "react-icons/ci";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 import { useNavigate } from "react-router-dom";
 import CustomInput from "../components/CustomInput ";
-import MainButton from "../components/button/Mainbutton";
+import MainButton from "../components/button/MainButton";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";

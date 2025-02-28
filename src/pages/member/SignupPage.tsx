@@ -15,7 +15,7 @@ import CustomInput from "../../components/CustomInput ";
 import { SecondaryButton } from "../../components/modal/Modal";
 import { FadeLoader } from "react-spinners";
 import styled from "@emotion/styled";
-import MainButton from "../../components/button/Mainbutton";
+import MainButton from "../../components/button/MainButton";
 
 function SignupPage() {
   // const [value, setValue] = useState<number | null>(null); // 초기값을 1로 설정

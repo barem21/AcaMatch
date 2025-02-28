@@ -9,14 +9,21 @@ import {
 
 export interface MenuItem {
   type: "item";
-  icon?: JSX.Element;
+  icon: JSX.Element | null;
   label: string;
   link: string;
-  active?: boolean;
-  isActive?: boolean;
+  active: boolean;
   expanded?: boolean;
   list?: SubMenuItem[];
 }
+// export interface MenuItem {
+//   type?: "item";
+//   icon: JSX.Element | null; // ✅ null을 허용
+//   label: string;
+//   link?: string;
+//   active: boolean;
+//   list?: { label: string; link: string; active: boolean }[];
+// }
 
 export interface SubMenuItem {
   label: string;

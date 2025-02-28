@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
-import MainButton from "../button/Mainbutton";
+import MainButton from "../button/MainButton";
 
 interface CustomModalProps {
   visible: boolean;

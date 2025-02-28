@@ -4,7 +4,7 @@ import { Checkbox, Dropdown, Form, Input, Menu, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
 import { useLocation, useNavigate } from "react-router-dom";
-import MainButton from "../components/button/Mainbutton";
+import MainButton from "../components/button/MainButton";
 import LocationModal from "../components/modal/LocationModal";
 import axios from "axios";
 

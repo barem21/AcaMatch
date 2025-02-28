@@ -1,5 +1,5 @@
+import styled from "@emotion/styled";
 import { message, Radio } from "antd";
-import axios from "axios";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
@@ -11,14 +11,13 @@ import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import LikeButton from "../../components/button/LikeButton";
-import MainButton from "../../components/button/Mainbutton";
+import MainButton from "../../components/button/MainButton";
 import CustomModal from "../../components/modal/Modal";
 import AcademyCalendar from "./AcademyCalendar";
 import ClassList from "./ClassList";
 import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
 import { AcademyClass, AcademyData } from "./types";
-import styled from "@emotion/styled";
 
 declare global {
   interface Window {

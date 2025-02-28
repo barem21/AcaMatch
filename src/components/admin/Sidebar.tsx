@@ -1,20 +1,21 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Divider, MenuItem } from "../../constants/adminMenuItems";
 
-// 메뉴 항목 타입 정의
-interface MenuItem {
-  type?: "item";
-  icon: JSX.Element;
-  label: string;
-  link?: string;
-  active: boolean;
-  list?: { label: string; link: string; active: boolean }[];
-}
+// // 메뉴 항목 타입 정의
+// interface MenuItem {
+//   type?: "item";
+//   icon: JSX.Element;
+//   label: string;
+//   link?: string;
+//   active: boolean;
+//   list?: { label: string; link: string; active: boolean }[];
+// }
 
-interface Divider {
-  type: "divider";
-}
+// interface Divider {
+//   type: "divider";
+// }
 
 // 타입 가드 함수: MenuItem인지 확인
 const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {

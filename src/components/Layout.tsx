@@ -6,6 +6,8 @@ import {
   adminMenuItems,
   Divider,
   getMenuItems,
+  MenuItem,
+  // SubMenuItem,
 } from "../constants/adminMenuItems";
 import { getCookie, setCookie } from "../utils/cookie";
 import AdminFooter from "./admin/Footer";
@@ -20,32 +22,22 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
-interface SubMenuItem {
-  label: string;
-  link: string;
-  active: boolean;
-  subList?: SubListItem[];
-}
+// interface SubMenuItem {
+//   label: string;
+//   link: string;
+//   active: boolean;
+// }
 
-interface SubListItem {
-  label: string;
-  link: string;
-  active: boolean;
-}
-
-interface MenuItem {
-  type?: "item";
-  icon: JSX.Element;
-  label: string;
-  link?: string;
-  active: boolean;
-  list?: { label: string; link: string; active: boolean }[];
-}
+// interface SubListItem {
+//   label: string;
+//   link: string;
+//   active: boolean;
+// }
 
 // MenuItem인지 확인하는 타입 가드 함수
-const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
-  return (item as MenuItem).label !== undefined;
-};
+// const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
+//   return item.type === "item";
+// };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const currentUserInfo = useRecoilValue(userInfo);
@@ -80,54 +72,52 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     });
   };
 
-  const mainRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const checkPathMatch = (path: string) => {
-    if (path === "/admin") {
-      return location.pathname === "/admin";
-    }
-    return location.pathname.startsWith(path);
+  const checkPathMatch = (link: string | undefined): boolean => {
+    if (!link) return false;
+    return location.pathname.startsWith(link);
   };
 
-  const shouldExpand = (item: MenuItem) => {
-    // 메인 메뉴 자체가 활성화된 경우
-    if (checkPathMatch(item.link)) return true;
+  const shouldExpand = (menuItem: MenuItem): boolean => {
+    if (checkPathMatch(menuItem.link)) return true;
 
-    // 서브 메뉴 중 하나라도 활성화된 경우
-    const hasActiveSubItem = item.list?.some(subItem => {
+    if (!menuItem.list) return false;
+
+    return menuItem.list.some(subItem => {
       if (checkPathMatch(subItem.link)) return true;
-      return subItem.subList?.some(subListItem =>
-        checkPathMatch(subListItem.link),
+      return (
+        subItem.subList?.some(subListItem =>
+          checkPathMatch(subListItem.link),
+        ) ?? false
       );
     });
-
-    return !!hasActiveSubItem;
   };
 
-  const handleMenuClick = (item: MenuItem | SubMenuItem) => {
-    const updatedItems = menuItems.map(menuItem => {
-      if (!isMenuItem(menuItem)) return menuItem;
+  // const handleMenuClick = (item: MenuItem | SubMenuItem) => {
+  //   const updatedItems = menuItems.map(menuItem => {
+  //     if (!isMenuItem(menuItem)) return menuItem;
 
-      if (menuItem.link === item.link) {
-        return { ...menuItem, expanded: !menuItem.expanded };
-      }
+  //     if (menuItem.link === item.link) {
+  //       return { ...menuItem, expanded: !menuItem.expanded };
+  //     }
 
-      const updatedList = menuItem.list?.map(subItem => {
-        if (subItem.link === item.link) {
-          return { ...subItem, expanded: !subItem.expanded };
-        }
-        return subItem;
-      });
+  //     const updatedList = menuItem.list?.map(subItem => {
+  //       if (subItem.link === item.link) {
+  //         return { ...subItem, expanded: !subItem.expanded };
+  //       }
+  //       return subItem;
+  //     });
 
-      return { ...menuItem, list: updatedList };
-    });
+  //     return { ...menuItem, list: updatedList };
+  //   });
 
-    setMenuItems(updatedItems);
-  };
+  //   setMenuItems(updatedItems);
+  // };
 
   useEffect(() => {
     const initialItems =
@@ -136,44 +126,48 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         : getMenuItems(currentUserInfo.roleId);
 
     const updatedItems = initialItems.map(item => {
-      if (item.type === "divider") return item;
+      if (item.type === "divider") return item; // Divider는 변경 없이 유지
 
       const isMainActive = checkPathMatch(item.link);
-      const shouldBeExpanded = shouldExpand(item);
+      const shouldBeExpanded = shouldExpand(item as MenuItem);
 
       const updatedList = item.list?.map(subItem => {
         const updatedSubList = subItem.subList?.map(subListItem => ({
           ...subListItem,
-          active: checkPathMatch(subListItem.link),
+          active: checkPathMatch(subListItem.link) || false,
         }));
 
         const isSubActive =
           checkPathMatch(subItem.link) ||
-          updatedSubList?.some(subListItem => subListItem.active);
+          updatedSubList?.some(subListItem => subListItem.active) ||
+          false;
 
         return {
           ...subItem,
           active: isSubActive,
-          expanded: isSubActive || shouldBeExpanded,
+          expanded: isSubActive || shouldBeExpanded || false,
           subList: updatedSubList,
         };
       });
 
-      const isAnySubActive = updatedList?.some(
-        subItem =>
-          subItem.active ||
-          subItem.subList?.some(subListItem => subListItem.active),
-      );
+      const isAnySubActive =
+        updatedList?.some(
+          subItem =>
+            subItem.active ||
+            subItem.subList?.some(subListItem => subListItem.active),
+        ) || false;
 
       return {
         ...item,
-        active: isMainActive || isAnySubActive,
-        expanded: shouldBeExpanded || isMainActive || isAnySubActive,
+        active: isMainActive || isAnySubActive || false,
+        expanded: shouldBeExpanded || isMainActive || isAnySubActive || false,
         list: updatedList,
+        icon: item.icon || <></>,
       };
     });
 
-    setMenuItems(updatedItems);
+    // 🚀 타입 강제 변환
+    setMenuItems(updatedItems as (MenuItem | Divider)[]);
   }, [currentUserInfo.roleId, location.pathname]);
 
   const handleScrollToTop = () => {
@@ -189,8 +183,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Sidebar
             isOpen={isOpen}
             close={close}
-            menuItems={menuItems}
-            setMenuItems={setMenuItems}
+            menuItems={menuItems as (MenuItem | Divider)[]}
+            setMenuItems={
+              setMenuItems as React.Dispatch<
+                React.SetStateAction<(MenuItem | Divider)[]>
+              >
+            }
           />
           <div
             className={`relative duration-300 ${
