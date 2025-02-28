@@ -15,8 +15,6 @@ function InquiryList() {
   const [myAcademyList, setMyAcademyList] = useState([]);
   const cookies = new Cookies();
 
-  console.log(userId);
-
   const titleName = "고객지원";
   const menuItems = [
     { label: "FAQ", isActive: false, link: "/support" },

@@ -57,7 +57,6 @@ function InquiryDetail() {
       const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
       setAcademyName(res.data.resultData.acaName);
       console.log(res.data.resultData);
-      alert("ok");
     } catch (error) {
       console.log(error);
     }
@@ -83,7 +82,7 @@ function InquiryDetail() {
         const res = await jwtAxios.get(`/api/chat/${chatRoomId}`);
         //form.resetFields(); //초기화
         setChatMessages(res.data.resultData);
-        console.log(res.data.resultData);
+        //console.log(res.data.resultData);
       } catch (error) {
         console.log(error);
       }
@@ -94,7 +93,7 @@ function InquiryDetail() {
     const client = Stomp.over(socket);
 
     client.connect({}, frame => {
-      console.log("Connected: " + frame);
+      //console.log("Connected: " + frame);
 
       // 기존 구독 해제
       if (stompClient !== null) {

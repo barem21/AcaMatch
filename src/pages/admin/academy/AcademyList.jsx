@@ -24,10 +24,20 @@ function AcademyList() {
   //학원 목록
   const academyList = async () => {
     try {
-      const res = await axios.get(
-        `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
-      );
-      setMyAcademyList(res.data.resultData);
+      if (currentUserInfo.roleId === 0) {
+        //전체 관리자일 때
+        const res = await jwtAxios.get(
+          `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
+        );
+        setMyAcademyList(res.data.resultData);
+        console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        console.log(res.data.resultData);
+      }
       console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
@@ -93,7 +103,7 @@ function AcademyList() {
   }, [currentUserInfo]);
 
   useEffect(() => {
-    if (!cookies.get("accessToken")) {
+    if (!cookies.get("accessToken") || currentUserInfo.roleId === 1) {
       navigate("-");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -192,18 +202,27 @@ function AcademyList() {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-40">등록일</div>
-            <div className="flex items-center justify-center w-52">
+            <div className="flex items-center justify-center min-w-32">
+              등록일
+            </div>
+            <div className="flex items-center justify-center min-w-40">
               학원 연락처
             </div>
-            <div className="flex items-center justify-center w-96">
+            <div className="flex items-center justify-center min-w-60">
               학원 주소
             </div>
-            <div className="flex items-center justify-center w-40">담당자</div>
-            <div className="flex items-center justify-center w-36">
+            <div className="flex items-center justify-center min-w-24">
+              담당자
+            </div>
+            <div className="flex items-center justify-center min-w-20">
               신고횟수
             </div>
-            <div className="flex items-center justify-center w-36">관리</div>
+            <div className="flex items-center justify-center min-w-24">
+              승인
+            </div>
+            <div className="flex items-center justify-center min-w-24">
+              관리
+            </div>
           </div>
 
           {!myAcademyList && (
@@ -215,7 +234,7 @@ function AcademyList() {
           {myAcademyList?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+              className="loop-content flex justify-between align-middle p-2 border-b"
             >
               <div className="flex justify-start items-center w-full">
                 <div
@@ -236,20 +255,29 @@ function AcademyList() {
                   {item?.acaName}
                 </div>
               </div>
-              <div className="flex items-center justify-center text-center w-40">
+              <div className="flex items-center justify-center text-center min-w-32">
                 {item.createdAt.substr(0, 10)}
               </div>
-              <div className="flex items-center justify-center text-center w-52">
-                010-0000-0000
+              <div className="flex items-center justify-center text-center min-w-40">
+                {item.acaPhone}
               </div>
-              <div className="flex items-center justify-center text-center w-96">
-                대구광역시 수성구 범어로 100
+              <div className="flex items-center justify-center text-center min-w-60">
+                {item?.address}
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center min-w-24">
                 홍길동
               </div>
-              <div className="flex items-center justify-center w-36">3회</div>
-              <div className="flex gap-4 items-center justify-center w-36">
+              <div className="flex items-center justify-center min-w-20">
+                3회
+              </div>
+              <div className="flex items-center justify-center min-w-24">
+                {item.acaAgree === 0 ? (
+                  <span className="text-sm text-red-300">승인대기</span>
+                ) : (
+                  <span className="text-sm text-blue-500">승인완료</span>
+                )}
+              </div>
+              <div className="flex gap-4 items-center justify-center min-w-24">
                 <button
                   onClick={() =>
                     navigate(`../academy/edit?acaId=${item.acaId}`)

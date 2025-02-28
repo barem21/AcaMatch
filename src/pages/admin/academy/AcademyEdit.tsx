@@ -250,9 +250,9 @@ function AcademyEdit() {
       form.setFieldsValue({
         acaId: res.data.resultData.acaId,
         acaName: res.data.resultData.acaName,
-        //address: res.data.resultData.addressDto.address,
-        //detailAddress: res.data.resultData.addressDto.detailAddress,
-        //postNum: res.data.resultData.addressDto.postNum,
+        address: res.data.resultData.addressDto.address,
+        detailAddress: res.data.resultData.addressDto.detailAddress,
+        postNum: res.data.resultData.addressDto.postNum,
         acaPhone: res.data.resultData.acaPhone,
         openTime: dayjs(res.data.resultData.openTime.substr(0, 5), "HH:mm"),
         closeTime: dayjs(res.data.resultData.closeTime.substr(0, 5), "HH:mm"),
