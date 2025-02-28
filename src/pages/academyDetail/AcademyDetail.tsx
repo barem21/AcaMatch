@@ -282,15 +282,16 @@ const AcademyDetail = () => {
           ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&page=${page}&size=${size}`
           : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&page=${page}&size=${size}`;
 
-        const response = await axios.get(url);
+        const response = await jwtAxios.get(url);
+        console.log(response);
 
         if (response.data.resultData) {
           setAcademyData(response.data.resultData);
           setIsLiked(response.data.resultData.isLiked);
           setLikeCount(response.data.resultData.likeCount);
           // console.log("여기긱기", response.data.resultData.classes);
-          console.log("여기", response.data.resultData);
-          if (response.data.resultData.addressDto.address) {
+          // console.log("여기", response.data.resultData);
+          if (response.data.resultData.addressDto?.address) {
             setAddress(response.data.resultData.addressDto.address);
           }
         }
@@ -477,8 +478,8 @@ const AcademyDetail = () => {
                 </div>
               </h2>
               <div className={styles.academy.description}>
-                {academyData.addressDto.address}{" "}
-                {academyData.addressDto.detailAddress}
+                {academyData.addressDto?.address}{" "}
+                {academyData.addressDto?.detailAddress}
               </div>
               <div className={styles.academy.description}>
                 {academyData.acaPhone}
@@ -577,9 +578,15 @@ const AcademyDetail = () => {
               </div>
 
               <div className={styles.section.title}>찾아 오시는 길</div>
-              {academyData?.addressDto?.address && (
-                <KakaoMap address={academyData.addressDto.address} />
-              )}
+              <div className={styles.section.map}>
+                {academyData?.addressDto?.address ? (
+                  <KakaoMap address={academyData.addressDto?.address} />
+                ) : (
+                  <div className="w-full h-[450px] flex items-center justify-center border border-gray-300 rounded-lg">
+                    주소가 없습니다.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

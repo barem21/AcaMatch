@@ -4,7 +4,6 @@ import { useRecoilValue } from "recoil";
 import { userInfo } from "../atoms/userInfo";
 import {
   adminMenuItems,
-  MenuItem,
   Divider,
   getMenuItems,
 } from "../constants/adminMenuItems";
@@ -12,7 +11,7 @@ import { getCookie, setCookie } from "../utils/cookie";
 import AdminFooter from "./admin/Footer";
 import AdminHeader from "./admin/Header";
 import Sidebar from "./admin/Sidebar";
-import BannerLayout from "./BannerLayout";
+import BannerLayout from "./banner/BannerLayout";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
 import ScrollButton from "./ScrollButton";
