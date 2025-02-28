@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import userInfo from "../../atoms/userInfo";
-import MainButton from "../../components/button/Mainbutton";
+import MainButton from "../../components/button/MainButton";
 import { SecondaryButton } from "../../components/modal/Modal";
 import { removeCookie, setCookie, getCookie } from "../../utils/cookie";
 import { useState } from "react";

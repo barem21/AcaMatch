@@ -8,7 +8,7 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import { getCookie, removeCookie, setCookie } from "../../utils/cookie";
-import MainButton from "../button/Mainbutton";
+import MainButton from "../button/MainButton";
 
 const SecondaryButton = styled(MainButton)`
   &:hover {

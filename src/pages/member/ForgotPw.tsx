@@ -4,7 +4,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FadeLoader } from "react-spinners";
-import MainButton from "../../components/button/Mainbutton";
+import MainButton from "../../components/button/MainButton";
 
 function ForgotPw() {
   const navigate = useNavigate();
