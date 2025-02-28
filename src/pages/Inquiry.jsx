@@ -51,7 +51,7 @@ function Inquiry() {
       );
       // console.log(acaId);
 
-      console.log(res.data.resultData.users);
+      //console.log(res.data.resultData.users);
       setAcademyData(res.data.resultData.users);
     } catch (error) {
       console.log(error);

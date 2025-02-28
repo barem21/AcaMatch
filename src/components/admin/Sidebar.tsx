@@ -75,7 +75,10 @@ const Sidebar: React.FC<{
         }`}
       >
         <div className="p-4 flex justify-center items-center mx-auto h-14 w-full">
-          <h1 className="text-xl font-bold">
+          <h1
+            className="text-xl font-bold cursor-pointer"
+            onClick={() => navigate("/admin")}
+          >
             <img src="/logo8.png" className="w-[180px] h-[38px]" />
           </h1>
         </div>

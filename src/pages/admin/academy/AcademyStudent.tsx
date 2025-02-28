@@ -6,12 +6,14 @@ import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import { Cookies } from "react-cookie";
 
+interface academyStudentType {}
+
 function AcademyStudent() {
   const [form] = Form.useForm();
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [studentList, setStudentList] = useState([]);
   const [academyInfo, setAcademyInfo] = useState("");
 
@@ -24,7 +26,7 @@ function AcademyStudent() {
         `/api/acaClass/acaClassUser?classId=${classId}&page=1`,
       );
       setStudentList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -163,13 +165,19 @@ function AcademyStudent() {
             {/*<div className="flex items-center justify-center w-40">삭제</div>*/}
           </div>
 
-          {studentList.length === 0 && (
+          {studentList?.length === 0 && (
             <div className="loop-content flex w-full justify-center align-middle p-4 border-b">
               등록된 수강생이 없습니다.
             </div>
           )}
 
-          {studentList.map((item, index) => (
+          {!studentList && (
+            <div className="loop-content flex w-full justify-center align-middle p-4 border-b">
+              등록된 수강생이 없습니다.
+            </div>
+          )}
+
+          {studentList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-2 border-b"
@@ -215,7 +223,7 @@ function AcademyStudent() {
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
             defaultCurrent={1}
-            total={studentList.length}
+            total={studentList?.length}
             showSizeChanger={false}
           />
         </div>

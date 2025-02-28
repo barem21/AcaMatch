@@ -8,6 +8,8 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import CustomModal from "../modal/Modal";
+import { useNavigate } from "react-router-dom";
+import { removeCookie } from "../../utils/cookie";
 
 interface HeaderProps {
   className?: string;
@@ -27,6 +29,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
   );
   const [messageContent, setMessageContent] = useState("");
   const cookies = new Cookies();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const accessToken = cookies.get("accessToken");
@@ -46,6 +49,13 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
             userId: response.data.resultData.userId,
           };
 
+          //일반회원은 관리자 접근권한 없음
+          if (userData.roleId === 1) {
+            alert("접근 권한(1)이 없습니다.");
+            navigate("/");
+            return;
+          }
+
           setUserInfo(userData);
           setUserPic(response.data.resultData.userPic);
         } catch (error) {
@@ -53,6 +63,11 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
         }
       };
       fetchUserData();
+    } else {
+      //비회원은 접근제한
+      alert("잘못된 접근(1)입니다.");
+      navigate("/log-in");
+      return;
     }
   }, [setUserInfo]);
 
@@ -131,6 +146,18 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
     },
   ];
 
+  const logOut = async () => {
+    try {
+      const res = await jwtAxios.post("/api/user/log-out", {});
+      //console.log(res);
+      removeCookie("accessToken");
+      removeCookie("message");
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
+
   return (
     <>
       <header
@@ -147,28 +174,38 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
               <FiMenu className="w-[20px] h-[20px]" />
             </button>
           </div>
-          <div>
-            <ul className="flex justify-center items-center gap-[12px] p-[12px] ">
-              <li>
-                <FaBell />
-              </li>
-              <li className="w-[32px] h-[32px]">
-                {userPic && currentUserInfo.userId && (
-                  <Dropdown
-                    menu={{ items }}
-                    placement="bottomRight"
-                    trigger={["click"]}
-                    overlayStyle={{ minWidth: "150px" }}
-                  >
-                    <img
-                      src={`http://112.222.157.157:5233/pic/user/${currentUserInfo.userId}/${userPic}`}
-                      alt="프로필"
-                      className="w-full h-full rounded-full object-cover cursor-pointer"
-                    />
-                  </Dropdown>
-                )}
-              </li>
-            </ul>
+          <div className="flex gap-4 pr-3">
+            <button onClick={() => navigate("/")} className="text-sm">
+              사이트 바로가기
+            </button>
+
+            {currentUserInfo.userId ? (
+              <button onClick={() => logOut()} className="text-sm">
+                로그아웃
+              </button>
+            ) : (
+              <ul className="flex justify-center items-center gap-[12px] p-[12px] ">
+                <li>
+                  <FaBell />
+                </li>
+                <li className="w-[32px] h-[32px]">
+                  {userPic && currentUserInfo.userId && (
+                    <Dropdown
+                      menu={{ items }}
+                      placement="bottomRight"
+                      trigger={["click"]}
+                      overlayStyle={{ minWidth: "150px" }}
+                    >
+                      <img
+                        src={`http://112.222.157.157:5233/pic/user/${currentUserInfo.userId}/${userPic}`}
+                        alt="프로필"
+                        className="w-full h-full rounded-full object-cover cursor-pointer"
+                      />
+                    </Dropdown>
+                  )}
+                </li>
+              </ul>
+            )}
           </div>
         </div>
       </header>
