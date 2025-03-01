@@ -234,7 +234,7 @@ function DashBoard() {
         params: {
           userId: userId,
           page: 1,
-          size: 3, // 최대 3개만 가져오기
+          size: 3,
         },
       });
       console.log(response.data);
@@ -252,7 +252,7 @@ function DashBoard() {
 
   useEffect(() => {
     fetchNotices();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     console.log("선택된 카테고리:", selectedCategory);

@@ -80,6 +80,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const checkPathMatch = (link: string | undefined): boolean => {
     if (!link) return false;
+
+    // 대시보드 경로인 경우 정확히 일치하는지 확인
+    if (link === "/admin") {
+      return location.pathname === "/admin";
+    }
+
+    // 다른 경로들은 기존처럼 startsWith로 확인
     return location.pathname.startsWith(link);
   };
 

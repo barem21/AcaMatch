@@ -1,14 +1,52 @@
-import { Button, Form, Pagination, Select } from "antd";
-import { useEffect } from "react";
+import { Button, Form, Pagination, Select, message } from "antd";
+import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import jwtAxios from "../../apis/jwt";
+
+interface PopupItem {
+  popUpId: number;
+  title: string;
+  startDate: string;
+  endDate: string;
+  popUpShow: number;
+  popUpType: number;
+  sumCount: number;
+}
 
 const PopupContent = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams, _setSearchParams] = useSearchParams();
+  const [popupList, setPopupList] = useState<PopupItem[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const state = searchParams.get("state");
+  const fetchPopupList = async () => {
+    try {
+      const response = await jwtAxios.get("/api/popUp");
+      const { resultData } = response.data;
+      setPopupList(resultData);
+      setTotalItems(resultData[0]?.sumCount || 0);
+    } catch (error) {
+      console.error("Error fetching popup list:", error);
+      message.error("팝업 목록을 불러오는데 실패했습니다.");
+    }
+  };
+
+  const handleDelete = async (title: string) => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+
+    try {
+      await jwtAxios.delete(`/api/popUp`, {
+        params: { title },
+      });
+      message.success("삭제되었습니다.");
+      fetchPopupList();
+    } catch (error) {
+      console.error("Error deleting popup:", error);
+      message.error("삭제에 실패했습니다.");
+    }
+  };
 
   const onFinished = async (values: any) => {
     console.log(values);
@@ -23,13 +61,16 @@ const PopupContent = () => {
   };
 
   useEffect(() => {
-    //페이지 들어오면 ant design 처리용 기본값 세팅
+    fetchPopupList();
     form.setFieldsValue({
-      state: state ? parseInt(state) : "all",
+      state: searchParams.get("state")
+        ? parseInt(searchParams.get("state")!)
+        : "all",
       search: "",
       showCnt: 40,
     });
   }, []);
+
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
@@ -42,7 +83,9 @@ const PopupContent = () => {
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="text-sm">팝업창 등록개수 : 총 N 건</label>
+                <label className="text-sm">
+                  팝업창 등록개수 : 총 {totalItems} 건
+                </label>
               </div>
 
               <div className="flex gap-2">
@@ -97,38 +140,49 @@ const PopupContent = () => {
             </div>
           </div>
 
-          <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-[100%] h-[56px]">
-              <div className="flex items-center gap-3 cursor-pointer">
-                <div>
-                  <h4>관리자 팝업입니다.</h4>
+          {popupList.map((popup, index) => (
+            <div
+              key={index}
+              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+            >
+              <div className="flex justify-start items-center w-[100%] h-[56px]">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h4>{popup.title}</h4>
+                  </div>
                 </div>
               </div>
+              <div className="flex items-center justify-center text-center w-[200px]">
+                {popup.startDate}
+              </div>
+              <div className="flex items-center justify-center text-center w-[200px]">
+                {popup.endDate}
+              </div>
+              <div className="flex items-center justify-center w-[132px]">
+                <p
+                  className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
+                  onClick={() =>
+                    navigate(`/admin/popup-content/add?title=${popup.title}`)
+                  }
+                >
+                  수정하기
+                </p>
+              </div>
+              <div className="flex gap-4 items-center justify-center w-[72px]">
+                <button onClick={() => handleDelete(popup.title)}>
+                  <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center justify-center text-center w-[200px]">
-              2025-01-01
-            </div>
-            <div className="flex items-center justify-center text-center w-[200px]">
-              2025-01-31
-            </div>
-            <div className="flex items-center justify-center w-[132px]">
-              <p
-                className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer`}
-                onClick={() => navigate("/admin/popup-content/add")}
-              >
-                수정하기
-              </p>
-            </div>
-            <div className="flex gap-4 items-center justify-center w-[72px]">
-              <button>
-                <FaRegTrashAlt className="w-3 text-gray-400" />
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">
-          <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
+          <Pagination
+            defaultCurrent={1}
+            total={totalItems}
+            showSizeChanger={false}
+          />
         </div>
       </div>
     </div>
