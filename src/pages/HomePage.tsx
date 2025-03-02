@@ -378,10 +378,19 @@ function HomePage() {
           className="rounded-xl"
         >
           <SwiperSlide>
-            <div className="w-full h-[200px] bg-blue-500 rounded-xl"></div>
+            {/* <div className="w-full h-[200px] bg-blue-500 rounded-xl"></div> */}
+            <img
+              src="/ai2.png"
+              alt="main_banner"
+              className="w-full h-[200px] bg-blue-500 rounded-xl"
+            />
           </SwiperSlide>
           <SwiperSlide>
-            <div className="w-full h-[200px] bg-red-500 rounded-xl"></div>
+            <img
+              src="/ai1.png"
+              alt="main_banner"
+              className="w-full h-[200px] bg-blue-500 rounded-xl"
+            />
           </SwiperSlide>
           <SwiperSlide>
             <div className="w-full h-[200px] bg-green-500 rounded-xl"></div>
