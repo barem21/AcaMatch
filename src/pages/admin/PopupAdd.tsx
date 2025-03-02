@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 const PopupAdd = () => {
   const [form] = Form.useForm();
   const [registrationType, setRegistrationType] = useState("image");
-  const [fileList, _setFileList] = useState([]);
+  const [fileList, setFileList] = useState<any[]>([]);
   const navigate = useNavigate();
 
   const initialValues = {
@@ -20,7 +20,15 @@ const PopupAdd = () => {
   const handleChange = (info: any) => {
     let newFileList = [...info.fileList];
     newFileList = newFileList.slice(-1);
-    // setFileList(newFileList);
+
+    newFileList = newFileList.map(file => {
+      if (file.response) {
+        file.url = file.response.url;
+      }
+      return file;
+    });
+
+    setFileList(newFileList);
 
     if (info.file.status === "done" && info.file.originFileObj) {
       form.setFieldValue("popupImage", info.file.originFileObj);
@@ -31,24 +39,46 @@ const PopupAdd = () => {
     try {
       const formData = new FormData();
 
-      const sendData = {
-        title: values.title,
-        startDate: values.startDate,
-        endDate: values.endDate,
-        registrationType: values.registrationType,
-        content: values.content,
-      };
+      if (values.registrationType === "image") {
+        // 이미지 첨부 방식
+        const popupData = {
+          p: {
+            title: values.title,
+            startDate: values.startDate.format("YYYY-MM-DD"),
+            endDate: values.endDate.format("YYYY-MM-DD"),
+            popUpShow: 0,
+            popUpType: 0,
+          },
+        };
 
-      formData.append(
-        "req",
-        new Blob([JSON.stringify(sendData)], { type: "application/json" }),
-      );
+        formData.append(
+          "p",
+          new Blob([JSON.stringify(popupData.p)], { type: "application/json" }),
+        );
 
-      if (values.popupImage) {
-        formData.append("popupImage", values.popupImage);
+        if (values.popupImage) {
+          formData.append("pic", values.popupImage);
+        }
+      } else {
+        // 직접 입력 방식
+        const popupData = {
+          p: {
+            title: values.title,
+            comment: values.content,
+            startDate: values.startDate.format("YYYY-MM-DD"),
+            endDate: values.endDate.format("YYYY-MM-DD"),
+            popUpShow: 0,
+            popUpType: 0,
+          },
+        };
+
+        formData.append(
+          "p",
+          new Blob([JSON.stringify(popupData.p)], { type: "application/json" }),
+        );
       }
 
-      const response = await jwtAxios.post("/api/popup", formData, {
+      const response = await jwtAxios.post("/api/popUp", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -142,20 +172,29 @@ const PopupAdd = () => {
                 <Upload
                   listType="picture-card"
                   maxCount={1}
-                  showUploadList={{ showPreviewIcon: false }}
                   fileList={fileList}
                   onChange={handleChange}
-                  customRequest={({ onSuccess }) => {
+                  beforeUpload={file => {
+                    const isImage = file.type.startsWith("image/");
+                    if (!isImage) {
+                      message.error("이미지 파일만 업로드 가능합니다!");
+                      return false;
+                    }
+                    return true;
+                  }}
+                  customRequest={({ file, onSuccess }) => {
                     setTimeout(() => {
                       onSuccess?.("ok");
                     }, 0);
                   }}
                   className="[&_.ant-upload-list-item]:border [&_.ant-upload-list-item]:border-[#3b77d8]"
                 >
-                  <button type="button" className="border-0 bg-transparent">
-                    <PlusOutlined />
-                    <div className="mt-2">Upload</div>
-                  </button>
+                  {fileList.length < 1 && (
+                    <button type="button" className="border-0 bg-transparent">
+                      <PlusOutlined />
+                      <div className="mt-2">Upload</div>
+                    </button>
+                  )}
                 </Upload>
               </Form.Item>
             )}
