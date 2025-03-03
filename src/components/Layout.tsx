@@ -17,6 +17,7 @@ import BannerLayout from "./banner/BannerLayout";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
 import ScrollButton from "./ScrollButton";
+import PopupWindow from "./PopupWindow";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -38,6 +39,16 @@ interface LayoutProps {
 // const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
 //   return item.type === "item";
 // };
+
+interface PopupData {
+  popUpId: number;
+  popUpType: number;
+  popUpShow: number;
+  popUpTitle: string;
+  popUpContent: string;
+  popUpStartDate: string;
+  popUpEndDate: string;
+}
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const currentUserInfo = useRecoilValue(userInfo);
@@ -74,9 +85,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const mainRef = useRef<HTMLDivElement>(null);
 
+  const [popupData, setPopupData] = useState<PopupData | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const fetchPopupData = async () => {
+      try {
+        const response = await fetch("/api/popup/getPopup");
+        const data = await response.json();
+        setPopupData(data);
+      } catch (error) {
+        console.error("팝업 데이터 가져오기 실패:", error);
+      }
+    };
+
+    if (isAdminPage) {
+      fetchPopupData();
+    }
+  }, [isAdminPage]);
 
   const checkPathMatch = (link: string | undefined): boolean => {
     if (!link) return false;
@@ -219,6 +248,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {children}
             </main>
             <AdminFooter className="w-full h-[52px] border-t text-[#7081B9] p-4 text-[13px]" />
+
+            {/* 팝업 조건부 렌더링 */}
+            {popupData &&
+              popupData.popUpType === 1 &&
+              popupData.popUpShow === 1 && (
+                <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                  <h3 className="text-xl font-bold mb-4">
+                    {popupData.popUpTitle}
+                  </h3>
+                  <div
+                    dangerouslySetInnerHTML={{ __html: popupData.popUpContent }}
+                  />
+                  <button
+                    className="mt-4 px-4 py-2 bg-[#507A95] text-white rounded-lg"
+                    onClick={() => setPopupData(null)}
+                  >
+                    닫기
+                  </button>
+                </div>
+              )}
           </div>
         </>
       ) : (
@@ -228,17 +277,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
 
           {isLayoutVisible ? (
-            <div className="flex">
-              {/* <BannerLayout position="left" /> */}
-              <div className="w-[280px]"></div>
-              <main
-                className="flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
-                style={{ minHeight: "calc(100vh - 164px)" }}
-              >
-                {children}
-              </main>
-              <BannerLayout position="right" />
-            </div>
+            <>
+              {location.pathname === "/" && <PopupWindow />}
+              <div className="flex">
+                <div className="w-[280px]"></div>
+                <main
+                  className="flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
+                  style={{ minHeight: "calc(100vh - 164px)" }}
+                >
+                  {children}
+                </main>
+                <BannerLayout position="right" />
+              </div>
+            </>
           ) : (
             <main>{children}</main>
           )}

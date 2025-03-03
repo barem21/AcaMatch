@@ -149,7 +149,7 @@ const AcademySearch = () => {
   const [temp, setTemp] = useState(0);
 
   const [searchState, setSearchState] = useState(
-    "/api/academy/getAcademyListByAll?page=1&size=10",
+    "/api/academy/getAcademyListByAll?premiumLimit=3&page=1&size=10",
   );
 
   const updateSearchState = (params: URLSearchParams) => {
@@ -157,7 +157,7 @@ const AcademySearch = () => {
 
     params.set("size", "10");
 
-    const newSearchState = `${baseUrl}?${params.toString()}`;
+    const newSearchState = `${baseUrl}?premiumLimit=3&${params.toString()}`;
 
     setSearchState(newSearchState);
     navigate(`?${params.toString()}`, { replace: true });
@@ -701,7 +701,7 @@ const AcademySearch = () => {
                   <div className="flex justify-center items-center min-w-[10%]">
                     <img
                       className="w-[60px] h-[60px] rounded-[20px]"
-                      src={`http://112.222.157.156:5223/pic/academy/${academy.acaId}/${academy.acaPic}`} // 기본 이미지 설정
+                      src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`} // 기본 이미지 설정
                       onError={e => {
                         const target = e.target as HTMLImageElement;
                         const randomNum = getRandomUniqueNumber();

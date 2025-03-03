@@ -142,7 +142,19 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
     },
     {
       key: "2",
-      label: <button className="w-full text-left">닫기</button>,
+      label: (
+        <button onClick={() => navigate("/")} className="w-full text-left">
+          사이트 바로가기
+        </button>
+      ),
+    },
+    {
+      key: "3",
+      label: (
+        <button onClick={() => logOut()} className="w-full text-left">
+          로그아웃
+        </button>
+      ),
     },
   ];
 
@@ -175,37 +187,27 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
             </button>
           </div>
           <div className="flex gap-4 pr-3">
-            <button onClick={() => navigate("/")} className="text-sm">
-              사이트 바로가기
-            </button>
-
-            {currentUserInfo.userId ? (
-              <button onClick={() => logOut()} className="text-sm">
-                로그아웃
-              </button>
-            ) : (
-              <ul className="flex justify-center items-center gap-[12px] p-[12px] ">
-                <li>
-                  <FaBell />
-                </li>
-                <li className="w-[32px] h-[32px]">
-                  {userPic && currentUserInfo.userId && (
-                    <Dropdown
-                      menu={{ items }}
-                      placement="bottomRight"
-                      trigger={["click"]}
-                      overlayStyle={{ minWidth: "150px" }}
-                    >
-                      <img
-                        src={`http://112.222.157.157:5233/pic/user/${currentUserInfo.userId}/${userPic}`}
-                        alt="프로필"
-                        className="w-full h-full rounded-full object-cover cursor-pointer"
-                      />
-                    </Dropdown>
-                  )}
-                </li>
-              </ul>
-            )}
+            <ul className="flex justify-center items-center gap-[12px] p-[12px]">
+              <li>
+                <FaBell />
+              </li>
+              <li className="w-[32px] h-[32px]">
+                {userPic && currentUserInfo.userId && (
+                  <Dropdown
+                    menu={{ items }}
+                    placement="bottomRight"
+                    trigger={["click"]}
+                    overlayStyle={{ minWidth: "150px" }}
+                  >
+                    <img
+                      src={`http://112.222.157.157:5233/pic/user/${currentUserInfo.userId}/${userPic}`}
+                      alt="프로필"
+                      className="w-full h-full rounded-full object-cover cursor-pointer"
+                    />
+                  </Dropdown>
+                )}
+              </li>
+            </ul>
           </div>
         </div>
       </header>

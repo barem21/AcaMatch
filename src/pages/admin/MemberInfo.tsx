@@ -141,6 +141,7 @@ function MemberInfo(): JSX.Element {
       const res = await jwtAxios.get(`/api/user`);
       setEditMember(res.data.resultData);
       //console.log("res.data.resultData : ", res.data.resultData);
+      console.log(res);
 
       // 데이터를 받아온 즉시 form 값 설정
       form.setFieldsValue({

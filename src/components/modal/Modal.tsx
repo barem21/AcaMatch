@@ -10,6 +10,8 @@ interface CustomModalProps {
   onButton2Click?: () => void;
   button1Text: string;
   button2Text?: string;
+  button2Disabled?: boolean;
+  button2Style?: React.CSSProperties;
   modalWidth?: number;
   modalHeight?: number;
   btWidth?: number; // 버튼 너비
@@ -36,6 +38,8 @@ const CancelButton = styled(MainButton)`
  * @param {Function} param0.onButton2Click - 버튼2 클릭 시 실행되는 이벤트 핸들러
  * @param {string} param0.button1Text - 버튼1의 텍스트
  * @param {string} param0.button2Text - 버튼2의 텍스트
+ * @param {boolean} param0.button2Disabled - 버튼2의 비활성화 여부
+ * @param {React.CSSProperties} param0.button2Style - 버튼2의 스타일
  * @param {number} [param0.modalWidth=400] - 모달의 너비 (기본값 400px)
  * @param {number} [param0.modalHeight=244] - 모달의 높이 (기본값 244px)
  *
@@ -49,6 +53,8 @@ const CustomModal: React.FC<CustomModalProps> = ({
   onButton2Click,
   button1Text = "취소하기",
   button2Text = "확인하기",
+  button2Disabled = false,
+  button2Style,
   modalWidth = 400,
   modalHeight,
 }) => {
@@ -56,18 +62,15 @@ const CustomModal: React.FC<CustomModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50 modal-popup-wrap"
-      style={{
-        width: "100%", // 부모 div가 전체 화면을 차지하게
-        height: "100vh", // 화면 전체 높이를 차지하게
-      }}
+      className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-10 modal-popup-wrap"
+      style={{ width: "100%", height: "100vh" }}
     >
       <div
         className={`bg-white rounded-3xl p-6 transition-all ease-out duration-300
-          ${visible ? "opacity-100 animate-fade-in animate-scale-up" : "opacity-0"}`}
+        ${visible ? "opacity-100 animate-fade-in animate-scale-up" : "opacity-0"}`}
         style={{
-          width: `${modalWidth}px`, // 동적 width 적용
-          height: modalHeight ? `${modalHeight}px` : "auto", // 동적 height 적용
+          width: `${modalWidth}px`,
+          height: modalHeight ? `${modalHeight}px` : "auto",
         }}
       >
         <h2 className="text-2xl font-bold text-left mb-[30px]">{title}</h2>
@@ -77,12 +80,14 @@ const CustomModal: React.FC<CustomModalProps> = ({
             onClick={onButton1Click}
             className={`px-4 py-2 w-[100%] h-[100%]`}
           >
-            {button1Text || "Default Button Text"}
+            {button1Text}
           </CancelButton>
           <MainButton
             type="primary"
             onClick={onButton2Click}
+            disabled={button2Disabled}
             className={`px-4 py-2 w-[100%] h-[100%]`}
+            style={button2Style}
           >
             {button2Text}
           </MainButton>
