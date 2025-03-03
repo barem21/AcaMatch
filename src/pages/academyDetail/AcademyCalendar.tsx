@@ -1,15 +1,20 @@
+import styled from "@emotion/styled";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
+import dayjs from "dayjs";
 import { useMemo } from "react";
 import { AcademyData } from "./types";
-import styled from "@emotion/styled";
-import DOMPurify from "dompurify";
 
 const CalendarContainer = styled.div`
   .fc .fc-toolbar-title {
     font-size: 1.5em;
     font-weight: bold;
+  }
+
+  .fc .fc-daygrid-more-link {
+    font-size: 12px !important;
+    color: #676d9c;
   }
 
   .fc .fc-today-button {
@@ -51,6 +56,21 @@ const CalendarContainer = styled.div`
       color: white;
     }
   }
+
+  // 날짜 셀의 높이 조정
+  .fc .fc-daygrid-day {
+    height: 120px !important; // 원하는 높이로 조정 가능
+  }
+
+  // 또는 더 구체적으로 내부 컨테이너의 높이를 조정
+  .fc .fc-daygrid-day-frame {
+    min-height: 120px !important;
+  }
+
+  // 날짜 그리드 전체의 높이를 조정하고 싶다면
+  .fc .fc-daygrid-body {
+    height: auto !important;
+  }
 `;
 
 interface AcademyCalendarProps {
@@ -58,7 +78,6 @@ interface AcademyCalendarProps {
 }
 
 const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
-  // 색상 팔레트 정의
   const colorPalette = [
     "#3b77d8", // 메인 컬러
     "#F8B195", // 피치
@@ -70,47 +89,91 @@ const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
     "#A8E6CF", // 민트
   ];
 
-  // 클래스별 색상 매핑 생성 (classId 기준)
-  const classColors = useMemo(() => {
-    if (!academyData?.classes) return {};
-
-    const uniqueClassIds = [
-      ...new Set(academyData.classes.map(c => c.classId)),
-    ];
-    return Object.fromEntries(
-      uniqueClassIds.map((id, index) => [
-        id,
-        colorPalette[index % colorPalette.length],
-      ]),
-    );
-  }, [academyData]);
-
   // 캘린더 이벤트 데이터 생성
   const calendarEvents = useMemo(() => {
-    return (
-      academyData?.classes?.map(classItem => ({
+    if (!academyData?.classes) return [];
+
+    const validClasses = academyData.classes.filter(
+      c => c.classId !== null && c.classId !== 0,
+    );
+
+    const events = validClasses.map((classItem, index) => {
+      const baseColor = colorPalette[index % colorPalette.length];
+      const isToday = dayjs(classItem.classStartDate).isSame(dayjs(), "day");
+
+      return {
         id: String(classItem.classId),
         title: classItem.className,
-        start: `${classItem.classStartDate}T${classItem.classStartTime}`,
-        end: `${classItem.classEndDate}T${classItem.classEndTime}`,
-        backgroundColor: classColors[classItem.classId], // classId로 색상 매핑
-        borderColor: classColors[classItem.classId], // classId로 색상 매핑
+        start: classItem.classStartDate, // 날짜만 사용
+        end: classItem.classEndDate, // 날짜만 사용
+        allDay: true, // 하루 종일 이벤트로 처리
+        backgroundColor: baseColor,
+        borderColor: baseColor,
+        classNames: isToday ? ["today-event"] : [],
         extendedProps: {
           classComment: classItem.classComment,
           classPrice: classItem.classPrice,
           classDay: classItem.classDay,
           classCategoryName: classItem.classCategoryName,
+          isToday,
+          startTime: classItem.classStartTime,
+          endTime: classItem.classEndTime,
         },
-      })) || []
-    );
-  }, [academyData, classColors]);
+      };
+    });
+
+    // 3개 이상의 이벤트가 있는 날짜에 대한 처리
+    const eventsByDate = events.reduce((acc: any, event) => {
+      const date = event.start;
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(event);
+      return acc;
+    }, {});
+
+    // Object.entries(eventsByDate).forEach(
+    //   ([date, dateEvents]: [string, any[]]) => {
+    //     if (dateEvents.length > 2) {
+    //       events.push({
+    //         start: date,
+    //         end: date,
+    //         title: `외 ${dateEvents.length - 2}개의 강좌`,
+    //         display: "background",
+    //         backgroundColor: "transparent",
+    //         textColor: "#676d9c",
+    //         classNames: ["more-events"],
+    //       });
+    //     }
+    //   },
+    // );
+
+    return events;
+  }, [academyData]);
 
   return (
     <CalendarContainer className="p-4">
+      <style>
+        {`
+          .today-event {
+            animation: todayPulse 2s infinite;
+            position: relative;
+          }
+          
+          @keyframes todayPulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(59, 119, 216, 0.4);
+            }
+            70% {
+              box-shadow: 0 0 0 10px rgba(59, 119, 216, 0);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(59, 119, 216, 0);
+            }
+          }
+        `}
+      </style>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        locale="ko"
         headerToolbar={{
           left: "prev,next today",
           center: "title",
@@ -122,92 +185,44 @@ const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
           week: "주",
           day: "일",
         }}
+        locale="ko"
         events={calendarEvents}
         eventContent={eventInfo => <EventContent eventInfo={eventInfo} />}
-        // eventClick={info => {
-        //   const event = info.event;
-        //   Modal.info({
-        //     title: event.title,
-        //     content: <EventModal event={event} />,
-        //     width: 500,
-        //   });
-        // }}
+        dayMaxEvents={2}
         height="auto"
-        dayMaxEvents={true}
-        eventTimeFormat={{
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }}
+        allDaySlot={true}
+        slotEventOverlap={false}
+        displayEventTime={false}
       />
     </CalendarContainer>
   );
 };
 
-export default AcademyCalendar;
-
-// interface EventContentProps {
-//   eventInfo: {
-//     event: any; // FullCalendar 이벤트 타입
-//   };
-// }
-
-interface EventModalProps {
-  event: any; // FullCalendar 이벤트 타입
-}
-
 export const EventContent = ({ eventInfo }: { eventInfo: any }) => {
-  const view = eventInfo.view.type;
+  const isMoreEvents = eventInfo.event.classNames?.includes("more-events");
 
-  // 시작 시간과 종료 시간 포맷팅
-  const startTime = eventInfo.event.start?.toLocaleTimeString("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  const endTime = eventInfo.event.end?.toLocaleTimeString("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  // 날짜 포맷팅
-  // const date = eventInfo.event.start?.toLocaleDateString("ko-KR", {
-  //   month: "short",
-  //   day: "numeric",
-  // });
-
-  if (view === "dayGridMonth") {
-    // 월간 뷰
+  if (isMoreEvents) {
     return (
-      <div className="flex p-1">
-        <div className="text-[12px] leading-none  truncate">
-          {eventInfo.event.title}
-        </div>
-      </div>
-    );
-  } else {
-    // 주간/일간 뷰
-    return (
-      <div className="flex flex-col p-1 ">
-        <div className="font-bold truncate">{eventInfo.event.title}</div>
-        <div className="text-sm">
-          {startTime} - {endTime}
-        </div>
-        <div
-          className="text-sm"
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(
-              eventInfo.event.extendedProps.classComment,
-            ),
-          }}
-        >
-          {/* {eventInfo.event.extendedProps.classComment} */}
-        </div>
+      <div className="text-[10px] text-[#676d9c] text-right pr-1 mt-[-2px]">
+        {eventInfo.event.title}
       </div>
     );
   }
+
+  return (
+    <div className="flex p-1">
+      <div
+        className="text-[12px] leading-none truncate w-full"
+        style={{
+          color: "white",
+          padding: "2px 4px",
+          borderRadius: "2px",
+        }}
+      >
+        {eventInfo.event.title}
+      </div>
+    </div>
+  );
 };
 
 export const EventModal = ({ event }: EventModalProps) => {
@@ -235,3 +250,5 @@ export const EventModal = ({ event }: EventModalProps) => {
     </div>
   );
 };
+
+export default AcademyCalendar;

@@ -384,7 +384,7 @@ function DashBoard() {
             ))}
           </ul>
         </div>
-        <div className="flex-col w-[calc(100%-1193px)] max-w-[394px] 2xl:max-w-[402px]">
+        <div className="flex-col w-[calc(100%-1193px)] max-w-[394px] 2xl:max-w-[402px] min-w-[350px]">
           <div className="w-full mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
             {/* <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]"> */}
             <div className="flex justify-between w-full p-3 border-b items-center">
@@ -407,7 +407,7 @@ function DashBoard() {
               </Dropdown>
             </div>
 
-            <div style={{ height: "200px" }}>
+            <div style={{ height: "200px", width: "350px" }}>
               <ResponsivePie
                 data={pieData}
                 margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
@@ -419,14 +419,14 @@ function DashBoard() {
               />
             </div>
 
-            <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] text-gray-700 text-sm gap-[12px] font-semibold">
+            <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] min-w-[350px] text-gray-700 text-sm gap-[12px] font-semibold">
               <CiCalendarDate size={"20px"} style={{ strokeWidth: 1 }} />
               {timePeriods[selectedTimeRange]}
             </div>
           </div>
-          <div className="border rounded-lg h-[120px]">
+          <div className="border rounded-lg h-[120px] min-w-[350px]">
             <div>
-              <ul className="flex mx-auto w-[350px] h-[30px] bg-[#F1F5FA]">
+              <ul className="flex mx-auto min-w-[175px] w-[350px] h-[30px] bg-[#F1F5FA]">
                 <li className="flex justify-center items-center w-[200px]">
                   공지사항
                 </li>
@@ -436,7 +436,7 @@ function DashBoard() {
               </ul>
               {notices.map((notice, index) => (
                 <ul key={index} className="flex mx-auto w-[350px] h-[30px]">
-                  <li className="flex justify-center items-center w-[200px]">
+                  <li className="flex justify-center items-center min-w-[175px] w-[200px]">
                     <span
                       className="truncate max-w-[180px]"
                       title={notice.boardName}

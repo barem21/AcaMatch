@@ -17,6 +17,7 @@ import AcademyCalendar from "./AcademyCalendar";
 import ClassList from "./ClassList";
 import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
+import BookList from "./BookList";
 import { AcademyClass, AcademyData } from "./types";
 
 declare global {
@@ -59,7 +60,7 @@ const styles = {
   },
   tab: {
     container:
-      "flex flex-row justify-between items-end h-[63px] sticky top-[64px] bg-white z-[100]",
+      "flex flex-row justify-between items-end h-[63px] sticky top-[64px] bg-white z-[10]",
     item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[40px] border-b-2",
     activeTab: "border-brand-BTBlue",
     inactiveTab: "border-[#F0F0F0]",
@@ -575,6 +576,9 @@ const AcademyDetail = () => {
               <div className="mb-[50px]">
                 <AcademyCalendar academyData={academyData} />
               </div>
+
+              {/* 책 목록 섹션 추가 */}
+              <BookList books={academyData.books} />
 
               <div className={styles.section.title}>찾아 오시는 길</div>
               <div className={styles.section.map}>
