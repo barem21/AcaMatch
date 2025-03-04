@@ -37,25 +37,27 @@ import MemberList from "./pages/admin/MemberList";
 import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
 import NoticeContent from "./pages/admin/NoticeContent.tsx";
 import NoticeView from "./pages/admin/NoticeView.tsx";
-import PopupAdd from "./pages/admin/PopupAdd.tsx";
-import PopupContent from "./pages/admin/PopupContent.tsx";
+import PopupAdd from "./pages/admin/popup/PopupAdd.tsx";
+import PopupContent from "./pages/admin/popup/PopupContent.tsx";
 import AcademyAdd from "./pages/admin/academy/AcademyAdd";
 import AcademyArrow from "./pages/admin/academy/AcademyArrow";
 import AcademyClassAdd from "./pages/admin/academy/AcademyClassAdd";
 import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
 import AcademyClassList from "./pages/admin/academy/AcademyClassList";
-import AcademyEdit from "./pages/admin/academy/AcademyEdit";
+// import AcademyEdit from "./pages/admin/academy/AcademyEdit";
 import AcademyList from "./pages/admin/academy/AcademyList";
 import AcademyPremium from "./pages/admin/academy/AcademyPremium";
 import AcademyPremiumReq from "./pages/admin/academy/AcademyPremiumReq";
 import AcademyRecord from "./pages/admin/academy/AcademyRecord";
-import AcademyStudent from "./pages/admin/academy/AcademyStudent";
+// import AcademyStudent from "./pages/admin/academy/AcademyStudent";
 import AcademyTestList from "./pages/admin/academy/AcademyTestList";
 import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
 import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import BannerView from "./pages/admin/BannerView.tsx";
 import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
+import PopupDetail from "./pages/admin/popup/PopupDetail.tsx";
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
 
 function App() {
   useEffect(() => {
@@ -177,6 +179,7 @@ function App() {
                 <Route path="notice-content/view" element={<NoticeView />} />
                 <Route path="popup-content" element={<PopupContent />} />
                 <Route path="popup-content/add" element={<PopupAdd />} />
+                <Route path="popup-content/detail/" element={<PopupDetail />} />
                 <Route path="banner-content" element={<BannerContent />} />
                 <Route path="banner-content/view" element={<BannerView />} />
                 <Route path="teacher">
@@ -185,14 +188,14 @@ function App() {
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
-                <Route path="academy/edit" element={<AcademyEdit />} />
+                {/* <Route path="academy/edit" element={<AcademyEdit />} /> */}
                 <Route path="academy/class" element={<AcademyClassList />} />
                 <Route path="academy/classAdd" element={<AcademyClassAdd />} />
                 <Route
                   path="academy/classEdit"
                   element={<AcademyClassEdit />}
                 />
-                <Route path="academy/student" element={<AcademyStudent />} />
+                {/* <Route path="academy/student" element={<AcademyStudent />} /> */}
                 <Route path="academy/testList" element={<AcademyTestList />} />
                 <Route path="academy/record" element={<AcademyRecord />} />
                 <Route path="academy/premium" element={<AcademyPremium />} />
@@ -214,6 +217,7 @@ function App() {
                 />
               </Route>
               <Route path="/404" element={<NotFoundPage />} />
+              <Route path="/success" element={<PaymentSuccess />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>

@@ -23,23 +23,6 @@ interface LayoutProps {
   children?: ReactNode;
 }
 
-// interface SubMenuItem {
-//   label: string;
-//   link: string;
-//   active: boolean;
-// }
-
-// interface SubListItem {
-//   label: string;
-//   link: string;
-//   active: boolean;
-// }
-
-// MenuItem인지 확인하는 타입 가드 함수
-// const isMenuItem = (item: MenuItem | Divider): item is MenuItem => {
-//   return item.type === "item";
-// };
-
 interface PopupData {
   popUpId: number;
   popUpType: number;
@@ -133,27 +116,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       );
     });
   };
-
-  // const handleMenuClick = (item: MenuItem | SubMenuItem) => {
-  //   const updatedItems = menuItems.map(menuItem => {
-  //     if (!isMenuItem(menuItem)) return menuItem;
-
-  //     if (menuItem.link === item.link) {
-  //       return { ...menuItem, expanded: !menuItem.expanded };
-  //     }
-
-  //     const updatedList = menuItem.list?.map(subItem => {
-  //       if (subItem.link === item.link) {
-  //         return { ...subItem, expanded: !subItem.expanded };
-  //       }
-  //       return subItem;
-  //     });
-
-  //     return { ...menuItem, list: updatedList };
-  //   });
-
-  //   setMenuItems(updatedItems);
-  // };
 
   useEffect(() => {
     const initialItems =

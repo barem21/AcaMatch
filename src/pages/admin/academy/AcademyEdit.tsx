@@ -711,3 +711,4 @@ function AcademyEdit() {
 }
 
 export default AcademyEdit;
+
