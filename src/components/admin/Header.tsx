@@ -192,18 +192,26 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
                 <FaBell />
               </li>
               <li className="w-[32px] h-[32px]">
-                {userPic && currentUserInfo.userId && (
+                {currentUserInfo.userId && (
                   <Dropdown
                     menu={{ items }}
                     placement="bottomRight"
                     trigger={["click"]}
                     overlayStyle={{ minWidth: "150px" }}
                   >
-                    <img
-                      src={`http://112.222.157.157:5233/pic/user/${currentUserInfo.userId}/${userPic}`}
-                      alt="프로필"
-                      className="w-full h-full rounded-full object-cover cursor-pointer"
-                    />
+                    {userPic ? (
+                      <img
+                        src={`http://112.222.157.157:5233/pic/user/${currentUserInfo.userId}/${userPic}`}
+                        alt="프로필"
+                        className="w-full h-full rounded-full object-cover cursor-pointer"
+                      />
+                    ) : (
+                      <img
+                        src="/aca_image_1.png"
+                        className="w-full h-full rounded-full object-cover cursor-pointer"
+                        alt=""
+                      />
+                    )}
                   </Dropdown>
                 )}
               </li>

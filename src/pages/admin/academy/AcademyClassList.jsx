@@ -13,23 +13,61 @@ function AcademyClassList() {
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const [classId, setClassId] = useState("");
+  const [myAcademyList, setMyAcademyList] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [classList, setClassList] = useState([]);
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-  const acaId = searchParams.get("acaId");
+  const acaId = parseInt(searchParams.get("acaId") || "1", 0);
+  const showCnt = parseInt(searchParams.get("showCnt") || "30", 0);
+
+  //학원 목록
+  const academyList = async () => {
+    try {
+      if (currentUserInfo.roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(
+          `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
+        );
+        setMyAcademyList(res.data.resultData);
+        console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  console.log(simplifiedData);
 
   //강좌 목록
   const academyClassList = async () => {
     try {
       const res = await axios.get(
-        `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
+        "/api/acaClass" +
+          (acaId && "?acaId=" + acaId) +
+          (acaId ? "&" : "?") +
+          "page=1&size=" +
+          (showCnt ? showCnt : 30),
       );
       setClassList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log("classList : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -90,8 +128,13 @@ function AcademyClassList() {
     navigate(`../academy/class?${queryParams}`); //쿼리스트링 url에 추가
 
     try {
-      const res = await axios.get(`/api/acaClass?acaId=${values.acaId}&page=1`);
+      const res = await axios.get(
+        "/api/acaClass?page=1&size=" +
+          (values.showCnt ? values.showCnt : 40) +
+          (values.acaId ? "&acaId=" + values.acaId : ""),
+      );
       setClassList(res.data.resultData);
+      console.log("search : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -103,6 +146,7 @@ function AcademyClassList() {
   };
 
   useEffect(() => {
+    academyList();
     academyClassList();
   }, []);
 
@@ -143,24 +187,7 @@ function AcademyClassList() {
                     className="select-admin-basic"
                     //onChange={onChange}
                     //onSearch={onSearch}
-                    options={[
-                      {
-                        value: "",
-                        label: "전체",
-                      },
-                      {
-                        value: 2047,
-                        label: "대구 ABC상아탑 학원",
-                      },
-                      {
-                        value: 2,
-                        label: "in서울 입시학원",
-                      },
-                      {
-                        value: 3,
-                        label: "가나다 어학원",
-                      },
-                    ]}
+                    options={simplifiedData}
                   />
                 </Form.Item>
                 <Form.Item name="search" className="mb-0">
@@ -240,6 +267,12 @@ function AcademyClassList() {
           </div>
 
           {classList === null && (
+            <div className="text-center p-4 border-b">
+              등록된 강의가 없습니다.
+            </div>
+          )}
+
+          {classList.length === 0 && (
             <div className="text-center p-4 border-b">
               등록된 강의가 없습니다.
             </div>

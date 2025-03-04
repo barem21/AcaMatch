@@ -17,9 +17,10 @@ function AcademyList() {
   const [academyId, setAcademyId] = useState("");
   const [myAcademyList, setMyAcademyList] = useState([]);
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-  const state = searchParams.get("state");
+  const state = parseInt(searchParams.get("state") || "1", 0);
+  const search = searchParams.get("search");
 
   //학원 목록
   const academyList = async () => {
@@ -27,7 +28,8 @@ function AcademyList() {
       if (currentUserInfo.roleId === 0) {
         //전체 관리자일 때
         const res = await jwtAxios.get(
-          `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
+          "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
+            (search !== null ? "?acaName=" + search : ""),
         );
         setMyAcademyList(res.data.resultData);
         console.log("admin : ", res.data.resultData);
@@ -38,7 +40,6 @@ function AcademyList() {
         setMyAcademyList(res.data.resultData);
         console.log(res.data.resultData);
       }
-      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -80,7 +81,28 @@ function AcademyList() {
 
   //학원 검색
   const onFinished = async values => {
-    console.log(values);
+    //console.log(values);
+
+    //학원 목록
+    try {
+      if (currentUserInfo.roleId === 0) {
+        //전체 관리자일 때
+        const res = await jwtAxios.get(
+          "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
+            (search !== null ? "?acaName=" + values.search : ""),
+        );
+        setMyAcademyList(res.data.resultData);
+        console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
@@ -96,9 +118,9 @@ function AcademyList() {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      state: state ? parseInt(state) : "all",
-      search: "",
-      showCnt: 40,
+      state: 1,
+      search: search ? search : "",
+      showCnt: 30,
     });
   }, [currentUserInfo]);
 
@@ -133,10 +155,6 @@ function AcademyList() {
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: "all",
-                        label: "전체",
-                      },
-                      {
                         value: 0,
                         label: "승인대기",
                       },
@@ -144,10 +162,10 @@ function AcademyList() {
                         value: 1,
                         label: "승인완료",
                       },
-                      {
-                        value: 2,
-                        label: "승인거부",
-                      },
+                      // {
+                      //   value: 2,
+                      //   label: "승인거부",
+                      // },
                     ]}
                   />
                 </Form.Item>
@@ -174,16 +192,16 @@ function AcademyList() {
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 30,
+                        label: "30개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
                       },
                       {
-                        value: 60,
-                        label: "60개씩 보기",
+                        value: 100,
+                        label: "100개씩 보기",
                       },
                     ]}
                   />
@@ -217,8 +235,11 @@ function AcademyList() {
             <div className="flex items-center justify-center min-w-20">
               신고횟수
             </div>
-            <div className="flex items-center justify-center min-w-24">
+            {/* <div className="flex items-center justify-center min-w-24">
               승인
+            </div> */}
+            <div className="flex items-center justify-center min-w-24">
+              강좌 관리
             </div>
             <div className="flex items-center justify-center min-w-24">
               관리
@@ -262,21 +283,31 @@ function AcademyList() {
                 {item.acaPhone}
               </div>
               <div className="flex items-center justify-center text-center min-w-60">
-                {item?.address}
+                {item.address}
               </div>
               <div className="flex items-center justify-center min-w-24">
-                홍길동
+                {item.name}
               </div>
               <div className="flex items-center justify-center min-w-20">
-                3회
+                ??회
               </div>
               <div className="flex items-center justify-center min-w-24">
-                {item.acaAgree === 0 ? (
-                  <span className="text-sm text-red-300">승인대기</span>
-                ) : (
-                  <span className="text-sm text-blue-500">승인완료</span>
-                )}
+                <button
+                  className="small_line_button"
+                  onClick={() =>
+                    navigate(`../academy/class?acaId=${item.acaId}`)
+                  }
+                >
+                  강좌 관리
+                </button>
               </div>
+              {/* <div className="flex items-center justify-center min-w-24">
+                {item.acaAgree === 1 ? (
+                  <span className="text-sm text-blue-500">승인완료</span>
+                ) : (
+                  <span className="text-sm text-red-300">승인대기</span>
+                )}
+              </div> */}
               <div className="flex gap-4 items-center justify-center min-w-24">
                 <button
                   onClick={() =>

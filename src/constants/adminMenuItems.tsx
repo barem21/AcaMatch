@@ -59,20 +59,15 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
       {
-        label: "학원 등록 요청",
-        link: "/admin/academy?state=0",
-        active: false,
-      },
-      {
-        label: "학원 승인",
+        label: "학원 등록 승인",
         link: "/admin/academy/arrow",
         active: false,
       },
-      {
-        label: "강의 관리",
-        link: "/admin/academy/class",
-        active: false,
-      },
+      // {
+      //   label: "강의 관리",
+      //   link: "/admin/academy/class",
+      //   active: false,
+      // },
       {
         label: "프리미엄 학원 관리",
         link: "/admin/academy/premium",
@@ -97,11 +92,13 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         link: "/admin/member",
         active: false,
       },
+      /*
       {
         label: "회원 정보",
         link: "/admin/member/info",
         active: false,
       },
+      */
     ],
   },
   { type: "divider" },
