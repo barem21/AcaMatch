@@ -90,7 +90,7 @@ const Sidebar: React.FC<{
               isMenuItem(item) ? (
                 <li key={index} className="flex flex-col">
                   <div
-                    className="flex justify-between items-center p-3 pl-0 rounded-lg cursor-pointer"
+                    className="flex justify-between items-center p-3 pl-0 pr-0 rounded-lg cursor-pointer"
                     onClick={() => {
                       handleMenuClick(index, item);
                       if (item.list) {
@@ -138,10 +138,9 @@ const Sidebar: React.FC<{
                   )}
                 </li>
               ) : (
-                <li
-                  key={index}
-                  className="border-b border-gray-700 border-dashed"
-                ></li>
+                <li key={index}>
+                  <div className="mt-3 mb-3 border-b border-gray-200 opacity-20 border-dashed"></div>
+                </li>
               ),
             )}
           </ul>

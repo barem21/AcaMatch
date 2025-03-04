@@ -1,15 +1,43 @@
 import { Button, Form, Input, Pagination, Select } from "antd";
-import { useNavigate } from "react-router-dom";
-import { FaRegTrashAlt } from "react-icons/fa";
+import axios from "axios";
 import { useEffect, useState } from "react";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import CustomModal from "../../../components/modal/Modal";
-//import CustomModal from "../../../components/modal/Modal";
+import jwtAxios from "../../../apis/jwt";
+
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+  acaPhone: string;
+  acaPic: string;
+  acaPics: string;
+  address: string;
+  comment: string;
+  createdAt: string;
+  name: string;
+  userId: number;
+}
 
 function AcademyArrow(): JSX.Element {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
+
+  //미승인 학원 목록
+  const academyList = async () => {
+    try {
+      const res = await axios.get(
+        `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree?acaAgree=0`,
+      );
+      setMyAcademyList(res.data.resultData);
+      console.log("admin : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   //학원등록 거부사유
   const handleButton1Click = (): void => {
@@ -38,10 +66,28 @@ function AcademyArrow(): JSX.Element {
     navigate(`../academy/arrow?${queryParams}`); //쿼리스트링 url에 추가
   };
 
-  const AcademyArrowChange = (e: any) => {
-    if (parseInt(e.target.value) === 2) {
+  const AcademyArrowChange = (value: number, acaId: number) => {
+    if (value === 2) {
       //alert("거부사유 입력");
       setIsModalVisible(true);
+    } else {
+      //alert(acaId);
+      if (confirm("승인완료 처리하시겠습니까?") === true) {
+        const academyUpdate = async () => {
+          const data = { acaId: acaId };
+          try {
+            const res = await axios.put("/api/academy/agree", data);
+            console.log("admin : ", res.data.resultData);
+            academyList();
+          } catch (error) {
+            console.log(error);
+          }
+        };
+        academyUpdate();
+      } else {
+        academyList();
+        return;
+      }
     }
   };
 
@@ -49,8 +95,21 @@ function AcademyArrow(): JSX.Element {
     form.submit();
   };
 
-  //학원등록 승인삭제 팝업
-  const handleAcademyDelete = () => {};
+  //학원등록 승인삭제 불가...
+  const handleAcademyDelete = async (acaId: number, userId: number) => {
+    try {
+      if (confirm("학원등록 신청을 삭제하시겠습니까?") === true) {
+        const res = await jwtAxios.delete(
+          `/api/academy?acaId=${acaId}&userId=${userId}`,
+        );
+        console.log(res.data.resultData);
+      } else {
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   //학원등록 거부사유 처리
   const onFinishedSe = async (values: any) => {
@@ -58,6 +117,8 @@ function AcademyArrow(): JSX.Element {
   };
 
   useEffect(() => {
+    academyList();
+
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
       search: "",
@@ -69,8 +130,8 @@ function AcademyArrow(): JSX.Element {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          학원등록 승인
-          <p>학원 관리 &gt; 학원등록 승인</p>
+          학원 등록 승인
+          <p>학원 관리 &gt; 학원 등록 승인</p>
         </h1>
 
         <div className="board-wrap">
@@ -123,61 +184,89 @@ function AcademyArrow(): JSX.Element {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-40">등록일</div>
-            <div className="flex items-center justify-center w-52">
+            <div className="flex items-center justify-center min-w-32">
+              등록일
+            </div>
+            <div className="flex items-center justify-center min-w-32">
               학원 연락처
             </div>
-            <div className="flex items-center justify-center w-96">
+            <div className="flex items-center justify-center min-w-40">
               학원 주소
             </div>
-            <div className="flex items-center justify-center w-40">등록자</div>
-            <div className="flex items-center justify-center w-36">처리</div>
-            <div className="flex items-center justify-center w-36">삭제</div>
+            <div className="flex items-center justify-center min-w-28">
+              등록자
+            </div>
+            <div className="flex items-center justify-center min-w-24">
+              처리
+            </div>
+            <div className="flex items-center justify-center min-w-16">
+              삭제
+            </div>
           </div>
 
-          <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-full">
-              <div className="flex items-center gap-3 cursor-pointer">
-                <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                  <img
-                    src="/aca_image_1.png"
-                    className="max-w-fit max-h-full object-cover"
-                    alt=" /"
-                  />
+          {myAcademyList === null && (
+            <div className=" flex justify-center align-middle p-2 border-b">
+              등록 대기중인 학원이 없습니다.
+            </div>
+          )}
+          {myAcademyList.length === 0 && (
+            <div className=" flex justify-center align-middle p-2 border-b">
+              등록 대기중인 학원이 없습니다.
+            </div>
+          )}
+
+          {myAcademyList?.map(item => (
+            <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
+              <div className="flex justify-start items-center w-full">
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.acaPic
+                          ? `http://http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
+                  </div>
+                  {item.acaName}
                 </div>
-                대구 ABC상아탑 학원
+              </div>
+              <div className="flex items-center justify-center text-center min-w-32">
+                {item.createdAt.substr(0, 10)}
+              </div>
+              <div className="flex items-center justify-center text-center min-w-32">
+                {item.acaPhone}
+              </div>
+              <div className="flex items-center justify-center text-center min-w-40">
+                {item.address}
+              </div>
+              <div className="flex items-center justify-center min-w-28">
+                {item.name}
+              </div>
+              <div className="flex items-center justify-center min-w-24">
+                <select
+                  className="p-1 border rounded-lg"
+                  onChange={e =>
+                    AcademyArrowChange(parseInt(e.target.value), item.acaId)
+                  }
+                >
+                  <option value={0}>승인대기</option>
+                  <option value={1}>승인완료</option>
+                  {/* <option value="2">승인거부</option> */}
+                </select>
+              </div>
+              <div className="flex gap-4 items-center justify-center min-w-16">
+                <button
+                  //onClick={e => DeleteAcademy(item.acaId)}
+                  onClick={() => handleAcademyDelete(item.acaId, item.userId)}
+                >
+                  <FaRegTrashAlt className="w-3 text-gray-400" />
+                </button>
               </div>
             </div>
-            <div className="flex items-center justify-center text-center w-40">
-              2025-02-24
-            </div>
-            <div className="flex items-center justify-center text-center w-52">
-              010-0000-0000
-            </div>
-            <div className="flex items-center justify-center text-center w-96">
-              대구광역시 수성구 범어로 100
-            </div>
-            <div className="flex items-center justify-center w-40">홍길동</div>
-            <div className="flex items-center justify-center w-40">
-              <select
-                className="p-1 border rounded-lg"
-                onChange={e => AcademyArrowChange(e)}
-              >
-                <option value="">선택</option>
-                <option value="0">승인대기</option>
-                <option value="1">승인완료</option>
-                <option value="2">승인거부</option>
-              </select>
-            </div>
-            <div className="flex gap-4 items-center justify-center w-36">
-              <button
-                //onClick={e => DeleteAcademy(item.acaId)}
-                onClick={() => handleAcademyDelete()}
-              >
-                <FaRegTrashAlt className="w-3 text-gray-400" />
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">

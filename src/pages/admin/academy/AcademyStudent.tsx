@@ -6,7 +6,23 @@ import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import { Cookies } from "react-cookie";
 
-interface academyStudentType {}
+interface studentListType {
+  userId: number;
+  userPic: string;
+  name: string;
+  phone: string;
+  birth: string;
+}
+
+interface classListType {
+  classId: number;
+  acaPics: string;
+  acaPic: string;
+  className: string;
+  startDate: string;
+  endDate: string;
+  name: string;
+}
 
 function AcademyStudent() {
   const [form] = Form.useForm();
@@ -14,12 +30,35 @@ function AcademyStudent() {
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [studentList, setStudentList] = useState([]);
+  const [studentList, setStudentList] = useState<studentListType[]>([]);
   const [academyInfo, setAcademyInfo] = useState("");
+  const [classList, setClassList] = useState<classListType[]>([]);
 
-  const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
+  const acaId = parseInt(searchParams.get("acaId") || "1", 0);
+  const classId = parseInt(searchParams.get("classId") || "1", 0);
+  const showCnt = parseInt(searchParams.get("showCnt") || "1", 30);
 
+  //강좌 목록
+  const academyClassList = async () => {
+    try {
+      const res = await axios.get(
+        `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1&size=${showCnt ? showCnt : 30}`,
+      );
+      setClassList(res.data.resultData);
+      console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData = classList.map(
+    ({ classId: value, className: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //수강생 목록
   const academyStudentList = async () => {
     try {
       const res = await axios.get(
@@ -44,7 +83,7 @@ function AcademyStudent() {
   };
 
   //학원 검색
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     console.log(values);
 
     // 쿼리 문자열로 변환
@@ -57,11 +96,12 @@ function AcademyStudent() {
   };
 
   useEffect(() => {
+    academyClassList();
     academyGetInfo();
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      classId: classId ? parseInt(classId) : "all",
+      classId: classId ? classId : "all",
       search: "",
       showCnt: 40,
     });
@@ -99,20 +139,7 @@ function AcademyStudent() {
                     className="select-admin-basic"
                     // onChange={onChange}
                     // onSearch={onSearch}
-                    options={[
-                      {
-                        value: "all",
-                        label: "전체",
-                      },
-                      {
-                        value: 301,
-                        label: "고등 영어",
-                      },
-                      {
-                        value: 302,
-                        label: "영어 문법 기초 강좌",
-                      },
-                    ]}
+                    options={simplifiedData}
                   />
                 </Form.Item>
                 <Form.Item name="search" className="mb-0">

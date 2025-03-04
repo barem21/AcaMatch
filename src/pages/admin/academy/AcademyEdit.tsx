@@ -167,7 +167,7 @@ function AcademyEdit() {
 
   const handleAddressSearch = () => {
     new window.daum.Postcode({
-      oncomplete: data => {
+      oncomplete: (data: any) => {
         form.setFieldsValue({ postNum: data.zonecode });
         form.setFieldsValue({ address: data.address });
       },
@@ -207,7 +207,7 @@ function AcademyEdit() {
   };
 
   //태그검색
-  const handleTagSearchForm = e => {
+  const handleTagSearchForm = (e: any) => {
     e.preventDefault();
 
     const tagSearch = async () => {
@@ -222,7 +222,7 @@ function AcademyEdit() {
   };
 
   //input 값 변경 처리
-  const handleChangeTag = e => {
+  const handleChangeTag = (e: any) => {
     setTagKeyword(e.target.value);
   };
 
@@ -259,6 +259,12 @@ function AcademyEdit() {
         comment: res.data.resultData.comment,
         teacherNum: res.data.resultData.teacherNum,
       });
+
+      const result = res.data.resultData.acaPic
+        .split(",")
+        .map(item => item.trim()); // 공백 제거
+
+      console.log(result);
 
       if (res.data.resultData.acaPic) {
         setFileList([

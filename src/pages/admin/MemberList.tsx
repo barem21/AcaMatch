@@ -2,14 +2,30 @@ import { Button, Form, Input, Pagination, Select } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../components/modal/Modal";
+import axios from "axios";
+
+interface memberListType {
+  birth: string;
+  createdAt: string;
+  email: string;
+  name: string;
+  nickName: string;
+  phone: string;
+  reportsCount: number;
+  updatedAt: string;
+  userId: number;
+  userPic: string;
+  userRole: number;
+}
 
 function MemberList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, _setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const [memberList, setMemberList] = useState<memberListType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const state = searchParams.get("state");
+  const state = parseInt(searchParams.get("state") || "1", 100);
 
   //회원삭제 팝업
   const handleButton1Click = () => {
@@ -19,8 +35,33 @@ function MemberList(): JSX.Element {
     setIsModalVisible(false);
   };
 
+  //학원 목록
+  const memberAllList = async () => {
+    try {
+      const res = await axios.get("/api/user/search");
+      setMemberList(res.data.resultData.content);
+      console.log(res.data.resultData.content);
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const onFinished = async (values: any) => {
     console.log(values);
+    try {
+      const res = await axios.get(
+        "/api/user/search" +
+          (values.state ? "?userRole=" + values.state : "") +
+          (values.search
+            ? (values.state ? "&" : "?") + "name=" + values.search
+            : ""),
+      );
+      setMemberList(res.data.resultData.content);
+      //console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
@@ -32,9 +73,11 @@ function MemberList(): JSX.Element {
   };
 
   useEffect(() => {
+    memberAllList();
+
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      state: state ? parseInt(state) : "all",
+      state: state ? state : "",
       search: "",
       showCnt: 40,
     });
@@ -45,7 +88,7 @@ function MemberList(): JSX.Element {
       <div className="w-full">
         <h1 className="title-admin-font">
           회원 관리
-          <p>회원 관리</p>
+          <p>회원 관리 &gt; 회원 목록</p>
         </h1>
 
         <div className="board-wrap">
@@ -64,23 +107,23 @@ function MemberList(): JSX.Element {
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: "all",
+                        value: "",
                         label: "전체",
                       },
                       {
-                        value: 0,
+                        value: 1,
                         label: "학생",
                       },
                       {
-                        value: 1,
+                        value: 2,
                         label: "학부모",
                       },
                       {
-                        value: 2,
+                        value: 3,
                         label: "학원 관계자",
                       },
                       {
-                        value: 3,
+                        value: 4,
                         label: "강사",
                       },
                     ]}
@@ -130,6 +173,7 @@ function MemberList(): JSX.Element {
             <div className="flex items-center justify-center w-full">
               회원명/아이디
             </div>
+            <div className="flex items-center justify-center w-40">닉네임</div>
             <div className="flex items-center justify-center w-40">
               회원유형
             </div>
@@ -137,46 +181,61 @@ function MemberList(): JSX.Element {
             <div className="flex items-center justify-center w-52">
               전화번호
             </div>
-            <div className="flex items-center justify-center w-96">주소</div>
-            <div className="flex items-center justify-center w-40">닉네임</div>
+            <div className="flex items-center justify-center w-52">
+              생년월일
+            </div>
             <div className="flex items-center justify-center w-36">
               신고횟수
             </div>
             {/*<div className="flex items-center justify-center w-36">관리</div>*/}
           </div>
 
-          <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
-            <div className="flex justify-start items-center w-full">
-              <div className="flex items-center gap-3 cursor-pointer">
-                <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                  <img
-                    src={"/aca_image_1.png"}
-                    className="max-w-fit max-h-full object-cover"
-                    alt=" /"
-                  />
-                </div>
-                <div>
-                  <h4>홍길동</h4>
-                  <p className="text-gray-500 text-[12px]">test@test.com</p>
+          {memberList?.map(item => (
+            <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
+              <div className="flex justify-start items-center w-full">
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={
+                        item.userPic
+                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.userPic}`
+                          : "/aca_image_1.png"
+                      }
+                      className="max-w-fit max-h-full object-cover"
+                      alt=" /"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{item.name}</h4>
+                    <p className="text-gray-500 text-[12px]">{item.email}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center justify-center text-center w-40">
-              학부모
-            </div>
-            <div className="flex items-center justify-center text-center w-40">
-              2025-01-01
-            </div>
-            <div className="flex items-center justify-center text-center w-52">
-              010-0000-0000
-            </div>
-            <div className="flex items-center justify-center text-center w-96">
-              대구광역시 수성구 범어로 100
-            </div>
-            <div className="flex items-center justify-center w-40">홍길동</div>
-            <div className="flex items-center justify-center w-36">3회</div>
+              <div className="flex items-center justify-center w-40">
+                {item.nickName}
+              </div>
+              <div className="flex items-center justify-center text-center w-40">
+                {item.userRole === 0 && "관리자"}
+                {item.userRole === 1 && "학생"}
+                {item.userRole === 2 && "학부모"}
+                {item.userRole === 3 && "학원 관계자"}
+                {item.userRole === 4 && "강사"}
+                {item.userRole === 5 && "??"}
+              </div>
+              <div className="flex items-center justify-center text-center w-40">
+                {item.createdAt.substr(0, 10)}
+              </div>
+              <div className="flex items-center justify-center text-center w-52">
+                {item.phone}
+              </div>
+              <div className="flex items-center justify-center text-center w-52">
+                {item.birth}
+              </div>
+              <div className="flex items-center justify-center w-36">
+                {item.reportsCount}회
+              </div>
 
-            {/*
+              {/*
             <div className="flex gap-4 items-center justify-center w-36">
               <button onClick={() => navigate(`../memberInfo?userId=0`)}>
                 <FaPen className="w-3 text-gray-400" />
@@ -186,7 +245,8 @@ function MemberList(): JSX.Element {
               </button>
             </div>
             */}
-          </div>
+            </div>
+          ))}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">
