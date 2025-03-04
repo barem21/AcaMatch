@@ -246,7 +246,7 @@ const AcademyDetail = () => {
   const [items, setItems] = useState([
     { label: "상세 학원정보", isActive: !reviewTab },
     { label: "수업정보", isActive: false },
-    { label: "후기", isActive: false },
+    { label: "후기 & 리뷰", isActive: false },
   ]);
 
   const checkIsAuthenticated = () => {
@@ -423,7 +423,7 @@ const AcademyDetail = () => {
     <div ref={scrollRef} className={styles.container}>
       <div className={styles.content.wrapper}>
         <div className={styles.header.wrapper}>
-          <h1 className={styles.header.title}>학원 상세보기</h1>
+          <h1 className={styles.header.title}>{academyData.acaName}</h1>
         </div>
 
         <div className={styles.tab.container}>
@@ -454,7 +454,7 @@ const AcademyDetail = () => {
               <div className={styles.content.image}>
                 {academyData.acaPic && (
                   <img
-                    src={`http://112.222.157.156:5223/pic/academy/${academyData.acaId}/${academyData.acaPic}`}
+                    src={`http://112.222.157.157:5233/pic/academy/${academyData.acaId}/${academyData.acaPic}`}
                     alt={academyData.acaName}
                     className="w-full h-full object-cover rounded-[12px]"
                     // onError={e => {

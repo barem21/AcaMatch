@@ -1,4 +1,4 @@
-import { Form, Pagination, Select, message } from "antd";
+import { Form, Pagination, Select, message, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -18,6 +18,8 @@ const BannerView = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [bannerList, setBannerList] = useState<BannerItem[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedBanner, setSelectedBanner] = useState<BannerItem | null>(null);
 
   const acaId = searchParams.get("acaId");
 
@@ -33,6 +35,21 @@ const BannerView = () => {
     } catch (error) {
       console.error("Error fetching banner list:", error);
       message.error("배너 목록을 불러오는데 실패했습니다.");
+    }
+  };
+
+  const handleBannerShowChange = async (banner: BannerItem, value: number) => {
+    try {
+      await jwtAxios.put(`/api/banner`, {
+        acaId: banner.acaId,
+        bannerPosition: banner.bannerPosition,
+        bannerShow: value,
+      });
+      message.success("배너 상태가 변경되었습니다.");
+      fetchBannerList(); // 변경 후 목록 갱신
+    } catch (error) {
+      console.error("Error updating banner show state:", error);
+      message.error("배너 상태 변경에 실패했습니다.");
     }
   };
 
@@ -54,6 +71,31 @@ const BannerView = () => {
     }
   };
 
+  const handleBannerClick = (banner: BannerItem) => {
+    setSelectedBanner(banner);
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setSelectedBanner(null);
+  };
+
+  const getBannerPositionFolder = (position: number) => {
+    switch (position) {
+      case 1:
+        return "top";
+      case 2:
+        return "bottom";
+      case 3:
+        return "left";
+      case 4:
+        return "right";
+      default:
+        return "etc";
+    }
+  };
+
   const getBannerPositionText = (position: number) => {
     switch (position) {
       case 1:
@@ -61,7 +103,7 @@ const BannerView = () => {
       case 2:
         return "중단 배너";
       case 3:
-        return "하단 배너";
+        return "좌측 배너";
       case 4:
         return "우측 배너";
       default:
@@ -101,9 +143,6 @@ const BannerView = () => {
             <div className="flex items-center justify-center w-[132px]">
               노출상태
             </div>
-            <div className="flex items-center justify-center w-[132px]">
-              수정하기
-            </div>
             <div className="flex items-center justify-center w-[72px]">
               삭제
             </div>
@@ -117,34 +156,35 @@ const BannerView = () => {
               <div className="flex justify-start items-center w-[75%] h-[56px]">
                 <div className="flex items-center gap-3">
                   <img
-                    src={`http://112.222.157.157:5233/pic/academy/${banner.acaId}/${banner.bannerPic}`}
+                    src={`http://112.222.157.157:5233/pic/banner/${banner.acaId}/${getBannerPositionFolder(banner.bannerPosition)}/${banner.bannerPic}`}
                     alt={`배너 ${getBannerPositionText(banner.bannerPosition)}`}
                     className="w-[56px] h-[56px] object-cover rounded-md"
                   />
                   <div>
-                    <h4>{getBannerPositionText(banner.bannerPosition)}</h4>
+                    <h4
+                      className="cursor-pointer hover:underline"
+                      onClick={() => handleBannerClick(banner)}
+                    >
+                      {getBannerPositionText(banner.bannerPosition)}
+                    </h4>
                   </div>
                 </div>
               </div>
+
+              {/* 노출 상태 드롭다운 */}
               <div className="flex items-center justify-center text-center w-[132px]">
-                <p
-                  className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center ${banner.bannerShow === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"}`}
-                >
-                  {banner.bannerShow === 1 ? "출력" : "미출력"}
-                </p>
+                <Select
+                  value={banner.bannerShow}
+                  className="w-[100px] h-[28px] text-center text-[10px] [&_.ant-select-selection-item]:text-[14px]"
+                  onChange={value => handleBannerShowChange(banner, value)}
+                  options={[
+                    { value: 1, label: "출력" },
+                    { value: 0, label: "미출력" },
+                  ]}
+                />
               </div>
-              <div className="flex items-center justify-center w-[132px]">
-                <p
-                  className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/admin/banner-content/edit?acaId=${banner.acaId}&position=${banner.bannerPosition}`,
-                    )
-                  }
-                >
-                  수정하기
-                </p>
-              </div>
+
+              {/* 삭제 버튼 */}
               <div className="flex gap-4 items-center justify-center w-[72px]">
                 <button onClick={() => handleDelete(banner.bannerPosition)}>
                   <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
@@ -154,6 +194,29 @@ const BannerView = () => {
           ))}
         </div>
       </div>
+
+      {/* 모달: 선택한 배너 이미지 크게 보기 */}
+      <Modal
+        visible={isModalVisible}
+        title="배너 이미지 보기"
+        footer={null}
+        onCancel={handleModalClose}
+        centered
+        getContainer={false}
+      >
+        {selectedBanner && (
+          <div className="flex flex-col items-center">
+            <img
+              src={`http://112.222.157.157:5233/pic/banner/${selectedBanner.acaId}/${getBannerPositionFolder(selectedBanner.bannerPosition)}/${selectedBanner.bannerPic}`}
+              alt="배너 이미지"
+              className="max-w-full max-h-[600px] object-contain"
+            />
+            <p className="mt-4">
+              {getBannerPositionText(selectedBanner.bannerPosition)}
+            </p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
