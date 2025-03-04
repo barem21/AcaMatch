@@ -5,6 +5,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayjs from "dayjs";
 import { useMemo } from "react";
 import { AcademyData } from "./types";
+import { EventApi } from "@fullcalendar/core";
 
 const CalendarContainer = styled.div`
   .fc .fc-toolbar-title {
@@ -77,6 +78,10 @@ interface AcademyCalendarProps {
   academyData: AcademyData | null;
 }
 
+interface EventModalProps {
+  event: EventApi;
+}
+
 const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
   const colorPalette = [
     "#3b77d8", // 메인 컬러
@@ -122,13 +127,13 @@ const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
       };
     });
 
-    // 3개 이상의 이벤트가 있는 날짜에 대한 처리
-    const eventsByDate = events.reduce((acc: any, event) => {
-      const date = event.start;
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(event);
-      return acc;
-    }, {});
+    // // 3개 이상의 이벤트가 있는 날짜에 대한 처리
+    // const eventsByDate = events.reduce((acc: any, event) => {
+    //   const date = event.start;
+    //   if (!acc[date]) acc[date] = [];
+    //   acc[date].push(event);
+    //   return acc;
+    // }, {});
 
     // Object.entries(eventsByDate).forEach(
     //   ([date, dateEvents]: [string, any[]]) => {
@@ -190,7 +195,6 @@ const AcademyCalendar = ({ academyData }: AcademyCalendarProps) => {
         eventContent={eventInfo => <EventContent eventInfo={eventInfo} />}
         dayMaxEvents={2}
         height="auto"
-        allDaySlot={true}
         slotEventOverlap={false}
         displayEventTime={false}
       />

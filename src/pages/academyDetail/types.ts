@@ -58,6 +58,14 @@ export interface AcademyData {
   addressDto: AddressDto;
   classes: Class[];
   reviews: Review[];
+  books?: {
+    bookId: number;
+    bookName: string;
+    bookWriter: string;
+    bookPublisher: string;
+    bookPrice: number;
+    bookPic?: string;
+  }[];
 }
 export interface MapPosition {
   lat: number;

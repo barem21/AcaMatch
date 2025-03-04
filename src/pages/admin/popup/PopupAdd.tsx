@@ -1,7 +1,7 @@
 import { Form, Button, Input, message, Upload, DatePicker, Radio } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import jwtAxios from "../../apis/jwt";
+import jwtAxios from "../../../apis/jwt";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import styled from "@emotion/styled";
@@ -16,6 +16,17 @@ interface PopupDetail {
   comment?: string;
   popUpPic?: string;
   sumCount: number;
+}
+
+// 팝업 데이터 인터페이스 정의
+interface PopupFormData {
+  popUpId: number;
+  title: string;
+  popUpShow: number;
+  popUpType: number;
+  startDate: string;
+  endDate: string;
+  comment?: string; // 선택적 필드로 추가
 }
 
 const StyledForm = styled(Form)`
@@ -153,7 +164,7 @@ const PopupAdd = () => {
     try {
       const formData = new FormData();
 
-      const popupData = {
+      const popupData: { p: PopupFormData } = {
         p: {
           popUpId: popupId ? parseInt(popupId) : 0,
           title: values.title,
@@ -339,7 +350,7 @@ const PopupAdd = () => {
                   }
                   return true;
                 }}
-                customRequest={({ file, onSuccess }) => {
+                customRequest={({ onSuccess }) => {
                   setTimeout(() => {
                     onSuccess?.("ok");
                   }, 0);

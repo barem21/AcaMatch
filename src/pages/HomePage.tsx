@@ -36,6 +36,16 @@ interface Tag {
   tagName: string;
 }
 
+interface Banner {
+  acaId: number;
+  acaName: string;
+  bannerId: number;
+  bannerUrl: string;
+  bannerShow: number;
+  bannerPosition: number;
+  bannerPic: string;
+}
+
 // const usedRandomNumbers = new Set<number>();
 
 // const getRandomUniqueNumber = () => {
@@ -56,6 +66,7 @@ function HomePage() {
   const navigate = useNavigate();
 
   const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   // const [isDefaultLoading, setIsDefaultLoading] = useState(true);
 
   // const [loading, setLoading] = useState(true); // 로딩 상태 추가
@@ -109,6 +120,43 @@ function HomePage() {
   const handleAcademyClick = (acaId: number) => {
     navigate(`/academy/detail?id=${acaId}&page=1&size=10`);
   };
+
+  const getBannerPositionFolder = (position: number) => {
+    switch (position) {
+      case 1:
+        return "top";
+      case 2:
+        return "bottom";
+      case 3:
+        return "left";
+      case 4:
+        return "right";
+      default:
+        return "etc";
+    }
+  };
+
+  // 배너 데이터 가져오기
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const response = await axios.get("/api/banner/all");
+
+        // bottom(2) 위치의 배너만 필터링
+        const filteredBanners = response.data.resultData.filter(
+          (banner: Banner) =>
+            banner.bannerShow === 1 &&
+            getBannerPositionFolder(banner.bannerPosition) === "bottom",
+        );
+
+        setBanners(filteredBanners);
+      } catch (error) {
+        console.error("Error fetching banners:", error);
+      }
+    };
+
+    fetchBanners();
+  }, []);
 
   useEffect(() => {
     const fetchDefaultAcademies = async () => {
@@ -229,26 +277,6 @@ function HomePage() {
     fetchData();
   }, []);
 
-  // const SkeletonCard = () => (
-  //   <div className="flex flex-col gap-4">
-  //     <Skeleton.Image
-  //       active
-  //       style={{
-  //         width: "100%",
-  //         height: "224px", // h-56과 동일
-  //         borderRadius: "12px",
-  //       }}
-  //     />
-  //     <div className="flex flex-col gap-3">
-  //       <Skeleton.Input active style={{ width: "60%" }} />
-  //       <div className="flex flex-col gap-1">
-  //         <Skeleton.Input active size="small" style={{ width: "80%" }} />
-  //         <Skeleton.Input active size="small" style={{ width: "40%" }} />
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <div className="flex flex-col w-full items-center px-4 py-[36px] gap-8 mx-auto">
       {/* 메인 베너 */}
@@ -368,7 +396,6 @@ function HomePage() {
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
           slidesPerView={1}
-          // navigation
           pagination={{ clickable: true }}
           autoplay={{
             delay: 3000,
@@ -377,6 +404,23 @@ function HomePage() {
           loop={true}
           className="rounded-xl"
         >
+          {banners.length > 0 ? (
+            banners.map(banner => (
+              <SwiperSlide key={banner.bannerId}>
+                <img
+                  src={`http://112.222.157.157:5233/pic/banner/${banner.acaId}/bottom/${banner.bannerPic}`}
+                  alt="banner"
+                  className="w-full h-[200px] bg-gray-300 rounded-xl object-cover"
+                />
+              </SwiperSlide>
+            ))
+          ) : (
+            <SwiperSlide>
+              <div className="w-full h-[200px] bg-gray-300 rounded-xl flex items-center justify-center">
+                <p className="text-white">등록된 배너가 없습니다.</p>
+              </div>
+            </SwiperSlide>
+          )}
           <SwiperSlide>
             {/* <div className="w-full h-[200px] bg-blue-500 rounded-xl"></div> */}
             <img
@@ -391,9 +435,6 @@ function HomePage() {
               alt="main_banner"
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="w-full h-[200px] bg-green-500 rounded-xl"></div>
           </SwiperSlide>
         </Swiper>
       </div>

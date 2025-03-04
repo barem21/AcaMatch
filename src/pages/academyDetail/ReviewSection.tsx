@@ -7,7 +7,6 @@ import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
 import ReviewModal from "../../components/modal/ReviewModal";
 import { AcademyClass, Review } from "./types"; // types.ts에서 Review 타입을 임포트
-import { AiFillStar } from "react-icons/ai";
 
 interface ReviewSectionProps {
   star: number;

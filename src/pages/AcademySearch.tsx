@@ -117,6 +117,7 @@ interface Academy {
   address: string;
   star: string;
   totalCount: string;
+  premium: string;
 }
 
 const AcademySearch = () => {
@@ -711,7 +712,9 @@ const AcademySearch = () => {
                   </div>
                   <div className="flex items-center p-4 w-full text-start">
                     <span className="text-[14px] text-brand-default">
-                      {academy.acaName}
+                      {Number(academy.premium) === 1
+                        ? `(유료)${academy.acaName} `
+                        : academy.acaName}
                     </span>
                   </div>
                   <div className="flex min-w-[15%] items-center p-4">

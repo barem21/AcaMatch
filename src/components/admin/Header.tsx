@@ -160,7 +160,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
 
   const logOut = async () => {
     try {
-      const res = await jwtAxios.post("/api/user/log-out", {});
+      await jwtAxios.post("/api/user/log-out", {});
       //console.log(res);
       removeCookie("accessToken");
       removeCookie("message");

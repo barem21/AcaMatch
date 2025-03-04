@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { Select, Form, message, Checkbox } from "antd";
-import FullCalendar from "@fullcalendar/react";
+import koLocale from "@fullcalendar/core/locales/ko";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import koLocale from "@fullcalendar/core/locales/ko";
-import userInfo from "../../../atoms/userInfo";
-import jwtAxios from "../../../apis/jwt";
+import FullCalendar from "@fullcalendar/react";
+import { Checkbox, Form, message, Select } from "antd";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import jwtAxios from "../../../apis/jwt";
 
 interface BoardItem {
   boardId: number;
@@ -27,10 +25,10 @@ interface Event {
 
 const CheckIn = () => {
   const [form] = Form.useForm();
-  const { userId } = useRecoilValue(userInfo);
-  const [boardList, setBoardList] = useState<BoardItem[]>([]);
+  // const { userId } = useRecoilValue(userInfo);
+  const [boardList, _setBoardList] = useState<BoardItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
-  const [selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
+  const [_selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
   const [checkedList, setCheckedList] = useState<number[]>([]);
 
   // 현재 날짜 기준으로 해당 월의 시작일과 종료일 계산
@@ -98,7 +96,8 @@ const CheckIn = () => {
   };
   const handleAcademyChange = (value: number) => {
     setSelectedAcademy(value);
-    fetchAttendanceData(value);
+    fetchAttendanceData();
+    // fetchAttendanceData(value);
   };
 
   // const handleDateClick = async (info: any) => {

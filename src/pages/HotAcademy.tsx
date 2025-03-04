@@ -35,7 +35,7 @@ function HotAcademy() {
     if (pic === "default.jpg" || pic === undefined || pic === null) {
       return `/default_academy${getRandomUniqueNumber()}.jpg`;
     }
-    return `http://112.222.157.156:5223/pic/academy/${acaId}/${pic}`;
+    return `http://112.222.157.157:5233/pic/academy/${acaId}/${pic}`;
   };
 
   const titleName = "학원목록";

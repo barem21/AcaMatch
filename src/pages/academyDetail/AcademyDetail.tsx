@@ -578,7 +578,7 @@ const AcademyDetail = () => {
               </div>
 
               {/* 책 목록 섹션 추가 */}
-              <BookList books={academyData.books} />
+              <BookList books={academyData?.books || []} />
 
               <div className={styles.section.title}>찾아 오시는 길</div>
               <div className={styles.section.map}>

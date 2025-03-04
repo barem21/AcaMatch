@@ -1,7 +1,7 @@
-import { Form, Pagination, Select, message, Modal } from "antd";
+import { Form, message, Modal, Select } from "antd";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
 
 interface BannerItem {
@@ -15,7 +15,7 @@ interface BannerItem {
 
 const BannerView = () => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [bannerList, setBannerList] = useState<BannerItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
