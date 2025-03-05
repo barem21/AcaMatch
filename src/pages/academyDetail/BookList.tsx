@@ -1,26 +1,27 @@
-import { Input, message, Pagination } from "antd";
+import { message, Pagination } from "antd";
 import DOMPurify from "dompurify";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
-import CustomModal from "../../components/modal/Modal";
-import { useRecoilState, useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
-import { useSearchParams } from "react-router-dom";
+import CustomModal from "../../components/modal/Modal";
 
 // Book 인터페이스 수정
 interface Book {
   bookId: number;
   bookName: string;
-  bookAmount: number;
-  bookComment: string;
-  bookPic: string;
+  bookWriter: string;
+  bookPublisher: string;
   bookPrice: number;
-  manager: string;
-  classId: number; // 클래스 ID 추가
+  bookPic?: string;
+  bookAmount?: number; // 선택적 필드로 변경
+  bookComment?: string; // 선택적 필드로 변경
+  manager?: string; // 선택적 필드로 변경
+  classId?: number; // 선택적 필드로 변경
 }
 
 interface BookListProps {
-  books?: Book[];
+  books: Book[];
   classes?: { classId: number; className: string }[];
 }
 
@@ -28,12 +29,12 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isPaymentMode, setIsPaymentMode] = useState(false);
-  const [buyerName, setBuyerName] = useState("");
-  const [buyerEmail, setBuyerEmail] = useState("");
+  const [_isPaymentMode, setIsPaymentMode] = useState(false);
+  // const [buyerName, setBuyerName] = useState("");
+  // const [buyerEmail, setBuyerEmail] = useState("");
   const currentUserInfo = useRecoilValue(userInfo);
   const pageSize = 5;
-  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [selectedClassId, _setSelectedClassId] = useState<number | null>(null);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
 
   // 클래스별 교재 필터링
@@ -71,9 +72,6 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
     }
 
     try {
-      // 현재 도메인의 success 경로를 리다이렉트 URL로 설정
-      const redirectUrl = `${window.location.origin}/success`;
-
       const response = await jwtAxios.post("/api/payment/ready", {
         products: [
           {
@@ -83,15 +81,18 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
         ],
         userId: currentUserInfo.userId,
         joinClassId: selectedBook.classId,
-        redirectUrl: redirectUrl, // 리다이렉트 URL 추가
       });
 
       if (response.data.resultData.next_redirect_pc_url) {
-        localStorage.setItem("paymentTid", response.data.resultData.tid);
+        const tid = response.data.resultData.tid;
+
+        // 카카오페이 결제 후 리다이렉트될 URL에 tid를 쿼리스트링으로 포함
+        const successUrl = `${window.location.origin}/success?tid=${encodeURIComponent(tid)}`;
 
         // 결제 창 열기
-        const paymentWindow = window.open(
-          response.data.resultData.next_redirect_pc_url,
+        window.open(
+          response.data.resultData.next_redirect_pc_url +
+            `&redirect_url=${encodeURIComponent(successUrl)}`,
           "KakaoPayment",
           "width=800,height=800",
         );
@@ -113,7 +114,7 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
     const pgToken = urlParams.get("pg_token");
 
     if (pgToken) {
-      const tid = localStorage.getItem("paymentTid");
+      // const tid = localStorage.getItem("paymentTid");
 
       // 결제 완료 처리
       const completePayment = async () => {
@@ -124,7 +125,7 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
           });
 
           message.success("결제가 완료되었습니다.");
-          localStorage.removeItem("paymentTid"); // tid 삭제
+          // localStorage.removeItem("paymentTid"); // tid 삭제
           // 필요한 경우 페이지 리디렉션
         } catch (error) {
           console.error("Error during payment completion:", error);

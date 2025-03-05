@@ -7,8 +7,10 @@ interface FooterProps {
 const Footer: React.FC<FooterProps> = ({ className }) => {
   return (
     <div className={className}>
-      Copyright © 2025 [AcaMatch]. 완벽한 아카데미를 찾는 신뢰할 수 있는
-      파트너.
+      <span className="text-[12px] max-[640px]:max-w-[330px]">
+        Copyright © 2025 [AcaMatch]. 완벽한 아카데미를 찾는 신뢰할 수 있는
+        파트너.
+      </span>
     </div>
   );
 };

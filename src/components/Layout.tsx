@@ -256,7 +256,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <main>{children}</main>
           )}
           {isLayoutVisible && !isAdminPage && (
-            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
+            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px] " />
           )}
           <ScrollButton onScrollToTop={handleScrollToTop} />
         </div>

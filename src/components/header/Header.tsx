@@ -9,6 +9,7 @@ import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import { getCookie, removeCookie, setCookie } from "../../utils/cookie";
 import MainButton from "../button/MainButton";
+import { GiHamburgerMenu } from "react-icons/gi";
 
 const SecondaryButton = styled(MainButton)`
   &:hover {
@@ -179,7 +180,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   };
   return (
     <header className={className}>
-      <div className="w-[1280px] max-[640px]:w-[360px] flex items-center justify-between mx-auto">
+      <div className="w-[1280px] max-[640px]:w-[360px] max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
         <img
           src="/logo2.png"
           className="w-[160px] cursor-pointer mr-[full]"
@@ -281,7 +282,9 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             )}
           </div>
         </div>
-        <button>≡</button>
+        <button className="min-[640px]:hidden">
+          <GiHamburgerMenu size={24} /> {/* 크기는 필요에 따라 조절 가능 */}
+        </button>
       </div>
     </header>
   );

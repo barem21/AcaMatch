@@ -139,6 +139,7 @@ function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/fe/redirect" element={<SignupSnsPage />} />
               <Route path="/signup/end" element={<SignupEnd />} />
+              <Route path="/success" element={<PaymentSuccess />} />
               {/* <Route path="/ai" element={<AI />} /> */}
               <Route path="/mypage">
                 <Route index element={<MyPage />} />
