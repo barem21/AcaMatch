@@ -9,7 +9,9 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const completePayment = async () => {
       const pgToken = searchParams.get("pg_token");
-      const tid = localStorage.getItem("paymentTid");
+      const tid = searchParams.get("tid");
+
+      console.log("Payment tokens:", { pgToken, tid });
 
       if (!pgToken || !tid) {
         message.error("결제 정보가 올바르지 않습니다.");
@@ -24,11 +26,6 @@ const PaymentSuccess = () => {
 
         if (response.data.resultMessage === "결제 성공") {
           message.success("결제가 완료되었습니다!");
-
-          // localStorage 정리
-          localStorage.removeItem("paymentTid");
-
-          // 창 닫기
           window.close();
         }
       } catch (error) {

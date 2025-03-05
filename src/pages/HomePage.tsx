@@ -484,6 +484,13 @@ function HomePage() {
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />
           </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="/test1.png"
+              alt="main_banner"
+              className="w-full h-[200px] bg-blue-500 rounded-xl"
+            />
+          </SwiperSlide>
         </Swiper>
       </div>
 
