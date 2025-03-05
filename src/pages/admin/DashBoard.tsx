@@ -130,6 +130,13 @@ interface BoardItem {
   totalCount: number;
 }
 
+// Add interface for API response
+interface CostInfo {
+  costCount: number;
+  sumFee: number;
+  saleRate: number;
+}
+
 function DashBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedItem, setSelectedItem] = useState<DataKey>(
@@ -152,11 +159,28 @@ function DashBoard() {
         100,
     ) * 100;
   const { userId } = useRecoilValue(userInfo);
+  const [statsInfo, setStatsInfo] = useState<CostInfo>({
+    costCount: 0,
+    sumFee: 0,
+    saleRate: 0,
+  });
 
   const statsData = [
-    { id: 1, value: "₩1,200,000", label: "이번주 판매금액" },
-    { id: 2, value: "85건", label: "결제 완료건 수" },
-    { id: 3, value: "72%", label: "판매율" },
+    {
+      id: 1,
+      value: `₩${statsInfo.sumFee.toLocaleString()}`,
+      label: "이번주 판매금액",
+    },
+    {
+      id: 2,
+      value: `${statsInfo.costCount}건`,
+      label: "결제 완료건 수",
+    },
+    {
+      id: 3,
+      value: `${(statsInfo.saleRate * 100).toFixed(1)}%`,
+      label: "판매율",
+    },
   ];
 
   useEffect(() => {
@@ -260,6 +284,24 @@ function DashBoard() {
     console.log("차트 데이터:", pieData);
 
     setSelectedData(selectedData.filter(data => data.id === "학원수"));
+  }, []);
+
+  // Add function to fetch cost info
+  const fetchCostInfo = async () => {
+    try {
+      const response = await jwtAxios.get(
+        "/api/academyCost/getAcademyCostInfoByMonth",
+      );
+      const { resultData } = response.data;
+      setStatsInfo(resultData);
+    } catch (error) {
+      console.error("Error fetching cost info:", error);
+    }
+  };
+
+  // Add useEffect to fetch cost info
+  useEffect(() => {
+    fetchCostInfo();
   }, []);
 
   return (

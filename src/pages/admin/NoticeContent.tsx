@@ -199,55 +199,61 @@ const NoticeContent = () => {
             </div>
           </div>
 
-          {boardList.map(item => (
-            <div
-              key={item.boardId}
-              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
-            >
-              <div className="flex justify-start items-center w-[100%] h-[56px]">
-                <div className="flex items-center gap-3 cursor-pointer">
-                  <div
+          {boardList && boardList.length > 0 ? (
+            boardList.map(item => (
+              <div
+                key={item.boardId}
+                className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+              >
+                <div className="flex justify-start items-center w-[100%] h-[56px]">
+                  <div className="flex items-center gap-3 cursor-pointer">
+                    <div
+                      onClick={() =>
+                        navigate(
+                          `/admin/notice-content/view?boardId=${item.boardId}`,
+                        )
+                      }
+                    >
+                      <h4>{item?.boardName}</h4>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center text-center min-w-[200px]">
+                  {item.createdAt}
+                </div>
+                <div className="flex items-center justify-center text-center min-w-[200px]">
+                  {item.name}
+                </div>
+                <div className="flex items-center justify-center min-w-[132px]">
+                  <p
+                    className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
                     onClick={() =>
                       navigate(
-                        `/admin/notice-content/view?boardId=${item.boardId}`,
+                        `/admin/notice-content/add?boardId=${item.boardId}`,
                       )
                     }
                   >
-                    <h4>{item?.boardName}</h4>
-                  </div>
+                    수정하기
+                  </p>
+                </div>
+                <div className="flex gap-4 items-center justify-center min-w-[72px]">
+                  <button
+                    onClick={() => {
+                      if (window.confirm("정말 삭제하시겠습니까?")) {
+                        handleDelete(item.boardId);
+                      }
+                    }}
+                  >
+                    <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center justify-center text-center min-w-[200px]">
-                {item.createdAt}
-              </div>
-              <div className="flex items-center justify-center text-center min-w-[200px]">
-                {item.name}
-              </div>
-              <div className="flex items-center justify-center min-w-[132px]">
-                <p
-                  className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/admin/notice-content/add?boardId=${item.boardId}`,
-                    )
-                  }
-                >
-                  수정하기
-                </p>
-              </div>
-              <div className="flex gap-4 items-center justify-center min-w-[72px]">
-                <button
-                  onClick={() => {
-                    if (window.confirm("정말 삭제하시겠습니까?")) {
-                      handleDelete(item.boardId);
-                    }
-                  }}
-                >
-                  <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
-                </button>
-              </div>
+            ))
+          ) : (
+            <div className="flex justify-center items-center h-[56px] border-b">
+              등록된 공지사항이 없습니다.
             </div>
-          ))}
+          )}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">

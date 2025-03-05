@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { message } from "antd";
 import jwtAxios from "../../apis/jwt";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -9,25 +10,25 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const completePayment = async () => {
       const pgToken = searchParams.get("pg_token");
-      const tid = searchParams.get("tid");
+      const Tid = localStorage.getItem("paymentTid"); // localStorage에서 tid 가져오기
 
-      console.log("Payment tokens:", { pgToken, tid });
+      console.log("Payment tokens:", { pgToken, Tid });
 
-      if (!pgToken || !tid) {
+      if (!pgToken || !Tid) {
         message.error("결제 정보가 올바르지 않습니다.");
         return;
       }
 
       try {
-        const response = await jwtAxios.post("/api/payment/success", {
-          pg_token: pgToken,
-          tid: tid,
-        });
+        const response = await axios.post(
+          `/api/payment/success?pg_token=${pgToken}&TId=${Tid}`,
+        );
 
-        if (response.data.resultMessage === "결제 성공") {
-          message.success("결제가 완료되었습니다!");
-          window.close();
-        }
+        // if (response.data.resultMessage === "결제 성공") {
+        message.success("결제가 완료되었습니다!");
+        localStorage.removeItem("paymentTid"); // tid 삭제
+        // window.close();
+        // }
       } catch (error) {
         console.error("Payment completion error:", error);
         message.error("결제 완료 처리 중 오류가 발생했습니다.");

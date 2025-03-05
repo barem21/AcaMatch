@@ -133,43 +133,49 @@ const BannerContent = () => {
             </div>
           </div>
 
-          {premiumAcademies.map(academy => (
-            <div
-              key={academy.acaId}
-              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
-            >
-              <div className="flex justify-start items-center w-[100%] h-[56px]">
-                <div className="flex items-center gap-3 cursor-pointer">
-                  <div>
-                    <h4>{academy.acaName}</h4>
+          {premiumAcademies && premiumAcademies.length > 0 ? (
+            premiumAcademies.map(academy => (
+              <div
+                key={academy.acaId}
+                className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+              >
+                <div className="flex justify-start items-center w-[100%] h-[56px]">
+                  <div className="flex items-center gap-3 cursor-pointer">
+                    <div>
+                      <h4>{academy.acaName}</h4>
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center justify-center text-center w-[200px]">
+                  {academy.startDate}
+                </div>
+                <div className="flex items-center justify-center text-center w-[200px]">
+                  {academy.endDate}
+                </div>
+                <div className="flex items-center justify-center w-[132px]">
+                  <p
+                    className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
+                    onClick={() =>
+                      navigate(
+                        `/admin/banner-content/view?acaId=${academy.acaId}`,
+                      )
+                    }
+                  >
+                    상세보기
+                  </p>
+                </div>
+                <div className="flex gap-4 items-center justify-center w-[72px]">
+                  <button onClick={() => handleDelete(academy.acaId)}>
+                    <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center justify-center text-center w-[200px]">
-                {academy.startDate}
-              </div>
-              <div className="flex items-center justify-center text-center w-[200px]">
-                {academy.endDate}
-              </div>
-              <div className="flex items-center justify-center w-[132px]">
-                <p
-                  className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/admin/banner-content/view?acaId=${academy.acaId}`,
-                    )
-                  }
-                >
-                  상세보기
-                </p>
-              </div>
-              <div className="flex gap-4 items-center justify-center w-[72px]">
-                <button onClick={() => handleDelete(academy.acaId)}>
-                  <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
-                </button>
-              </div>
+            ))
+          ) : (
+            <div className="flex justify-center items-center h-[56px] border-b">
+              등록된 배너가 없습니다.
             </div>
-          ))}
+          )}
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">

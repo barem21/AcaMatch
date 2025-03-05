@@ -1,27 +1,26 @@
-import { message, Pagination } from "antd";
+import { Input, message, Pagination } from "antd";
 import DOMPurify from "dompurify";
-import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useState, useEffect } from "react";
 import jwtAxios from "../../apis/jwt";
-import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
+import { useRecoilState, useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
+import { useSearchParams } from "react-router-dom";
 
 // Book 인터페이스 수정
 interface Book {
   bookId: number;
   bookName: string;
-  bookWriter: string;
-  bookPublisher: string;
+  bookAmount: number;
+  bookComment: string;
+  bookPic: string;
   bookPrice: number;
-  bookPic?: string;
-  bookAmount?: number; // 선택적 필드로 변경
-  bookComment?: string; // 선택적 필드로 변경
-  manager?: string; // 선택적 필드로 변경
-  classId?: number; // 선택적 필드로 변경
+  manager: string;
+  classId: number; // 클래스 ID 추가
 }
 
 interface BookListProps {
-  books: Book[];
+  books?: Book[];
   classes?: { classId: number; className: string }[];
 }
 
@@ -29,12 +28,12 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [_isPaymentMode, setIsPaymentMode] = useState(false);
-  // const [buyerName, setBuyerName] = useState("");
-  // const [buyerEmail, setBuyerEmail] = useState("");
+  const [isPaymentMode, setIsPaymentMode] = useState(false);
+  const [buyerName, setBuyerName] = useState("");
+  const [buyerEmail, setBuyerEmail] = useState("");
   const currentUserInfo = useRecoilValue(userInfo);
   const pageSize = 5;
-  const [selectedClassId, _setSelectedClassId] = useState<number | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
 
   // 클래스별 교재 필터링
@@ -84,15 +83,9 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
       });
 
       if (response.data.resultData.next_redirect_pc_url) {
-        const tid = response.data.resultData.tid;
-
-        // 카카오페이 결제 후 리다이렉트될 URL에 tid를 쿼리스트링으로 포함
-        const successUrl = `${window.location.origin}/success?tid=${encodeURIComponent(tid)}`;
-
         // 결제 창 열기
         window.open(
-          response.data.resultData.next_redirect_pc_url +
-            `&redirect_url=${encodeURIComponent(successUrl)}`,
+          response.data.resultData.next_redirect_pc_url,
           "KakaoPayment",
           "width=800,height=800",
         );
@@ -114,7 +107,7 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
     const pgToken = urlParams.get("pg_token");
 
     if (pgToken) {
-      // const tid = localStorage.getItem("paymentTid");
+      const tid = localStorage.getItem("paymentTid");
 
       // 결제 완료 처리
       const completePayment = async () => {
@@ -125,7 +118,7 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
           });
 
           message.success("결제가 완료되었습니다.");
-          // localStorage.removeItem("paymentTid"); // tid 삭제
+          localStorage.removeItem("paymentTid"); // tid 삭제
           // 필요한 경우 페이지 리디렉션
         } catch (error) {
           console.error("Error during payment completion:", error);
