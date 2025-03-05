@@ -71,7 +71,7 @@ function AcademyTestList() {
     setIsModalVisible(false);
   };
   const handleButton2Click = () => {
-    const subjectName = form.getFieldValue("subjectName");
+    const subjectName = form.getFieldValue("examName");
 
     if (!subjectName) {
       message.error("시험제목을 입력해 주세요.");
@@ -121,9 +121,10 @@ function AcademyTestList() {
 
   //전송하기
   const onFinished = async values => {
+    console.log(values);
+
     values.classId = parseInt(classId);
-    const res = await axios.post("/api/subject", values);
-    //console.log(res.data);
+    const res = await axios.post("/api/exam", values);
     if (res.data.resultData === 1) {
       form.resetFields(); //초기화
       setIsModal2Visible(true);
@@ -298,7 +299,7 @@ function AcademyTestList() {
                     <img
                       src={
                         item.acaPic
-                          ? `http://112.222.157.157:5223/pic/academy/${acaId}/${item.acaPic}`
+                          ? `http://112.222.157.157:5233/pic/academy/${acaId}/${item.acaPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
@@ -306,13 +307,13 @@ function AcademyTestList() {
                     />
                   </div>
                   <div>
-                    <h4 className="font-bold">{item.subjectName}</h4>
+                    <h4 className="font-bold">{item.examName}</h4>
                     {/* <p className="text-sm text-gray-500">[채점방식 : 점수]</p> */}
                   </div>
                 </div>
               </div>
               <div className="flex items-center justify-center w-60">
-                {item.examDate}
+                {item.examDate ? item.examDate : "-"}
               </div>
               <div className="flex items-center justify-center w-60">
                 {item.processingStatus === 0 ? "채점 전" : "채점 완료"}
@@ -322,7 +323,7 @@ function AcademyTestList() {
                   className="small_line_button"
                   onClick={() =>
                     navigate(
-                      `../academy/record?acaId=${acaId}&classId=${classId}&subjectId=${item.subjectId}`,
+                      `../academy/record?acaId=${acaId}&classId=${classId}&examId=${item.examId}`,
                     )
                   }
                 >
@@ -352,7 +353,7 @@ function AcademyTestList() {
                 onFinish={values => onFinished(values)}
               >
                 <Form.Item
-                  name="scoreType"
+                  name="examType"
                   label="채점 방식"
                   rules={[
                     { required: true, message: "채점 방식을 선택해 주세요." },
@@ -375,7 +376,7 @@ function AcademyTestList() {
 
                 <div className="flex w-full mt-3">
                   <Form.Item
-                    name="subjectName"
+                    name="examName"
                     className="w-full"
                     rules={[
                       { required: true, message: "시험 제목을 입력해 주세요." },
@@ -388,7 +389,6 @@ function AcademyTestList() {
                   </Form.Item>
                 </div>
 
-                {/*
                 <div className="flex w-full gap-3 justify-between">
                   <Form.Item>
                     <Button
@@ -408,7 +408,6 @@ function AcademyTestList() {
                     </Button>
                   </Form.Item>
                 </div>
-                */}
               </Form>
             </AddTest>
           }

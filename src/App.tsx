@@ -44,12 +44,12 @@ import AcademyArrow from "./pages/admin/academy/AcademyArrow";
 import AcademyClassAdd from "./pages/admin/academy/AcademyClassAdd";
 import AcademyClassEdit from "./pages/admin/academy/AcademyClassEdit";
 import AcademyClassList from "./pages/admin/academy/AcademyClassList";
-// import AcademyEdit from "./pages/admin/academy/AcademyEdit";
+import AcademyEdit from "./pages/admin/academy/AcademyEdit";
 import AcademyList from "./pages/admin/academy/AcademyList";
 import AcademyPremium from "./pages/admin/academy/AcademyPremium";
 import AcademyPremiumReq from "./pages/admin/academy/AcademyPremiumReq";
 import AcademyRecord from "./pages/admin/academy/AcademyRecord";
-// import AcademyStudent from "./pages/admin/academy/AcademyStudent";
+import AcademyStudent from "./pages/admin/academy/AcademyStudent";
 import AcademyTestList from "./pages/admin/academy/AcademyTestList";
 import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
 import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
@@ -169,7 +169,7 @@ function App() {
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
-                <Route path="memberInfo" element={<MemberInfo />} />
+                {/* <Route path="memberInfo" element={<MemberInfo />} /> */}
                 <Route path="profile" element={<MemberInfo />} />
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentanager" element={<Paymentanager />} />
@@ -188,14 +188,14 @@ function App() {
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/arrow" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
-                {/* <Route path="academy/edit" element={<AcademyEdit />} /> */}
+                <Route path="academy/edit" element={<AcademyEdit />} />
                 <Route path="academy/class" element={<AcademyClassList />} />
                 <Route path="academy/classAdd" element={<AcademyClassAdd />} />
                 <Route
                   path="academy/classEdit"
                   element={<AcademyClassEdit />}
                 />
-                {/* <Route path="academy/student" element={<AcademyStudent />} /> */}
+                <Route path="academy/student" element={<AcademyStudent />} />
                 <Route path="academy/testList" element={<AcademyTestList />} />
                 <Route path="academy/record" element={<AcademyRecord />} />
                 <Route path="academy/premium" element={<AcademyPremium />} />

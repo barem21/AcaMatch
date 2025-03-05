@@ -96,7 +96,7 @@ function Inquiry() {
                     <img
                       src={
                         academy.userPic
-                          ? `http://112.222.157.156:5223/pic/user/${academy.userId}/${academy.userPic}`
+                          ? `http://112.222.157.157:5233/pic/user/${academy.userId}/${academy.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
@@ -105,7 +105,7 @@ function Inquiry() {
                   </div>
                 </div>
                 <div
-                  className="flex items-center p-4 w-full text-start cursor-pointer"
+                  className="flex items-center p-4 pl-0 w-full text-start cursor-pointer"
                   onClick={e =>
                     navigate(
                       `/support/inquiry/detail?acaId=${academy.acaId}&userId=${academy.userId}`,

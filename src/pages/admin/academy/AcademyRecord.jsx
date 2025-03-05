@@ -52,7 +52,7 @@ function AcademyRecord() {
   const navigate = useNavigate();
   const acaId = searchParams.get("acaId");
   const classId = searchParams.get("classId");
-  const subjectId = searchParams.get("subjectId");
+  const examId = searchParams.get("examId");
 
   const RecordList = styled.div`
     .editModal button {
@@ -239,10 +239,10 @@ function AcademyRecord() {
   const academyStudentList = async () => {
     try {
       const res = await axios.get(
-        `/api/grade/gradeUser?acaId=${acaId}&joinClassId=${classId}&subjectId=${subjectId}`,
+        `/api/grade/status?acaId=${acaId}&classId=${classId}&examId=${examId}`,
       );
       setTestStudentList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -553,11 +553,11 @@ function AcademyRecord() {
                     />
                   </div>
 
-                  {item.userName}
+                  {item.studentName}
                 </div>
               </div>
               <div className="flex items-center justify-center w-40">
-                {item.examDate}
+                {item.examDate ? item.examDate : "-"}
               </div>
               <div className="flex items-center justify-center w-40">
                 {item.pass !== null

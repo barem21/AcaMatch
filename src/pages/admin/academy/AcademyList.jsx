@@ -81,15 +81,13 @@ function AcademyList() {
 
   //학원 검색
   const onFinished = async values => {
-    //console.log(values);
-
     //학원 목록
     try {
       if (currentUserInfo.roleId === 0) {
         //전체 관리자일 때
         const res = await jwtAxios.get(
           "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
-            (search !== null ? "?acaName=" + values.search : ""),
+            (values.search !== null ? "?acaName=" + values.search : ""),
         );
         setMyAcademyList(res.data.resultData);
         console.log("admin : ", res.data.resultData);
@@ -239,7 +237,7 @@ function AcademyList() {
               승인
             </div> */}
             <div className="flex items-center justify-center min-w-24">
-              강좌 관리
+              강의관리
             </div>
             <div className="flex items-center justify-center min-w-24">
               관리
@@ -298,7 +296,7 @@ function AcademyList() {
                     navigate(`../academy/class?acaId=${item.acaId}`)
                   }
                 >
-                  강좌 관리
+                  강의관리
                 </button>
               </div>
               {/* <div className="flex items-center justify-center min-w-24">

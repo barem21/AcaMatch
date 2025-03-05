@@ -211,7 +211,7 @@ function MyPageUserInfo() {
           uid: "1",
           name: editMember.userPic,
           status: "done",
-          url: `http://112.222.157.156:5223/pic/user/${editMember.userId}/${editMember.userPic}`,
+          url: `http://112.222.157.157:5233/pic/user/${editMember.userId}/${editMember.userPic}`,
         },
       ]);
     }
