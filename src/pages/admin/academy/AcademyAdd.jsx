@@ -131,8 +131,8 @@ function AcademyAdd() {
   const [academyKeyword, setAcademyKeyword] = useState(""); //학원검색 키워드
   const [searchAcademyResult, setSearchAcademyResult] = useState([]); //학원검색 결과
   const [fileList, setFileList] = useState([]);
-  const [fileList2, setFileList2] = useState([]);
-  const [fileList3, setFileList3] = useState([]);
+  //const [fileList2, setFileList2] = useState("");
+  //const [fileList3, setFileList3] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentUserInfo = useRecoilValue(userInfo);
@@ -225,7 +225,7 @@ function AcademyAdd() {
           type="checkbox"
           id={`checkbox-${item.tagId}`}
           checked={selectedItems.includes(item.tagId)}
-          onChange={() => handleCheckbox2Change(item.tagName)}
+          onChange={() => handleCheckbox2Change(item.tagId)}
         />
         <label htmlFor={`checkbox-${item.tagId}`}>{item.tagName}</label>
       </div>
@@ -234,6 +234,7 @@ function AcademyAdd() {
 
   //첨부파일 처리
   const handleChange = info => {
+    /*
     let newFileList = [...info.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
@@ -250,44 +251,51 @@ function AcademyAdd() {
       console.log("파일 선택됨:", info.file.originFileObj);
       form.setFieldValue("pics", info.file.originFileObj);
     }
+    */
+
+    const newFileList = [...info.fileList];
+    setFileList(newFileList);
+
+    //form.setFieldValue("pics", info.file.originFileObj);
+    form.setFieldValue(
+      "pics",
+      newFileList.map(file => file.originFileObj),
+    );
   };
 
   //사업자등록증 파일 처리
   const handle1Change = info2 => {
-    let newFileList2 = [...info2.fileList];
-
+    //const newFileList2 = [...info2.fileList];
     // maxCount로 인해 하나의 파일만 유지
-    newFileList2 = newFileList2.slice(-1);
-
+    //newFileList2 = newFileList2.slice(-1);
     // 파일 상태 업데이트
-    setFileList2(newFileList2);
-
-    console.log("파일 선택됨:", info2.file.originFileObj);
+    //setFileList2(newFileList2);
+    //console.log("파일 선택됨:", info2.file.originFileObj);
     form.setFieldValue("businessLicensePic", info2.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info2.file.status === "done" && info2.file.originFileObj) {
-      console.log("파일 선택됨:", info2.file.originFileObj);
+      //console.log("파일 선택됨:", info2.file.originFileObj);
       form.setFieldValue("businessLicensePic", info2.file.originFileObj);
     }
   };
 
   //학원등록증 파일 처리
   const handle2Change = info3 => {
-    let newFileList3 = [...info3.fileList];
+    //let newFileList3 = [...info3.fileList];
 
     // maxCount로 인해 하나의 파일만 유지
-    newFileList3 = newFileList3.slice(-1);
+    //newFileList3 = newFileList3.slice(-1);
 
     // 파일 상태 업데이트
-    setFileList3(newFileList3);
+    //setFileList3(newFileList3);
 
-    console.log("파일 선택됨:", info3.file.originFileObj);
+    //console.log("파일 선택됨:", info3.file.originFileObj);
     form.setFieldValue("operationLicensePic", info3.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info3.file.status === "done" && info3.file.originFileObj) {
-      console.log("파일 선택됨:", info3.file.originFileObj);
+      //console.log("파일 선택됨:", info3.file.originFileObj);
       form.setFieldValue("operationLicensePic", info3.file.originFileObj);
     }
   };
@@ -349,6 +357,7 @@ function AcademyAdd() {
   };
 
   const onFinished = async values => {
+    const picsCount = values.pics.length;
     console.log(values);
 
     if (isSubmitting) return; // 이미 제출 중이면 추가 제출을 막음
@@ -361,7 +370,11 @@ function AcademyAdd() {
 
       // pic이 있는 경우에만 추가
       if (values.pics) {
-        formData.append("pics", values.pics);
+        //formData.append("pics", values.pics);
+        // pic이 있는 경우에만 추가
+        for (let i = 0; i < picsCount; i++) {
+          formData.append("pics", values.pics[i]);
+        }
       }
       if (values.businessLicensePic) {
         formData.append("businessLicensePic", values.businessLicensePic);
@@ -382,7 +395,9 @@ function AcademyAdd() {
         address: values.address,
         detailAddress: values.detailAddress,
         postNum: values.postNum,
-        tagNameList: ["미술"], //selectedItems.map(item => parseInt(item, 10)),
+        tagNameList: values.userTag
+          ? values.userTag
+          : selectedItems.map(item => parseInt(item, 10)),
         businessName: values.businessName,
         businessNumber: values.businessNumber,
         corporateNumber: values.corporateNumber,
@@ -597,12 +612,11 @@ function AcademyAdd() {
               </Form.Item>
 
               <div className="flex gap-3 w-full">
-                <Form.Item label="태그 등록" className="w-full">
+                <Form.Item label="태그 등록" name="userTag" className="w-full">
                   <Input
                     className="input-admin-basic"
-                    placeholder="태그를 선택해 주세요."
-                    onClick={() => handleTagSearch()}
-                    readOnly
+                    placeholder="태그를 입력해 주세요."
+                    //onClick={() => handleTagSearch()}
                   />
                 </Form.Item>
 
@@ -616,6 +630,32 @@ function AcademyAdd() {
                   </button>
                 </Form.Item>
               </div>
+
+              {selectedItems && (
+                <div className="w-full pl-32 pb-6">
+                  <ul className="flex flex-wrap gap-5">
+                    {selectedItems.map(value => {
+                      const selectedTags = tagList.find(
+                        option => option.tagId === value,
+                      );
+                      return (
+                        <li
+                          key={value}
+                          className="flex justify-center items-center"
+                        >
+                          {selectedTags.tagName}
+                          <button
+                            onClick={() => handleRemoveItem(value)}
+                            className="size-5 ml-2 border border-gray-300 rounded-full text-xs"
+                          >
+                            &times;
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
 
               <Form.Item
                 name="businessName"
@@ -658,32 +698,6 @@ function AcademyAdd() {
                   placeholder="법인번호를 입력해 주세요."
                 />
               </Form.Item>
-
-              {selectedItems && (
-                <div className="w-full pl-32 pb-6">
-                  <ul className="flex flex-wrap gap-5">
-                    {selectedItems.map(value => {
-                      const selectedTags = tagList.find(
-                        option => option.tagId === value,
-                      );
-                      return (
-                        <li
-                          key={value}
-                          className="flex justify-center items-center"
-                        >
-                          {selectedTags.tagName}
-                          <button
-                            onClick={() => handleRemoveItem(value)}
-                            className="size-5 ml-2 border border-gray-300 rounded-full text-xs"
-                          >
-                            &times;
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
 
               <Form.Item
                 name="businessLicensePic"
@@ -764,6 +778,7 @@ function AcademyAdd() {
               <Form.Item name="pics" label="학원 이미지">
                 <div>
                   <Upload
+                    multiple
                     listType="picture-card"
                     maxCount={5}
                     onChange={handleChange}

@@ -204,11 +204,11 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
         link: "/admin/academy",
         active: false,
       },
-      {
-        label: "강의 관리",
-        link: "/admin/academy/class",
-        active: false,
-      },
+      // {
+      //   label: "강의 관리",
+      //   link: "/admin/academy/class",
+      //   active: false,
+      // },
     ],
   },
   {
@@ -225,7 +225,7 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
       },
       {
         label: "회원 정보",
-        link: "/admin/member/info",
+        link: "/admin/profile",
         active: false,
       },
     ],

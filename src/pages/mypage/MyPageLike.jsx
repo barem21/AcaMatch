@@ -182,19 +182,21 @@ function MyPageLike() {
             >
               <div className="w-full flex justify-start items-center">
                 <div
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
                 >
-                  <img
-                    className="h-[60px] w-[60px] rounded-[20px]"
-                    src={`http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`}
-                    onError={e => {
-                      const target = e.target;
-                      const randomNum = getRandomUniqueNumber();
-                      target.src = `/default_academy${randomNum}.jpg`;
-                    }}
-                    alt=""
-                  />
+                  <div className="flex align-middle justify-center h-[60px] w-[60px] rounded-[20px] overflow-hidden">
+                    <img
+                      className="w-full object-cover"
+                      src={`http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`}
+                      onError={e => {
+                        const target = e.target;
+                        const randomNum = getRandomUniqueNumber();
+                        target.src = `/default_academy${randomNum}.jpg`;
+                      }}
+                      alt=""
+                    />
+                  </div>
                   {item.acaName}
                 </div>
               </div>

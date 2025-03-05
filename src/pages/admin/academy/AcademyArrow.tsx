@@ -2,7 +2,7 @@ import { Button, Form, Input, Pagination, Select } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../../components/modal/Modal";
 import jwtAxios from "../../../apis/jwt";
 
@@ -25,15 +25,20 @@ function AcademyArrow(): JSX.Element {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
+  const [searchParams] = useSearchParams();
+
+  const search = searchParams.get("search");
+  //const showCnt = searchParams.get("showCnt");
 
   //미승인 학원 목록
   const academyList = async () => {
     try {
       const res = await axios.get(
-        `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree?acaAgree=0`,
+        "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree?acaAgree=0" +
+          (search !== null ? "&acaName=" + search : ""),
       );
       setMyAcademyList(res.data.resultData);
-      console.log("admin : ", res.data.resultData);
+      //console.log("admin : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -59,7 +64,15 @@ function AcademyArrow(): JSX.Element {
 
   //학원 검색
   const onFinished = async (values: any) => {
-    console.log(values);
+    try {
+      const res = await jwtAxios.get(
+        "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree?acaAgree=0" +
+          (values.search !== null ? "&acaName=" + values.search : ""),
+      );
+      setMyAcademyList(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
@@ -209,7 +222,7 @@ function AcademyArrow(): JSX.Element {
               등록 대기중인 학원이 없습니다.
             </div>
           )}
-          {myAcademyList.length === 0 && (
+          {myAcademyList?.length === 0 && (
             <div className=" flex justify-center align-middle p-2 border-b">
               등록 대기중인 학원이 없습니다.
             </div>
@@ -223,7 +236,7 @@ function AcademyArrow(): JSX.Element {
                     <img
                       src={
                         item.acaPic
-                          ? `http://http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
+                          ? `http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"

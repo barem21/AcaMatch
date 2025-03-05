@@ -52,9 +52,7 @@ const StyledForm = styled(Form)`
 
   .ant-form-item {
     margin-bottom: 0;
-    padding-top: 12px;
-    padding-bottom: 24px;
-    min-height: 100px;
+    padding: 15px 0px;
     position: relative;
   }
 
@@ -233,175 +231,178 @@ const PopupAdd = () => {
   };
 
   return (
-    <div className="flex flex-col flex-1 p-8 bg-white rounded-lg gap-4">
-      <div className="flex justify-between items-center pb-3 border-b">
-        <h3>{popupId ? "팝업 수정" : "팝업 등록"}</h3>
-      </div>
+    <div className="flex gap-5 w-full justify-center pb-10">
+      <div className="w-full">
+        <h1 className="title-admin-font">
+          {popupId ? "팝업 수정" : "팝업 등록"}
+          <p>공지 및 콘텐츠 관리 &gt; {popupId ? "팝업 수정" : "팝업 등록"}</p>
+        </h1>
 
-      <div className="flex flex-col flex-1">
-        <StyledForm form={form} onFinish={values => onFinished(values)}>
-          <Form.Item
-            name="title"
-            label="제목"
-            rules={[{ required: true, message: "제목을 입력해 주세요." }]}
-            className="[&_.ant-form-item-control-input-content_.input-wrap]:flex 
+        <div className="max-w-3xl p-1 pl-6 pr-6 border rounded-md">
+          <StyledForm form={form} onFinish={values => onFinished(values)}>
+            <Form.Item
+              name="title"
+              label="제목"
+              rules={[{ required: true, message: "제목을 입력해 주세요." }]}
+              className="[&_.ant-form-item-control-input-content_.input-wrap]:flex 
                        [&_.ant-form-item-control-input-content_.input-wrap]:justify-start 
                        [&_.ant-form-item-control-input-content_.input-wrap]:gap-[15px] 
                        [&_.ant-form-item-control-input-content_.input-wrap]:items-center pl-0 border-b"
-          >
-            <Input
-              className="h-[32px] rounded-[4px] input-admin-basic"
-              placeholder="제목을 입력해 주세요."
-            />
-          </Form.Item>
-
-          <div className="flex gap-[12px] border-b py-3">
-            <Form.Item
-              name="startDate"
-              label="시작일"
-              rules={[{ required: true, message: "시작일을 선택해 주세요." }]}
             >
-              <DatePicker className="w-full [&_.ant-picker]:p-0 [&_.ant-picker]:px-[11px]" />
-            </Form.Item>
-
-            <Form.Item
-              name="endDate"
-              label="종료일"
-              rules={[{ required: true, message: "종료일을 선택해 주세요." }]}
-            >
-              <DatePicker className="w-full [&_.ant-picker]:p-0 [&_.ant-picker]:px-[11px]" />
-            </Form.Item>
-          </div>
-
-          <Form.Item
-            name="registrationType"
-            label="등록방식"
-            rules={[{ required: true }]}
-            className="pl-0 pr-0 border-b"
-          >
-            <Radio.Group
-              onChange={e => setRegistrationType(e.target.value)}
-              className="[&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
-                         [&_.ant-radio-wrapper_span]:text-[13px]"
-            >
-              <Radio value="image" className="w-[100px]">
-                이미지 첨부
-              </Radio>
-              <Radio value="direct">직접 입력</Radio>
-            </Radio.Group>
-          </Form.Item>
-
-          <Form.Item
-            name="popUpType"
-            label="팝업 대상"
-            rules={[{ required: true }]}
-            className="pl-0 pr-0 border-b"
-          >
-            <Radio.Group
-              className="[&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
-                         [&_.ant-radio-wrapper_span]:text-[13px]"
-            >
-              <Radio value={0} className="w-[100px]">
-                일반회원
-              </Radio>
-              <Radio value={1}>학원관계자</Radio>
-            </Radio.Group>
-          </Form.Item>
-
-          <Form.Item
-            name="popUpShow"
-            label="출력상태"
-            rules={[{ required: true }]}
-            className="pl-0 pr-0 border-b"
-          >
-            <Radio.Group
-              className="[&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
-                         [&_.ant-radio-wrapper_span]:text-[13px] "
-            >
-              <Radio value={1} className="w-[100px] ">
-                출력
-              </Radio>
-              <Radio value={0}>미출력</Radio>
-            </Radio.Group>
-          </Form.Item>
-
-          {registrationType === "image" && (
-            <Form.Item
-              name="popupImage"
-              label="팝업 이미지"
-              rules={[
-                {
-                  required: !popupId || !fileList[0]?.url, // 신규 등록이거나 기존 이미지가 없을 때만 필수
-                  message: "이미지를 업로드해 주세요.",
-                },
-              ]}
-              className="py-3"
-            >
-              <Upload
-                listType="picture-card"
-                maxCount={1}
-                fileList={fileList}
-                onChange={handleChange}
-                beforeUpload={file => {
-                  const isImage = file.type.startsWith("image/");
-                  if (!isImage) {
-                    message.error("이미지 파일만 업로드 가능합니다!");
-                    return false;
-                  }
-                  return true;
-                }}
-                customRequest={({ onSuccess }) => {
-                  setTimeout(() => {
-                    onSuccess?.("ok");
-                  }, 0);
-                }}
-                className="[&_.ant-upload-list-item]:border [&_.ant-upload-list-item]:border-[#3b77d8] [&_.ant-form-item]:pb-[12px]"
-              >
-                {fileList.length < 1 && (
-                  <button type="button" className="border-0 bg-transparent">
-                    <PlusOutlined />
-                    <div className="mt-2">Upload</div>
-                  </button>
-                )}
-              </Upload>
-            </Form.Item>
-          )}
-
-          {registrationType === "direct" && (
-            <Form.Item
-              name="content"
-              label="팝업 내용"
-              rules={[{ required: true, message: "내용을 입력해 주세요." }]}
-              className="py-3"
-            >
-              <Input.TextArea
-                className="p-[15px] input-admin-basic w-full"
-                rows={6}
-                placeholder="팝업 내용을 입력해 주세요."
+              <Input
+                className="h-[32px] rounded-[4px] input-admin-basic"
+                placeholder="제목을 입력해 주세요."
               />
             </Form.Item>
-          )}
 
-          <div className="flex justify-end border-t gap-3">
-            <div className="flex items-center">
-              <button
-                type="button"
-                className="btn-admin-cancel pt-[12px]"
-                onClick={() => navigate(-1)}
+            <div className="flex gap-[12px] border-b py-3">
+              <Form.Item
+                name="startDate"
+                label="시작일"
+                rules={[{ required: true, message: "시작일을 선택해 주세요." }]}
               >
-                취소하기
-              </button>
+                <DatePicker className="w-full [&_.ant-picker]:p-0 [&_.ant-picker]:px-[11px]" />
+              </Form.Item>
+
+              <Form.Item
+                name="endDate"
+                label="종료일"
+                rules={[{ required: true, message: "종료일을 선택해 주세요." }]}
+              >
+                <DatePicker className="w-full [&_.ant-picker]:p-0 [&_.ant-picker]:px-[11px]" />
+              </Form.Item>
             </div>
-            <Form.Item className="flex items-center pt-[0] ">
-              <Button
-                htmlType="submit"
-                className="btn-admin-ok [&_.ant-form-item]:p-0 "
+
+            <Form.Item
+              name="popUpType"
+              label="팝업 대상"
+              rules={[{ required: true }]}
+              className="pl-0 pr-0 border-b"
+            >
+              <Radio.Group
+                className="[&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
+                         [&_.ant-radio-wrapper_span]:text-[13px]"
               >
-                {popupId ? "수정하기" : "등록하기"}
-              </Button>
+                <Radio value={0} className="w-[100px]">
+                  일반회원
+                </Radio>
+                <Radio value={1}>학원관계자</Radio>
+              </Radio.Group>
             </Form.Item>
-          </div>
-        </StyledForm>
+
+            <Form.Item
+              name="popUpShow"
+              label="출력상태"
+              rules={[{ required: true }]}
+              className="pl-0 pr-0 border-b"
+            >
+              <Radio.Group
+                className="[&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
+                         [&_.ant-radio-wrapper_span]:text-[13px] "
+              >
+                <Radio value={1} className="w-[100px] ">
+                  출력
+                </Radio>
+                <Radio value={0}>미출력</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            <Form.Item
+              name="registrationType"
+              label="등록방식"
+              rules={[{ required: true }]}
+              className="pl-0 pr-0 border-b"
+            >
+              <Radio.Group
+                onChange={e => setRegistrationType(e.target.value)}
+                className="[&_.ant-radio-wrapper]:text-[#676d9c] [&_.ant-radio-wrapper]:mr-5
+             [&_.ant-radio-wrapper_span]:text-[13px]"
+              >
+                <Radio value="image" className="w-[100px]">
+                  이미지 첨부
+                </Radio>
+                <Radio value="direct">직접 입력</Radio>
+              </Radio.Group>
+            </Form.Item>
+
+            {registrationType === "image" && (
+              <Form.Item
+                name="popupImage"
+                label="팝업 이미지"
+                rules={[
+                  {
+                    required: !popupId || !fileList[0]?.url, // 신규 등록이거나 기존 이미지가 없을 때만 필수
+                    message: "이미지를 업로드해 주세요.",
+                  },
+                ]}
+                className="py-3"
+              >
+                <Upload
+                  listType="picture-card"
+                  maxCount={1}
+                  fileList={fileList}
+                  onChange={handleChange}
+                  beforeUpload={file => {
+                    const isImage = file.type.startsWith("image/");
+                    if (!isImage) {
+                      message.error("이미지 파일만 업로드 가능합니다!");
+                      return false;
+                    }
+                    return true;
+                  }}
+                  customRequest={({ onSuccess }) => {
+                    setTimeout(() => {
+                      onSuccess?.("ok");
+                    }, 0);
+                  }}
+                  className="[&_.ant-upload-list-item]:border [&_.ant-upload-list-item]:border-[#3b77d8] [&_.ant-form-item]:pb-[12px]"
+                >
+                  {fileList.length < 1 && (
+                    <button type="button" className="border-0 bg-transparent">
+                      <PlusOutlined />
+                      <div className="mt-2">Upload</div>
+                    </button>
+                  )}
+                </Upload>
+              </Form.Item>
+            )}
+
+            {registrationType === "direct" && (
+              <Form.Item
+                name="content"
+                label="팝업 내용"
+                rules={[{ required: true, message: "내용을 입력해 주세요." }]}
+                className="py-3"
+              >
+                <Input.TextArea
+                  className="p-[15px] input-admin-basic w-full"
+                  rows={6}
+                  placeholder="팝업 내용을 입력해 주세요."
+                />
+              </Form.Item>
+            )}
+
+            <div className="flex justify-end border-t gap-3">
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  className="btn-admin-cancel pt-[12px]"
+                  onClick={() => navigate(-1)}
+                >
+                  취소하기
+                </button>
+              </div>
+              <Form.Item className="flex items-center pt-[0] ">
+                <Button
+                  htmlType="submit"
+                  className="btn-admin-ok [&_.ant-form-item]:p-0 "
+                >
+                  {popupId ? "수정하기" : "등록하기"}
+                </Button>
+              </Form.Item>
+            </div>
+          </StyledForm>
+        </div>
       </div>
     </div>
   );
