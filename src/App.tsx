@@ -54,6 +54,8 @@ import AcademyTestList from "./pages/admin/academy/AcademyTestList";
 import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
 import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
+import AcademyLike from "./pages/admin/academy/AcademyLike";
+import AcademyReview from "./pages/admin/academy/AcademyReview";
 import BannerView from "./pages/admin/BannerView.tsx";
 import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
@@ -194,6 +196,8 @@ function App() {
                   path="academy/classEdit"
                   element={<AcademyClassEdit />}
                 />
+                <Route path="academy/like" element={<AcademyLike />} />
+                <Route path="academy/review" element={<AcademyReview />} />
                 <Route path="academy/student" element={<AcademyStudent />} />
                 <Route path="academy/testList" element={<AcademyTestList />} />
                 <Route path="academy/record" element={<AcademyRecord />} />

@@ -343,7 +343,7 @@ function AcademyEdit() {
           detailAddress: values.detailAddress,
           postNum: values.postNum,
         },
-        tagNameList: selectedItems.map(item => parseInt(item, 10)),
+        tagNameList: selectedItems,
         //tagIdList: [1, 3],
       };
 
