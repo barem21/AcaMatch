@@ -9,8 +9,9 @@ import {
   Select,
   Upload,
   Radio,
+  UploadProps,
 } from "antd";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
@@ -20,39 +21,57 @@ import CustomModal from "../../../components/modal/Modal";
 import AI from "../../../components/AI";
 import { Cookies } from "react-cookie";
 
+interface aiHistoryType {
+  feedBack: string;
+  createdAt: string;
+}
+
+interface testStudentList {
+  userId: number;
+  userPic: string;
+  userName: string;
+  joinClassId: number;
+  gradeId: number;
+  examName: string;
+  examDate: string;
+  examType: number;
+  score: number;
+  pass: number;
+}
+
 function AcademyRecord() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [form3] = Form.useForm();
   const currentUserInfo = useRecoilValue(userInfo);
-  const [testStudentList, setTestStudentList] = useState([]);
-  const [testGradeId, setTestGradeId] = useState();
-  const [testRecord, setTestRecord] = useState();
-  const [testPass, setTestPass] = useState();
-  const [joinClassId, setJoinClassId] = useState();
-  const [scoreType, setScoreType] = useState(0);
+  const [testStudentList, setTestStudentList] = useState<testStudentList[]>([]);
+  const [testGradeId, setTestGradeId] = useState<number>(0);
+  const [_testRecord, setTestRecord] = useState<number | null>(null);
+  const [_testPass, setTestPass] = useState<number | null>(null);
+  const [joinClassId, setJoinClassId] = useState<number>(0);
+  const [scoreType, setScoreType] = useState<number>(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const [isModalVisible4, setIsModalVisible4] = useState(false);
   const [isModalVisible5, setIsModalVisible5] = useState(false); //ai 성적분석 팝업창
   const [isModalVisible6, setIsModalVisible6] = useState(false);
-  const [isModalVisible7, setIsModalVisible7] = useState(false);
+  const [_isModalVisible7, setIsModalVisible7] = useState(false);
   const [isModalVisible8, setIsModalVisible8] = useState(false);
   const [isModalVisible9, setIsModalVisible9] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [academyInfo, setAcademyInfo] = useState();
-  const [aiHistoryList, setaiHistoryList] = useState([]);
+  const [aiHistoryList, _setaiHistoryList] = useState<aiHistoryType[]>([]);
   const [myAcademyTestList, setMyAcademyTestList] = useState([]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
 
   const navigate = useNavigate();
-  const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
-  const examId = searchParams.get("examId");
+  const acaId = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId = parseInt(searchParams.get("classId") || "0", 0);
+  const examId: number = parseInt(searchParams.get("examId") || "0", 0);
 
   const RecordList = styled.div`
     .editModal button {
@@ -99,7 +118,7 @@ function AcademyRecord() {
 
   //수강생 목록 다운로드(엑셀)
   const handle2Button2Click = async () => {
-    const res = await axios.get(`/api/grade/export?subjectId=${subjectId}`);
+    const res = await axios.get(`/api/grade/export?subjectId=${examId}`);
     if (res.data.resultData) {
       window.open(res.data.resultData);
     }
@@ -139,17 +158,21 @@ function AcademyRecord() {
     form2.resetFields(); //초기화
     setIsModalVisible6(false);
   };
+  /*
   const handle6Button2Click = () => {
     setIsModalVisible6(false);
   };
+  */
 
   //점수 등록결과 관련
+  /*
   const handle7Button1Click = () => {
     setIsModalVisible7(false);
   };
   const handle7Button2Click = () => {
     setIsModalVisible7(false);
   };
+  */
 
   //AI 성적분석 내역 관련
   const handle8Button1Click = () => {
@@ -168,11 +191,16 @@ function AcademyRecord() {
   };
 
   //점수 수정하기 모달창 오픈
-  const handleRecordEdit = (gradeId, score, pass, scoreType) => {
+  const handleRecordEdit = (
+    gradeId: number,
+    score: number,
+    pass: number,
+    examType: number,
+  ) => {
     setTestGradeId(gradeId);
     setTestRecord(score);
     setTestPass(pass);
-    setScoreType(scoreType);
+    setScoreType(examType);
 
     form.setFieldsValue({
       record: pass ? null : score,
@@ -182,25 +210,26 @@ function AcademyRecord() {
   };
 
   //점수 등록하기 모달창 오픈
-  const handleRecordAdd = (joinId, scoreType) => {
+  const handleRecordAdd = (joinId: number, examType: number) => {
     setJoinClassId(joinId);
-    setScoreType(scoreType);
+    setScoreType(examType);
     form2.setFieldsValue({
-      record: scoreType === 0 && 0,
-      pass: scoreType === 1 && 1,
+      record: examType === 0 && 0,
+      pass: examType === 1 && 1,
     });
     setIsModalVisible6(true);
   };
 
   //AI 성적분석 모달창 오픈
-  const handleRecordAI = gradeId => {
+  const handleRecordAI = (gradeId: number) => {
     setTestGradeId(gradeId);
 
     setIsModalVisible5(true);
   };
 
   //AI 분석내역 모달창 오픈
-  const handleHistoryAI = async gradeId => {
+  /*
+  const handleHistoryAI = async (gradeId: number) => {
     setTestGradeId(gradeId);
     setIsModalVisible8(true);
 
@@ -213,6 +242,7 @@ function AcademyRecord() {
       console.log(error);
     }
   };
+  */
 
   //수강생 다운로드 모달창 오픈
   const handleStudentDownload = () => {
@@ -239,7 +269,7 @@ function AcademyRecord() {
   const academyStudentList = async () => {
     try {
       const res = await axios.get(
-        `/api/grade/status?acaId=${acaId}&classId=${classId}&examId=${examId}`,
+        `/api/grade/gradeDetail?examId=${examId}&page=1&size=30`,
       );
       setTestStudentList(res.data.resultData);
       console.log(res.data.resultData);
@@ -249,26 +279,12 @@ function AcademyRecord() {
   };
 
   //첨부파일 처리
-  const handleChange = info => {
-    let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
-
-    // 파일 상태 업데이트
-    setFileList(newFileList);
-
+  const handleChange: UploadProps["onChange"] = (info: any) => {
     form.setFieldValue("gradeFile", info.file.originFileObj);
-
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info.file.status === "done" && info.file.originFileObj) {
-      //console.log("파일 선택됨:", info.file.originFileObj);
-      //form.setFieldValue("gradeFile", info.file.originFileObj);
-    }
   };
 
   //점수 직접 등록하기
-  const onFinishedTh = async values => {
+  const onFinishedTh = async (values: any) => {
     //console.log(values);
 
     //오늘 날짜 확인
@@ -280,9 +296,9 @@ function AcademyRecord() {
 
     const datas = {
       joinClassId: joinClassId,
-      subjectId: subjectId,
+      examId: examId,
       score: parseInt(values.record),
-      pass: values.pass,
+      pass: values.pass ? values.pass : 0,
       examDate: dateString,
       processingStatus: 1,
     };
@@ -296,7 +312,7 @@ function AcademyRecord() {
   };
 
   //점수 직접 수정하기
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     //console.log(values);
 
     //오늘 날짜 확인
@@ -324,7 +340,7 @@ function AcademyRecord() {
   };
 
   //엑셀 일괄 수정하기
-  const onFinishedSe = async values => {
+  const onFinishedSe = async (values: any) => {
     //console.log(values.gradeFile);
     try {
       const formData = new FormData();
@@ -351,7 +367,7 @@ function AcademyRecord() {
         setIsModalVisible3(false);
         academyStudentList();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       //console.log(error.response.data.resultMessage);
 
       form.resetFields(); //초기화
@@ -360,16 +376,18 @@ function AcademyRecord() {
 
       //academyStudentList();
 
-      const errorMessage = error.response.data.resultMessage; //에러 메시지
-      if (errorMessage.includes("엑셀 파일이 아닙니다")) {
-        setErrorMessage(
-          "엑셀 파일(.xlsx)이 아닙니다. 올바른 파일을 선택해주세요.",
-        );
-      }
-      if (errorMessage.includes("DB 수정 중 오류 발생")) {
-        setErrorMessage(
-          "양식에 맞지 않은 데이터가 포함되어 있습니다. 양식에 맞춰서 엑셀 파일을 작성해 주세요.",
-        );
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data.resultMessage; //에러 메시지
+        if (errorMessage.includes("엑셀 파일이 아닙니다")) {
+          setErrorMessage(
+            "엑셀 파일(.xlsx)이 아닙니다. 올바른 파일을 선택해주세요.",
+          );
+        }
+        if (errorMessage.includes("DB 수정 중 오류 발생")) {
+          setErrorMessage(
+            "양식에 맞지 않은 데이터가 포함되어 있습니다. 양식에 맞춰서 엑셀 파일을 작성해 주세요.",
+          );
+        }
       }
 
       //message.error(error.response.data.resultMessage);
@@ -377,7 +395,7 @@ function AcademyRecord() {
   };
 
   //학원 검색
-  const onFinishedFo = async values => {
+  const onFinishedFo = async (values: any) => {
     console.log(values);
 
     // 쿼리 문자열로 변환
@@ -394,7 +412,7 @@ function AcademyRecord() {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form3.setFieldsValue({
-      subjectId: subjectId ? parseInt(subjectId) : "all",
+      examId: examId ? examId : "all",
       search: "",
       showCnt: 40,
     });
@@ -411,7 +429,7 @@ function AcademyRecord() {
         const res = await axios.get(
           `/api/grade/status?acaId=${acaId}&classId=${classId}`,
         );
-        const formatted = res.data.resultData.map(item => ({
+        const formatted = res.data.resultData.map((item: any) => ({
           value: item.subjectId,
           label: item.subjectName,
         }));
@@ -502,7 +520,7 @@ function AcademyRecord() {
 
                 <Button
                   className="btn-admin-basic"
-                  onClick={e => handleScoreUpload()}
+                  onClick={() => handleScoreUpload()}
                 >
                   + 테스트 결과 일괄등록
                 </Button>
@@ -545,7 +563,7 @@ function AcademyRecord() {
                     <img
                       src={
                         item.userPic && item.userPic !== "default_user.jpg"
-                          ? `http://112.222.157.157:5223/pic/user/${item.userId}/${item.userPic}`
+                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
@@ -553,7 +571,7 @@ function AcademyRecord() {
                     />
                   </div>
 
-                  {item.studentName}
+                  {item.userName}
                 </div>
               </div>
               <div className="flex items-center justify-center w-40">
@@ -576,7 +594,7 @@ function AcademyRecord() {
                   <button
                     className="small_line_button"
                     onClick={() =>
-                      handleRecordAdd(item.joinClassId, item.scoreType)
+                      handleRecordAdd(item.joinClassId, item.examType)
                     }
                   >
                     등록하기
@@ -589,7 +607,7 @@ function AcademyRecord() {
                         item.gradeId,
                         item.score,
                         item.pass,
-                        item.scoreType,
+                        item.examType,
                       )
                     }
                   >

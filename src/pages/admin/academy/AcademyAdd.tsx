@@ -1,6 +1,16 @@
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, message, TimePicker, Upload } from "antd";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  message,
+  TimePicker,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -118,6 +128,45 @@ const TagListSelect = styled.div`
 
 const AcademyListSelect = styled.div``;
 
+interface tagListType {
+  tagId: number;
+  tagName: string;
+}
+
+interface searchAcademyResultType {
+  ACA_ASNUM: string;
+  ACA_INSTI_SC_NM: string;
+  ACA_NM: string;
+  ADMST_ZONE_NM: string;
+  ATPT_OFCDC_SC_CODE: string;
+  ATPT_OFCDC_SC_NM: string;
+  BRHS_ACA_YN: string;
+  CAA_BEGIN_YMD: string;
+  CAA_END_YMD: string;
+  DTM_RCPTN_ABLTY_NMPR_SMTOT: number;
+  ESTBL_YMD: string;
+  FA_RDNDA: string;
+  FA_RDNMA: string;
+  FA_RDNZC: string;
+  FA_TELNO: string;
+  LE_CRSE_LIST_NM: string;
+  LE_CRSE_NM: string;
+  LE_ORD_NM: string;
+  LOAD_DTM: string;
+  PSNBY_THCC_CNTNT: string;
+  REALM_SC_NM: string;
+  REG_STTUS_NM: string;
+  REG_YMD: string;
+  THCC_OTHBC_YN: string;
+  TOFOR_SMTOT: number;
+}
+
+declare global {
+  interface Window {
+    daum: any; // daum 객체의 타입을 any로 지정 (정확한 타입을 알고 있다면 타입을 더 구체적으로 지정할 수 있습니다)
+  }
+}
+
 function AcademyAdd() {
   const [form] = Form.useForm();
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -125,31 +174,34 @@ function AcademyAdd() {
   const [isModalVisible, setIsModalVisible] = useState(false); //태그 검색
   const [isModalVisible2, setIsModalVisible2] = useState(false); //학원 검색
   const [tagKeyword, setTagKeyword] = useState(""); //태그검색 키워드
-  const [tagList, setTagList] = useState([]); //태그목록(전체/검색결과)
-  const [selectedItems, setSelectedItems] = useState([]); //선택한 태그값
+  const [tagList, setTagList] = useState<tagListType[]>([]); //태그목록(전체/검색결과)
+  const [selectedItems, setSelectedItems] = useState<string[]>([]); //선택한 태그값
   const [academyArea, setAcademyArea] = useState(""); //지역선택
   const [academyKeyword, setAcademyKeyword] = useState(""); //학원검색 키워드
-  const [searchAcademyResult, setSearchAcademyResult] = useState([]); //학원검색 결과
-  const [fileList, setFileList] = useState([]);
+  const [searchAcademyResult, setSearchAcademyResult] = useState<
+    searchAcademyResultType[]
+  >([]); //학원검색 결과
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   //const [fileList2, setFileList2] = useState("");
   //const [fileList3, setFileList3] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentUserInfo = useRecoilValue(userInfo);
+  const { userId } = useRecoilValue(userInfo);
   const navigate = useNavigate();
 
   // 체크박스 클릭 시 선택/해제 처리
-  const handleCheckbox2Change = value => {
+  const handleCheckbox2Change = (tagId: number, tagName: string) => {
+    console.log(tagId);
     setSelectedItems(
       prevSelectedItems =>
-        prevSelectedItems.includes(value)
-          ? prevSelectedItems.filter(item => item !== value) // 이미 선택된 항목이면 제거
-          : [...prevSelectedItems, value], // 선택되지 않은 항목이면 추가
+        prevSelectedItems.includes(tagName)
+          ? prevSelectedItems.filter(item => item !== tagName) // 이미 선택된 항목이면 제거
+          : [...prevSelectedItems, tagName], // 선택되지 않은 항목이면 추가
     );
   };
 
   // 선택한 항목 제거
-  const handleRemoveItem = value => {
+  const handleRemoveItem = (value: any) => {
     setSelectedItems(prevSelectedItems =>
       prevSelectedItems.filter(item => item !== value),
     );
@@ -157,7 +209,7 @@ function AcademyAdd() {
 
   const handleAddressSearch = () => {
     new window.daum.Postcode({
-      oncomplete: data => {
+      oncomplete: (data: any) => {
         form.setFieldsValue({ postNum: data.zonecode });
         form.setFieldsValue({ address: data.address });
       },
@@ -199,7 +251,7 @@ function AcademyAdd() {
   };
 
   //태그검색
-  const handleTagSearchForm = e => {
+  const handleTagSearchForm = (e: any) => {
     e.preventDefault();
 
     const tagSearch = async () => {
@@ -214,7 +266,7 @@ function AcademyAdd() {
   };
 
   //input 값 변경 처리
-  const handleChangeTag = e => {
+  const handleChangeTag = (e: any) => {
     setTagKeyword(e.target.value);
   };
 
@@ -224,8 +276,8 @@ function AcademyAdd() {
         <input
           type="checkbox"
           id={`checkbox-${item.tagId}`}
-          checked={selectedItems.includes(item.tagId)}
-          onChange={() => handleCheckbox2Change(item.tagId)}
+          checked={selectedItems.includes(item.tagName)}
+          onChange={() => handleCheckbox2Change(item.tagId, item.tagName)}
         />
         <label htmlFor={`checkbox-${item.tagId}`}>{item.tagName}</label>
       </div>
@@ -233,71 +285,25 @@ function AcademyAdd() {
   });
 
   //첨부파일 처리
-  const handleChange = info => {
-    /*
-    let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
-
-    // 파일 상태 업데이트
-    setFileList(newFileList);
-
-    console.log("파일 선택됨:", info.file.originFileObj);
-    form.setFieldValue("pics", info.file.originFileObj);
-
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info.file.status === "done" && info.file.originFileObj) {
-      console.log("파일 선택됨:", info.file.originFileObj);
-      form.setFieldValue("pics", info.file.originFileObj);
-    }
-    */
-
+  const handleChange: UploadProps["onChange"] = (info: any) => {
     const newFileList = [...info.fileList];
     setFileList(newFileList);
 
     //form.setFieldValue("pics", info.file.originFileObj);
     form.setFieldValue(
       "pics",
-      newFileList.map(file => file.originFileObj),
+      newFileList.map((file: any) => file.originFileObj),
     );
   };
 
   //사업자등록증 파일 처리
-  const handle1Change = info2 => {
-    //const newFileList2 = [...info2.fileList];
-    // maxCount로 인해 하나의 파일만 유지
-    //newFileList2 = newFileList2.slice(-1);
-    // 파일 상태 업데이트
-    //setFileList2(newFileList2);
-    //console.log("파일 선택됨:", info2.file.originFileObj);
+  const handle1Change: UploadProps["onChange"] = (info2: any) => {
     form.setFieldValue("businessLicensePic", info2.file.originFileObj);
-
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info2.file.status === "done" && info2.file.originFileObj) {
-      //console.log("파일 선택됨:", info2.file.originFileObj);
-      form.setFieldValue("businessLicensePic", info2.file.originFileObj);
-    }
   };
 
   //학원등록증 파일 처리
-  const handle2Change = info3 => {
-    //let newFileList3 = [...info3.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    //newFileList3 = newFileList3.slice(-1);
-
-    // 파일 상태 업데이트
-    //setFileList3(newFileList3);
-
-    //console.log("파일 선택됨:", info3.file.originFileObj);
+  const handle2Change: UploadProps["onChange"] = (info3: any) => {
     form.setFieldValue("operationLicensePic", info3.file.originFileObj);
-
-    // 선택된 파일이 있으면 콘솔에 출력
-    if (info3.file.status === "done" && info3.file.originFileObj) {
-      //console.log("파일 선택됨:", info3.file.originFileObj);
-      form.setFieldValue("operationLicensePic", info3.file.originFileObj);
-    }
   };
 
   //모달창에서 학원 검색하기
@@ -309,15 +315,15 @@ function AcademyAdd() {
   };
 
   //input 값 변경 처리
-  const handleChangeArea = e => {
+  const handleChangeArea = (e: any) => {
     setAcademyArea(e.target.value);
   };
-  const handleChangeAcademy = e => {
+  const handleChangeAcademy = (e: any) => {
     setAcademyKeyword(e.target.value);
   };
 
   //학원검색
-  const handleAcademySearchForm = e => {
+  const handleAcademySearchForm = (e: any) => {
     e.preventDefault();
 
     const academyApiSearch = async () => {
@@ -338,25 +344,25 @@ function AcademyAdd() {
 
   //검색결과 적용
   const settingData = (
-    acaName,
+    acaName: string,
+    acaPhone: string,
+    comment: string,
     //postNum,
     //address,
     //detailAddress,
-    acaPhone,
-    comment,
   ) => {
     //데이터를 받아온 즉시 form 값 설정
     form.setFieldsValue({
       acaName: acaName,
+      acaPhone: acaPhone,
+      comment: comment,
       //postNum: postNum,
       //address: address,
       //detailAddress: detailAddress,
-      acaPhone: acaPhone,
-      comment: comment,
     });
   };
 
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     const picsCount = values.pics.length;
     console.log(values);
 
@@ -370,21 +376,21 @@ function AcademyAdd() {
 
       // pic이 있는 경우에만 추가
       if (values.pics) {
-        //formData.append("pics", values.pics);
-        // pic이 있는 경우에만 추가
         for (let i = 0; i < picsCount; i++) {
           formData.append("pics", values.pics[i]);
         }
       }
+
       if (values.businessLicensePic) {
         formData.append("businessLicensePic", values.businessLicensePic);
       }
+
       if (values.operationLicensePic) {
         formData.append("operationLicensePic", values.operationLicensePic);
       }
 
       const reqData = {
-        userId: parseInt(currentUserInfo.userId),
+        userId: userId,
         //dongId: 3,
         acaName: values.acaName,
         acaPhone: values.acaPhone,
@@ -395,13 +401,11 @@ function AcademyAdd() {
         address: values.address,
         detailAddress: values.detailAddress,
         postNum: values.postNum,
-        tagNameList: values.userTag
-          ? values.userTag
-          : selectedItems.map(item => parseInt(item, 10)),
+        //tagNameList: ["영어", "미술"],
+        tagNameList: selectedItems,
         businessName: values.businessName,
         businessNumber: values.businessNumber,
         corporateNumber: values.corporateNumber,
-        //tagIdList: [1, 3],
       };
 
       //JSON 형태로 데이터를 만들어 formData에 추가
@@ -449,7 +453,7 @@ function AcademyAdd() {
   }, []);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) {
+    if (!userId) {
       navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -595,7 +599,13 @@ function AcademyAdd() {
                 </Form.Item>
               </div>
 
-              <Form.Item name="teacherNum" label="강사 인원수">
+              <Form.Item
+                name="teacherNum"
+                label="강사 인원수"
+                rules={[
+                  { required: true, message: "강사 인원수를 입력해 주세요." },
+                ]}
+              >
                 <Input
                   className="input-admin-basic"
                   id="teacherNum"
@@ -636,14 +646,14 @@ function AcademyAdd() {
                   <ul className="flex flex-wrap gap-5">
                     {selectedItems.map(value => {
                       const selectedTags = tagList.find(
-                        option => option.tagId === value,
+                        option => option.tagName === value,
                       );
                       return (
                         <li
                           key={value}
                           className="flex justify-center items-center"
                         >
-                          {selectedTags.tagName}
+                          {selectedTags?.tagName}
                           <button
                             onClick={() => handleRemoveItem(value)}
                             className="size-5 ml-2 border border-gray-300 rounded-full text-xs"
@@ -775,7 +785,13 @@ function AcademyAdd() {
                 </div>
               </Form.Item>
 
-              <Form.Item name="pics" label="학원 이미지">
+              <Form.Item
+                name="pics"
+                label="학원 이미지"
+                rules={[
+                  { required: true, message: "학원 이미지를 등록해 주세요." },
+                ]}
+              >
                 <div>
                   <Upload
                     multiple
@@ -816,7 +832,7 @@ function AcademyAdd() {
                 <button
                   type="button"
                   className="btn-admin-cancel"
-                  onClick={e => navigate(-1)}
+                  onClick={() => navigate(-1)}
                 >
                   취소하기
                 </button>

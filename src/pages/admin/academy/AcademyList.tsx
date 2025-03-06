@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import { Button, Form, Input, message, Pagination, Select } from "antd";
@@ -9,17 +9,30 @@ import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 
+interface myAcademyListType {
+  acaName: string;
+  acaPic: string;
+  acaPics: string;
+  comment: string;
+  createdAt: string;
+  acaPhone: string;
+  address: string;
+  userId: number;
+  name: string;
+  acaId: number;
+}
+
 function AcademyList() {
   const [form] = Form.useForm();
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [academyId, setAcademyId] = useState("");
-  const [myAcademyList, setMyAcademyList] = useState([]);
+  const [academyId, setAcademyId] = useState<number>(0);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const state = parseInt(searchParams.get("state") || "1", 0);
+  //const state = parseInt(searchParams.get("state") || "1", 0);
   const search = searchParams.get("search");
 
   //학원 목록
@@ -46,13 +59,13 @@ function AcademyList() {
   };
 
   //학원삭제 팝업
-  const handleAcademyDelete = acaId => {
+  const handleAcademyDelete = (acaId: number) => {
     setAcademyId(acaId);
     setIsModalVisible(true);
   };
 
   //학원 삭제
-  const DeleteAcademy = async academyId => {
+  const DeleteAcademy = async (academyId: number) => {
     //alert(academyId);
     try {
       //alert("학원 삭제" + acaId + currentUserInfo.userId);
@@ -80,7 +93,7 @@ function AcademyList() {
   };
 
   //학원 검색
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     //학원 목록
     try {
       if (currentUserInfo.roleId === 0) {
@@ -93,7 +106,9 @@ function AcademyList() {
         console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
-          `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
+          "/api/academy/getAcademyListByUserId?signedUserId=" +
+            currentUserInfo.userId +
+            (values.search !== null ? "&acaName=" + values.search : ""),
         );
         setMyAcademyList(res.data.resultData);
         console.log("academy : ", res.data.resultData);
@@ -316,7 +331,7 @@ function AcademyList() {
                 </button>
                 <button
                   //onClick={e => DeleteAcademy(item.acaId)}
-                  onClick={e => handleAcademyDelete(item.acaId)}
+                  onClick={() => handleAcademyDelete(item.acaId)}
                 >
                   <FaRegTrashAlt className="w-3 text-gray-400" />
                 </button>

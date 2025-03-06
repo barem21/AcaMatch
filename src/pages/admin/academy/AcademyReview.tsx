@@ -1,65 +1,43 @@
 import { message, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
-import SideBar from "../../../components/SideBar";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 //import { useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { Cookies } from "react-cookie";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
-import { useNavigate } from "react-router-dom";
-import { Cookies } from "react-cookie";
+
+interface ademyReviewListType {
+  classId: number;
+  className: string;
+  userId: number;
+  writerName: string;
+  writerPic: string;
+  comment: string;
+  star: number;
+  createdAt: string;
+  acaId: number;
+  reviewCount: number;
+  reviewId: number;
+}
 
 function AcademyReview() {
   const cookies = new Cookies();
-  const [academyReviewList, setAcademyReviewList] = useState([]); //학원리뷰 목록
+  const [academyReviewList, setAcademyReviewList] = useState<
+    ademyReviewListType[]
+  >([]); //학원리뷰 목록
   const [resultMessage, setResultMessage] = useState("");
-  const [reviewId, setReviewId] = useState();
+  const [reviewId, _setReviewId] = useState();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
-  //const acaId = searchParams.get("acaId");
 
-  const titleName = "마이페이지";
-  let menuItems = [];
-  switch (currentUserInfo.roleId) {
-    case 3: //학원 관계자
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: false, link: "/mypage" },
-        /*
-        {
-          label: "학원학생 관리",
-          isActive: false,
-          link: "/mypage/academy/student",
-        },
-        */
-        {
-          label: "학원리뷰 목록",
-          isActive: true,
-          link: "/mypage/academy/review",
-        },
-        { label: "좋아요 목록", isActive: false, link: "/mypage/academy/like" },
-      ];
-      break;
-    case 2: //학부모
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: false, link: "/mypage" },
-        { label: "나의 리뷰 목록", isActive: true, link: "/mypage/review" },
-        { label: "학생 관리", isActive: false, link: "/mypage/child" },
-      ];
-      break;
-    default: //일반학생
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "나의 학원정보", isActive: false, link: "/mypage" },
-        { label: "나의 성적확인", isActive: false, link: "/mypage/record" },
-        { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
-        { label: "나의 리뷰 목록", isActive: true, link: "/mypage/review" },
-      ];
-  }
+  const acaId = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId = parseInt(searchParams.get("classId") || "0", 0);
 
   const handleButton1Click = () => {
     setIsModalVisible(false);
@@ -92,9 +70,9 @@ function AcademyReview() {
   };
 
   //리뷰 삭제하기
-  const deleteReviewCheck = (acaId, classId) => {
+  const deleteReviewCheck = (acaId: number, classId: number) => {
     setResultMessage(
-      `리뷰(${acaId})를 삭제하시면 복구할 수 없습니다. 해당 리뷰를 삭제하시겠습니까?`,
+      `리뷰(${acaId}/${classId})를 삭제하시면 복구할 수 없습니다. 해당 리뷰를 삭제하시겠습니까?`,
     );
     setIsModalVisible(true);
   };
@@ -112,10 +90,11 @@ function AcademyReview() {
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
-      <SideBar menuItems={menuItems} titleName={titleName} />
-
       <div className="w-full">
-        <h1 className="title-font">학원리뷰 목록</h1>
+        <h1 className="title-admin-font">
+          학원 리뷰 목록
+          <p>학원 관리 &gt; 학원 리뷰 목록</p>
+        </h1>
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 pl-6 pr-6 border-b">
