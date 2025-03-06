@@ -529,7 +529,6 @@ function DashBoard() {
                 </Button>
               </Dropdown>
             </div>
-
             <div
               style={{
                 height: "200px",
@@ -570,8 +569,8 @@ function DashBoard() {
                 >
                   공지사항
                 </li>
-                <li className="flex justify-center items-center w-[200px]">
-                  일시
+                <li className="flex justify-center items-center min-w-32">
+                  작성일
                 </li>
               </ul>
               {notices.map((notice, index) => (
@@ -585,13 +584,13 @@ function DashBoard() {
                     }
                   >
                     <span
-                      className="truncate max-w-[180px]"
+                      className="truncate pl-3 pr-3"
                       title={notice.boardName}
                     >
                       {notice.boardName}
                     </span>
                   </li>
-                  <li className="flex justify-center items-center w-[200px]">
+                  <li className="flex justify-center items-center min-w-32 text-gray-500 text-sm">
                     {notice.createdAt}
                   </li>
                 </ul>
@@ -607,10 +606,10 @@ function DashBoard() {
           </span>
           <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
             <li className="flex justify-center items-center w-full text-[#303E67]">
-              날짜
+              신청일
             </li>
             <li className="flex justify-center items-center w-full text-[#303E67]">
-              학원 명
+              학원명
             </li>
             <li className="flex justify-center items-center w-full text-[#303E67]">
               요청상태

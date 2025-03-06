@@ -103,8 +103,8 @@ function AcademyTextbookAdd(): JSX.Element {
   const [previewImage, setPreviewImage] = useState("");
   // const [fileList, setFileList] = useState([]);
   const [searchParams] = useSearchParams();
-  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
-  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
 
   //첨부파일 처리
   const handleChange = (info: any) => {

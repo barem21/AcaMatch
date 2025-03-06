@@ -217,7 +217,7 @@ function AcademyStudent() {
                         item.userPic
                           ? item.userPic === "default_user.jpg"
                             ? "/aca_image_1.png"
-                            : `http://112.222.157.157:5223/pic/user/${item.userId}/${item.userPic}`
+                            : `http://112.222.157.157:5233/pic/user/${item.userId}/${item.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"

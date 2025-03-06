@@ -1,8 +1,9 @@
-import { Button, Form, Input, Pagination, Select } from "antd";
+import { Button, Form, Input, message, Pagination, Select } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 import axios from "axios";
+import CustomModal from "../../../components/modal/Modal";
 
 interface classListType {
   acaPic: string;
@@ -31,9 +32,12 @@ function AcademyTextbookList(): JSX.Element {
   const [searchParams, _setSearchParams] = useSearchParams();
   const [classList, setClassList] = useState<classListType[]>([]);
   const [textBookList, setTextBookList] = useState<textBookListType[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [textBookId, setTextBookId] = useState<number>(0);
 
-  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
-  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
+  const showCnt: number = parseInt(searchParams.get("showCnt") || "0", 0);
 
   //교재목록 호출
   const getTextBookList = async () => {
@@ -50,13 +54,55 @@ function AcademyTextbookList(): JSX.Element {
   const onFinished = async (values: any) => {
     console.log(values);
 
+    try {
+      const res = await axios.get(
+        `/api/book/GetBookListByAcaNameBookName?bookName=${values.search}&size=${showCnt}`,
+      );
+      console.log(res.data.resultData);
+      setTextBookList(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
     navigate(`../academy/textBook?acaId=${acaId}&${queryParams}`); //쿼리스트링 url에 추가
   };
 
-  const onChange = () => {
+  const onChange = (values: any) => {
+    console.log(values);
     form.submit();
+  };
+
+  //교재삭제 팝업
+  const handleTextBookDelete = (bookId: number) => {
+    setTextBookId(bookId);
+    setIsModalVisible(true);
+  };
+
+  //교재삭제
+  const DeleteTextBook = async (bookId: number) => {
+    try {
+      const res = await axios.delete(`/api/book/deleteBook?bookId=${bookId}`);
+      console.log(res.data.resultData);
+
+      if (res.data.resultData === 1) {
+        message.success("등록된 교재을 삭제하였습니다.");
+        getTextBookList();
+      }
+    } catch (error) {
+      message.error("교재 삭제가 실패되었습니다.");
+      console.log(error);
+    }
+  };
+
+  //교재삭제 확인
+  const handleButton1Click = () => {
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = () => {
+    DeleteTextBook(textBookId);
+    setIsModalVisible(false);
   };
 
   useEffect(() => {
@@ -73,7 +119,7 @@ function AcademyTextbookList(): JSX.Element {
     const academyClassList = async () => {
       try {
         const res = await axios.get(
-          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
+          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1&size=${showCnt}`,
         );
         const formatted = res.data.resultData.map((item: any) => ({
           value: item.classId,
@@ -176,7 +222,18 @@ function AcademyTextbookList(): JSX.Element {
             <div className="flex items-center justify-center w-36">관리</div>
           </div>
 
-          {textBookList.map((item, index) => (
+          {!textBookList && (
+            <div className="p-4 text-center border-b">
+              등록된 교재가 없습니다.
+            </div>
+          )}
+          {textBookList?.length === 0 && (
+            <div className="p-4 text-center border-b">
+              등록된 교재가 없습니다.
+            </div>
+          )}
+
+          {textBookList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
@@ -216,7 +273,7 @@ function AcademyTextbookList(): JSX.Element {
                 >
                   <FaPen className="w-3 text-gray-400" />
                 </button>
-                <button>
+                <button onClick={() => handleTextBookDelete(item.bookId)}>
                   <FaRegTrashAlt className="w-3 text-gray-400" />
                 </button>
               </div>
@@ -228,6 +285,17 @@ function AcademyTextbookList(): JSX.Element {
           <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
         </div>
       </div>
+
+      <CustomModal
+        visible={isModalVisible}
+        title={"교재 삭제하기"}
+        content={"선택하신 교재를 삭제하시겠습니까?"}
+        onButton1Click={handleButton1Click}
+        onButton2Click={handleButton2Click}
+        button1Text={"취소하기"}
+        button2Text={"삭제하기"}
+        modalWidth={400}
+      />
     </div>
   );
 }
