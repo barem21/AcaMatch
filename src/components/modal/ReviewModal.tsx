@@ -14,6 +14,7 @@ interface ReviewModalProps {
   joinClassId: number[];
   academyId: number;
   existingReview?: Review | null;
+  classId?: number;
 }
 
 interface ReviewFormValues {
@@ -25,6 +26,7 @@ function ReviewModal({
   joinClassId,
   academyId,
   existingReview,
+  classId,
 }: ReviewModalProps) {
   const [form] = Form.useForm();
   const [rating, setRating] = useState(existingReview?.star || 1);
@@ -55,25 +57,27 @@ function ReviewModal({
       return;
     }
 
-    console.log(joinClassId, values.comment.trim(), rating);
     try {
       if (existingReview) {
         // 리뷰 수정 요청 (PUT)
         await jwtAxios.put(`/api/review/user`, {
-          acaId: academyId, // 기존 리뷰 ID
+          userId: user.userId,
+          classId: existingReview.joinClassId,
           comment: values.comment.trim(),
           star: rating,
-          userId: user.userId,
+          reviewId: existingReview.reviewId,
+          acaId: academyId,
         });
         message.success("리뷰가 수정되었습니다.");
       } else {
         setIsSubmitting(true);
 
         const res = await jwtAxios.post("/api/review/user", {
-          acaId: academyId,
+          userId: user.userId,
+          classId: joinClassId[0],
           comment: values.comment.trim(),
           star: rating,
-          userId: user.userId,
+          acaId: academyId,
         });
 
         console.log(joinClassId[0]);
@@ -82,10 +86,7 @@ function ReviewModal({
         console.log(res);
         message.success("리뷰가 등록되었습니다.");
       }
-      const handleRefresh = () => {
-        navigate(0);
-      };
-      handleRefresh();
+
       onClose();
     } catch (error) {
       console.error("리뷰 등록 실패:", error);

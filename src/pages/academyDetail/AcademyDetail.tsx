@@ -19,6 +19,7 @@ import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
 import BookList from "./BookList";
 import { AcademyClass, AcademyData } from "./types";
+import axios from "axios";
 
 declare global {
   interface Window {
@@ -395,6 +396,26 @@ const AcademyDetail = () => {
     setSelectClass(classId);
   };
 
+  const fetchAcademyDetails = async () => {
+    try {
+      const url = userId
+        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&page=${page}&size=${size}`
+        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&page=${page}&size=${size}`;
+
+      const response = await axios.get(url);
+      if (response.data?.resultData) {
+        setAcademyData(response.data.resultData);
+        setIsLiked(response.data.resultData.isLiked ?? false);
+      } else {
+        console.error("학원 상세 정보가 없습니다.");
+        setIsLiked(false);
+      }
+    } catch (error) {
+      console.error("학원 상세 정보를 가져오는데 실패했습니다.", error);
+      setIsLiked(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -600,12 +621,13 @@ const AcademyDetail = () => {
 
         {items[2].isActive && (
           <ReviewSection
-            academyId={academyData.acaId}
             star={academyData.star}
             reviewCount={academyData.reviewCount}
             renderStars={renderStars}
+            academyId={academyData.acaId}
             reviews={academyData.reviews}
             classes={academyData.classes as AcademyClass[]}
+            onReviewUpdate={fetchAcademyDetails}
           />
         )}
       </div>

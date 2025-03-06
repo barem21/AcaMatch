@@ -243,7 +243,6 @@ const AcaRevenue = (): JSX.Element => {
           />
         </div>
       </div>
-
       {modalVisible && (
         <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
           <div className="relative bg-white w-[500px] rounded-lg shadow-lg">

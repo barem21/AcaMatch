@@ -15,6 +15,7 @@ interface ReviewSectionProps {
   academyId?: number;
   reviews: Review[];
   classes: AcademyClass[];
+  onReviewUpdate?: () => void; // 리뷰 업데이트 함수 추가
 }
 interface ClassItem {
   classId: number;
@@ -48,7 +49,8 @@ const ReviewSection = ({
   renderStars,
   academyId,
   classes,
-  reviews: initialReviews, // 초기 리뷰 데이터
+  reviews: initialReviews,
+  onReviewUpdate, // props로 받은 업데이트 함수
 }: ReviewSectionProps) => {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,7 +93,7 @@ const ReviewSection = ({
     try {
       // 비동기적으로 데이터 요청
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${user.userId}&page=1&size=100`,
+        `/api/joinClass?studentId=${user.userId}&page=1&size=100`,
       );
 
       // API 응답에서 resultData를 가져옵니다.
@@ -106,7 +108,7 @@ const ReviewSection = ({
         ),
       );
       setIsClassIn(isClassInRes);
-      console.log(resultData);
+      console.log("resultData: ", resultData);
       console.log("Classes: ", classes);
       console.log("결과: ", isClassInRes); // true 또는 false가 출력됨
 
@@ -145,6 +147,12 @@ const ReviewSection = ({
       console.error("리뷰 삭제 실패:", error);
     }
     setIsDeleteModalVisible(false);
+  };
+
+  const handleReviewUpdate = async () => {
+    if (onReviewUpdate) {
+      await onReviewUpdate(); // 부모 컴포넌트의 업데이트 함수 호출
+    }
   };
 
   // const handlePageChange = (page: number) => {
@@ -205,8 +213,13 @@ const ReviewSection = ({
                 />
                 <div className="w-full">
                   <div className="flex">
-                    <div className={`${styles.reviews.text} w-[700px]`}>
+                    <div
+                      className={`${styles.reviews.text} w-[700px] flex items-center gap-2`}
+                    >
                       {review.nickName}
+                      <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {review.className}
+                      </span>
                     </div>
                     <div>
                       {review.userId === Number(user.userId) && (
@@ -218,9 +231,8 @@ const ReviewSection = ({
                             }}
                             onClick={() => {
                               setIsModalVisible(true);
-                              setEditReview(review); // 수정할 리뷰 데이터 설정
+                              setEditReview(review);
                             }}
-                            // onClick={}
                           >
                             리뷰수정
                           </button>
@@ -271,8 +283,11 @@ const ReviewSection = ({
           joinClassId={commonClasses}
           academyId={Number(academyId)}
           existingReview={editReview}
-          // rating={3} // 선택적으로 전달
-          onClose={() => setIsModalVisible(false)}
+          onClose={() => {
+            setIsModalVisible(false);
+            setEditReview(null);
+            handleReviewUpdate(); // 리뷰 수정/등록 후 데이터 업데이트
+          }}
         />
       )}
       {isDeleteModalVisible && (

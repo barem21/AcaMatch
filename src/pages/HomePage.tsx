@@ -151,48 +151,52 @@ function HomePage() {
     setIsLoggedIn(!!accessToken);
 
     if (accessToken) {
-      // 로그인한 유저라면 위치 정보를 가져옴
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-        },
-        error => {
-          console.error("위치 정보를 가져오는 데 실패했습니다.", error);
-        },
-      );
+      const getLocationByIP = async () => {
+        try {
+          // IP 기반 위치 정보 가져오기
+          const locationResponse = await axios.get("https://ipapi.co/json/");
+          const location = {
+            lat: locationResponse.data.latitude,
+            lon: locationResponse.data.longitude,
+          };
+          setUserLocation(location);
+
+          // 위치 정보를 기반으로 주변 학원 정보 가져오기
+          const academyResponse = await axios.get(
+            "/api/academy/GetAcademyListByDistance",
+            {
+              params: {
+                lat: location.lat,
+                lon: location.lon,
+                page: 1,
+                size: 5,
+              },
+            },
+          );
+          setAcademies(academyResponse.data.resultData);
+        } catch (error) {
+          console.error("위치 정보 또는 학원 정보 가져오기 실패:", error);
+          // 실패 시 기본 학원 목록 로드
+          const response = await axios.get("/api/academy/AcademyDefault");
+          setAcademies(response.data.resultData);
+        }
+      };
+
+      // IP 기반 위치 정보 가져오기 실행
+      getLocationByIP();
+    } else {
+      // 비로그인 상태일 때는 기본 학원 목록 가져오기
+      const fetchDefaultAcademies = async () => {
+        try {
+          const response = await axios.get("/api/academy/AcademyDefault");
+          setAcademies(response.data.resultData);
+        } catch (error) {
+          console.error("기본 학원 목록을 가져오는 데 실패했습니다.", error);
+        }
+      };
+      fetchDefaultAcademies();
     }
   }, []);
-
-  useEffect(() => {
-    const fetchAcademies = async () => {
-      try {
-        let response;
-        if (isLoggedIn && userLocation) {
-          // 로그인 상태라면 "주변에 있는 학원" API 호출
-          response = await axios.get("/api/academy/GetAcademyListByDistance", {
-            params: {
-              lat: userLocation.lat,
-              lon: userLocation.lon,
-            },
-          });
-        } else {
-          // 로그인하지 않았다면 기존 추천 학원 목록 사용
-          response = await axios.get("/api/academy/AcademyDefault");
-        }
-
-        setAcademies(response.data.resultData);
-      } catch (error) {
-        console.error("학원 목록을 가져오는 데 실패했습니다.", error);
-      }
-    };
-
-    if (isLoggedIn) {
-      fetchAcademies();
-    }
-  }, [isLoggedIn, userLocation]);
 
   // 배너 데이터 가져오기
   useEffect(() => {
@@ -334,6 +338,22 @@ function HomePage() {
 
     fetchData();
   }, []);
+
+  const getLocationByIP = async () => {
+    try {
+      // 무료 IP Geolocation API 사용
+      const response = await axios.get("https://ipapi.co/json/");
+      setUserLocation({
+        lat: response.data.latitude,
+        lon: response.data.longitude,
+      });
+    } catch (error) {
+      console.error("IP 기반 위치 확인 실패:", error);
+      // 실패시 기본 학원 목록 라드
+      const response = await axios.get("/api/academy/AcademyDefault");
+      setAcademies(response.data.resultData);
+    }
+  };
 
   return (
     <div className="flex flex-col w-full items-center px-4 py-[36px] max-[640px]:py-[16px] gap-8 mx-auto">
