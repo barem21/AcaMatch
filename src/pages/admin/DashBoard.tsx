@@ -168,17 +168,21 @@ function DashBoard() {
   const statsData = [
     {
       id: 1,
-      value: `₩${statsInfo.sumFee.toLocaleString()}`,
+      value: statsInfo?.sumFee ? `₩${statsInfo.sumFee.toLocaleString()}` : "₩0",
       label: "이번주 판매금액",
     },
     {
       id: 2,
-      value: `${statsInfo.costCount}건`,
+      value:
+        statsInfo?.costCount !== undefined ? `${statsInfo.costCount}건` : "0건",
       label: "결제 완료건 수",
     },
     {
       id: 3,
-      value: `${(statsInfo.saleRate * 100).toFixed(1)}%`,
+      value:
+        statsInfo?.saleRate !== undefined
+          ? `${(statsInfo.saleRate * 100).toFixed(1)}%`
+          : "0%",
       label: "판매율",
     },
   ];
@@ -449,7 +453,7 @@ function DashBoard() {
               </Dropdown>
             </div>
 
-            <div style={{ height: "200px", width: "350px" }}>
+            <div style={{ height: "200px", width: "100%" }}>
               <ResponsivePie
                 data={pieData}
                 margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
@@ -468,25 +472,25 @@ function DashBoard() {
           </div>
           <div className="border rounded-lg h-[120px] min-w-[350px]">
             <div>
-              <ul className="flex mx-auto min-w-[175px] w-[350px] h-[30px] bg-[#F1F5FA]">
-                <li className="flex justify-center items-center w-[200px]">
+              <ul className="flex mx-auto min-w-[175px] w-full h-[30px] bg-[#F1F5FA]">
+                <li className="flex justify-center items-center w-full">
                   공지사항
                 </li>
-                <li className="flex justify-center items-center w-[200px]">
-                  일시
+                <li className="flex justify-center items-center min-w-32">
+                  작성일
                 </li>
               </ul>
               {notices.map((notice, index) => (
-                <ul key={index} className="flex mx-auto w-[350px] h-[30px]">
-                  <li className="flex justify-center items-center min-w-[175px] w-[200px]">
+                <ul key={index} className="flex mx-auto w-full h-[30px]">
+                  <li className="flex justify-start items-center min-w-[175px] w-full">
                     <span
-                      className="truncate max-w-[180px]"
+                      className="truncate pl-3 pr-3"
                       title={notice.boardName}
                     >
                       {notice.boardName}
                     </span>
                   </li>
-                  <li className="flex justify-center items-center w-[200px]">
+                  <li className="flex justify-center items-center min-w-32 text-gray-500 text-sm">
                     {notice.createdAt}
                   </li>
                 </ul>
@@ -502,10 +506,10 @@ function DashBoard() {
           </span>
           <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] ">
             <li className="flex justify-center items-center w-full text-[#303E67]">
-              날짜
+              신청일
             </li>
             <li className="flex justify-center items-center w-full text-[#303E67]">
-              학원 명
+              학원명
             </li>
             <li className="flex justify-center items-center w-full text-[#303E67]">
               요청상태

@@ -164,7 +164,6 @@ function AcademyPremium(): JSX.Element {
             </div>
             <div className="flex items-center justify-center w-40">
               <select className="p-1 border rounded-lg">
-                <option value="">선택</option>
                 <option value="0">승인대기</option>
                 <option value="1">승인완료</option>
                 <option value="2">승인거부</option>
@@ -187,7 +186,7 @@ function AcademyPremium(): JSX.Element {
                     alt=" /"
                   />
                 </div>
-                대구 ABC상아탑 학원
+                서울 ABC상아탑 학원
               </div>
             </div>
             <div className="flex items-center justify-center text-center w-40">
@@ -203,7 +202,6 @@ function AcademyPremium(): JSX.Element {
             </div>
             <div className="flex items-center justify-center w-40">
               <select className="p-1 border rounded-lg">
-                <option value="">선택</option>
                 <option value="0">승인대기</option>
                 <option value="1">승인완료</option>
                 <option value="2">승인거부</option>

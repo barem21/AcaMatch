@@ -1,10 +1,20 @@
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, Upload } from "antd";
-import { useState } from "react";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  message,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -100,10 +110,93 @@ function AcademyTextbookEdit(): JSX.Element {
   const navigate = useNavigate();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
+  const [searchParams] = useSearchParams();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  const onFinished = (values: any) => {
-    console.log(values);
+  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
+  const bookId: number = parseInt(searchParams.get("bookId") || "0", 0);
+
+  //교재정보 가져오기
+  const textBookGetInfo = async () => {
+    try {
+      const res = await axios.get(`/api/book/GetBookInfo/${bookId}`);
+      console.log("book_info : ", res.data.resultData);
+
+      // 데이터를 받아온 즉시 form 값 설정
+      form.setFieldsValue({
+        manager: res.data.resultData.manager,
+        bookName: res.data.resultData.bookName,
+        bookPrice: res.data.resultData.bookPrice,
+        bookAmount: res.data.resultData.bookAmount,
+        bookComment: res.data.resultData.bookComment,
+      });
+
+      setFileList([
+        {
+          uid: "1",
+          name: res.data.resultData.file,
+          status: "done",
+          url: `http://112.222.157.157:5233/pic/book/${res.data.resultData.bookId}/${res.data.resultData.bookPic}`,
+        },
+      ]);
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  const handleChange: UploadProps["onChange"] = (info: any) => {
+    const newFileList = [...info.fileList];
+    setFileList(newFileList);
+
+    form.setFieldValue("file", info.file.originFileObj);
+  };
+
+  const onFinished = async (values: any) => {
+    console.log(values);
+    try {
+      const formData = new FormData();
+
+      if (values.file) {
+        formData.append("file", values.file);
+      }
+
+      const reqData = {
+        bookId: bookId,
+        classId: classId,
+        manager: values.manager,
+        bookName: values.bookName,
+        bookPrice: values.bookPrice,
+        bookAmount: values.bookAmount,
+        bookComment: values.bookComment,
+      };
+
+      //JSON 형태로 데이터를 만들어 formData에 추가
+      formData.append(
+        "req",
+        new Blob([JSON.stringify(reqData)], { type: "application/json" }),
+      );
+
+      const header = {
+        headers: {
+          Accept: "*/*",
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      const res = await axios.put("/api/book/updateBook", formData, header);
+      if (res.data.resultData === 1) {
+        message.success("수정이 완료되었습니다.");
+        navigate(`../academy/textBook?acaId=${acaId}&classId=${classId}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    textBookGetInfo();
+  }, []);
 
   return (
     <AcademyInfo className="w-full">
@@ -130,7 +223,7 @@ function AcademyTextbookEdit(): JSX.Element {
                 />
               </Form.Item>
               <Form.Item
-                name="className"
+                name="bookName"
                 label="교재 이름"
                 rules={[
                   { required: true, message: "교재 이름을 입력해 주세요." },
@@ -144,7 +237,7 @@ function AcademyTextbookEdit(): JSX.Element {
               </Form.Item>
 
               <Form.Item
-                name="quantity"
+                name="bookAmount"
                 label="수량"
                 rules={[{ required: true, message: "수량을 입력해 주세요." }]}
               >
@@ -156,7 +249,7 @@ function AcademyTextbookEdit(): JSX.Element {
               </Form.Item>
 
               <Form.Item
-                name="price"
+                name="bookPrice"
                 label="가격"
                 rules={[{ required: true, message: "가격을 입력해 주세요." }]}
               >
@@ -167,12 +260,14 @@ function AcademyTextbookEdit(): JSX.Element {
                 />
               </Form.Item>
 
-              <Form.Item name="pic" label="교재 이미지">
+              <Form.Item name="file" label="교재 이미지">
                 <div>
                   <Upload
                     listType="picture-card"
                     maxCount={1}
+                    fileList={fileList}
                     showUploadList={{ showPreviewIcon: false }}
+                    onChange={handleChange}
                   >
                     <button
                       style={{ border: 0, background: "none" }}
@@ -196,7 +291,7 @@ function AcademyTextbookEdit(): JSX.Element {
               </Form.Item>
 
               <Form.Item
-                name="classComment"
+                name="bookComment"
                 label="교재 소개글"
                 className="h-44"
                 rules={[
@@ -220,7 +315,7 @@ function AcademyTextbookEdit(): JSX.Element {
 
                 <Form.Item className="mb-0">
                   <Button htmlType="submit" className="btn-admin-ok">
-                    등록하기
+                    수정하기
                   </Button>
                 </Form.Item>
               </div>
