@@ -12,6 +12,7 @@ import { FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { getCookie } from "../utils/cookie";
 
 interface Academy {
   acaId: number;
@@ -66,7 +67,7 @@ interface Banner {
 function HomePage() {
   const navigate = useNavigate();
 
-  const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
+  // const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   // const [isDefaultLoading, setIsDefaultLoading] = useState(true);
 
@@ -74,6 +75,13 @@ function HomePage() {
 
   const [popularTag, setPopularTag] = useState<Tag[]>([]);
   const [bestAcademyCards, setBestAcademyCards] = useState<BestAcademy[]>([]);
+
+  const [academies, setAcademies] = useState<Academy[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
 
   const serviceStats = [
     {
@@ -109,7 +117,7 @@ function HomePage() {
 
   const getAcademyImageUrl = (acaId: number, pic: string) => {
     if (!pic || pic === "default.jpg") {
-      // 🔥 학원별로 고유한 랜덤 숫자를 설정
+      // 학원별로 고유한 랜덤 숫자를 설정
       if (!randomNumbersRef.current[acaId]) {
         randomNumbersRef.current[acaId] = Math.floor(Math.random() * 10) + 1; // 1~10 사이 랜덤
       }
@@ -136,6 +144,55 @@ function HomePage() {
         return "etc";
     }
   };
+
+  // 거리별
+  useEffect(() => {
+    const accessToken = getCookie("accessToken");
+    setIsLoggedIn(!!accessToken);
+
+    if (accessToken) {
+      // 로그인한 유저라면 위치 정보를 가져옴
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        error => {
+          console.error("위치 정보를 가져오는 데 실패했습니다.", error);
+        },
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchAcademies = async () => {
+      try {
+        let response;
+        if (isLoggedIn && userLocation) {
+          // 로그인 상태라면 "주변에 있는 학원" API 호출
+          response = await axios.get("/api/academy/GetAcademyListByDistance", {
+            params: {
+              lat: userLocation.lat,
+              lon: userLocation.lon,
+            },
+          });
+        } else {
+          // 로그인하지 않았다면 기존 추천 학원 목록 사용
+          response = await axios.get("/api/academy/AcademyDefault");
+        }
+
+        setAcademies(response.data.resultData);
+      } catch (error) {
+        console.error("학원 목록을 가져오는 데 실패했습니다.", error);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchAcademies();
+    }
+  }, [isLoggedIn, userLocation]);
 
   // 배너 데이터 가져오기
   useEffect(() => {
@@ -176,22 +233,22 @@ function HomePage() {
     fetchDefaultAcademies();
   }, []);
 
-  useEffect(() => {
-    const fetchDefaultAcademies = async () => {
-      // setIsDefaultLoading(true);
-      try {
-        const response = await axios.get("/api/academy/AcademyDefault");
-        setDefaultAcademies(response.data.resultData);
-        // console.log(response);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        // setIsDefaultLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchDefaultAcademies = async () => {
+  //     // setIsDefaultLoading(true);
+  //     try {
+  //       const response = await axios.get("/api/academy/AcademyDefault");
+  //       setDefaultAcademies(response.data.resultData);
+  //       // console.log(response);
+  //     } catch (error) {
+  //       console.error(error);
+  //     } finally {
+  //       // setIsDefaultLoading(false);
+  //     }
+  //   };
 
-    fetchDefaultAcademies();
-  }, []);
+  //   fetchDefaultAcademies();
+  // }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -349,11 +406,14 @@ function HomePage() {
           )}
         </div>
       </div>
+
       <div className="w-full max-w-[990px] max-[640px]:hidden">
-        <h2 className="text-2xl font-bold mb-6">이 학원 어떠신가요?</h2>
-        {defaultAcademies && defaultAcademies.length > 0 ? (
+        <h2 className="text-2xl font-bold mb-6">
+          {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
+        </h2>
+        {academies && academies.length > 0 ? (
           <div className="grid grid-cols-5 gap-6">
-            {defaultAcademies.map(academy => (
+            {academies.map(academy => (
               <div
                 key={academy.acaId}
                 className="flex flex-col gap-4 cursor-pointer"
@@ -363,19 +423,15 @@ function HomePage() {
                 }}
               >
                 <img
-                  src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
+                  src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`}
                   alt={academy.acaName}
-                  // effect="blur"
                   className="w-full h-[178px] rounded-xl object-cover"
-                  // placeholderSrc="/image-placeholder.jpg" // 로딩 중 표시될 저해상도 이미지
-                  // wrapperClassName="w-full h-[186px]"
                 />
                 <div>
                   <h3 className="font-medium text-base text-[#242424] truncate">
                     {academy.acaName}
                   </h3>
                   <p className="text-sm text-[#507A95] truncate">
-                    {/* {academy.address} */}
                     {academy.tagNames || "태그 정보 없음"}
                   </p>
                   <p className="text-sm text-[#507A95]">
@@ -387,14 +443,20 @@ function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">추천할 학원이 존재하지 않습니다.</p>
+          <p className="text-gray-500">
+            {isLoggedIn
+              ? "주변 학원이 존재하지 않습니다."
+              : "추천할 학원이 존재하지 않습니다."}
+          </p>
         )}
       </div>
 
       {/* 모바일용 */}
       <div className="w-full max-[640px]:w-[330px] min-[640px]:hidden">
-        <h2 className="text-2xl font-bold mb-6">이 학원 어떠신가요?</h2>
-        {defaultAcademies && defaultAcademies.length > 0 ? (
+        <h2 className="text-2xl font-bold mb-6">
+          {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
+        </h2>
+        {academies && academies.length > 0 ? (
           <Swiper
             modules={[FreeMode]}
             slidesPerView={"auto"} // 자동으로 크기 조정
@@ -403,7 +465,7 @@ function HomePage() {
             grabCursor={true} // 마우스 커서 손모양
             className="overflow-visible"
           >
-            {defaultAcademies.map(academy => (
+            {academies.map(academy => (
               <SwiperSlide
                 key={academy.acaId}
                 className="w-[160px] flex-shrink-0"
@@ -415,7 +477,7 @@ function HomePage() {
                   <img
                     src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
                     alt={academy.acaName}
-                    className="w-full h-[178px] rounded-xl object-cover"
+                    className="w-full h-[160px] rounded-xl object-cover"
                   />
                   <div>
                     <h3 className="font-medium text-base text-[#242424] truncate">
@@ -480,13 +542,6 @@ function HomePage() {
           <SwiperSlide>
             <img
               src="/ai1.png"
-              alt="main_banner"
-              className="w-full h-[200px] bg-blue-500 rounded-xl"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="/test1.png"
               alt="main_banner"
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />
@@ -579,7 +634,7 @@ function HomePage() {
                   onClick={() => handleAcademyClick(Number(card.acaId))}
                 >
                   <img
-                    className="h-56 bg-gray-200 rounded-xl object-cover"
+                    className="h-[160px] bg-gray-200 rounded-xl object-cover"
                     src={card.image}
                     alt={card.subject}
                   />

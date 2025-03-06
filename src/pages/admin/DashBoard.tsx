@@ -5,7 +5,7 @@ import { Button, Dropdown, Menu } from "antd";
 import { useState } from "react";
 import { CiCalendarDate } from "react-icons/ci";
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
@@ -58,11 +58,11 @@ const lastMonthData: ChartData[] = [
   generateData("결제내역", 5, 300, 30),
 ];
 
-const academyApprovals = [
-  { date: "2024-02-15", name: "서울 학원", status: "대기중" },
-  { date: "2024-02-16", name: "부산 학원", status: "대기중" },
-  { date: "2024-02-17", name: "대구 학원", status: "대기중" },
-];
+// const academyApprovals = [
+//   { date: "2024-02-15", name: "서울 학원", status: "대기중" },
+//   { date: "2024-02-16", name: "부산 학원", status: "대기중" },
+//   { date: "2024-02-17", name: "대구 학원", status: "대기중" },
+// ];
 
 const reportedUsers = [
   { user: "user123", type: "욕설", count: 3, status: "미처리" },
@@ -70,21 +70,20 @@ const reportedUsers = [
   { user: "user789", type: "부적절한 콘텐츠", count: 2, status: "미처리" },
 ];
 
+// Add interface for search info
+interface SearchInfo {
+  tagCount: number;
+  tagName: string;
+  totalTagCount: number;
+}
+
 const pieChartData: Record<
   CategoryKey,
   Record<WeekKey, { id: string; label: string; value: number; color: string }[]>
 > = {
   "최근 검색": {
-    이번주: [
-      { id: "검색1", label: "검색1", value: 40, color: "#377dff" },
-      { id: "검색2", label: "검색2", value: 30, color: "#A8C5FF" },
-      { id: "검색3", label: "검색3", value: 30, color: "#FFAA00" },
-    ],
-    지난주: [
-      { id: "검색1", label: "검색1", value: 50, color: "#377dff" },
-      { id: "검색2", label: "검색2", value: 30, color: "#A8C5FF" },
-      { id: "검색3", label: "검색3", value: 20, color: "#FFAA00" },
-    ],
+    이번주: [], // Will be populated from API
+    지난주: [], // Will be populated from API
   },
   "방문 통계": {
     이번주: [
@@ -139,6 +138,7 @@ interface CostInfo {
 
 function DashBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<DataKey>(
     (searchParams.get("category") as DataKey) || "학원수",
   );
@@ -165,6 +165,10 @@ function DashBoard() {
     saleRate: 0,
   });
 
+  const [academyApprovals, setAcademyApprovals] = useState<
+    { date: string; name: string; status: string }[]
+  >([]);
+
   const statsData = [
     {
       id: 1,
@@ -187,6 +191,32 @@ function DashBoard() {
     },
   ];
 
+  const fetchAcademyApprovals = async () => {
+    try {
+      const response = await jwtAxios.get(
+        "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree",
+        {
+          params: { acaAgree: 0 },
+        },
+      );
+
+      const { resultData } = response.data;
+
+      const formattedData = resultData.map((academy: any) => ({
+        date: academy.createdAt.split(" ")[0], // 날짜만 가져오기
+        name: academy.acaName,
+        status: "대기중", // 기본적으로 승인 대기 상태
+      }));
+
+      setAcademyApprovals(formattedData);
+    } catch (error) {
+      console.error("Error fetching academy approvals:", error);
+    }
+  };
+  useEffect(() => {
+    fetchAcademyApprovals();
+  }, []);
+
   useEffect(() => {
     setSearchParams({
       category: selectedItem,
@@ -203,7 +233,54 @@ function DashBoard() {
     setSelectedData(dataSource.filter(d => d.id === (e.key as DataKey)));
   };
 
-  const pieData = pieChartData[selectedCategory]?.[selectedTimeRange] || [];
+  // Add state for search data
+  const [searchData, setSearchData] = useState<
+    Record<
+      WeekKey,
+      { id: string; label: string; value: number; color: string }[]
+    >
+  >({
+    이번주: [],
+    지난주: [],
+  });
+
+  // Add function to fetch search info
+  const fetchSearchInfo = async (period: WeekKey) => {
+    try {
+      const response = await jwtAxios.get(
+        `/api/academy/GetSearchInfo/${period}`,
+      );
+      const { resultData } = response.data;
+
+      // Transform API data to chart format
+      const colors = ["#377dff", "#A8C5FF", "#FFAA00"]; // Keep existing colors
+      const chartData = resultData.map((item: SearchInfo, index: number) => ({
+        id: item.tagName,
+        label: item.tagName,
+        value: item.tagCount,
+        color: colors[index % colors.length],
+      }));
+
+      setSearchData(prev => ({
+        ...prev,
+        [period]: chartData,
+      }));
+    } catch (error) {
+      console.error(`Error fetching search info for ${period}:`, error);
+    }
+  };
+
+  // Add useEffect to fetch search data
+  useEffect(() => {
+    fetchSearchInfo("이번주");
+    fetchSearchInfo("지난주");
+  }, []);
+
+  // Update pieData calculation
+  const pieData =
+    selectedCategory === "최근 검색"
+      ? searchData[selectedTimeRange]
+      : pieChartData[selectedCategory][selectedTimeRange];
 
   const handleMonthClick = (e: { key: string }) => {
     const monthKey = e.key as MonthKey;
@@ -431,7 +508,7 @@ function DashBoard() {
           </ul>
         </div>
         <div className="flex-col w-[calc(100%-1193px)] max-w-[394px] 2xl:max-w-[402px] min-w-[350px]">
-          <div className="w-full mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
+          <div className="w-full justify-center mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
             {/* <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]"> */}
             <div className="flex justify-between w-full p-3 border-b items-center">
               {/* 카테고리 선택 드롭다운 */}
@@ -452,17 +529,30 @@ function DashBoard() {
                 </Button>
               </Dropdown>
             </div>
-
-            <div style={{ height: "200px", width: "100%" }}>
-              <ResponsivePie
-                data={pieData}
-                margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
-                innerRadius={0.9}
-                padAngle={2}
-                cornerRadius={3}
-                colors={({ data }) => data.color}
-                enableArcLabels={false}
-              />
+            <div
+              style={{
+                height: "200px",
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {pieData && pieData.length > 0 ? (
+                <ResponsivePie
+                  data={pieData}
+                  margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
+                  innerRadius={0.9}
+                  padAngle={2}
+                  cornerRadius={3}
+                  colors={({ data }) => data.color}
+                  enableArcLabels={false}
+                />
+              ) : (
+                <div className="h-full w-full mx-auto flex items-center justify-center text-gray-500">
+                  데이터가 없습니다
+                </div>
+              )}
             </div>
 
             <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] min-w-[350px] text-gray-700 text-sm gap-[12px] font-semibold">
@@ -472,8 +562,11 @@ function DashBoard() {
           </div>
           <div className="border rounded-lg h-[120px] min-w-[350px]">
             <div>
-              <ul className="flex mx-auto min-w-[175px] w-full h-[30px] bg-[#F1F5FA]">
-                <li className="flex justify-center items-center w-full">
+              <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA]">
+                <li
+                  className="flex justify-center items-center w-[200px] cursor-pointer"
+                  onClick={() => navigate("/admin/notice-content")}
+                >
                   공지사항
                 </li>
                 <li className="flex justify-center items-center min-w-32">
@@ -482,7 +575,14 @@ function DashBoard() {
               </ul>
               {notices.map((notice, index) => (
                 <ul key={index} className="flex mx-auto w-full h-[30px]">
-                  <li className="flex justify-start items-center min-w-[175px] w-full">
+                  <li
+                    className="flex justify-center items-center min-w-[175px] w-[200px] cursor-pointer"
+                    onClick={() =>
+                      navigate(
+                        `/admin/notice-content/view?boardId=${notice.boardId}`,
+                      )
+                    }
+                  >
                     <span
                       className="truncate pl-3 pr-3"
                       title={notice.boardName}
@@ -499,12 +599,12 @@ function DashBoard() {
           </div>
         </div>
       </div>
-      <div className="flex mt-[12px] gap-[12px] ">
-        <div className="w-full border border-b-[0] rounded-[4px]">
+      <div className="flex mt-[12px] gap-[12px]">
+        <div className="w-full border rounded-[4px] h-fit">
           <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
             학원 승인 대기
           </span>
-          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] ">
+          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
             <li className="flex justify-center items-center w-full text-[#303E67]">
               신청일
             </li>
@@ -515,29 +615,32 @@ function DashBoard() {
               요청상태
             </li>
           </ul>
-
-          {academyApprovals.map((item, index) => (
-            <ul key={index} className="flex mx-auto w-full h-[30px] border-b">
-              <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                {item.date}
-              </li>
-              <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                {item.name}
-              </li>
-
-              <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
-                  {item.status}
-                </p>
-              </li>
-            </ul>
-          ))}
+          <div className="overflow-hidden">
+            {academyApprovals.slice(0, 5).map((item, index, array) => (
+              <ul
+                key={index}
+                className={`flex mx-auto w-full h-[30px] ${index !== array.length - 1 ? "border-b" : ""}`}
+              >
+                <li className="flex justify-center items-center w-1/3 text-[#242424]">
+                  {item.date}
+                </li>
+                <li className="flex justify-center items-center w-1/3 text-[#242424]">
+                  {item.name}
+                </li>
+                <li className="flex justify-center items-center w-1/3 text-[#242424]">
+                  <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
+                    {item.status}
+                  </p>
+                </li>
+              </ul>
+            ))}
+          </div>
         </div>
-        <div className="w-full border border-b-[0] rounded-[4px]">
+        <div className="w-full border rounded-[4px]">
           <span className="flex p-4 items-center w-full h-[47px] border-b">
             신고된 유저 목록
           </span>
-          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA]">
+          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
             <li className="flex justify-center items-center w-full text-[#303E67]">
               유저정보
             </li>
@@ -551,22 +654,27 @@ function DashBoard() {
               처리상태
             </li>
           </ul>
-          {reportedUsers.map((user, index) => (
-            <ul key={index} className="flex mx-auto w-full h-[30px] border-b">
-              <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                {user.user}
-              </li>
-              <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                {user.type}
-              </li>
-              <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                {user.count}
-              </li>
-              <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                {user.status}
-              </li>
-            </ul>
-          ))}
+          <div className="overflow-hidden">
+            {reportedUsers.map((user, index, array) => (
+              <ul
+                key={index}
+                className={`flex mx-auto w-full h-[30px] ${index !== array.length - 1 ? "border-b" : ""}`}
+              >
+                <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                  {user.user}
+                </li>
+                <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                  {user.type}
+                </li>
+                <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                  {user.count}
+                </li>
+                <li className="flex justify-center items-center w-1/4 text-[#242424]">
+                  {user.status}
+                </li>
+              </ul>
+            ))}
+          </div>
         </div>
       </div>
     </div>

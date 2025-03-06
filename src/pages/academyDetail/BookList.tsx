@@ -83,6 +83,9 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
       });
 
       if (response.data.resultData.next_redirect_pc_url) {
+        // tid를 localStorage에 저장
+        localStorage.setItem("paymentTid", response.data.resultData.tid);
+
         // 결제 창 열기
         window.open(
           response.data.resultData.next_redirect_pc_url,

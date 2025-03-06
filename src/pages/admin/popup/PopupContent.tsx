@@ -54,18 +54,24 @@ const PopupContent = () => {
       const response = await jwtAxios.get("/api/popUp/detail", {
         params: { popUpId },
       });
+
       if (response.data.resultData.length > 0) {
         const detail = response.data.resultData[0];
+        console.log("Popup Detail:", detail); // 전체 데이터 확인
+
         setPopupDetail(detail);
-        // imageUrl 설정
-        setImageUrl(
-          detail.popUpPic
-            ? `http://112.222.157.157:5233/pic/popUp/${detail.popUpId}/${detail.popUpPic}`
-            : null,
-        );
+
+        if (detail.popUpPic) {
+          const url = `http://112.222.157.157:5233/pic/popUp/${detail.popUpId}/${detail.popUpPic}`;
+          console.log("Setting image URL:", url);
+          setImageUrl(url);
+        } else {
+          console.log("No popUpPic found");
+          setImageUrl(null);
+        }
+
         setIsModalOpen(true);
       }
-      console.log(response);
     } catch (error) {
       console.error("Error fetching popup detail:", error);
       message.error("팝업 상세 정보를 불러오는데 실패했습니다.");
@@ -104,6 +110,12 @@ const PopupContent = () => {
   const renderModalContent = () => {
     if (!popupDetail) return null;
 
+    console.log("Rendering modal with:", {
+      popupDetail,
+      imageUrl,
+      comment: popupDetail.comment,
+    });
+
     return (
       <div
         className="space-y-3"
@@ -120,7 +132,7 @@ const PopupContent = () => {
             <strong>종료일:</strong> {popupDetail.endDate}
           </p>
           <p>
-            <strong>노출 상태:</strong>{" "}
+            <strong>출력 상태:</strong>{" "}
             {popupDetail.popUpShow === 1 ? "출력중" : "미출력"}
           </p>
           <p>
@@ -134,7 +146,7 @@ const PopupContent = () => {
 
         <div className="border-t pt-4">
           <p className="font-bold mb-2">팝업 내용:</p>
-          {popupDetail.comment === "" && imageUrl ? (
+          {imageUrl ? (
             <div className="w-full flex justify-center">
               <img
                 src={imageUrl}
@@ -147,7 +159,12 @@ const PopupContent = () => {
                 }}
                 onError={e => {
                   console.error("이미지 로드 실패:", imageUrl);
-                  e.currentTarget.style.display = "none";
+                  const imgElement = e.currentTarget;
+                  imgElement.style.display = "none";
+                  // 이미지 로드 실패 시 대체 텍스트 표시
+                  const errorText = document.createElement("p");
+                  errorText.textContent = "이미지를 불러올 수 없습니다.";
+                  imgElement.parentNode?.appendChild(errorText);
                 }}
               />
             </div>

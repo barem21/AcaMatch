@@ -17,6 +17,7 @@ interface CustomModalProps {
   btWidth?: number; // 버튼 너비
   btHeight?: number; // 버튼 높이
   gap?: string; // gap 값
+  children?: React.ReactNode;
 }
 
 const CancelButton = styled(MainButton)`

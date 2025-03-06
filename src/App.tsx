@@ -56,7 +56,6 @@ import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import BannerView from "./pages/admin/BannerView.tsx";
 import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
-import PopupDetail from "./pages/admin/popup/PopupDetail.tsx";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 
 function App() {
@@ -180,7 +179,6 @@ function App() {
                 <Route path="notice-content/view" element={<NoticeView />} />
                 <Route path="popup-content" element={<PopupContent />} />
                 <Route path="popup-content/add" element={<PopupAdd />} />
-                <Route path="popup-content/detail/" element={<PopupDetail />} />
                 <Route path="banner-content" element={<BannerContent />} />
                 <Route path="banner-content/view" element={<BannerView />} />
                 <Route path="teacher">
