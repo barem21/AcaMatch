@@ -417,6 +417,10 @@ function HomePage() {
               <div
                 key={academy.acaId}
                 className="flex flex-col gap-4 cursor-pointer"
+                onClick={() => {
+                  handleAcademyClick(academy.acaId);
+                  // console.log(academy.acaId);
+                }}
               >
                 <img
                   src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`}
@@ -538,13 +542,6 @@ function HomePage() {
           <SwiperSlide>
             <img
               src="/ai1.png"
-              alt="main_banner"
-              className="w-full h-[200px] bg-blue-500 rounded-xl"
-            />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img
-              src="/test1.png"
               alt="main_banner"
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />

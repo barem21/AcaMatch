@@ -713,7 +713,7 @@ const AcademySearch = () => {
                   <div className="flex items-center p-4 w-full text-start">
                     <span className="text-[14px] text-brand-default">
                       {Number(academy.premium) === 1
-                        ? `(유료)${academy.acaName} `
+                        ? `(광고)${academy.acaName} `
                         : academy.acaName}
                     </span>
                   </div>

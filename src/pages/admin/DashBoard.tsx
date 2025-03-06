@@ -172,17 +172,21 @@ function DashBoard() {
   const statsData = [
     {
       id: 1,
-      value: `₩${statsInfo.sumFee.toLocaleString()}`,
+      value: statsInfo?.sumFee ? `₩${statsInfo.sumFee.toLocaleString()}` : "₩0",
       label: "이번주 판매금액",
     },
     {
       id: 2,
-      value: `${statsInfo.costCount}건`,
+      value:
+        statsInfo?.costCount !== undefined ? `${statsInfo.costCount}건` : "0건",
       label: "결제 완료건 수",
     },
     {
       id: 3,
-      value: `${(statsInfo.saleRate * 100).toFixed(1)}%`,
+      value:
+        statsInfo?.saleRate !== undefined
+          ? `${(statsInfo.saleRate * 100).toFixed(1)}%`
+          : "0%",
       label: "판매율",
     },
   ];
