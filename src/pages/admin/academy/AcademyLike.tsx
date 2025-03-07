@@ -20,8 +20,6 @@ interface AcademyLikeList {
   [academyId: string]: academyLikeListType[]; // academyId를 key로 하는 LikedUser 배열
 }
 
-const mergedObj: AcademyLikeList = {}; // mergedObj의 타입을 정의
-
 function AcademyLike() {
   const cookies = new Cookies();
   const [academyLikeList, setAcademyLikeList] = useState<academyLikeListType[]>(
@@ -38,6 +36,7 @@ function AcademyLike() {
       );
 
       // 객체들을 하나로 합치기
+      const mergedObj: AcademyLikeList = {}; // mergedObj의 타입을 정의
       for (let i = 0; i < res.data.resultData.length; i++) {
         if (res.data.resultData[i].academyAllLikeCount > 0) {
           const likedUsers = res.data.resultData[i].likedUsers;
@@ -50,24 +49,6 @@ function AcademyLike() {
           ];
         }
       }
-      /*
-      let mergedObj = {};
-      for (let i = 0; i < res.data.resultData.length; i++) {
-        if (res.data.resultData[i].academyAllLikeCount > 0) {
-          const likedUsers = res.data.resultData[i].likedUsers;
-          mergedObj = {
-            ...mergedObj,
-            [res.data.resultData[i].academyId]: [
-              ...(mergedObj[res.data.resultData[i].academyId] || []),
-              ...likedUsers.map((user: any) => ({
-                ...user, // 기존 속성 유지
-                acaName: res.data.resultData[i].acaName, // academyId 추가
-              })),
-            ],
-          };
-        }
-      }
-      */
       //console.log(mergedObj.undefined);
       setAcademyLikeList(mergedObj.undefined);
     } catch (error) {
@@ -132,7 +113,7 @@ function AcademyLike() {
                     <img
                       src={
                         item.userPic
-                          ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.userPic}`
+                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"

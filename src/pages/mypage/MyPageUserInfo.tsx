@@ -1,8 +1,17 @@
 import { PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, message, Upload } from "antd";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  message,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
@@ -105,6 +114,19 @@ const MemberInfo = styled.div`
   }
 `;
 
+interface editMemberType {
+  birth: string;
+  createdAt: string;
+  email: string;
+  name: string;
+  nickName: string;
+  phone: string;
+  updatedAt: string;
+  userId: number;
+  userPic: string;
+  userRole: number;
+}
+
 function MyPageUserInfo() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
@@ -112,9 +134,14 @@ function MyPageUserInfo() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [nickNameCheck, setNickNameCheck] = useState(0);
-  const [editMember, setEditMember] = useState({});
+  const [editMember, setEditMember] = useState<editMemberType>();
   const currentUserInfo = useRecoilValue(userInfo);
   //const accessToken = getCookie("accessToken");
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState("");
+  const [phoneNumber, _setPhoneNumber] = useState("");
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const navigate = useNavigate();
 
@@ -176,7 +203,7 @@ function MyPageUserInfo() {
   };
 
   // 비밀번호와 비밀번호 확인이 일치하는지 검사하는 커스텀 유효성 검사 함수
-  const validateConfirmPassword = (_, value) => {
+  const validateConfirmPassword = (_: any, value: any) => {
     const password = form.getFieldValue("newPw"); // 'password' 필드의 값 가져오기
     if (value && value !== password) {
       return Promise.reject(new Error("비밀번호가 일치하지 않습니다."));
@@ -184,7 +211,7 @@ function MyPageUserInfo() {
     return Promise.resolve();
   };
 
-  const { email, name, nickName, phone, birth, userPic } = editMember;
+  //const { email, name, nickName, phone, birth, userPic } = editMember;
 
   useEffect(() => {
     memberInfo();
@@ -217,25 +244,16 @@ function MyPageUserInfo() {
     }
   }, [editMember, form]);
 
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [fileList, setFileList] = useState([]);
-
-  const handleChange = info => {
-    let newFileList = [...info.fileList];
-
-    // maxCount로 인해 하나의 파일만 유지
-    newFileList = newFileList.slice(-1);
-
-    console.log("newFileList : ", newFileList);
+  const handleChange: UploadProps["onChange"] = info => {
+    const newFileList = [...info.fileList];
 
     // 파일 상태 업데이트
     setFileList(newFileList);
+    form.setFieldValue("pic", info.file.originFileObj);
 
     // 선택된 파일이 있으면 콘솔에 출력
     if (info.file.status === "done" && info.file.originFileObj) {
-      console.log("파일 선택됨:", info.file.originFileObj);
+      //console.log("파일 선택됨:", info.file.originFileObj);
       form.setFieldValue("pic", info.file.originFileObj);
     }
   };
@@ -248,7 +266,7 @@ function MyPageUserInfo() {
     setIsModalVisible(false);
   };
 
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     if (nickNameCheck === 2) {
       setIsModalVisible(true);
       //console.log("닉네임 확인이 필요합니다.");
@@ -297,7 +315,7 @@ function MyPageUserInfo() {
   };
 
   //닉네임 중복확인
-  const sameCheck = async nickName => {
+  const sameCheck = async (nickName: string | number) => {
     if (!nickName) {
       setIsModalVisible(true);
       setNickNameCheck(3);
@@ -324,7 +342,7 @@ function MyPageUserInfo() {
   };
 
   //휴대폰 번호 구분기호 자동입력
-  const handlePhoneNumber = e => {
+  const handlePhoneNumber = (e: any) => {
     const value = e.target.value.replace(/\D/g, ""); // 숫자만 남기기
 
     if (value.length <= 3) {
@@ -355,14 +373,14 @@ function MyPageUserInfo() {
   //로그아웃
   const logOut = async () => {
     try {
-      const res = await jwtAxios.post("/api/user/log-out", {});
+      await jwtAxios.post("/api/user/log-out", {});
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
   };
 
   //회원탈퇴 실행
-  const onFinishedSe = async values => {
+  const onFinishedSe = async (values: any) => {
     try {
       const res = await jwtAxios.delete("/api/user", {
         data: { pw: values.pw },
@@ -378,12 +396,14 @@ function MyPageUserInfo() {
       } else {
         message.error("회원탈퇴가 실패되었습니다.");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.log(error);
-      if (error.response.data.resultMessage === "잘못된 파라미터입니다.") {
-        message.error("비밀번호가 잘못되었습니다. 다시 시도해 주세요.");
-      } else {
-        message.error("회원탈퇴가 실패되었습니다.");
+      if (error instanceof AxiosError) {
+        if (error.response?.data?.resultMessage === "잘못된 파라미터입니다.") {
+          message.error("비밀번호가 잘못되었습니다. 다시 시도해 주세요.");
+        } else {
+          message.error("회원탈퇴가 실패되었습니다.");
+        }
       }
     }
   };
@@ -396,17 +416,21 @@ function MyPageUserInfo() {
   }, []);
 
   return (
-    <MemberInfo className="flex gap-5 w-full justify-center align-top">
+    <MemberInfo className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full mb-20">
-        <h1 className="title-font">회원정보 관리</h1>
-        <div className="w-3/5">
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          회원정보 관리
+        </h1>
+
+        <div className="w-3/5 max-[640px]:w-full">
           <Form form={form} onFinish={values => onFinished(values)}>
             <Form.Item
               name="user_id"
               label="이메일"
               rules={[{ required: true, message: "이메일을 입력해 주세요." }]}
+              className="max-[640px]:flex-col"
             >
               <Input type="text" className="input readonly" readOnly />
             </Form.Item>
@@ -473,11 +497,11 @@ function MyPageUserInfo() {
               <Input type="text" className="input readonly" readOnly />
             </Form.Item>
 
-            <div className="flex gap-3 w-full">
+            <div className="flex gap-3 w-full max-[640px]:flex-col max-[640px]:gap-0">
               <Form.Item
                 name="nickName"
                 label="닉네임"
-                className="w-full"
+                className="w-full max-[640px]:mb-3"
                 rules={[{ required: true, message: "닉네임을 입력해 주세요." }]}
               >
                 <Input
@@ -492,7 +516,7 @@ function MyPageUserInfo() {
               <Form.Item>
                 <button
                   type="button"
-                  className="min-w-[84px] h-14 bg-[#E8EEF3] rounded-xl font-bold text-sm"
+                  className="min-w-[84px] h-14 bg-[#E8EEF3] rounded-xl font-bold text-sm max-[640px]:w-full"
                   onClick={() => sameCheck(form.getFieldValue("nickName"))}
                 >
                   중복확인
@@ -518,7 +542,7 @@ function MyPageUserInfo() {
             </Form.Item>
 
             <Form.Item name="birth" label="생년월일">
-              <span className="readonly w-full">{editMember.birth}</span>
+              <span className="readonly w-full">{editMember?.birth}</span>
             </Form.Item>
 
             <Form.Item name="pic" label="프로필 이미지">
@@ -559,7 +583,7 @@ function MyPageUserInfo() {
               <Form.Item className="w-40">
                 <Button
                   className="w-full h-14 text-sm"
-                  onClick={e => memberOut()}
+                  onClick={() => memberOut()}
                 >
                   회원탈퇴
                 </Button>

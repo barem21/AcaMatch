@@ -68,7 +68,7 @@ function AcademyClassList() {
     }),
   );
 
-  console.log(simplifiedData);
+  //console.log(simplifiedData);
 
   //강좌 목록
   const academyClassList = async () => {
@@ -271,6 +271,9 @@ function AcademyClassList() {
             <div className="flex items-center justify-center w-44">시작일</div>
             <div className="flex items-center justify-center w-44">종료일</div>
             <div className="flex items-center justify-center w-40">
+              출석 관리
+            </div>
+            <div className="flex items-center justify-center w-40">
               교재 관리
             </div>
             <div className="flex items-center justify-center w-40">
@@ -316,13 +319,25 @@ function AcademyClassList() {
                 </div>
               </div>
               <div className="flex items-center justify-center w-40">
-                홍길동
+                홍길동 / {item.teacherId}
               </div>
               <div className="flex items-center justify-center w-44">
                 {item.startDate}
               </div>
               <div className="flex items-center justify-center w-44">
                 {item.endDate}
+              </div>
+              <div className="flex items-center justify-center w-40">
+                <button
+                  className="small_line_button"
+                  onClick={() =>
+                    navigate(
+                      `../teacher/checkIn?acaId=${acaId}&classId=${item.classId}`,
+                    )
+                  }
+                >
+                  출석 관리
+                </button>
               </div>
               <div className="flex items-center justify-center w-40">
                 <button

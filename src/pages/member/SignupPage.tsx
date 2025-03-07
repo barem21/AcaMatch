@@ -238,7 +238,7 @@ function SignupPage() {
   return (
     <>
       <header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite">
-        <div className="w-[1280px] flex items-center justify-between mx-auto  ">
+        <div className="w-[1280px] flex items-center justify-between mx-auto max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4">
           <img
             src="/logo2.png"
             className="w-[160px] cursor-pointer mr-[full]"
@@ -248,8 +248,9 @@ function SignupPage() {
           />
         </div>
       </header>
-      <div className="flex-col-start p-20 pt-[0] gap-10 w-[1280px] mx-auto">
-        <div className="flex flex-col w-[960px] max-w-[960px] mx-auto">
+
+      <div className="flex-col-start p-20 pt-[0] gap-10 w-[1280px] mx-auto max-[640px]:w-full max-[640px]:p-5">
+        <div className="flex flex-col w-[960px] max-w-[960px] mx-auto max-[640px]:w-full">
           {/* 헤더 */}
           <div className="flex flex-col items-center p-5 w-full">
             <h1 className="w-full text-center font-lexend font-bold text-[22px] leading-7 text-brand-default">
@@ -261,7 +262,7 @@ function SignupPage() {
           <Form
             form={form}
             onFinish={values => onFinish(values)}
-            className="flex flex-col justify-center mx-auto"
+            className="flex flex-col justify-center mx-auto max-[640px]:w-full max-[640px]:gap-8"
             initialValues={{
               email: "",
               password: "",
@@ -274,9 +275,10 @@ function SignupPage() {
             }}
           >
             <Form.Item name="signUpType" className="mb-0 h-[0]"></Form.Item>
+
             {/* 회원 타입 선택 */}
-            <div className="flex gap-[12px] h-[80px] items-center">
-              <label className="flex text-[16px] w-[120px] h-[56px] font-[500]">
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 회원타입 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -286,7 +288,7 @@ function SignupPage() {
                   { required: true, message: "회원타입을 선택해주세요." },
                 ]}
               >
-                <div className="flex items-center w-full h-[56px]">
+                <div className="flex items-center w-full h-[56px] max-[640px]:h-auto">
                   <Radio.Group
                     className="flex gap-[4px]"
                     options={[
@@ -301,8 +303,8 @@ function SignupPage() {
             </div>
 
             {/* 입력 필드들 */}
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:h-auto">
+              <label className="flex text-[16px] min-w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 이메일 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -324,13 +326,14 @@ function SignupPage() {
               </Form.Item>
               <SecondaryButton
                 onClick={checkEmail}
-                className="w-[84px] h-[56px]"
+                className="w-[84px] h-[56px] max-[640px]:w-full"
               >
                 중복확인
               </SecondaryButton>
             </div>
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:w-full max-[640px]:h-auto">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 비밀번호 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -359,16 +362,17 @@ function SignupPage() {
                     form.validateFields(["password"]);
                   }}
                   style={{
-                    width: "448px",
                     height: "56px",
                     borderRadius: "12px",
                     fontSize: "14px",
                   }}
+                  className="w-[448px] max-[640px]:w-full"
                 />
               </Form.Item>
             </div>
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:w-full max-[640px]:h-auto">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 비밀번호 확인 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -402,20 +406,20 @@ function SignupPage() {
                 </label> */}
                   <Input.Password
                     maxLength={16}
-                    className="ant-form-item-control-input-content"
                     placeholder="비밀 번호를 입력해 주세요"
                     style={{
-                      width: "448px",
                       height: "56px",
                       borderRadius: "12px",
                       fontSize: "14px",
                     }}
+                    className="ant-form-item-control-input-content w-[448px] max-[640px]:w-full"
                   />
                 </div>
               </Form.Item>
             </div>
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:w-full max-[640px]:h-auto">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 이름 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -429,9 +433,10 @@ function SignupPage() {
                 </div>
               </Form.Item>
             </div>
+
             {/* 생일 */}
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:w-full max-[640px]:h-auto">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 생년월일 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -440,7 +445,8 @@ function SignupPage() {
                 rules={[
                   { required: true, message: "생년월일을 선택해 주세요!" },
                 ]}
-                style={{ width: "448px", height: "56px" }}
+                style={{ height: "56px" }}
+                className="w-[448px] max-[640px]:w-full"
               >
                 <DatePicker
                   format="YYYY-MM-DD" // 원하는 날짜 형식
@@ -450,8 +456,9 @@ function SignupPage() {
                 />
               </Form.Item>
             </div>
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:w-full max-[640px]:h-auto">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 닉네임 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -475,13 +482,14 @@ function SignupPage() {
                 onClick={() => {
                   checkNickName();
                 }}
-                className="w-[84px] h-[56px]"
+                className="w-[84px] h-[56px] max-[640px]:w-full"
               >
                 중복확인
               </SecondaryButton>
             </div>
-            <div className="flex gap-[12px] h-[80px]">
-              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500]">
+
+            <div className="flex gap-[12px] h-[80px] max-[640px]:flex-col max-[640px]:w-full max-[640px]:h-auto">
+              <label className="flex text-[16px] w-[120px] h-[56px] items-center font-[500] max-[640px]:h-auto">
                 휴대폰번호 &nbsp;
                 <label className="text-[#D9534F]">*</label>
               </label>
@@ -500,7 +508,7 @@ function SignupPage() {
 
             {/* 약관 동의 */}
             <div className="flex flex-col items-end mt-[4px]">
-              <div className="flex flex-col border border-[#DBE0E5] rounded-xl w-[448px] ">
+              <div className="flex flex-col border border-[#DBE0E5] rounded-xl w-[448px] max-[640px]:w-full">
                 <div className="border-b border-[#DBE0E5] p-2 pl-4">
                   <Form.Item
                     valuePropName="checked"
@@ -535,7 +543,7 @@ function SignupPage() {
               {/* 회원가입 버튼 */}
               <SecondaryButton
                 htmlType="submit"
-                className="w-[448px] h-10 rounded-xl font-bold text-sm text-brand-default mt-[8px]"
+                className="w-[448px] h-14 rounded-xl font-bold text-sm text-brand-default mt-[8px] max-[640px]:w-full"
               >
                 회원가입
               </SecondaryButton>

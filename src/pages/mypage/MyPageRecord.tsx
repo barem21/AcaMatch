@@ -4,18 +4,30 @@ import { message, Pagination } from "antd";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
 import jwtAxios from "../../apis/jwt";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
+
+interface myAcademyArrayType {
+  acaId: number;
+  acaPic: string;
+  acaName: string;
+  classId: number;
+  className: string;
+  startDate: string;
+  endDate: string;
+}
 
 function MyPageRecord() {
   const cookies = new Cookies();
-  const [myAcademyArray, setMyAcademyArray] = useState([]);
+  const [myAcademyArray, setMyAcademyArray] = useState<myAcademyArrayType[]>(
+    [],
+  );
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const scrollRef = useRef(null);
-  const { search } = useLocation();
+  //const { search } = useLocation();
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -43,7 +55,7 @@ function MyPageRecord() {
   }
 
   const myAcademyList = async () => {
-    const params = new URLSearchParams(search);
+    //const params = new URLSearchParams(search);
     // setCurrentPage(params.get("page"));
 
     //자녀목록 호출
@@ -61,13 +73,13 @@ function MyPageRecord() {
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${checkUserId}&role=${currentUserInfo.roleId}&page=${currentPage}`,
+        `/api/joinClass?studentId=${checkUserId}&role=${currentUserInfo.roleId}&page=${currentPage}`,
       );
       //console.log(checkUserId);
-      //console.log(res);
+      //console.log(res.data.resutData);
 
-      const splitClasses = res.data.resultData.flatMap(academy => {
-        return academy.classList.map(classItem => {
+      const splitClasses = res.data.resultData.flatMap((academy: any) => {
+        return academy.classList.map((classItem: any) => {
           return {
             acaId: academy.acaId,
             acaPic: academy.acaPic,
@@ -100,10 +112,13 @@ function MyPageRecord() {
     }
   }, []);
 
-  const handlePageChange = page => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      (scrollRef.current as HTMLElement).scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
   const paginatedData = myAcademyArray.slice(
@@ -111,26 +126,29 @@ function MyPageRecord() {
     currentPage * pageSize,
   );
   return (
-    <div ref={scrollRef} className="flex gap-5 w-full justify-center align-top">
+    <div
+      ref={scrollRef}
+      className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0"
+    >
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full">
-        <h1 className="title-font">
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
           {currentUserInfo.roleId === 2 ? "자녀" : "나의"} 성적확인
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle p-4 border-b">
+          <div className="flex justify-between align-middle p-4 border-b max-[640px]:hidden">
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
             {/* <div className="flex items-center justify-center w-60">
               테스트일
             </div> */}
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-28">
               문의하기
             </div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-28">
               성적확인
             </div>
           </div>
@@ -144,7 +162,7 @@ function MyPageRecord() {
           {paginatedData?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-4 border-b"
+              className="loop-content flex justify-between align-middle p-4 border-b max-[640px]:flex-col max-[640px]:justify-start"
             >
               <div className="flex justify-start items-center w-full">
                 <div
@@ -155,7 +173,7 @@ function MyPageRecord() {
                     <img
                       src={
                         item.acaPic
-                          ? `http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`
+                          ? `http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
                           : "aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
@@ -188,29 +206,32 @@ function MyPageRecord() {
               {/* <div className="flex items-center justify-center w-60">
                 2025-01-01
               </div> */}
-              <div className="flex items-center justify-center w-40">
-                <span
-                  className="small_line_button cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/support/inquiry/detail?acaId=${item.acaId}&userId=${currentUserInfo.userId}`,
-                    )
-                  }
-                >
-                  1:1 문의
-                </span>
-              </div>
-              <div className="flex items-center justify-center w-40">
-                <span
-                  className="small_line_button cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/mypage/record/detail?acaId=${item.acaId}&acaName=${item.acaName}`,
-                    )
-                  }
-                >
-                  성적확인
-                </span>
+              <div className="flex max-[640px]:justify-start max-[640px]:pl-[68px] max-[640px]:mt-2">
+                <div className="flex items-center justify-center min-w-28 max-[640px]:mr-2">
+                  <span
+                    className="small_line_button cursor-pointer max-[640px]:w-full max-[640px]:text-center"
+                    onClick={() =>
+                      navigate(
+                        `/support/inquiry/detail?acaId=${item.acaId}&userId=${currentUserInfo.userId}`,
+                      )
+                    }
+                  >
+                    1:1 문의
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-center min-w-28">
+                  <span
+                    className="small_line_button cursor-pointer max-[640px]:w-full max-[640px]:text-center"
+                    onClick={() =>
+                      navigate(
+                        `/mypage/record/detail?acaId=${item.acaId}&acaName=${item.acaName}`,
+                      )
+                    }
+                  >
+                    성적확인
+                  </span>
+                </div>
               </div>
             </div>
           ))}

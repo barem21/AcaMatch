@@ -49,6 +49,7 @@ function CustomInput({
   const inputClassName = [
     "text-[14px]",
     "placeholder:text-[14px]",
+    "max-[640px]:!w-full",
     // "placeholder:text-brand-placeholder",
     focusOutline && `focus:outline-${focusOutline}`,
     focusBorder && `focus:border-${focusBorder}`,
@@ -80,6 +81,7 @@ function CustomInput({
               padding,
               fontSize: "14px",
             }}
+            classNames="max-[640px]:w-full"
           />
         </InputStyle>
       ) : (
@@ -95,6 +97,7 @@ function CustomInput({
             padding,
             fontSize: "14px",
           }}
+          classNames="max-[640px]:w-full"
         />
       )}
       {children}

@@ -154,12 +154,12 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-[640px]:p-4">
       <h2 className="text-[24px] font-bold flex items-center h-[70px]">
         교재 소개
       </h2>
       {/* 교재 목록 표시 */}
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-5 gap-4 max-[640px]:grid-cols-2">
         {currentBooks.length > 0 ? (
           currentBooks.map(book => (
             <div
@@ -170,7 +170,7 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
               <img
                 src={`http://112.222.157.157:5233/pic/book/${book.bookId}/${book.bookPic}`}
                 alt={book.bookName}
-                className={`w-full h-[178px] rounded-xl object-cover ${
+                className={`w-full max-h-[178px] rounded-xl object-cover max-[640px] ${
                   isOutOfStock(book) ? "opacity-50" : ""
                 }`}
               />
@@ -227,11 +227,13 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
         content={
           selectedBook ? (
             <div className="flex flex-col gap-6">
-              <img
-                src={`http://112.222.157.157:5233/pic/book/${selectedBook.bookId}/${selectedBook.bookPic}`}
-                alt={selectedBook.bookName}
-                className="w-[200px] h-[200px] rounded-xl object-cover"
-              />
+              <div className="flex justify-center items-center">
+                <img
+                  src={`http://112.222.157.157:5233/pic/book/${selectedBook.bookId}/${selectedBook.bookPic}`}
+                  alt={selectedBook.bookName}
+                  className="w-[200px] h-[200px] rounded-xl object-cover"
+                />
+              </div>
               <h3 className="text-xl font-bold">{selectedBook.bookName}</h3>
               <p className="text-[#507A95]">
                 가격: {selectedBook.bookPrice.toLocaleString()}원

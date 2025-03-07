@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { message, Radio } from "antd";
+import { Calendar, message, Radio } from "antd";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
@@ -46,23 +46,35 @@ const CustomScrollbar = styled.div`
   }
 `;
 
+const CalendarWrap = styled.div`
+  .css-v9iays .fc .fc-daygrid-day {
+    height: auto !important;
+  }
+  .css-v9iays .fc .fc-daygrid-day-frame {
+    min-height: 90px !important;
+  }
+`;
+
 // Tailwind 스타일 상수
 const styles = {
   container: "flex w-full",
   content: {
-    wrapper: "flex flex-col gap-[12px] mt-[32px] relative",
+    wrapper: "flex flex-col gap-[12px] mt-[32px] relative max-[640px]:w-full",
     imageContainer: "flex items-center justify-center px-[16px] py-[12px]",
-    image: "w-[928px] h-[320px] bg-gray-500 rounded-[12px]",
-    mainContent: "w-[940px] flex flex-col gap-[12px] mx-auto",
+    image:
+      "w-[928px] h-[320px] bg-gray-500 rounded-[12px] max-[640px]:w-full max-[640px]:h-[240px]",
+    mainContent:
+      "w-[940px] flex flex-col gap-[12px] mx-auto max-[640px]:w-full max-[640px]:items-center",
   },
   header: {
-    wrapper: "flex h-[72px] px-[16px] py-[16px]",
+    wrapper:
+      "flex h-[72px] px-[16px] py-[16px] max-[640px]:h-auto max-[640px]:justify-center",
     title: "font-bold text-3xl text-brand-default text-start",
   },
   tab: {
     container:
       "flex flex-row justify-between items-end h-[63px] sticky top-[64px] bg-white z-[10]",
-    item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[40px] border-b-2",
+    item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[40px] border-b-2 max-[640px]:w-full max-[640px]:!min-w-10",
     activeTab: "border-brand-BTBlue",
     inactiveTab: "border-[#F0F0F0]",
     text: "text-[16px] leading-[40px] text-center",
@@ -70,25 +82,28 @@ const styles = {
     inactiveText: "text-[#666666]",
   },
   academy: {
-    title: "h-[58px] flex justify-center items-center text-[24px] font-bold",
+    title:
+      "h-[58px] flex justify-center items-center text-[24px] font-bold max-[640px]:w-full",
     description:
-      "h-[36px] flex justify-center items-center text-[14px] text-[#507A95]",
+      "h-[36px] flex justify-center items-center text-[14px] text-[#507A95] max-[640px]:h-auto",
     content: "flex flex-col justify-center items-center text-[14px]",
     textContent: "text-[14px]items-center px-[16px] py-[12px] mb-[50px]",
   },
   stats: {
     container:
-      "flex justify-center items-center p-5 gap-[130px] w-[960px] h-[94px] mb-[50px] border border-[#EEEEEE] rounded-[10px]",
+      "flex justify-center items-center p-5 gap-[130px] w-[960px] h-[94px] mb-[50px] border border-[#EEEEEE] rounded-[10px] max-[640px]:w-[96%] max-[640px]:gap-5 max-[640px]:flex-col max-[640px]:h-auto",
     rating: "flex items-center h-[50px] text-[32px] font-bold",
     ratingWrapper: "flex items-center gap-[10px]",
-    statsWrapper: "flex flex-col items-center justify-between",
-    statItem: "w-[200px] flex items-center justify-between",
+    statsWrapper:
+      "flex flex-col items-center justify-between max-[640px]:flex-row max-[640px]:gap-8",
+    statItem:
+      "w-[200px] flex items-center justify-between max-[640px]:w-auto max-[640px]:gap-3",
     statLabel: "font-bold",
     statValue: "flex items-center text-[14px] text-[#507A95]",
   },
   section: {
     title: "text-[24px] font-bold flex items-center h-[70px]",
-    map: "w-full h-[450px] mb-[100px]",
+    map: "w-full h-[450px] mb-[100px] max-[640px]:h-auto max-[640px]:mb-0",
   },
 };
 
@@ -488,6 +503,7 @@ const AcademyDetail = () => {
                 )}
               </div>
             </div>
+
             <div className={styles.content.mainContent}>
               <h2 className={`${styles.academy.title} relative`}>
                 {academyData.acaName}
@@ -509,7 +525,7 @@ const AcademyDetail = () => {
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(academyData.comments),
                 }}
-                className="text-[14px] mb-[50px]"
+                className="text-[14px] mb-[50px] max-[640px]:pl-5 max-[640px]:pr-5"
               >
                 {/* {academyData.comments} */}
               </div>
@@ -552,6 +568,7 @@ const AcademyDetail = () => {
                     </span>
                   </div>
                 </div>
+
                 <div className="flex items-center justify-center gap-[12px]">
                   {roleId === 3 ? (
                     <div className="w-[119px] h-[40px] text-[14px]"></div>
@@ -595,7 +612,9 @@ const AcademyDetail = () => {
 
               <div className={styles.section.title}>학원 일정</div>
               <div className="mb-[50px]">
-                <AcademyCalendar academyData={academyData} />
+                <CalendarWrap>
+                  <AcademyCalendar academyData={academyData} />
+                </CalendarWrap>
               </div>
 
               {/* 책 목록 섹션 추가 */}

@@ -8,7 +8,6 @@ interface KakaoMapProps {
 
 const MapContainer = styled.div`
   width: 100%;
-  margin-bottom: 100px;
 `;
 
 const LoadingContainer = styled.div`
@@ -121,10 +120,7 @@ const KakaoMap = ({ address }: KakaoMapProps) => {
       {isMapLoaded ? (
         <Map
           center={mapPosition}
-          style={{
-            width: "100%",
-            height: "450px",
-          }}
+          className="w-full h-[450px] max-[640px]:h-80"
           level={3}
         >
           <MapMarker position={markerPosition}></MapMarker>
