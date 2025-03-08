@@ -1,42 +1,46 @@
-import React, { useEffect, useRef, useState } from "react";
-import SideBar from "../components/SideBar";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { VscSend } from "react-icons/vsc";
 import styled from "@emotion/styled";
-import jwtAxios from "../apis/jwt";
-import { useRecoilValue } from "recoil";
-import userInfo from "../atoms/userInfo";
-import { Button, Form } from "antd";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { VscSend } from "react-icons/vsc";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import jwtAxios from "../apis/jwt";
+import userInfo from "../atoms/userInfo";
+import SideBar from "../components/SideBar";
 
 /* 채팅관련 */
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 /* 채팅관련 */
 
+interface chatMessagesType {
+  chatId: number;
+  createdAt: string;
+  message: string;
+  read: boolean;
+  senderType: string;
+}
+
 function InquiryDetail() {
   /* 채팅관련 */
-  const [stompClient, setStompClient] = useState(null);
-  //const [messages, setMessages] = useState([]);
+  const [stompClient, setStompClient] = useState<Stomp.Client>();
   const [chatRoomId, setChatRoomId] = useState(0);
   const [messageInput, setMessageInput] = useState("");
   /* 채팅관련 */
 
-  const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [chatMessages, setChatMessages] = useState([]);
+  const [chatMessages, setChatMessages] = useState<chatMessagesType[]>([]);
   const [academyName, setAcademyName] = useState();
   const { roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
   const [searchParams, _setSearchParams] = useSearchParams();
+
   const acaId = searchParams.get("acaId");
   const userId = searchParams.get("userId");
 
-  const scrollRef = useRef(null); //scroll을 내릴 div
-
   const titleName = "고객지원";
   const menuItems = [
-    { label: "FAQ", isActive: false, link: "/support" },
-    { label: "1 : 1 문의", isActive: true, link: "/support/inquiryList" },
+    { label: "자주하는 질문", isActive: false, link: "/support" },
+    { label: "1:1 문의", isActive: true, link: "/support/inquiryList" },
   ];
 
   //채팅방 개설
@@ -71,7 +75,8 @@ function InquiryDetail() {
   }, []);
 
   useEffect(() => {
-    document.querySelector("#chat-list-wrap").scrollTo(0, 1500);
+    const chatListWrap = document.querySelector("#chat-list-wrap");
+    chatListWrap?.scrollTo(0, 1500);
   }, [chatMessages]);
 
   /* 채팅관련 */
@@ -82,7 +87,7 @@ function InquiryDetail() {
         const res = await jwtAxios.get(`/api/chat/${chatRoomId}`);
         //form.resetFields(); //초기화
         setChatMessages(res.data.resultData);
-        //console.log(res.data.resultData);
+        console.log(res.data.resultData);
       } catch (error) {
         console.log(error);
       }
@@ -92,29 +97,37 @@ function InquiryDetail() {
     const socket = new SockJS("http://acamatch.site:5233/ws");
     const client = Stomp.over(socket);
 
-    client.connect({}, frame => {
-      //console.log("Connected: " + frame);
+    client.connect({}, (frame: any) => {
+      console.log("Connected: " + frame);
 
       // 기존 구독 해제
-      if (stompClient !== null) {
-        //stompClient.disconnect();
+      if (stompClient) {
+        stompClient.disconnect(() => {
+          console.log("Disconnected from WebSocket");
+        });
       }
 
       // 새로운 채팅방 ID로 구독 설정
       const subscription = client.subscribe(
         `/queue/${chatRoomId}`,
-        response => {
+        (response: any) => {
           const message = JSON.parse(response.body);
+          console.log(message);
           myMtomDetail(); //대화목록 갱신
         },
       );
+      console.log(subscription);
       setStompClient(client);
     });
 
     // 컴포넌트가 언마운트 될 때 WebSocket 연결 종료
     return () => {
       if (client) {
-        //client.disconnect();
+        /*
+        client.disconnect(() => {
+          console.log("Disconnected from WebSocket");
+        });
+        */
       }
     };
   }, [chatRoomId]); // chatRoomId가 변경될 때마다 연결을 새로 설정
@@ -127,7 +140,7 @@ function InquiryDetail() {
     }
 
     const messagePayload = {
-      chatRoomId: parseInt(chatRoomId, 10),
+      chatRoomId: chatRoomId,
       senderType: roleId === 3 ? "ACADEMY_TO_USER" : "USER_TO_ACADEMY",
       message: messageInput.trim(),
     };
@@ -140,7 +153,7 @@ function InquiryDetail() {
     setMessageInput("");
   };
 
-  const handlerSendMessage = e => {
+  const handlerSendMessage = (e: any) => {
     // 엔터 키가 눌렸을 때만 처리
     if (e.key === "Enter") {
       e.preventDefault(); // 엔터 키 기본 동작을 방지 (예: 폼 제출)
@@ -150,10 +163,13 @@ function InquiryDetail() {
   /* 채팅관련 */
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
-      <div className="flex flex-col w-full mb-16">
-        <h1 className="title-font">1:1 학원별 문의</h1>
+
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          1:1 학원별 문의
+        </h1>
 
         <div
           className="flex items-center w-full py-4 text-white rounded-t-[12px] relative"
@@ -184,6 +200,7 @@ function InquiryDetail() {
             {academyName ? academyName : "학원명"}
           </span>
         </div>
+
         <div
           className="flex flex-col bg-[#4B89DC] h-[80vh] rounded-[12px]"
           style={{ height: "calc(100vh - 300px)" }}
@@ -202,9 +219,9 @@ function InquiryDetail() {
                     className={`flex ${chat.senderType === "USER_TO_ACADEMY" ? (roleId === 3 ? "gap-2" : "justify-end") : roleId === 3 ? "justify-end" : "gap-2"}`}
                   >
                     {/* 학원 프로필 이미지 (사용자가 아닐 때만 표시) */}
-                    {!chat.senderType === "ACADEMY_TO_USER" && (
+                    {chat.senderType !== "ACADEMY_TO_USER" && (
                       <div
-                        className="w-12 h-12 rounded-full bg-white flex-shrink-0 bg-cover bg-center border border-gray-200"
+                        className="w-12 h-12 rounded-full bg-white flex-shrink-0 bg-cover bg-center border border-gray-200 hidden"
                         style={{
                           backgroundImage: `url('/default_academy.jpg')`,
                         }}

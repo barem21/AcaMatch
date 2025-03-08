@@ -105,11 +105,13 @@ function MypageReview() {
   };
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full">
-        <h1 className="title-font">나의 리뷰 목록</h1>
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          나의 리뷰 목록
+        </h1>
 
         <div className="board-wrap">
           <div className="flex justify-between align-middle p-4 pl-6 pr-6 border-b">

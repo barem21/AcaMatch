@@ -96,18 +96,18 @@ const LocationModal: React.FC<LocationModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50 cursor-default text-brand-default">
-      <div className=" h-[700px] flex justify-center items-center">
-        <div className="bg-white rounded-3xl p-6 w-[600px] h-[700px]">
+      <div className=" h-[700px] flex justify-center items-center max-[640px]:w-full">
+        <div className="bg-white rounded-3xl p-6 w-[600px] h-[700px] max-[640px]:w-[92%] max-[640px]:h-[80vh] max-[640px]:pl-3 max-[640px]:pr-3">
           <h2 className="text-2xl font-bold text-left mb-[15px] ml-[25px]">
             지역선택
           </h2>
           <div className="border-b mb-[15px]"></div>
-          <div className="flex gap-[24px] justify-center ">
-            <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px]">
+          <div className="flex gap-[24px] justify-center max-[640px]:gap-2">
+            <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px] max-[640px]:w-1/3 max-[640px]:h-[calc(80vh-170px)]">
               {resultData.map(data => (
                 <p
                   key={data.cityId}
-                  className={`flex items-center pl-[15px] text-base text-left mb-[10px] h-[48px] leading-[48px] cursor-pointer rounded-[12px] ${
+                  className={`flex items-center pl-[15px] text-base text-left mb-[10px] h-[48px] leading-[48px] cursor-pointer rounded-[12px] max-[640px]:h-auto max-[640px]:leading-normal max-[640px]:p-2 ${
                     selectedCityId === data.cityId
                       ? "text-white bg-brand-BTBlue font-bold"
                       : ""
@@ -124,7 +124,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
                 </p>
               ))}
             </CustomScrollbar>
-            <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px]">
+
+            <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px] max-[640px]:w-1/3 max-[640px]:h-[calc(80vh-170px)]">
               {streetData.map(street => (
                 <p
                   key={street.streetId}
@@ -144,7 +145,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
                 </p>
               ))}
             </CustomScrollbar>
-            <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px]">
+
+            <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px] max-[640px]:w-1/3 max-[640px]:h-[calc(80vh-170px)]">
               <Radio.Group
                 value={selectedDongId}
                 onChange={e => {
@@ -174,7 +176,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
               </Radio.Group>
             </CustomScrollbar>
           </div>
-          <div className="flex justify-center gap-[12px] w-[490px] items-center mx-auto mt-[20px]">
+
+          <div className="flex justify-center gap-[12px] w-[490px] items-center mx-auto mt-[20px] max-[640px]:w-full">
             <MainButton
               onClick={handleCloseModal}
               className="px-4 py-2 w-[144px] h-[32px]"

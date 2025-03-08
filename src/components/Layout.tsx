@@ -247,7 +247,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex">
                 <div className="w-[280px] max-[640px]:hidden"></div>
                 <main
-                  className="flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[320px]"
+                  className="flex w-full min-w-[1280px] mx-auto max-w-[1280px] max-[640px]:min-w-[320px]"
                   style={{ minHeight: "calc(100vh - 164px)" }}
                 >
                   {children}
