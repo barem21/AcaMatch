@@ -27,7 +27,7 @@ function InquiryDetail() {
   const [chatMessages, setChatMessages] = useState([]);
   const [academyName, setAcademyName] = useState();
   const { roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const acaId = searchParams.get("acaId");
   const userId = searchParams.get("userId");
 
@@ -139,6 +139,7 @@ function InquiryDetail() {
     // 메시지 입력창 초기화
     setMessageInput("");
   };
+
   const handlerSendMessage = e => {
     // 엔터 키가 눌렸을 때만 처리
     if (e.key === "Enter") {

@@ -25,7 +25,7 @@ interface ClassItem {
 const styles = {
   stats: {
     container:
-      "flex justify-center items-center p-4 gap-[130px] w-[928px] h-[94px] mb-[50px] border border-[#EEEEEE] rounded-[10px]",
+      "flex justify-center items-center p-4 gap-[130px] w-[928px] h-[94px] mb-[50px] border border-[#EEEEEE] rounded-[10px] max-[640px]:w-full",
     rating: "flex items-center h-[50px] text-[32px] font-bold",
     ratingWrapper: "flex items-center gap-[10px]",
     statsWrapper: "flex flex-col items-center justify-between",
@@ -34,11 +34,12 @@ const styles = {
     statValue: "flex items-center text-[14px] text-[#507A95]",
   },
   reviews: {
-    container: "flex flex-col py-[12px] w-[928px]",
-    header: "flex flex-row gap-[12px] items-center w-[930px]",
+    container: "flex flex-col py-[12px] w-[928px] max-[640px]:w-full",
+    header:
+      "flex flex-row gap-[12px] items-center w-[930px] max-[640px]:w-full",
     avatar: "w-[40px] h-[40px] rounded-[20px] object-cover",
     text: "text-[14px]",
-    rating: "flex text-[16px] mt-[12px] gap-[2px] w-[930px]",
+    rating: "flex text-[16px] mt-[12px] gap-[2px] w-[930px] max-[640px]:w-full",
     content: "flex text-[14px] mt-[12px]",
   },
 };
@@ -168,7 +169,7 @@ const ReviewSection = ({
   // };
 
   return (
-    <div className="flex flex-col mx-auto p-[12px]">
+    <div className="flex flex-col mx-auto p-[12px] max-[640px]:w-full">
       <div className={styles.stats.container}>
         <div className={styles.stats.ratingWrapper}>
           <div className={styles.stats.rating}>{star.toFixed(1)}</div>
@@ -182,7 +183,9 @@ const ReviewSection = ({
       </div>
 
       <div className="flex justify-between items-center">
-        <h3 className="text-[18px] font-bold h-[47px]">Reviews</h3>
+        <h3 className="text-[18px] font-bold h-[47px] max-[640px]:h-auto">
+          Reviews
+        </h3>
         {isClassIn && (
           <button
             className="small_line_button bg-[#3B77D8]"

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
-import { getCookie } from "../../utils/cookie";
+//import { getCookie } from "../../utils/cookie";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
 import jwtAxios from "../../apis/jwt";
@@ -27,14 +27,22 @@ const getRandomUniqueNumber = () => {
   return randomNum;
 };
 
+interface likeListType {
+  acaId: number;
+  acaName: string;
+  academyAllLikeCount: number;
+  userLikeCount: number;
+  acaPic?: string;
+}
+
 function MyPageLike() {
   const cookies = new Cookies();
-  const [likeList, setLikeList] = useState([]); // 좋아요 목록
+  const [likeList, setLikeList] = useState<likeListType[]>([]); // 좋아요 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [academyIdToDelete, setAcademyIdToDelete] = useState(null); // 삭제할 학원 ID
+  const [academyIdToDelete, setAcademyIdToDelete] = useState<number>(0); // 삭제할 학원 ID
 
   const currentUserInfo = useRecoilValue(userInfo);
-  const accessToken = getCookie("accessToken");
+  //const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
   const [totalLikesCount, setTotalLikesCount] = useState(0); // To track total items
 
@@ -62,13 +70,11 @@ function MyPageLike() {
       ];
   }
 
-  const fetchData = async page => {
+  const fetchData = async (page: number) => {
     try {
       const res = await jwtAxios.get(
         `/api/like/user?userId=${currentUserInfo.userId}&page=${page}`,
       );
-      console.log(res);
-
       if (res.data.resultData.length > 0) {
         setLikeList(res.data.resultData);
         setTotalLikesCount(res.data.totalCount); // Assuming API returns total count
@@ -79,6 +85,7 @@ function MyPageLike() {
   };
 
   //좋아요 삭제하기
+  /*
   const handleButton1Click = () => {
     setIsModalVisible(false);
   };
@@ -99,11 +106,14 @@ function MyPageLike() {
     }
     setIsModalVisible(false);
   };
+  */
 
-  const handleLikeChange = academyId => {
+  /*
+  const handleLikeChange = (academyId: number) => {
     setLikeAcaId(academyId);
     setIsModalVisible(true);
   };
+  */
 
   useEffect(() => {
     fetchData(1); // Fetch data when the component mounts
@@ -116,7 +126,7 @@ function MyPageLike() {
     }
   }, []);
 
-  const handleLikeClick = academyId => {
+  const handleLikeClick = (academyId: number) => {
     // 학원 ID를 모달에 전달하여 삭제 여부를 확인
     setAcademyIdToDelete(academyId);
     setIsModalVisible(true);
@@ -153,14 +163,16 @@ function MyPageLike() {
   };
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full">
-        <h1 className="title-font">나의 좋아요 목록</h1>
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          나의 좋아요 목록
+        </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle p-4 border-b">
+          <div className="flex justify-between align-middle p-4 border-b max-[640px]:hidden">
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
@@ -190,7 +202,7 @@ function MyPageLike() {
                       className="w-full object-cover"
                       src={`http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`}
                       onError={e => {
-                        const target = e.target;
+                        const target = e.target as HTMLImageElement;
                         const randomNum = getRandomUniqueNumber();
                         target.src = `/default_academy${randomNum}.jpg`;
                       }}

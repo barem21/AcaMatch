@@ -63,7 +63,7 @@ function LoginPage() {
   return (
     <div>
       <header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite">
-        <div className="w-[1280px] flex items-center justify-between mx-auto">
+        <div className="w-[1280px] flex items-center justify-between mx-auto max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4">
           <img
             src="/logo2.png"
             className="w-[160px] cursor-pointer mr-[full]"
@@ -91,7 +91,7 @@ function LoginPage() {
               </p>
             </div>
 
-            <div className="flex flex-col mb-[16px]">
+            <div className="flex flex-col mb-[16px] max-[640px]:w-full">
               {/* 이메일 필드 */}
               <label className="flex text-[16px] w-[120px] font-[500] mb-[8px]">
                 이메일 &nbsp;
@@ -110,7 +110,8 @@ function LoginPage() {
                 <Input
                   maxLength={254}
                   placeholder="이메일을 입력해주세요"
-                  style={{ width: "480px", height: "56px" }}
+                  style={{ height: "56px" }}
+                  className="w-[480px] max-[640px]:w-full"
                 />
               </Form.Item>
 
@@ -137,7 +138,8 @@ function LoginPage() {
                 <Input.Password
                   type="password"
                   placeholder="비밀번호를 입력해주세요"
-                  style={{ width: "480px", height: "56px" }}
+                  style={{ height: "56px" }}
+                  className="w-[480px] max-[640px]:w-full"
                 />
               </Form.Item>
 
@@ -163,17 +165,17 @@ function LoginPage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-[8px]">
+            <div className="flex flex-col items-center gap-[8px] max-[640px]:w-full">
               {/* 회원가입 버튼 */}
               <SecondaryButton
                 onClick={() => navigate("/signup")}
-                className={`px-4 py-2 w-[480px] h-[40px]`}
+                className={`px-4 py-2 w-[480px] h-[40px] max-[640px]:w-full`}
               >
                 회원가입
               </SecondaryButton>
               <SecondaryButton
                 onClick={() => handleOAuthLogin("naver")}
-                className="px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff]"
+                className="px-4 py-2 w-[480px] h-[40px] bg-[#03c75a] text-[#ffffff] max-[640px]:w-full"
               >
                 <div className="flex items-center w-[140px] justify-between">
                   <img src="btnG_Naver2.png" className="w-[30px] h-[30px]" />
@@ -183,7 +185,7 @@ function LoginPage() {
 
               <SecondaryButton
                 onClick={() => handleOAuthLogin("google")}
-                className="px-4 py-2 w-[480px] h-[40px] bg-[#e5e5e6] text-[#242424]"
+                className="px-4 py-2 w-[480px] h-[40px] bg-[#e5e5e6] text-[#242424] max-[640px]:w-full"
               >
                 <div className="flex items-center w-[140px] justify-between">
                   <img
@@ -196,7 +198,7 @@ function LoginPage() {
 
               <SecondaryButton
                 onClick={() => handleOAuthLogin("kakao")}
-                className="px-4 py-2 w-[480px] h-[40px] text-[#242424] bg-[#fbe400]"
+                className="px-4 py-2 w-[480px] h-[40px] text-[#242424] bg-[#fbe400] max-[640px]:w-full"
               >
                 <div className="flex items-center w-[140px] justify-between">
                   <img
@@ -219,7 +221,7 @@ function LoginPage() {
                 type="primary"
                 htmlType="submit"
                 onClick={() => {}}
-                className={`px-4 py-2 w-[480px] h-[40px]`}
+                className={`px-4 py-2 w-[480px] h-[40px] max-[640px]:w-full`}
               >
                 로그인
               </MainButton>

@@ -359,7 +359,7 @@ function HomePage() {
     <div className="flex flex-col w-full items-center px-4 py-[36px] max-[640px]:py-[16px] gap-8 mx-auto">
       {/* 메인 베너 */}
       <div
-        className="w-[990px] h-[540px] max-[640px]:w-[330px] max-[640px]:h-[400px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative"
+        className="w-[990px] h-[540px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[640px]:h-[400px] max-[640px]:w-full"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner.jpg)`,
           backgroundSize: "cover",
@@ -472,7 +472,7 @@ function HomePage() {
       </div>
 
       {/* 모바일용 */}
-      <div className="w-full max-[640px]:w-[330px] min-[640px]:hidden">
+      <div className="w-full min-[640px]:hidden">
         <h2 className="text-2xl font-bold mb-6">
           {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
         </h2>
@@ -636,7 +636,7 @@ function HomePage() {
       </div>
 
       {/* 화제가 되고 있는 학원 (모바일) */}
-      <div className="w-full max-[640px]:w-[330px] min-[640px]:hidden">
+      <div className="w-full min-[640px]:hidden">
         <h2 className="text-2xl font-bold mb-6">화제가 되고 있는 학원</h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <Swiper

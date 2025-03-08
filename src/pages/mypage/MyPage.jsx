@@ -140,12 +140,12 @@ function MyPage() {
     <div
       id="list-wrap"
       ref={scrollRef}
-      className="flex gap-5 w-full justify-center align-top"
+      className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0"
     >
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full">
-        <h1 className="title-font">
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
           {roleId === 2 ? "자녀" : "나의"} 학원정보
         </h1>
 

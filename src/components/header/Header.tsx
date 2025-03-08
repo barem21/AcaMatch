@@ -180,7 +180,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   };
   return (
     <header className={className}>
-      <div className="w-[1280px] max-[640px]:w-[360px] max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
+      <div className="w-[1280px] max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
         <img
           src="/logo2.png"
           className="w-[160px] cursor-pointer mr-[full]"

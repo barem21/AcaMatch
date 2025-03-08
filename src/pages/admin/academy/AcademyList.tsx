@@ -19,6 +19,7 @@ interface myAcademyListType {
   address: string;
   userId: number;
   name: string;
+  reportsCount: number;
   acaId: number;
 }
 
@@ -302,7 +303,7 @@ function AcademyList() {
                 {item.name}
               </div>
               <div className="flex items-center justify-center min-w-20">
-                ??회
+                {item.reportsCount}회
               </div>
               <div className="flex items-center justify-center min-w-24">
                 <button

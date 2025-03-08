@@ -1,26 +1,40 @@
-import { useRecoilValue } from "recoil";
-import userInfo from "../../atoms/userInfo";
-import { getCookie } from "../../utils/cookie";
-import { useEffect, useState } from "react";
-import SideBar from "../../components/SideBar";
-import { Button, Form, message, Pagination } from "antd";
-import jwtAxios from "../../apis/jwt";
-import { FaPlusCircle } from "react-icons/fa";
-import CustomModal from "../../components/modal/Modal";
 import styled from "@emotion/styled";
-import { useNavigate } from "react-router-dom";
+import { Button, Form, message, Pagination } from "antd";
+import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
+import { FaPlusCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import jwtAxios from "../../apis/jwt";
+import userInfo from "../../atoms/userInfo";
+import CustomModal from "../../components/modal/Modal";
+import SideBar from "../../components/SideBar";
+//import { getCookie } from "../../utils/cookie";
+
+interface mypageChildListType {
+  birth: string;
+  certification: number;
+  createdAt: string;
+  email: string;
+  name: string;
+  phone: string;
+  updatedAt: string;
+  userId: number;
+  userPic?: string;
+}
 
 function MypageParent() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
-  const [myypageChildList, setMypageChildList] = useState([]);
+  const [mypageChildList, setMypageChildList] = useState<mypageChildListType[]>(
+    [],
+  );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
   const currentUserInfo = useRecoilValue(userInfo);
-  const accessToken = getCookie("accessToken");
-  const [parentList, setParentList] = useState([]); //자녀 목록
+  //const accessToken = getCookie("accessToken");
+  //const [parentList, setParentList] = useState([]); //자녀 목록
   const navigate = useNavigate();
 
   const titleName = "마이페이지";
@@ -123,14 +137,14 @@ function MypageParent() {
     try {
       const res = await jwtAxios.get("/api/user/relationship/list/2");
       setMypageChildList(res.data.resultData);
-      //console.log(res.data.resultData);
+      console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
 
   //부모등록 전송하기
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     try {
       const res = await jwtAxios.post("/api/user/relationship", values);
       //setMypageChildList(res.data.resultData);
@@ -143,14 +157,15 @@ function MypageParent() {
       }
     } catch (error) {
       console.log(error);
-      if (error.status === 404) {
+      const customError = error as { status: number };
+      if (customError.status === 404) {
         message.error("해당되는 정보가 없습니다. 이메일을 다시 확인해 주세요.");
       }
     }
   };
 
   //부모등록 취소하기
-  const cancelRequest = async values => {
+  const cancelRequest = async (values: any) => {
     try {
       const res = await jwtAxios.delete("/api/user/relationship", {
         data: { email: values },
@@ -178,11 +193,11 @@ function MypageParent() {
   }, []);
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <ParentList className="w-full">
-        <h1 className="title-font flex justify-between align-middle">
+      <ParentList className="w-full max-[640px]:p-4">
+        <h1 className="title-font flex justify-between align-middle max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
           보호자 정보
           <button
             className="flex items-center gap-1 mr-5 text-sm font-normal"
@@ -194,35 +209,37 @@ function MypageParent() {
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle p-4 border-b">
+          <div className="flex justify-between align-middle p-4 border-b max-[640px]:hidden">
             <div className="flex items-center justify-center w-full">
               보호자 정보
             </div>
-            <div className="flex items-center justify-center w-60">요청일</div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-32">
+              요청일
+            </div>
+            <div className="flex items-center justify-center min-w-32">
               처리상태
             </div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-32">
               요청상태
             </div>
           </div>
 
-          {myypageChildList?.length === 0 && (
+          {mypageChildList?.length === 0 && (
             <div className="p-4 text-center border-b">
               등록된 보호자 정보가 없습니다.
             </div>
           )}
 
-          {myypageChildList === null && (
+          {mypageChildList === null && (
             <div className="p-4 text-center">
               등록된 보호자 정보가 없습니다.
             </div>
           )}
 
-          {myypageChildList?.map((item, index) => (
+          {mypageChildList?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-4 border-b"
+              className="loop-content flex justify-between align-middle p-4 border-b max-[640px]:flex-col max-[640px]:justify-start"
             >
               <div className="flex justify-start items-center w-full">
                 <div className="flex items-center gap-3">
@@ -243,13 +260,14 @@ function MypageParent() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center w-60">
+
+              <div className="flex items-center justify-center min-w-32 max-[640px]:w-full max-[640px]:justify-start max-[640px]:pl-[68px]">
                 {item.createdAt.substr(0, 10)}
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center min-w-32 max-[640px]:justify-start max-[640px]:pl-[68px]">
                 {item.certification === 0 ? "승인대기" : "등록완료"}
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center min-w-32 max-[640px]:justify-start max-[640px]:pl-[68px] max-[640px]:mt-2">
                 {item.certification === 1 ? (
                   <span className="small_line_button bg-gray-200 opacity-50">
                     요청취소
@@ -271,7 +289,7 @@ function MypageParent() {
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
             defaultCurrent={1}
-            total={myypageChildList.length}
+            total={mypageChildList.length}
             showSizeChanger={false}
           />
         </div>
