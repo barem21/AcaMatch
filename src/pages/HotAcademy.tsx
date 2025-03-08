@@ -112,15 +112,17 @@ function HotAcademy() {
   };
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full">
-        <h1 className="title-font">화제의 학원</h1>
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font flex justify-between align-middle max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          화제의 학원
+        </h1>
         <div className="w-full gap-[12px] py-[16px] px-[16px] border rounded-lg overflow-hidden">
           <div className="flex flex-col gap-6">
             {/* 학원 목록 */}
-            <div className="grid grid-cols-5 gap-6 h-[568px]">
+            <div className="grid grid-cols-5 gap-6 h-[568px] max-[640px]:grid-cols-2 max-[640px]:h-auto">
               {showSkeleton
                 ? [...Array(10)].map((_, index) => <SkeletonCard key={index} />)
                 : academyData.map(academy => (
@@ -175,16 +177,19 @@ const AcademyCard = ({ academy }: { academy: any }) => {
 
   return (
     <div
-      className="flex flex-col items-start pb-3 gap-3 w-[166px] cursor-pointer"
+      className="flex flex-col items-start pb-3 gap-3 w-[166px] cursor-pointer max-[640px]:w-full"
       onClick={() =>
         navigate(`/academy/detail?id=${academy.id}&page=1&size=10`)
       }
     >
-      <img
-        src={academy.image}
-        alt={academy.acaName}
-        className="w-[166px] h-[166px] rounded-xl object-cover"
-      />
+      <div className="relative w-full max-[640px]:pb-[100%]">
+        <img
+          src={academy.image}
+          alt={academy.acaName}
+          className="w-[166px] h-[166px] rounded-xl object-cover max-[640px]:absolute max-[640px]:w-full max-[640px]:h-full"
+        />
+      </div>
+
       <div className="flex flex-col items-start w-full">
         <h3 className="text-base font-medium text-[#0E161B] leading-6 w-full line-clamp-1">
           {academy.acaName}

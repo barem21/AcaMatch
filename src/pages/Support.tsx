@@ -20,13 +20,13 @@ function Support() {
   const menuItems: MenuItem[] = [
     {
       type: "item",
-      label: "공지사항",
+      label: "자주하는 질문",
       isActive: true,
       link: "/support",
     },
     {
       type: "item",
-      label: "1 : 1 문의",
+      label: "1:1 문의",
       isActive: false,
       link: "/support/inquiryList",
     },
@@ -142,11 +142,15 @@ function Support() {
   const Kategorie = ["전체", "가입", "학원 문의", "계정", "리뷰", "기타"];
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
-      <div className="flex flex-col w-full gap-[12px]">
-        <h1 className="title-font">자주 물어보는 질문</h1>
-        <div className="flex flex-wrap gap-3 justify-start items-center">
+
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          자주하는 질문
+        </h1>
+
+        <div className="flex flex-wrap gap-3 justify-start items-center mb-5">
           {Kategorie.map(kategorie => (
             <div
               key={kategorie}
@@ -197,6 +201,7 @@ function Support() {
                     </div>
                   </div>
                 </div>
+
                 <div
                   className={`transition-all duration-200 overflow-hidden bg-brand-BTWhite ${
                     openItems.includes(index) ? "max-h-40" : "max-h-0"
