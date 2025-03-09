@@ -17,7 +17,7 @@ import BannerLayout from "./banner/BannerLayout";
 import Footer from "./footer/Footer";
 import Header from "./header/Header";
 import ScrollButton from "./ScrollButton";
-import PopupWindow from "./PopupWindow";
+import PopupWindow from "./popup/PopupWindow";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -47,6 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     "/signup/end",
     "/forgotPw",
     "/fe/redirect",
+    "/success",
   ];
   const isLayoutVisible = !noLayoutPaths.includes(location.pathname);
   const isAdminPage = location.pathname.startsWith("/admin");
@@ -74,21 +75,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  useEffect(() => {
-    const fetchPopupData = async () => {
-      try {
-        const response = await fetch("/api/popup/getPopup");
-        const data = await response.json();
-        setPopupData(data);
-      } catch (error) {
-        console.error("팝업 데이터 가져오기 실패:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchPopupData = async () => {
+  //     try {
+  //       const response = await fetch("/api/popup/getPopup");
+  //       const data = await response.json();
+  //       setPopupData(data);
+  //       console.log("팝업 데이터", data);
+  //     } catch (error) {
+  //       console.error("팝업 데이터 가져오기 실패:", error);
+  //     }
+  //   };
 
-    if (isAdminPage) {
-      fetchPopupData();
-    }
-  }, [isAdminPage]);
+  //   if (isAdminPage) {
+  //     fetchPopupData();
+  //   }
+  // }, [isAdminPage]);
 
   const checkPathMatch = (link: string | undefined): boolean => {
     if (!link) return false;
@@ -178,6 +180,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex mobile-width" ref={mainRef}>
       {isAdminPage ? (
         <>
+          {location.pathname === "/admin" && <PopupWindow isAdmin={true} />}
           <Sidebar
             isOpen={isOpen}
             close={close}
@@ -240,11 +243,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {isLayoutVisible ? (
             <>
-              {location.pathname === "/" && <PopupWindow />}
+              {location.pathname === "/" && <PopupWindow isAdmin={false} />}
               <div className="flex">
-                <div className="w-[280px]"></div>
+                <div className="w-[280px] max-[640px]:hidden"></div>
                 <main
-                  className="flex w-full min-w-[990px] mx-auto max-w-[1280px] max-[640px]:min-w-[360px]"
+                  className="flex w-full min-w-[1280px] mx-auto max-w-[1280px] max-[640px]:min-w-[320px]"
                   style={{ minHeight: "calc(100vh - 164px)" }}
                 >
                   {children}
@@ -256,7 +259,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <main>{children}</main>
           )}
           {isLayoutVisible && !isAdminPage && (
-            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
+            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px] " />
           )}
           <ScrollButton onScrollToTop={handleScrollToTop} />
         </div>

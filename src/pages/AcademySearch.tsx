@@ -73,7 +73,7 @@ const FilterBox = ({
 
   return (
     <div
-      className="w-[288px] border border-brand-BTWhite rounded-xl p-[12px]"
+      className="w-[288px] border border-brand-BTWhite rounded-xl p-[12px] max-[640px]:w-full"
       style={style}
     >
       {/* Header 부분 */}
@@ -590,17 +590,17 @@ const AcademySearch = () => {
   // };
 
   return (
-    <Form form={form} onFinish={onFinish}>
-      <div className="flex flex-row justify-between w-full gap-[12px]">
-        <div className="flex mt-[75px] ">
-          <div className="flex-col-start gap-4 w-[288px] h-[916px]">
-            <div className="flex items-start pb-5">
+    <Form form={form} onFinish={onFinish} className="w-full">
+      <div className="flex flex-row justify-between w-full gap-[12px] max-[640px]:flex-col">
+        <div className="flex mt-[75px] max-[640px]:mt-7 max-[640px]:p-4">
+          <div className="flex-col-start gap-4 w-[288px] h-[916px] max-[640px]:w-full max-[640px]:h-auto">
+            <div className="flex items-start pb-5 max-[640px]:hidden">
               <h2 className="text-[24px] font-[500] leading-[21px] text-brand-default mb-[15px]">
                 카테고리
               </h2>
             </div>
 
-            <div className="flex flex-col gap-[8px]">
+            <div className="flex flex-col gap-[8px] max-[640px]:w-full">
               {filterSections.map(section => (
                 <FilterBox
                   key={section.id}
@@ -615,38 +615,38 @@ const AcademySearch = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-start gap-3 w-full mt-[65px]">
+
+        <div className="flex flex-col items-start gap-3 w-full mt-[65px] max-[640px]:mt-0 max-[640px]:p-4">
           {/* 상단 검색 영역 */}
-          <div className="flex flex-row flex-wrap justify-between items-start gap-3 w-full h-[72px]">
-            <div className="flex flex-col w-[288px] min-w-[288px] h-10">
-              <h1 className="font-bold text-3xl text-brand-default">
+          <div className="flex flex-row flex-wrap justify-between items-start gap-3 w-full h-[72px] max-[640px]:h-auto">
+            <div className="flex flex-col w-[288px] min-w-[288px] h-10 max-[640px]:h-auto">
+              <h1 className="font-bold text-3xl text-brand-default max-[640px]:text-xl">
                 학원 검색
               </h1>
             </div>
           </div>
 
           {/* 검색 필터 */}
-          <div className="flex flex-row gap-3 w-full h-14">
+          <div className="flex flex-row gap-3 w-full h-14 max-[640px]:flex-col max-[640px]:h-auto max-[640px]:gap-2">
             {/* 태그 검색 */}
-            <div>
-              <div className="flex justify-center items-center">
-                {/* Dropdown 컴포넌트 */}
-                <Dropdown overlay={menu} trigger={["click"]}>
-                  <DropdownButton
-                    onClick={() => {}}
-                    className="w-[100px] h-[56px] border-none flex items-center px-4 text-brand-default"
-                  >
-                    {selectedSearchType} <DownOutlined />
-                  </DropdownButton>
-                </Dropdown>
-              </div>
+            <div className="flex items-center">
+              {/* Dropdown 컴포넌트 */}
+              <Dropdown overlay={menu} trigger={["click"]}>
+                <DropdownButton
+                  onClick={() => {}}
+                  className="w-[100px] h-[56px] border-none flex items-center px-4 text-brand-default max-[640px]:w-full max-[640px]:justify-start"
+                >
+                  {selectedSearchType} <DownOutlined />
+                </DropdownButton>
+              </Dropdown>
             </div>
+
             <div className="relative">
-              <Form.Item name="searchInput">
+              <Form.Item name="searchInput" className="mb-0">
                 <SearchInput
                   key={location.search}
                   placeholder={`${selectedSearchType}를 입력해주세요`}
-                  className="border-none w-[395px] h-[56px]"
+                  className="border-none w-[395px] h-[56px] max-[640px]:w-full"
                   size="large"
                   // value={searchValue}
                   defaultValue={searchValue}
@@ -657,7 +657,7 @@ const AcademySearch = () => {
               {/* <CiSearch className="text-[24px] font-bold  text-brand-placeholder absolute right-[10px] bottom-[15px] " /> */}
             </div>
             <div
-              className="flex items-center text-brand-placeholder pl-[11px] w-[460px] h-[56px] bg-[#ffffff] border border-[#DBE3E6] rounded-[12px] justify-between pr-[10px] cursor-pointer"
+              className="flex items-center text-brand-placeholder pl-[11px] w-[460px] h-[56px] bg-[#ffffff] border border-[#DBE3E6] rounded-[12px] justify-between pr-[10px] cursor-pointer max-[640px]:w-full"
               onClick={() => setIsModalVisible(true)}
             >
               <span>
@@ -669,19 +669,20 @@ const AcademySearch = () => {
           </div>
 
           {/* 학원 목록 테이블 */}
-          <div className="flex flex-col w-full border border-[#DBE3E6] rounded-xl">
+          <div className="flex flex-col w-full border border-[#DBE3E6] rounded-xl max-[640px]:overflow-hidden max-[640px]:border-t-0">
             {/* 테이블 헤더 */}
-            <div className="flex flex-row h-[46px] items-center justify-center">
+            <div className="flex flex-row h-[46px] items-center justify-center max-[640px]:hidden">
+              <span className="min-w-[10%]"></span>
               <span className="flex-row-center text-[14px] text-brand-default text-center w-full">
                 학원
               </span>
-              <span className="flex-row-center text-[14px] text-brand-default text-center min-w-[15%]">
+              <span className="flex-row-center text-[14px] text-brand-default text-center min-w-40">
                 태그
               </span>
-              <span className="flex-row-center text-[14px] text-brand-default text-center  min-w-[15%]">
+              <span className="flex-row-center text-[14px] text-brand-default text-center  min-w-40">
                 지역
               </span>
-              <span className="flex-row-center text-[14px] text-brand-default text-center  min-w-[15%]">
+              <span className="flex-row-center text-[14px] text-brand-default text-center  min-w-32">
                 별점
               </span>
             </div>
@@ -692,48 +693,56 @@ const AcademySearch = () => {
               academyData.map((academy, index) => (
                 <div
                   key={index}
-                  className="flex flex-row h-[72px] border-t border-[#DBE3E6] cursor-pointer"
+                  className="flex flex-row border-t border-[#DBE3E6] cursor-pointer"
                   onClick={() => {
                     const id = academy.acaId;
                     const path = `/academy/detail?id=${id}`;
                     navigate(path);
                   }}
                 >
-                  <div className="flex justify-center items-center min-w-[10%]">
-                    <img
-                      className="w-[60px] h-[60px] rounded-[20px]"
-                      src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`} // 기본 이미지 설정
-                      onError={e => {
-                        const target = e.target as HTMLImageElement;
-                        const randomNum = getRandomUniqueNumber();
-                        target.src = `/default_academy${randomNum}.jpg`;
-                      }}
-                    />
+                  <div className="flex justify-center items-center min-w-[10%] max-[640px]:min-w-24">
+                    <div className="p-2">
+                      <img
+                        className="w-[60px] h-[60px] rounded-[20px]"
+                        src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`} // 기본 이미지 설정
+                        onError={e => {
+                          const target = e.target as HTMLImageElement;
+                          const randomNum = getRandomUniqueNumber();
+                          target.src = `/default_academy${randomNum}.jpg`;
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center p-4 w-full text-start">
-                    <span className="text-[14px] text-brand-default">
-                      {Number(academy.premium) === 1
-                        ? `(유료)${academy.acaName} `
-                        : academy.acaName}
-                    </span>
-                  </div>
-                  <div className="flex min-w-[15%] items-center p-4">
-                    <span className="text-[14px] text-brand-placeholder line-clamp-1 text-start">
-                      {Array.isArray(academy.tagName)
-                        ? academy.tagName.join(", ")
-                        : academy.tagName}
-                    </span>
-                  </div>
-                  <div className="flex min-w-[15%] justify-center items-center p-4">
-                    <span className="text-[14px] text-brand-placeholder line-clamp-1">
-                      {academy.address}
-                    </span>
-                  </div>
-                  <div className="flex min-w-[15%] justify-center items-center p-4">
-                    <div className="flex justify-center items-center px-4 h-8 bg-[#F0F2F5] rounded-xl">
-                      <span className="text-[14px] font-medium text-brand-default ">
-                        {Number(academy.star).toFixed(1)}
+
+                  <div className="flex justify-center items-center w-full max-[640px]:flex-col max-[640px]:justify-start max-[640px]:p-4">
+                    <div className="flex justify-start items-center w-full">
+                      <span className="text-[14px] text-brand-default">
+                        {Number(academy.premium) === 1
+                          ? `(광고)${academy.acaName} `
+                          : academy.acaName}
                       </span>
+                    </div>
+
+                    <div className="flex min-w-40 items-center p-4 max-[640px]:w-full max-[640px]:p-0">
+                      <span className="text-[14px] text-brand-placeholder line-clamp-1 text-start">
+                        {Array.isArray(academy.tagName)
+                          ? academy.tagName.join(", ")
+                          : academy.tagName}
+                      </span>
+                    </div>
+
+                    <div className="flex min-w-40 justify-center items-center p-4 max-[640px]:justify-start max-[640px]:w-full max-[640px]:p-0">
+                      <span className="text-[14px] text-brand-placeholder line-clamp-1">
+                        {academy.address}
+                      </span>
+                    </div>
+
+                    <div className="flex min-w-32 justify-center items-center p-4 max-[640px]:justify-start max-[640px]:w-full max-[640px]:p-0">
+                      <div className="flex justify-center items-center px-4 h-8 bg-[#F0F2F5] rounded-xl">
+                        <span className="text-[14px] font-medium text-brand-default ">
+                          {Number(academy.star).toFixed(1)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

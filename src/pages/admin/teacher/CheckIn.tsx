@@ -7,6 +7,10 @@ import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import jwtAxios from "../../../apis/jwt";
+import axios from "axios";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../../atoms/userInfo";
+import { useSearchParams } from "react-router-dom";
 
 interface BoardItem {
   boardId: number;
@@ -23,13 +27,83 @@ interface Event {
   backgroundColor?: string;
 }
 
+interface classListType {
+  acaId: number;
+  acaPics: string;
+  acaPic: string;
+  acaName: string;
+  classId: number;
+  className: string;
+  startDate: string;
+  endDate: string;
+  teacherId: number;
+  academyId: number;
+  teacherName: string;
+}
+
 const CheckIn = () => {
   const [form] = Form.useForm();
-  // const { userId } = useRecoilValue(userInfo);
+  const { userId, roleId } = useRecoilValue(userInfo);
+  const [myAcademyList, setMyAcademyList] = useState([]); //학원 목록
+  const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
   const [boardList, _setBoardList] = useState<BoardItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [_selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
   const [checkedList, setCheckedList] = useState<number[]>([]);
+  const [searchParams] = useSearchParams();
+
+  const acaId = parseInt(searchParams.get("acaId") || "1", 0);
+
+  //검색조건용 학원 목록
+  const academyList = async () => {
+    try {
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(
+          `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //강좌 목록
+  const academyClassList = async () => {
+    try {
+      const res = await axios.get(
+        `/api/acaClass?acaId=${acaId}&page=1&size=30`,
+      );
+      setClassList(res.data.resultData);
+      console.log("classList : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // acaId와 acaName만 남기기
+  const simplifiedData2 = classList.map(
+    ({ classId: value, className: label }) => ({
+      value,
+      label,
+    }),
+  );
 
   // 현재 날짜 기준으로 해당 월의 시작일과 종료일 계산
   const getCurrentMonthRange = () => {
@@ -94,6 +168,7 @@ const CheckIn = () => {
       message.error("출석 데이터를 불러오는데 실패했습니다.");
     }
   };
+
   const handleAcademyChange = (value: number) => {
     setSelectedAcademy(value);
     fetchAttendanceData();
@@ -131,7 +206,16 @@ const CheckIn = () => {
   };
 
   useEffect(() => {
+    academyList(); //학원 목록
+    academyClassList(); //강좌 목록
     fetchAttendanceData();
+  }, []);
+
+  useEffect(() => {
+    //페이지 들어오면 ant design 처리용 기본값 세팅
+    form.setFieldsValue({
+      acaId: acaId ? acaId : 0,
+    });
   }, []);
 
   // useEffect(() => {
@@ -145,7 +229,7 @@ const CheckIn = () => {
       <div className="w-full">
         <h1 className="title-admin-font">
           학생 출석 관리
-          <p>결제 및 지출 관리 {">"} 학원 및 지출 관리</p>
+          <p>학원 관리 &gt; 학원 강의목록 &gt; 학생 출석 관리</p>
         </h1>
 
         <div className="board-wrap">
@@ -153,24 +237,17 @@ const CheckIn = () => {
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-28 text-sm">학원 선택</label>
-                <Form.Item name="academy" className="mb-0 mr-[10px]">
+                <Form.Item name="acaId" className="mb-0 mr-[10px]">
                   <Select
                     showSearch
                     placeholder="학원을 선택하세요"
                     optionFilterProp="label"
                     className="select-admin-basic w-[300px]"
                     onChange={handleAcademyChange}
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    options={boardList.map(item => ({
-                      value: item.boardId,
-                      label: item.boardName,
-                    }))}
+                    options={simplifiedData}
                   />
                 </Form.Item>
+
                 <label className="w-28 text-sm">강좌 선택</label>
                 <Form.Item name="academy" className="mb-0">
                   <Select
@@ -179,15 +256,7 @@ const CheckIn = () => {
                     optionFilterProp="label"
                     className="select-admin-basic w-[300px]"
                     onChange={handleAcademyChange}
-                    filterOption={(input, option) =>
-                      (option?.label ?? "")
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    options={boardList.map(item => ({
-                      value: item.boardId,
-                      label: item.boardName,
-                    }))}
+                    options={simplifiedData2}
                   />
                 </Form.Item>
               </div>

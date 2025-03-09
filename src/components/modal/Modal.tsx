@@ -17,6 +17,7 @@ interface CustomModalProps {
   btWidth?: number; // 버튼 너비
   btHeight?: number; // 버튼 높이
   gap?: string; // gap 값
+  children?: React.ReactNode;
 }
 
 const CancelButton = styled(MainButton)`
@@ -66,7 +67,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
       style={{ width: "100%", height: "100vh" }}
     >
       <div
-        className={`bg-white rounded-3xl p-6 transition-all ease-out duration-300
+        className={`bg-white rounded-3xl p-6 transition-all ease-out duration-300 max-[640px]:!w-[92%]
         ${visible ? "opacity-100 animate-fade-in animate-scale-up" : "opacity-0"}`}
         style={{
           width: `${modalWidth}px`,

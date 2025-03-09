@@ -3,7 +3,7 @@ import { message } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
 import { FaBell } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
@@ -18,12 +18,26 @@ const SecondaryButton = styled(MainButton)`
     color: #000 !important;
   }
 `;
+
 const menuItems = [
   { label: "학원 검색", link: "/academy?page=1" },
   { label: "화제의 학원", link: "/hotAcademy" },
   { label: "고객지원", link: "/support" },
   { label: "마이페이지", link: "/mypage" },
 ];
+
+const MobileMenuWrap = styled.div`
+  #mobileMenuWrap {
+    left: auto;
+    right: -100%;
+    padding: 20px;
+    transition: all 0.3s ease;
+    z-index: 2;
+  }
+  #mobileMenuWrap.show {
+    right: -50%;
+  }
+`;
 
 interface HeaderProps {
   className?: string;
@@ -35,6 +49,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const [notifications, setNotifications] = useState<string[]>([]);
   const [showNotifications, setShowNotifications] = useState(false); // 알림창 표시 여부
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const currentUserInfo = useRecoilValue(userInfo);
 
   useEffect(() => {
@@ -156,6 +171,11 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   //   e.stopPropagation();
   // };
 
+  /* 모바일 전용메뉴 */
+  const toggleMobileMenu = () => {
+    setIsMenuOpen(prevState => !prevState);
+  };
+
   const logOut = async () => {
     try {
       const res = await jwtAxios.post("/api/user/log-out", {});
@@ -178,9 +198,10 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     }
     return false;
   };
+
   return (
     <header className={className}>
-      <div className="w-[1280px] max-[640px]:w-[360px] max-[640px]:h-[64px] flex items-center justify-between mx-auto">
+      <div className="w-[1280px] max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
         <img
           src="/logo2.png"
           className="w-[160px] cursor-pointer mr-[full]"
@@ -283,9 +304,33 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           </div>
         </div>
         <button className="min-[640px]:hidden">
-          <GiHamburgerMenu size={24} /> {/* 크기는 필요에 따라 조절 가능 */}
+          <GiHamburgerMenu size={24} onClick={() => toggleMobileMenu()} />
+          {/* 크기는 필요에 따라 조절 가능 */}
         </button>
       </div>
+
+      <MobileMenuWrap>
+        <div
+          id="mobileMenuWrap"
+          className={`${isMenuOpen ? "show" : "hide"} fixed top-[64px] w-full h-[calc(100vh-60px)] bg-gray-100`}
+        >
+          <ul>
+            <li onClick={() => navigate("/")}>모바일 메뉴</li>
+            <li>
+              <Link to={"/academy?page=1&size=10"}>학원 검색</Link>
+            </li>
+            <li>
+              <Link to={"/hotAcademy"}>화제의 학원</Link>
+            </li>
+            <li>
+              <Link to={"/support"}>고객지원</Link>
+            </li>
+            <li>
+              <Link to={"/mypage/user"}>마이페이지</Link>
+            </li>
+          </ul>
+        </div>
+      </MobileMenuWrap>
     </header>
   );
 };

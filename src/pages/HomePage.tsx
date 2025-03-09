@@ -8,9 +8,11 @@ import CustomInput from "../components/CustomInput ";
 import MainButton from "../components/button/MainButton";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { getCookie } from "../utils/cookie";
 
 interface Academy {
   acaId: number;
@@ -65,7 +67,7 @@ interface Banner {
 function HomePage() {
   const navigate = useNavigate();
 
-  const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
+  // const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   // const [isDefaultLoading, setIsDefaultLoading] = useState(true);
 
@@ -73,6 +75,13 @@ function HomePage() {
 
   const [popularTag, setPopularTag] = useState<Tag[]>([]);
   const [bestAcademyCards, setBestAcademyCards] = useState<BestAcademy[]>([]);
+
+  const [academies, setAcademies] = useState<Academy[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
 
   const serviceStats = [
     {
@@ -108,7 +117,7 @@ function HomePage() {
 
   const getAcademyImageUrl = (acaId: number, pic: string) => {
     if (!pic || pic === "default.jpg") {
-      // 🔥 학원별로 고유한 랜덤 숫자를 설정
+      // 학원별로 고유한 랜덤 숫자를 설정
       if (!randomNumbersRef.current[acaId]) {
         randomNumbersRef.current[acaId] = Math.floor(Math.random() * 10) + 1; // 1~10 사이 랜덤
       }
@@ -135,6 +144,59 @@ function HomePage() {
         return "etc";
     }
   };
+
+  // 거리별
+  useEffect(() => {
+    const accessToken = getCookie("accessToken");
+    setIsLoggedIn(!!accessToken);
+
+    if (accessToken) {
+      const getLocationByIP = async () => {
+        try {
+          // IP 기반 위치 정보 가져오기
+          const locationResponse = await axios.get("https://ipapi.co/json/");
+          const location = {
+            lat: locationResponse.data.latitude,
+            lon: locationResponse.data.longitude,
+          };
+          setUserLocation(location);
+
+          // 위치 정보를 기반으로 주변 학원 정보 가져오기
+          const academyResponse = await axios.get(
+            "/api/academy/GetAcademyListByDistance",
+            {
+              params: {
+                lat: location.lat,
+                lon: location.lon,
+                page: 1,
+                size: 5,
+              },
+            },
+          );
+          setAcademies(academyResponse.data.resultData);
+        } catch (error) {
+          console.error("위치 정보 또는 학원 정보 가져오기 실패:", error);
+          // 실패 시 기본 학원 목록 로드
+          const response = await axios.get("/api/academy/AcademyDefault");
+          setAcademies(response.data.resultData);
+        }
+      };
+
+      // IP 기반 위치 정보 가져오기 실행
+      getLocationByIP();
+    } else {
+      // 비로그인 상태일 때는 기본 학원 목록 가져오기
+      const fetchDefaultAcademies = async () => {
+        try {
+          const response = await axios.get("/api/academy/AcademyDefault");
+          setAcademies(response.data.resultData);
+        } catch (error) {
+          console.error("기본 학원 목록을 가져오는 데 실패했습니다.", error);
+        }
+      };
+      fetchDefaultAcademies();
+    }
+  }, []);
 
   // 배너 데이터 가져오기
   useEffect(() => {
@@ -175,22 +237,22 @@ function HomePage() {
     fetchDefaultAcademies();
   }, []);
 
-  useEffect(() => {
-    const fetchDefaultAcademies = async () => {
-      // setIsDefaultLoading(true);
-      try {
-        const response = await axios.get("/api/academy/AcademyDefault");
-        setDefaultAcademies(response.data.resultData);
-        // console.log(response);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        // setIsDefaultLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchDefaultAcademies = async () => {
+  //     // setIsDefaultLoading(true);
+  //     try {
+  //       const response = await axios.get("/api/academy/AcademyDefault");
+  //       setDefaultAcademies(response.data.resultData);
+  //       // console.log(response);
+  //     } catch (error) {
+  //       console.error(error);
+  //     } finally {
+  //       // setIsDefaultLoading(false);
+  //     }
+  //   };
 
-    fetchDefaultAcademies();
-  }, []);
+  //   fetchDefaultAcademies();
+  // }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -277,27 +339,43 @@ function HomePage() {
     fetchData();
   }, []);
 
+  const getLocationByIP = async () => {
+    try {
+      // 무료 IP Geolocation API 사용
+      const response = await axios.get("https://ipapi.co/json/");
+      setUserLocation({
+        lat: response.data.latitude,
+        lon: response.data.longitude,
+      });
+    } catch (error) {
+      console.error("IP 기반 위치 확인 실패:", error);
+      // 실패시 기본 학원 목록 라드
+      const response = await axios.get("/api/academy/AcademyDefault");
+      setAcademies(response.data.resultData);
+    }
+  };
+
   return (
-    <div className="flex flex-col w-full items-center px-4 py-[36px] gap-8 mx-auto">
+    <div className="flex flex-col w-full items-center px-4 py-[36px] max-[640px]:py-[16px] gap-8 mx-auto">
       {/* 메인 베너 */}
       <div
-        className="w-[990px] h-[540px] max-[640px]:w-[360px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative"
+        className="w-[990px] h-[540px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[640px]:h-[400px] max-[640px]:w-full"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner.jpg)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute left-10 top-[216px] text-white">
-          <h1 className="text-5xl font-black font-lexend mb-4">
+        <div className="absolute left-10 max-[640px]:left-5 top-[216px] max-[640px]:top-[175px] text-white">
+          <h1 className="text-2xl min-[640px]:text-4xl font-black font-lexend mb-4">
             원하는 학원을 찾아보세요
           </h1>
-          <p className="text-base font-normal">
+          <p className="text-sm min-[640px]:text-base max-[640px]:w-[290px] font-normal">
             여러분의 학습 목표에 맞는 학원을 쉽고 빠르게 추천해 드립니다.
           </p>
         </div>
         <div
-          className="absolute left-10 right-10 bottom-10 py-5 flex justify-center items-center w-[full]"
+          className="absolute left-10 max-[640px]:left-5 right-10 max-[640px]:right-5 max-[640px]:bottom-5 bottom-10 py-5 flex justify-center items-center w-[full]"
           onKeyDown={e => {
             if (e.key === "Enter") handleButton1Click(); // 엔터 입력 시 버튼 클릭
           }}
@@ -328,7 +406,7 @@ function HomePage() {
       </div>
 
       {/* 인기 태그 */}
-      <div className="w-full max-w-[990px]">
+      <div className="w-full max-w-[990px] ">
         <h2 className="text-2xl font-bold mb-6">인기 태그</h2>
         <div className="flex flex-wrap gap-5 justify-start items-center">
           {popularTag && popularTag.length > 0 ? (
@@ -348,11 +426,14 @@ function HomePage() {
           )}
         </div>
       </div>
-      <div className="w-full max-w-[990px]">
-        <h2 className="text-2xl font-bold mb-6">이 학원 어떠신가요?</h2>
-        {defaultAcademies && defaultAcademies.length > 0 ? (
+
+      <div className="w-full max-w-[990px] max-[640px]:hidden">
+        <h2 className="text-2xl font-bold mb-6">
+          {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
+        </h2>
+        {academies && academies.length > 0 ? (
           <div className="grid grid-cols-5 gap-6">
-            {defaultAcademies.map(academy => (
+            {academies.map(academy => (
               <div
                 key={academy.acaId}
                 className="flex flex-col gap-4 cursor-pointer"
@@ -362,19 +443,15 @@ function HomePage() {
                 }}
               >
                 <img
-                  src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
+                  src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`}
                   alt={academy.acaName}
-                  // effect="blur"
                   className="w-full h-[178px] rounded-xl object-cover"
-                  // placeholderSrc="/image-placeholder.jpg" // 로딩 중 표시될 저해상도 이미지
-                  // wrapperClassName="w-full h-[186px]"
                 />
                 <div>
                   <h3 className="font-medium text-base text-[#242424] truncate">
                     {academy.acaName}
                   </h3>
                   <p className="text-sm text-[#507A95] truncate">
-                    {/* {academy.address} */}
                     {academy.tagNames || "태그 정보 없음"}
                   </p>
                   <p className="text-sm text-[#507A95]">
@@ -385,6 +462,59 @@ function HomePage() {
               </div>
             ))}
           </div>
+        ) : (
+          <p className="text-gray-500">
+            {isLoggedIn
+              ? "주변 학원이 존재하지 않습니다."
+              : "추천할 학원이 존재하지 않습니다."}
+          </p>
+        )}
+      </div>
+
+      {/* 모바일용 */}
+      <div className="w-full min-[640px]:hidden">
+        <h2 className="text-2xl font-bold mb-6">
+          {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
+        </h2>
+        {academies && academies.length > 0 ? (
+          <Swiper
+            modules={[FreeMode]}
+            slidesPerView={"auto"} // 자동으로 크기 조정
+            spaceBetween={16} // 각 카드 사이의 간격
+            freeMode={true} // 드래그 이동 가능
+            grabCursor={true} // 마우스 커서 손모양
+            className="overflow-visible"
+          >
+            {academies.map(academy => (
+              <SwiperSlide
+                key={academy.acaId}
+                className="w-[160px] flex-shrink-0"
+              >
+                <div
+                  className="flex flex-col gap-4 cursor-pointer"
+                  onClick={() => handleAcademyClick(academy.acaId)}
+                >
+                  <img
+                    src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
+                    alt={academy.acaName}
+                    className="w-full h-[160px] rounded-xl object-cover"
+                  />
+                  <div>
+                    <h3 className="font-medium text-base text-[#242424] truncate">
+                      {academy.acaName}
+                    </h3>
+                    <p className="text-sm text-[#507A95] truncate">
+                      {academy.tagNames || "태그 정보 없음"}
+                    </p>
+                    <p className="text-sm text-[#507A95]">
+                      {academy.starAvg?.toFixed(1)}&nbsp; ({academy.reviewCount}{" "}
+                      reviews)
+                    </p>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         ) : (
           <p className="text-gray-500">추천할 학원이 존재하지 않습니다.</p>
         )}
@@ -443,7 +573,7 @@ function HomePage() {
       <div className="w-full max-w-[990px]">
         <h2 className="text-2xl font-bold font-lexend mb-7">서비스 현황</h2>
         {service && service.length > 0 ? (
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-3 gap-6 max-[640px]:grid-cols-1">
             {service.map((stat, index) => (
               <div
                 key={index}
@@ -454,7 +584,9 @@ function HomePage() {
                   <h3 className="text-base font-bold text-[#242424]">
                     {stat.title}
                   </h3>
-                  <p className="text-sm text-[#507A95]">{stat.count}</p>
+                  <p className="text-sm text-[#507A95] max-[640px]:text-xs">
+                    {stat.count}
+                  </p>
                 </div>
               </div>
             ))}
@@ -465,7 +597,7 @@ function HomePage() {
       </div>
 
       {/* 화제가 되고 있는 학원 */}
-      <div className="w-full max-w-[990px]">
+      <div className="w-full max-w-[990px] max-[640px]:hidden">
         <h2 className="text-2xl font-bold mb-7">화제가 되고 있는 학원</h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <div className="grid grid-cols-4 gap-6">
@@ -496,6 +628,53 @@ function HomePage() {
               </div>
             ))}
           </div>
+        ) : (
+          <p className="text-gray-500">
+            화제가 되고 있는 학원이 존재하지 않습니다.
+          </p>
+        )}
+      </div>
+
+      {/* 화제가 되고 있는 학원 (모바일) */}
+      <div className="w-full min-[640px]:hidden">
+        <h2 className="text-2xl font-bold mb-6">화제가 되고 있는 학원</h2>
+        {bestAcademyCards && bestAcademyCards.length > 0 ? (
+          <Swiper
+            modules={[FreeMode]}
+            slidesPerView={"auto"} // 자동으로 크기 조정
+            spaceBetween={16} // 각 카드 사이의 간격
+            freeMode={true} // 드래그 이동 가능
+            grabCursor={true} // 마우스 커서 손모양
+            className="overflow-visible"
+          >
+            {bestAcademyCards.map((card, index) => (
+              <SwiperSlide key={index} className="w-[160px] flex-shrink-0">
+                <div
+                  className="flex flex-col gap-4 cursor-pointer"
+                  onClick={() => handleAcademyClick(Number(card.acaId))}
+                >
+                  <img
+                    className="h-[160px] bg-gray-200 rounded-xl object-cover"
+                    src={card.image}
+                    alt={card.subject}
+                  />
+                  <div className="flex flex-col">
+                    <h3 className="font-medium text-base text-[#242424] truncate">
+                      {card.subject || "학원명 없음"}
+                    </h3>
+                    <div className="text-sm text-[#507A95]">
+                      <p className="text-[14px] line-clamp-1">
+                        {card.description || "태그 정보 없음"}
+                      </p>
+                      <p className="text-[14px] line-clamp-1">
+                        {card.reviews || "리뷰 정보 없음"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         ) : (
           <p className="text-gray-500">
             화제가 되고 있는 학원이 존재하지 않습니다.

@@ -205,8 +205,13 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
       {
-        label: "강의 관리",
-        link: "/admin/academy/class",
+        label: "좋아요 목록",
+        link: "/admin/academy/like",
+        active: false,
+      },
+      {
+        label: "학원 리뷰 목록",
+        link: "/admin/academy/review",
         active: false,
       },
     ],
@@ -225,7 +230,7 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
       },
       {
         label: "회원 정보",
-        link: "/admin/member/info",
+        link: "/admin/profile",
         active: false,
       },
     ],

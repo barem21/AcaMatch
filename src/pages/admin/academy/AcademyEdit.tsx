@@ -1,6 +1,16 @@
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
-import { Button, Form, Image, Input, message, TimePicker, Upload } from "antd";
+import {
+  Button,
+  Form,
+  Image,
+  Input,
+  message,
+  TimePicker,
+  Upload,
+  UploadFile,
+  UploadProps,
+} from "antd";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -122,13 +132,11 @@ interface tagListType {
   tagName: string;
 }
 
-interface fileListType {
-  uid: number;
-  name: string;
-  status: string;
-  url: string;
+declare global {
+  interface Window {
+    daum: any; // daum 객체의 타입을 any로 지정 (정확한 타입을 알고 있다면 타입을 더 구체적으로 지정할 수 있습니다)
+  }
 }
-
 function AcademyEdit() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
@@ -140,21 +148,23 @@ function AcademyEdit() {
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [tagKeyword, setTagKeyword] = useState(""); //태그검색 키워드
   const [tagList, setTagList] = useState<tagListType[]>([]); //태그목록(전체/검색결과)
-  const [selectedItems, setSelectedItems] = useState<number[]>([]); //선택한 태그값
+  const [selectedItems, setSelectedItems] = useState<string[]>([]); //선택한 태그값
   const [searchParams] = useSearchParams();
-  const [fileList, setFileList] = useState<fileListType[]>([]);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
   const { userId } = useRecoilValue(userInfo);
   const navigate = useNavigate();
 
   // 체크박스 클릭 시 선택/해제 처리
-  const handleCheckbox2Change = (value: any) => {
+  const handleCheckbox2Change = (tagId: number, tagName: string) => {
+    //alert(tagId + "/" + tagName);
+    console.log(tagId);
     setSelectedItems(
       prevSelectedItems =>
-        prevSelectedItems.includes(value)
-          ? prevSelectedItems.filter(item => item !== value) // 이미 선택된 항목이면 제거
-          : [...prevSelectedItems, value], // 선택되지 않은 항목이면 추가
+        prevSelectedItems.includes(tagName)
+          ? prevSelectedItems.filter(item => item !== tagName) // 이미 선택된 항목이면 제거
+          : [...prevSelectedItems, tagName], // 선택되지 않은 항목이면 추가
     );
   };
 
@@ -188,7 +198,7 @@ function AcademyEdit() {
 
   const handleButton2Click2 = () => {
     setIsModalVisible2(false);
-    navigate("/mypage/academy");
+    navigate("../academy");
   };
 
   //모달창에서 태그 검색하기
@@ -232,8 +242,8 @@ function AcademyEdit() {
         <input
           type="checkbox"
           id={`checkbox-${item.tagId}`}
-          checked={selectedItems.includes(item.tagId)}
-          onChange={() => handleCheckbox2Change(item.tagId)}
+          checked={selectedItems.includes(item.tagName)}
+          onChange={() => handleCheckbox2Change(item.tagId, item.tagName)}
         />
         <label htmlFor={`checkbox-${item.tagId}`}>{item.tagName}</label>
       </div>
@@ -258,30 +268,30 @@ function AcademyEdit() {
         closeTime: dayjs(res.data.resultData.closeTime.substr(0, 5), "HH:mm"),
         comment: res.data.resultData.comment,
         teacherNum: res.data.resultData.teacherNum,
+        businessNumber: res.data.resultData.businessNumber,
       });
 
-      const result = res.data.resultData.acaPic
+      const acaPicArr = res.data.resultData.acaPic
         .split(",")
-        .map(item => item.trim()); // 공백 제거
+        .map((item: string) => item.trim()); // 공백 제거
 
-      console.log(result);
+      //console.log(acaPicArr[0]);
 
-      if (res.data.resultData.acaPic) {
-        setFileList([
-          {
-            uid: 1,
-            name: res.data.resultData.acaPic,
-            status: "done",
-            url: `http://112.222.157.157:5233/pic/academy/${res.data.resultData.acaId}/${res.data.resultData.acaPic}`,
-          },
-        ]);
-      }
+      setFileList(
+        acaPicArr.map((item: string, index: number) => ({
+          uid: index + 1, // uid는 index를 기반으로 하거나 적절한 값을 사용
+          name: item,
+          status: "done",
+          url: `http://112.222.157.157:5233/pic/academy/${res.data.resultData.acaId}/${item}`,
+        })),
+      );
     } catch (error) {
       console.log(error);
     }
   };
 
   //첨부파일 처리
+  /*
   const handleChange = (info: any) => {
     const newFileList = [...info.fileList];
 
@@ -290,6 +300,17 @@ function AcademyEdit() {
 
     console.log("파일 선택됨:", info.file.originFileObj);
     form.setFieldValue("pics", info.file.originFileObj);
+  };
+  */
+  const handleChange: UploadProps["onChange"] = (info: any) => {
+    const newFileList = [...info.fileList];
+    setFileList(newFileList);
+
+    //form.setFieldValue("pics", info.file.originFileObj);
+    form.setFieldValue(
+      "pics",
+      newFileList.map((file: any) => file.originFileObj),
+    );
   };
 
   const onFinished = async (values: any) => {
@@ -300,8 +321,11 @@ function AcademyEdit() {
       const formData = new FormData();
 
       // pic이 있는 경우에만 추가
-      if (values.pic) {
-        formData.append("pic", values.pic);
+      if (values.pics) {
+        const picsCount = values.pics.length;
+        for (let i = 0; i < picsCount; i++) {
+          formData.append("pics", values.pics[i]);
+        }
       }
 
       const reqData = {
@@ -319,7 +343,7 @@ function AcademyEdit() {
           detailAddress: values.detailAddress,
           postNum: values.postNum,
         },
-        tagIdList: selectedItems.map(item => parseInt(item, 10)),
+        tagNameList: selectedItems,
         //tagIdList: [1, 3],
       };
 
@@ -401,21 +425,14 @@ function AcademyEdit() {
                 />
               </Form.Item>
 
-              <Form.Item
-                name="business_number"
-                label="사업자등록번호"
-                rules={[
-                  {
-                    required: true,
-                    message: "사업자등록번호를 입력해 주세요.",
-                  },
-                ]}
-              >
+              <Form.Item name="businessNumber" label="사업자등록번호">
                 <Input
                   className="input-admin-basic"
                   id="acaName"
                   maxLength={20}
                   placeholder="사업자등록번호를 입력해 주세요."
+                  readOnly
+                  disabled
                 />
               </Form.Item>
 
@@ -569,13 +586,13 @@ function AcademyEdit() {
               {selectedItems && (
                 <div className="w-full pl-32 pb-6">
                   <ul className="flex flex-wrap gap-5">
-                    {selectedItems.map(value => {
+                    {selectedItems.map((value, index) => {
                       const selectedTags = tagList.find(
-                        option => option.tagId === value,
+                        option => option.tagName === value,
                       );
                       return (
                         <li
-                          key={value}
+                          key={index}
                           className="flex justify-center items-center"
                         >
                           {selectedTags?.tagName}
@@ -592,15 +609,10 @@ function AcademyEdit() {
                 </div>
               )}
 
-              <Form.Item
-                name="pics"
-                label="학원 이미지"
-                rules={[
-                  { required: true, message: "학원 이미지를 첨부해 주세요." },
-                ]}
-              >
+              <Form.Item name="pics" label="학원 이미지">
                 <div>
                   <Upload
+                    multiple
                     listType="picture-card"
                     maxCount={5}
                     onChange={handleChange}
@@ -711,4 +723,3 @@ function AcademyEdit() {
 }
 
 export default AcademyEdit;
-

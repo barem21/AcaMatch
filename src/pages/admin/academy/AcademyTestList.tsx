@@ -1,31 +1,44 @@
 import styled from "@emotion/styled";
-import { Button, Input, Form, message, Pagination, Radio, Select } from "antd";
+import { Button, Form, Input, message, Pagination, Radio, Select } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FaPlusCircle } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useRecoilValue } from "recoil";
-import userInfo from "../../../atoms/userInfo";
-import CustomModal from "../../../components/modal/Modal";
 import { Cookies } from "react-cookie";
+import { useNavigate, useSearchParams } from "react-router-dom";
+//import { useRecoilValue } from "recoil";
+//import userInfo from "../../../atoms/userInfo";
+import CustomModal from "../../../components/modal/Modal";
+
+interface myAcademyTestListType {
+  acaPics: string;
+  acaPic: string;
+  examId: number;
+  examName: string;
+  examDate: string;
+  processingStatus: number;
+  teacherId: number;
+  academyId: number;
+  teacherName: string;
+}
 
 function AcademyTestList() {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const cookies = new Cookies();
-  const currentUserInfo = useRecoilValue(userInfo);
-  const [myAcademyTestList, setMyAcademyTestList] = useState([]);
+  //const currentUserInfo = useRecoilValue(userInfo);
+  const [myAcademyTestList, setMyAcademyTestList] = useState<
+    myAcademyTestListType[]
+  >([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModal2Visible, setIsModal2Visible] = useState(false);
   const [resultMessage, setResultMessage] = useState("");
   const [academyInfo, setAcademyInfo] = useState("");
-  const [radioValue, setRadioValue] = useState(1);
+  const [radioValue, _setRadioValue] = useState(1);
   const [classList, setClassList] = useState([]);
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
 
-  const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
+  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
 
   const TestList = styled.div`
     button {
@@ -71,7 +84,7 @@ function AcademyTestList() {
     setIsModalVisible(false);
   };
   const handleButton2Click = () => {
-    const subjectName = form.getFieldValue("subjectName");
+    const subjectName = form.getFieldValue("examName");
 
     if (!subjectName) {
       message.error("시험제목을 입력해 주세요.");
@@ -120,10 +133,11 @@ function AcademyTestList() {
   };
 
   //전송하기
-  const onFinished = async values => {
-    values.classId = parseInt(classId);
-    const res = await axios.post("/api/subject", values);
-    //console.log(res.data);
+  const onFinished = async (values: any) => {
+    console.log(values);
+
+    values.classId = classId;
+    const res = await axios.post("/api/exam", values);
     if (res.data.resultData === 1) {
       form.resetFields(); //초기화
       setIsModal2Visible(true);
@@ -137,7 +151,7 @@ function AcademyTestList() {
   };
 
   //테스트 검색
-  const onFinishedSe = async values => {
+  const onFinishedSe = async (values: any) => {
     console.log(values);
 
     // 쿼리 문자열로 변환
@@ -154,7 +168,7 @@ function AcademyTestList() {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form2.setFieldsValue({
-      classId: classId ? parseInt(classId) : "all",
+      classId: classId ? classId : "all",
       search: "",
       showCnt: 40,
     });
@@ -171,7 +185,7 @@ function AcademyTestList() {
         const res = await axios.get(
           `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
         );
-        const formatted = res.data.resultData.map(item => ({
+        const formatted = res.data.resultData.map((item: any) => ({
           value: item.classId,
           label: item.className,
         }));
@@ -298,7 +312,7 @@ function AcademyTestList() {
                     <img
                       src={
                         item.acaPic
-                          ? `http://112.222.157.157:5223/pic/academy/${acaId}/${item.acaPic}`
+                          ? `http://112.222.157.157:5233/pic/academy/${acaId}/${item.acaPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
@@ -306,13 +320,13 @@ function AcademyTestList() {
                     />
                   </div>
                   <div>
-                    <h4 className="font-bold">{item.subjectName}</h4>
+                    <h4 className="font-bold">{item.examName}</h4>
                     {/* <p className="text-sm text-gray-500">[채점방식 : 점수]</p> */}
                   </div>
                 </div>
               </div>
               <div className="flex items-center justify-center w-60">
-                {item.examDate}
+                {item.examDate ? item.examDate : "-"}
               </div>
               <div className="flex items-center justify-center w-60">
                 {item.processingStatus === 0 ? "채점 전" : "채점 완료"}
@@ -322,7 +336,7 @@ function AcademyTestList() {
                   className="small_line_button"
                   onClick={() =>
                     navigate(
-                      `../academy/record?acaId=${acaId}&classId=${classId}&subjectId=${item.subjectId}`,
+                      `../academy/record?acaId=${acaId}&classId=${classId}&examId=${item.examId}`,
                     )
                   }
                 >
@@ -352,7 +366,7 @@ function AcademyTestList() {
                 onFinish={values => onFinished(values)}
               >
                 <Form.Item
-                  name="scoreType"
+                  name="examType"
                   label="채점 방식"
                   rules={[
                     { required: true, message: "채점 방식을 선택해 주세요." },
@@ -375,7 +389,7 @@ function AcademyTestList() {
 
                 <div className="flex w-full mt-3">
                   <Form.Item
-                    name="subjectName"
+                    name="examName"
                     className="w-full"
                     rules={[
                       { required: true, message: "시험 제목을 입력해 주세요." },
@@ -388,7 +402,6 @@ function AcademyTestList() {
                   </Form.Item>
                 </div>
 
-                {/*
                 <div className="flex w-full gap-3 justify-between">
                   <Form.Item>
                     <Button
@@ -408,7 +421,6 @@ function AcademyTestList() {
                     </Button>
                   </Form.Item>
                 </div>
-                */}
               </Form>
             </AddTest>
           }

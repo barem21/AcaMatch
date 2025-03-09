@@ -1,58 +1,32 @@
 import { useRecoilValue } from "recoil";
 //import { getCookie } from "../../../utils/cookie";
-import userInfo from "../../../atoms/userInfo";
-import SideBar from "../../../components/SideBar";
 import { message, Pagination } from "antd";
-import jwtAxios from "../../../apis/jwt";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Cookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+import jwtAxios from "../../../apis/jwt";
+import userInfo from "../../../atoms/userInfo";
+
+interface academyLikeListType {
+  acaId: number;
+  acaName: string;
+  academyAllLikeCount: number;
+  userId: number;
+  userPic: string;
+  nickName: string;
+}
+
+interface AcademyLikeList {
+  [academyId: string]: academyLikeListType[]; // academyId를 key로 하는 LikedUser 배열
+}
 
 function AcademyLike() {
   const cookies = new Cookies();
-  const [academyLikeList, setAcademyLikeList] = useState([]);
+  const [academyLikeList, setAcademyLikeList] = useState<academyLikeListType[]>(
+    [],
+  );
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
-
-  const titleName = "마이페이지";
-  let menuItems = [];
-  switch (currentUserInfo.roleId) {
-    case 3: //학원 관계자
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: false, link: "/mypage/academy" },
-        /*
-        {
-          label: "학원학생 관리",
-          isActive: false,
-          link: "/mypage/academy/student",
-        },
-        */
-        {
-          label: "학원리뷰 목록",
-          isActive: false,
-          link: "/mypage/academy/review",
-        },
-        { label: "좋아요 목록", isActive: true, link: "/mypage/academy/like" },
-      ];
-      break;
-    case 2: //학부모
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "학원정보 관리", isActive: false, link: "/mypage" },
-        { label: "리뷰 목록", isActive: false, link: "/mypage/review" },
-        { label: "학생 관리", isActive: true, link: "/mypage/like" },
-      ];
-      break;
-    default: //일반학생
-      menuItems = [
-        { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "나의 학원정보", isActive: false, link: "/mypage" },
-        { label: "나의 성적확인", isActive: false, link: "/mypage/record" },
-        { label: "나의 좋아요 목록", isActive: true, link: "/mypage/like" },
-        { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
-      ];
-  }
 
   //학원 좋아요 전체목록 가져오기
   const getLikeList = async () => {
@@ -62,20 +36,17 @@ function AcademyLike() {
       );
 
       // 객체들을 하나로 합치기
-      let mergedObj = {};
+      const mergedObj: AcademyLikeList = {}; // mergedObj의 타입을 정의
       for (let i = 0; i < res.data.resultData.length; i++) {
         if (res.data.resultData[i].academyAllLikeCount > 0) {
           const likedUsers = res.data.resultData[i].likedUsers;
-          mergedObj = {
-            ...mergedObj,
-            [res.data.resultData[i].academyId]: [
-              ...(mergedObj[res.data.resultData[i].academyId] || []),
-              ...likedUsers.map(user => ({
-                ...user, // 기존 속성 유지
-                acaName: res.data.resultData[i].acaName, // academyId 추가
-              })),
-            ],
-          };
+          mergedObj[res.data.resultData[i].academyId] = [
+            ...(mergedObj[res.data.resultData[i].academyId] || []),
+            ...likedUsers.map((user: academyLikeListType) => ({
+              ...user,
+              acaName: res.data.resultData[i].acaName, // academyId에 해당하는 acaName 추가
+            })),
+          ];
         }
       }
       //console.log(mergedObj.undefined);
@@ -98,15 +69,14 @@ function AcademyLike() {
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
-      <SideBar menuItems={menuItems} titleName={titleName} />
-
       <div className="w-full">
-        <h1 className="title-font flex justify-between align-middle">
+        <h1 className="title-admin-font">
           좋아요 목록
+          <p>학원 관리 &gt; 좋아요 목록</p>
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle p-4 pl-6 pr-6 border-b">
+          <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
             <div className="flex items-center justify-center w-full">
               학원명 / 회원 닉네임
             </div>
@@ -143,7 +113,7 @@ function AcademyLike() {
                     <img
                       src={
                         item.userPic
-                          ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.userPic}`
+                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"

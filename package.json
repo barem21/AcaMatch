@@ -24,6 +24,8 @@
     "@nivo/line": "^0.88.0",
     "@nivo/pie": "^0.88.0",
     "@stomp/stompjs": "^7.0.0",
+    "@types/sockjs-client": "^1.5.4",
+    "@types/stompjs": "^2.3.9",
     "antd": "^5.23.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",

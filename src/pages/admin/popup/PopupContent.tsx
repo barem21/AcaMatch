@@ -54,18 +54,24 @@ const PopupContent = () => {
       const response = await jwtAxios.get("/api/popUp/detail", {
         params: { popUpId },
       });
+
       if (response.data.resultData.length > 0) {
         const detail = response.data.resultData[0];
+        console.log("Popup Detail:", detail); // 전체 데이터 확인
+
         setPopupDetail(detail);
-        // imageUrl 설정
-        setImageUrl(
-          detail.popUpPic
-            ? `http://112.222.157.157:5233/pic/popUp/${detail.popUpId}/${detail.popUpPic}`
-            : null,
-        );
+
+        if (detail.popUpPic) {
+          const url = `http://112.222.157.157:5233/pic/popUp/${detail.popUpId}/${detail.popUpPic}`;
+          console.log("Setting image URL:", url);
+          setImageUrl(url);
+        } else {
+          console.log("No popUpPic found");
+          setImageUrl(null);
+        }
+
         setIsModalOpen(true);
       }
-      console.log(response);
     } catch (error) {
       console.error("Error fetching popup detail:", error);
       message.error("팝업 상세 정보를 불러오는데 실패했습니다.");
@@ -104,6 +110,12 @@ const PopupContent = () => {
   const renderModalContent = () => {
     if (!popupDetail) return null;
 
+    console.log("Rendering modal with:", {
+      popupDetail,
+      imageUrl,
+      comment: popupDetail.comment,
+    });
+
     return (
       <div
         className="space-y-3"
@@ -120,7 +132,7 @@ const PopupContent = () => {
             <strong>종료일:</strong> {popupDetail.endDate}
           </p>
           <p>
-            <strong>노출 상태:</strong>{" "}
+            <strong>출력 상태:</strong>{" "}
             {popupDetail.popUpShow === 1 ? "출력중" : "미출력"}
           </p>
           <p>
@@ -134,7 +146,7 @@ const PopupContent = () => {
 
         <div className="border-t pt-4">
           <p className="font-bold mb-2">팝업 내용:</p>
-          {popupDetail.comment === "" && imageUrl ? (
+          {imageUrl ? (
             <div className="w-full flex justify-center">
               <img
                 src={imageUrl}
@@ -147,7 +159,12 @@ const PopupContent = () => {
                 }}
                 onError={e => {
                   console.error("이미지 로드 실패:", imageUrl);
-                  e.currentTarget.style.display = "none";
+                  const imgElement = e.currentTarget;
+                  imgElement.style.display = "none";
+                  // 이미지 로드 실패 시 대체 텍스트 표시
+                  const errorText = document.createElement("p");
+                  errorText.textContent = "이미지를 불러올 수 없습니다.";
+                  imgElement.parentNode?.appendChild(errorText);
                 }}
               />
             </div>
@@ -210,64 +227,70 @@ const PopupContent = () => {
             </div>
           </div>
 
-          {popupList.map(popup => (
-            <div
-              key={popup.popUpId}
-              className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
-            >
+          {popupList && popupList.length > 0 ? (
+            popupList.map(popup => (
               <div
-                className="flex justify-start items-center w-[100%] h-[56px] cursor-pointer"
-                onClick={() => fetchPopupDetail(popup.popUpId)}
+                key={popup.popUpId}
+                className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
               >
-                <h4>{popup.title}</h4>
-              </div>
-              <div className="flex items-center justify-center text-center w-[200px]">
-                {popup.startDate}
-              </div>
-              <div className="flex items-center justify-center text-center w-[200px]">
-                {popup.endDate}
-              </div>
-              <div className="flex items-center justify-center w-[200px]">
-                {popup.popUpType === 1 ? "관리자" : "사용자"}
-              </div>
-              <div className="flex items-center justify-center w-[200px]">
-                <p
-                  onClick={async () => {
-                    try {
-                      await jwtAxios.put(`/api/popUp/show/${popup.popUpId}`, {
-                        popUpShow: popup.popUpShow === 0 ? 1 : 0,
-                      });
-                      message.success("출력 상태가 변경되었습니다.");
-                      fetchPopupList(currentPage);
-                    } catch (error) {
-                      console.error("출력 상태 변경 실패:", error);
-                      message.error("출력 상태 변경에 실패했습니다.");
+                <div
+                  className="flex justify-start items-center w-[100%] h-[56px] cursor-pointer"
+                  onClick={() => fetchPopupDetail(popup.popUpId)}
+                >
+                  <h4>{popup.title}</h4>
+                </div>
+                <div className="flex items-center justify-center text-center w-[200px]">
+                  {popup.startDate}
+                </div>
+                <div className="flex items-center justify-center text-center w-[200px]">
+                  {popup.endDate}
+                </div>
+                <div className="flex items-center justify-center w-[200px]">
+                  {popup.popUpType === 1 ? "관리자" : "사용자"}
+                </div>
+                <div className="flex items-center justify-center w-[200px]">
+                  <p
+                    onClick={async () => {
+                      try {
+                        await jwtAxios.put(`/api/popUp/show/${popup.popUpId}`, {
+                          popUpShow: popup.popUpShow === 0 ? 1 : 0,
+                        });
+                        message.success("출력 상태가 변경되었습니다.");
+                        fetchPopupList(currentPage);
+                      } catch (error) {
+                        console.error("출력 상태 변경 실패:", error);
+                        message.error("출력 상태 변경에 실패했습니다.");
+                      }
+                    }}
+                    className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center cursor-pointer ${
+                      popup.popUpShow === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"
+                    }`}
+                  >
+                    {popup.popUpShow === 1 ? "출력중" : "미출력"}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center w-[132px]">
+                  <p
+                    className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
+                    onClick={() =>
+                      navigate(`/admin/popup-content/add?id=${popup.popUpId}`)
                     }
-                  }}
-                  className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center cursor-pointer ${
-                    popup.popUpShow === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"
-                  }`}
-                >
-                  {popup.popUpShow === 1 ? "출력중" : "미출력"}
-                </p>
+                  >
+                    수정하기
+                  </p>
+                </div>
+                <div className="flex gap-4 items-center justify-center w-[72px]">
+                  <button onClick={() => handleDelete(popup.popUpId)}>
+                    <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center justify-center w-[132px]">
-                <p
-                  className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
-                  onClick={() =>
-                    navigate(`/admin/popup-content/add?id=${popup.popUpId}`)
-                  }
-                >
-                  수정하기
-                </p>
-              </div>
-              <div className="flex gap-4 items-center justify-center w-[72px]">
-                <button onClick={() => handleDelete(popup.popUpId)}>
-                  <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
-                </button>
-              </div>
+            ))
+          ) : (
+            <div className="flex justify-center items-center border-b h-[200px] text-gray-500">
+              등록된 팝업이 없습니다.
             </div>
-          ))}
+          )}
         </div>
 
         {/* 페이지네이션 추가 */}

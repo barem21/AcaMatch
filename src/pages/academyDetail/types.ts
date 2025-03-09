@@ -18,10 +18,17 @@ export interface Class {
 }
 
 export interface Review {
-  comment: string;
-  star: number;
-  createdAt: string;
-  userId: number;
+  reviewId: number;
+  reviewComment: string;
+  reviewStar: number;
+  reviewCreatedAt: string;
+  reviewUpdatedAt: string;
+  reviewUserId: number;
+  reviewUserNickName: string;
+  reviewClassName: string;
+  joinClassId: number;
+  banReview: number;
+  reviewPics?: string[]; // 미디어 리뷰용
 }
 
 export interface AcademyResponse {
@@ -40,9 +47,13 @@ export interface AcademyResponse {
     isLiked: boolean;
     addressDto: AddressDto;
     classes: Class[];
-    reviews: Review[];
+    generalReviews: Review[]; // reviews -> generalReviews
+    mediaReviews: Review[]; // 추가
+    generalReviewCount: number; // 추가
+    mediaReviewCount: number; // 추가
   };
 }
+
 export interface AcademyData {
   acaId: number;
   acaName: string;
@@ -57,7 +68,10 @@ export interface AcademyData {
   isLiked: boolean;
   addressDto: AddressDto;
   classes: Class[];
-  reviews: Review[];
+  generalReviews: Review[]; // reviews -> generalReviews
+  mediaReviews: Review[]; // 추가
+  generalReviewCount: number; // 추가
+  mediaReviewCount: number; // 추가
   books?: {
     bookId: number;
     bookName: string;
@@ -67,6 +81,7 @@ export interface AcademyData {
     bookPic?: string;
   }[];
 }
+
 export interface MapPosition {
   lat: number;
   lng: number;
@@ -77,6 +92,7 @@ export interface KakaoMapProps {
   height?: string;
   level?: number;
 }
+
 export interface AcademyClass {
   classId: number;
   className: string;
@@ -88,12 +104,4 @@ export interface AcademyClass {
   classPrice: number;
   classDay?: string; // 선택적 속성
   classCategoryName?: string; // 선택적 속성
-}
-export interface Review {
-  userId: number;
-  star: number;
-  comment: string;
-  createdAt: string;
-  reviewId: number;
-  nickName: string;
 }

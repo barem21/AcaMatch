@@ -8,16 +8,30 @@ import { Cookies } from "react-cookie";
 import CustomModal from "../../../components/modal/Modal";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 
+interface classListType {
+  acaId: number;
+  acaPics: string;
+  acaPic: string;
+  acaName: string;
+  classId: number;
+  className: string;
+  startDate: string;
+  endDate: string;
+  teacherId: number;
+  academyId: number;
+  teacherName: string;
+}
+
 function AcademyClassList() {
   const [form] = Form.useForm();
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
-  const [classId, setClassId] = useState("");
+  const [classId, setClassId] = useState<number>(0);
   const [myAcademyList, setMyAcademyList] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
-  const [classList, setClassList] = useState([]);
+  const [classList, setClassList] = useState<classListType[]>([]);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -54,7 +68,7 @@ function AcademyClassList() {
     }),
   );
 
-  console.log(simplifiedData);
+  //console.log(simplifiedData);
 
   //강좌 목록
   const academyClassList = async () => {
@@ -74,14 +88,14 @@ function AcademyClassList() {
   };
 
   //강좌 삭제하기
-  const deleteClass = async classId => {
+  const deleteClass = async (classId: number) => {
     setClassId(classId);
     setIsModalVisible(true);
   };
 
   //강좌삭제 확인팝업 관련
   const handleButton1Click = () => {
-    setClassId();
+    setClassId(0);
     setIsModalVisible(false);
   };
   const handleButton2Click = async () => {
@@ -93,7 +107,7 @@ function AcademyClassList() {
       if (res.data.resultData === 1) {
         setIsModalVisible(false);
         setIsModalVisible2(true);
-        setClassId();
+        setClassId(0);
         academyClassList();
       }
     } catch (error) {
@@ -122,7 +136,7 @@ function AcademyClassList() {
     setIsModalVisible3(true);
   };
 
-  const onFinished = async values => {
+  const onFinished = async (values: any) => {
     //console.log(values);
     const queryParams = new URLSearchParams(values).toString(); // 쿼리 문자열로 변환
     navigate(`../academy/class?${queryParams}`); //쿼리스트링 url에 추가
@@ -153,7 +167,7 @@ function AcademyClassList() {
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      acaId: acaId ? parseInt(acaId) : "",
+      acaId: acaId ? acaId : "",
       search: "",
       showCnt: 40,
     });
@@ -206,7 +220,6 @@ function AcademyClassList() {
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    name="showCnt"
                     placeholder="40개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
@@ -250,13 +263,16 @@ function AcademyClassList() {
             </div>
           </Form>
 
-          <div className="flex justify-between align-middle p-2 border-b">
+          <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
             <div className="flex items-center justify-center w-full">
               강의 제목
             </div>
             <div className="flex items-center justify-center w-40">강사명</div>
             <div className="flex items-center justify-center w-44">시작일</div>
             <div className="flex items-center justify-center w-44">종료일</div>
+            <div className="flex items-center justify-center w-40">
+              출석 관리
+            </div>
             <div className="flex items-center justify-center w-40">
               교재 관리
             </div>
@@ -303,13 +319,25 @@ function AcademyClassList() {
                 </div>
               </div>
               <div className="flex items-center justify-center w-40">
-                홍길동
+                홍길동 / {item.teacherId}
               </div>
               <div className="flex items-center justify-center w-44">
                 {item.startDate}
               </div>
               <div className="flex items-center justify-center w-44">
                 {item.endDate}
+              </div>
+              <div className="flex items-center justify-center w-40">
+                <button
+                  className="small_line_button"
+                  onClick={() =>
+                    navigate(
+                      `../teacher/checkIn?acaId=${acaId}&classId=${item.classId}`,
+                    )
+                  }
+                >
+                  출석 관리
+                </button>
               </div>
               <div className="flex items-center justify-center w-40">
                 <button

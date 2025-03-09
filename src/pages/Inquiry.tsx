@@ -7,20 +7,33 @@ import userInfo from "../atoms/userInfo";
 import CustomModal from "../components/modal/Modal";
 import SideBar from "../components/SideBar";
 
+interface academyDataType {
+  createdAt: string;
+  unReadCount: number;
+  chatRoomId: number;
+  userId: number;
+  userName: string;
+  userPic: string;
+  acaId: number;
+  acaName: string;
+  acaPic: string;
+  status?: string;
+}
+
 function Inquiry() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
-  const [academyData, setAcademyData] = useState([]); // 초기값을 빈 배열로 설정
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [academyData, setAcademyData] = useState<academyDataType[]>([]); // 초기값을 빈 배열로 설정
+  const [searchParams, _setSearchParams] = useSearchParams();
 
   const acaId = searchParams.get("acaId");
   const userId = searchParams.get("userId");
 
   const titleName = "고객지원";
   const menuItems = [
-    { label: "FAQ", isActive: false, link: "/support" },
-    { label: "1 : 1 문의", isActive: true, link: "/support/inquiryList" },
+    { label: "자주하는 질문", isActive: false, link: "/support" },
+    { label: "1:1 문의", isActive: true, link: "/support/inquiryList" },
   ];
 
   /*
@@ -47,11 +60,10 @@ function Inquiry() {
         roleId === 3
           ? `/api/chat/chat-room?aca-id=${acaId}`
           : `/api/chat/chat-room?user-id=${userId}`,
-        ``,
       );
       // console.log(acaId);
 
-      //console.log(res.data.resultData.users);
+      console.log(res.data.resultData.users);
       setAcademyData(res.data.resultData.users);
     } catch (error) {
       console.log(error);
@@ -64,20 +76,24 @@ function Inquiry() {
     myMtomList();
   }, []);
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
-      <div className="flex flex-col w-full">
-        <h1 className="title-font">1:1 학원별 회원 문의</h1>
+
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          1:1 학원별 회원 문의
+        </h1>
+
         <div className="flex flex-col w-full border border-[#DBE3E6] rounded-xl">
           {/* 테이블 헤더 */}
-          <div className="flex flex-row h-[46px] items-center justify-center">
+          <div className="flex flex-row h-[46px] items-center justify-center max-[640px]:hidden">
             <span className="flex-row-center text-[14px] text-brand-default text-center w-full">
               작성자
             </span>
-            <span className="flex-row-center text-[14px] text-brand-default text-center w-1/2">
+            <span className="flex-row-center text-[14px] text-brand-default text-center min-w-60">
               학원명
             </span>
-            <span className="flex-row-center text-[14px] text-brand-default text-center min-w-[15%]">
+            <span className="flex-row-center text-[14px] text-brand-default text-center min-w-32">
               날짜
             </span>
             {/*<span className="flex-row-center text-[14px] text-brand-default text-center  min-w-[15%]">
@@ -89,73 +105,75 @@ function Inquiry() {
             academyData.map((academy, index) => (
               <div
                 key={index}
-                className="flex flex-row h-[72px] border-t border-[#DBE3E6]"
+                className="flex items-center border-t border-[#DBE3E6] max-[640px]:border-none"
               >
-                <div className="flex justify-center items-center min-w-[10%]">
-                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                <div
+                  className="flex justify-start items-center w-full p-3 cursor-pointer"
+                  onClick={() =>
+                    navigate(
+                      `/support/inquiry/detail?acaId=${academy.acaId}&userId=${academy.userId}`,
+                    )
+                  }
+                >
+                  <div className="w-14 h-14 mr-3 rounded-xl bg-gray-300 overflow-hidden">
                     <img
                       src={
                         academy.userPic
-                          ? `http://112.222.157.156:5223/pic/user/${academy.userId}/${academy.userPic}`
+                          ? `http://112.222.157.157:5233/pic/user/${academy.userId}/${academy.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
                       alt=""
                     />
                   </div>
+                  <span className="text-brand-default">{academy.userName}</span>
                 </div>
-                <div
-                  className="flex items-center p-4 w-full text-start cursor-pointer"
-                  onClick={e =>
-                    navigate(
-                      `/support/inquiry/detail?acaId=${academy.acaId}&userId=${academy.userId}`,
-                    )
-                  }
-                >
-                  <span className="text-[14px] text-brand-default">
-                    {academy.userName}
-                  </span>
-                </div>
-                <div className="flex w-1/2 justify-center items-center p-4">
-                  {academy.acaName}
-                  <div
-                    className={`flex justify-center items-center px-4 h-8 rounded-xl ${
-                      academy.status === "처리중"
-                    }`}
-                  >
-                    <span className="text-[14px] font-medium">
-                      {academy.status}
+
+                <div className="flex max-[640px]:flex-col">
+                  <div className="flex justify-center items-center min-w-60 max-[640px]:pl-20 max-[640px]:justify-start">
+                    {academy.acaName}
+                    {academy.status && (
+                      <div
+                        className={`flex justify-center items-center h-8 rounded-xl ${
+                          academy.status === "처리중"
+                        }`}
+                      >
+                        <span className="text-[14px] font-medium">
+                          {academy.status}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-center items-center min-w-32 max-[640px]:pl-20 max-[640px]:justify-start">
+                    <span className="text-[14px] text-brand-placeholder">
+                      {academy.createdAt?.substr(0, 10)}
                     </span>
                   </div>
+
+                  {/*
+                  <div className="flex min-w-[15%] justify-center items-center p-4">
+                    {academy.canCancel ? (
+                      <button
+                        className="small_line_button"
+                        onClick={e => {
+                          e.stopPropagation(); // 이벤트 전파 중지
+                          setIsModalVisible(true);
+                        }}
+                      >
+                        취소하기
+                      </button>
+                    ) : (
+                      <button
+                        className="small_line_button bg-gray-200 opacity-50"
+                        disabled
+                        onClick={e => e.stopPropagation()}
+                      >
+                        취소하기
+                      </button>
+                    )}
+                  </div>
+                  */}
                 </div>
-                <div className="flex min-w-[15%] justify-center items-center p-4">
-                  <span className="text-[14px] text-brand-placeholder">
-                    {academy.createdAt?.substr(0, 10)}
-                  </span>
-                </div>
-                {/*
-                <div className="flex min-w-[15%] justify-center items-center p-4">
-                  {academy.canCancel ? (
-                    <button
-                      className="small_line_button"
-                      onClick={e => {
-                        e.stopPropagation(); // 이벤트 전파 중지
-                        setIsModalVisible(true);
-                      }}
-                    >
-                      취소하기
-                    </button>
-                  ) : (
-                    <button
-                      className="small_line_button bg-gray-200 opacity-50"
-                      disabled
-                      onClick={e => e.stopPropagation()}
-                    >
-                      취소하기
-                    </button>
-                  )}
-                </div>
-                */}
               </div>
             ))
           ) : (

@@ -6,6 +6,8 @@ import { FadeLoader } from "react-spinners";
 import jwtAxios from "../apis/jwt";
 
 interface TestGradeId {
+  //testGradeId?: { gradeId: number };
+  gradeId: number;
   testGradeId?: { gradeId: number };
 }
 
