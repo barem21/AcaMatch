@@ -26,6 +26,7 @@ function MyPage() {
   switch (roleId) {
     case 0: //관리자
     case 3: //학원관계자
+    case 4: //강사
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
         { label: "학원 관리자", isActive: false, link: "/admin" },
@@ -119,7 +120,7 @@ function MyPage() {
   // }, []);
 
   useEffect(() => {
-    if (roleId === 0 || roleId === 3) {
+    if (roleId === 0 || roleId === 3 || roleId === 4) {
       navigate("/mypage/user");
     }
   }, []);

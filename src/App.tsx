@@ -58,6 +58,8 @@ import AcademyLike from "./pages/admin/academy/AcademyLike";
 import AcademyReview from "./pages/admin/academy/AcademyReview";
 import BannerView from "./pages/admin/BannerView.tsx";
 import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
+import TeacherList from "./pages/admin/teacher/TeacherList";
+import TeacherAdd from "./pages/admin/teacher/TeacherAdd";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 
 function App() {
@@ -185,6 +187,8 @@ function App() {
                 <Route path="banner-content/view" element={<BannerView />} />
                 <Route path="teacher">
                   <Route path="checkIn" element={<CheckIn />} />
+                  <Route path="add" element={<TeacherAdd />} />
+                  <Route path="list" element={<TeacherList />} />
                 </Route>
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="academy/arrow" element={<AcademyArrow />} />

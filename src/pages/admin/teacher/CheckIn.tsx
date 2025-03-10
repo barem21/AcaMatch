@@ -10,8 +10,9 @@ import jwtAxios from "../../../apis/jwt";
 import axios from "axios";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
+/*
 interface BoardItem {
   boardId: number;
   userId: number;
@@ -19,6 +20,7 @@ interface BoardItem {
   createdAt: string;
   name: string;
 }
+  */
 
 interface Event {
   title: string;
@@ -43,16 +45,17 @@ interface classListType {
 
 const CheckIn = () => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
   const { userId, roleId } = useRecoilValue(userInfo);
   const [myAcademyList, setMyAcademyList] = useState([]); //학원 목록
   const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
-  const [boardList, _setBoardList] = useState<BoardItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
-  const [_selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
+  //const [_selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
   const [checkedList, setCheckedList] = useState<number[]>([]);
   const [searchParams] = useSearchParams();
 
-  const acaId = parseInt(searchParams.get("acaId") || "1", 0);
+  const acaId = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId = parseInt(searchParams.get("classId") || "0", 0);
 
   //검색조건용 학원 목록
   const academyList = async () => {
@@ -170,8 +173,10 @@ const CheckIn = () => {
   };
 
   const handleAcademyChange = (value: number) => {
-    setSelectedAcademy(value);
-    fetchAttendanceData();
+    console.log(value);
+    form.submit();
+    //setSelectedAcademy(value);
+    //fetchAttendanceData();
     // fetchAttendanceData(value);
   };
 
@@ -205,6 +210,15 @@ const CheckIn = () => {
     }
   };
 
+  //검색
+  const onFinished = async (values: any) => {
+    console.log(values);
+
+    // 쿼리 문자열로 변환
+    const queryParams = new URLSearchParams(values).toString();
+    navigate(`?${queryParams}`); //쿼리스트링 url에 추가
+  };
+
   useEffect(() => {
     academyList(); //학원 목록
     academyClassList(); //강좌 목록
@@ -215,6 +229,7 @@ const CheckIn = () => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
       acaId: acaId ? acaId : 0,
+      classId: classId ? classId : 0,
     });
   }, []);
 
@@ -233,7 +248,7 @@ const CheckIn = () => {
         </h1>
 
         <div className="board-wrap">
-          <Form form={form}>
+          <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-28 text-sm">학원 선택</label>
@@ -249,10 +264,10 @@ const CheckIn = () => {
                 </Form.Item>
 
                 <label className="w-28 text-sm">강좌 선택</label>
-                <Form.Item name="academy" className="mb-0">
+                <Form.Item name="classId" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="학원을 선택하세요"
+                    placeholder="강좌를 선택하세요"
                     optionFilterProp="label"
                     className="select-admin-basic w-[300px]"
                     onChange={handleAcademyChange}
