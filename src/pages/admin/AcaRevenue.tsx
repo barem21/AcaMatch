@@ -1,9 +1,8 @@
 import { Button, Form, Pagination, Select, message } from "antd";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
-import CustomModal from "../../components/modal/Modal";
 
 interface RevenueData {
   acaId: number;
@@ -16,6 +15,14 @@ interface RevenueData {
   costId: number;
 }
 
+interface OrderDetails {
+  name: string;
+  partnerOrderId: string;
+  price: number;
+  fee: number;
+  createdAt: string;
+  orderType: number;
+}
 const AcaRevenue = (): JSX.Element => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -24,7 +31,7 @@ const AcaRevenue = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
-  const [orderDetails, setOrderDetails] = useState(null);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
 
   // 기본값: 현재 연도와 월
   const currentYear = new Date().getFullYear();
@@ -35,7 +42,7 @@ const AcaRevenue = (): JSX.Element => {
   const year = searchParams.get("year") || currentYear.toString();
   const month = searchParams.get("month") || currentMonth.toString();
   const page = parseInt(searchParams.get("page") || "1", 10);
-  const size = parseInt(searchParams.get("size") || "10", 10);
+  const size = parseInt(searchParams.get("size") || "30", 10);
 
   useEffect(() => {
     fetchRevenueData();
@@ -64,11 +71,12 @@ const AcaRevenue = (): JSX.Element => {
     }
   };
 
-  const fetchOrderDetails = async costId => {
+  const fetchOrderDetails = async (costId: number) => {
     try {
       const response = await axios.get(
         `/api/academyCost/getAcademyCostInfoByCostId/${costId}`,
       );
+      console.log(response.data.resultData);
       setOrderDetails(response.data.resultData);
       setModalVisible(true);
     } catch (error) {
@@ -202,7 +210,7 @@ const AcaRevenue = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="flex items-center justify-center text-center w-[200px]">
-                  {item.createdAt.split("T")[0]}
+                  {item.createdAt.split(".")[0]}
                 </div>
                 <div className="flex items-center justify-center text-center w-[100px]">
                   {item.price.toLocaleString()}원
@@ -264,6 +272,16 @@ const AcaRevenue = (): JSX.Element => {
                   <p className="flex justify-between">
                     <span className="font-semibold">구매자:</span>
                     <span>{orderDetails.name}</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="font-semibold">타입</span>
+                    <span>
+                      {orderDetails.orderType === 0
+                        ? "학원"
+                        : orderDetails.orderType === 1
+                          ? "책"
+                          : "프리미엄 학원"}
+                    </span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-semibold">주문 ID:</span>
