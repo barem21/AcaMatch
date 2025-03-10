@@ -18,6 +18,7 @@ interface Banner {
   bannerShow: number;
   bannerPosition: number;
   bannerPic: string;
+  bannerType: number;
 }
 
 const getBannerPositionFolder = (position: number) => {
@@ -39,17 +40,18 @@ const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
   const swiperRef = useRef<SwiperType>();
   const [banners, setBanners] = useState<Banner[]>([]);
 
-  // 오른쪽 배너(`bannerPosition === 4`) 가져오기
+  // 오른쪽 배너 가져오기
   useEffect(() => {
     const fetchBanners = async () => {
       try {
         const response = await axios.get("/api/banner/all");
 
-        // `bannerShow === 1` && `bannerPosition === 4` 인 배너만 필터링
+        // bannerShow === 1 && bannerPosition === 4 && bannerType === 1 인 배너만 필터링
         const filteredBanners = response.data.resultData.filter(
           (banner: Banner) =>
             banner.bannerShow === 1 &&
-            getBannerPositionFolder(banner.bannerPosition) === "right",
+            banner.bannerPosition === 4 &&
+            banner.bannerType === 1,
         );
 
         setBanners(filteredBanners);

@@ -20,9 +20,7 @@ const PaymentSuccess = () => {
       }
 
       try {
-        const response = await axios.post(
-          `/api/payment/success?pg_token=${pgToken}&TId=${Tid}`,
-        );
+        await axios.post(`/api/payment/success?pg_token=${pgToken}&TId=${Tid}`);
 
         message.success("결제가 완료되었습니다!");
         localStorage.removeItem("paymentTid");

@@ -292,10 +292,10 @@ function SignupPage() {
                   <Radio.Group
                     className="flex gap-[4px]"
                     options={[
-                      { value: "STUDENT", label: "학생" },
-                      { value: "PARENT", label: "학부모" },
-                      { value: "ACADEMY", label: "학원 관계자" },
-                      { value: "TEACHER", label: "교사" },
+                      { value: "1", label: "학생" },
+                      { value: "2", label: "학부모" },
+                      { value: "3", label: "학원 관계자" },
+                      { value: "4", label: "교사" },
                     ]}
                   />
                 </div>

@@ -95,6 +95,10 @@ const PopupAdd = () => {
         );
 
         const popupDetail = response.data.resultData[0];
+        console.log("서버에서 받은 날짜:", {
+          startDate: popupDetail.startDate,
+          endDate: popupDetail.endDate,
+        });
 
         if (popupDetail.popUpPic) {
           setRegistrationType("image");
@@ -119,6 +123,11 @@ const PopupAdd = () => {
           content: popupDetail.comment || "",
           popUpShow: popupDetail.popUpShow,
           popUpType: popupDetail.popUpType,
+        });
+
+        console.log("폼에 설정된 날짜:", {
+          startDate: form.getFieldValue("startDate"),
+          endDate: form.getFieldValue("endDate"),
         });
       } catch (error) {
         console.error("팝업 상세 정보 조회 실패:", error);
@@ -173,6 +182,13 @@ const PopupAdd = () => {
         },
       };
 
+      // 전송되는 데이터 확인을 위한 로그
+      console.log("수정할 데이터:", popupData.p);
+      console.log("원본 날짜 값:", {
+        startDate: values.startDate,
+        endDate: values.endDate,
+      });
+
       // 직접 입력일 경우 comment 추가
       if (values.registrationType === "direct") {
         popupData.p.comment = values.content;
@@ -183,34 +199,23 @@ const PopupAdd = () => {
         new Blob([JSON.stringify(popupData.p)], { type: "application/json" }),
       );
 
-      // 이미지 등록 방식일 경우에만 pic 추가
+      // FormData 내용 확인
+      const formDataContent = JSON.parse(await formData.get("p").text());
+      console.log("FormData에 포함된 내용:", formDataContent);
+
+      // 이미지가 있을 경우 추가
       if (values.registrationType === "image" && values.popupImage) {
         formData.append("pic", values.popupImage);
       }
 
+      // 수정 요청 전송
       if (popupId) {
-        // FormData 내용 로그 출력
-        for (const [key, value] of formData.entries()) {
-          if (key === "p") {
-            // Blob 타입의 데이터를 문자열로 변환하여 파싱
-            const reader = new FileReader();
-            reader.onload = () => {
-              const text = reader.result as string;
-              console.log("FormData p:", JSON.parse(text));
-            };
-            reader.readAsText(value as Blob);
-          } else {
-            // File 객체는 그대로 출력
-            console.log("FormData:", key, value);
-          }
-        }
-
-        await jwtAxios.put("/api/popUp", formData, {
+        const response = await jwtAxios.put("/api/popUp", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
-
+        console.log("서버 응답:", response.data);
         message.success("팝업이 수정되었습니다.");
       } else {
         await jwtAxios.post("/api/popUp", formData, {
@@ -220,6 +225,7 @@ const PopupAdd = () => {
         });
         message.success("팝업이 등록되었습니다.");
       }
+      console.log(formData);
 
       navigate(-1);
     } catch (error) {

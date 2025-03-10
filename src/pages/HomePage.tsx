@@ -41,11 +41,12 @@ interface Tag {
 interface Banner {
   acaId: number;
   acaName: string;
-  bannerId: number;
-  bannerUrl: string;
-  bannerShow: number;
-  bannerPosition: number;
+  bannerType: number;
+  startDate?: string;
+  endDate?: string;
   bannerPic: string;
+  bannerPosition: number;
+  bannerShow: number;
 }
 
 // const usedRandomNumbers = new Set<number>();
@@ -68,7 +69,8 @@ function HomePage() {
   const navigate = useNavigate();
 
   // const [defaultAcademies, setDefaultAcademies] = useState<Academy[]>([]);
-  const [banners, setBanners] = useState<Banner[]>([]);
+  const [desktopBanners, setDesktopBanners] = useState<Banner[]>([]);
+  const [mobileBanners, setMobileBanners] = useState<Banner[]>([]);
   // const [isDefaultLoading, setIsDefaultLoading] = useState(true);
 
   // const [loading, setLoading] = useState(true); // 로딩 상태 추가
@@ -78,7 +80,7 @@ function HomePage() {
 
   const [academies, setAcademies] = useState<Academy[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userLocation, setUserLocation] = useState<{
+  const [_userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
@@ -203,17 +205,27 @@ function HomePage() {
     const fetchBanners = async () => {
       try {
         const response = await axios.get("/api/banner/all");
+        const banners = response.data.resultData;
 
-        // bottom(2) 위치의 배너만 필터링
-        const filteredBanners = response.data.resultData.filter(
+        // 메인 배너 (position: 2, show: 1, type: 1)만 필터링
+        const filteredDesktopBanners = banners.filter(
           (banner: Banner) =>
+            banner.bannerPosition === 2 &&
             banner.bannerShow === 1 &&
-            getBannerPositionFolder(banner.bannerPosition) === "bottom",
+            banner.bannerType === 1,
         );
+        setDesktopBanners(filteredDesktopBanners);
 
-        setBanners(filteredBanners);
+        // 모바일 배너 (position: 1)
+        const filteredMobileBanners = banners.filter(
+          (banner: Banner) =>
+            banner.bannerPosition === 1 &&
+            banner.bannerShow === 1 &&
+            banner.bannerType === 1,
+        );
+        setMobileBanners(filteredMobileBanners);
       } catch (error) {
-        console.error("Error fetching banners:", error);
+        console.error("배너 정보를 가져오는데 실패했습니다:", error);
       }
     };
 
@@ -339,21 +351,21 @@ function HomePage() {
     fetchData();
   }, []);
 
-  const getLocationByIP = async () => {
-    try {
-      // 무료 IP Geolocation API 사용
-      const response = await axios.get("https://ipapi.co/json/");
-      setUserLocation({
-        lat: response.data.latitude,
-        lon: response.data.longitude,
-      });
-    } catch (error) {
-      console.error("IP 기반 위치 확인 실패:", error);
-      // 실패시 기본 학원 목록 라드
-      const response = await axios.get("/api/academy/AcademyDefault");
-      setAcademies(response.data.resultData);
-    }
-  };
+  // const getLocationByIP = async () => {
+  //   try {
+  //     // 무료 IP Geolocation API 사용
+  //     const response = await axios.get("https://ipapi.co/json/");
+  //     setUserLocation({
+  //       lat: response.data.latitude,
+  //       lon: response.data.longitude,
+  //     });
+  //   } catch (error) {
+  //     console.error("IP 기반 위치 확인 실패:", error);
+  //     // 실패시 기본 학원 목록 라드
+  //     const response = await axios.get("/api/academy/AcademyDefault");
+  //     setAcademies(response.data.resultData);
+  //   }
+  // };
 
   return (
     <div className="flex flex-col w-full items-center px-4 py-[36px] max-[640px]:py-[16px] gap-8 mx-auto">
@@ -521,7 +533,7 @@ function HomePage() {
       </div>
 
       {/* 베너 */}
-      <div className="w-full max-w-[990px]">
+      <div className="w-full max-w-[990px] max-[640px]:hidden">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
@@ -534,25 +546,68 @@ function HomePage() {
           loop={true}
           className="rounded-xl"
         >
-          {banners.length > 0 ? (
-            banners.map(banner => (
-              <SwiperSlide key={banner.bannerId}>
+          {desktopBanners.length > 0 ? (
+            desktopBanners.map(banner => (
+              <SwiperSlide key={`${banner.acaId}-${banner.bannerPosition}`}>
                 <img
                   src={`http://112.222.157.157:5233/pic/banner/${banner.acaId}/bottom/${banner.bannerPic}`}
-                  alt="banner"
+                  alt={banner.acaName}
                   className="w-full h-[200px] bg-gray-300 rounded-xl object-cover"
+                  onClick={() => handleAcademyClick(Number(banner.acaId))}
+                  style={{ cursor: "pointer" }}
                 />
               </SwiperSlide>
             ))
           ) : (
-            <SwiperSlide>
-              <div className="w-full h-[200px] bg-gray-300 rounded-xl flex items-center justify-center">
-                <p className="text-white">등록된 배너가 없습니다.</p>
-              </div>
-            </SwiperSlide>
+            <div></div>
           )}
           <SwiperSlide>
-            {/* <div className="w-full h-[200px] bg-blue-500 rounded-xl"></div> */}
+            <img
+              src="/ai2.png"
+              alt="main_banner"
+              className="w-full h-[200px] bg-blue-500 rounded-xl"
+            />
+          </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="/ai1.png"
+              alt="main_banner"
+              className="w-full h-[200px] bg-blue-500 rounded-xl"
+            />
+          </SwiperSlide>
+        </Swiper>
+      </div>
+
+      {/* 모바일 */}
+      <div className="w-full max-w-[990px] min-[640px]:hidden">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          spaceBetween={30}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+          }}
+          loop={true}
+          className="rounded-xl"
+        >
+          {mobileBanners.length > 0 ? (
+            mobileBanners.map(banner => (
+              <SwiperSlide key={`${banner.acaId}-${banner.bannerPosition}`}>
+                <img
+                  src={`http://112.222.157.157:5233/pic/banner/${banner.acaId}/top/${banner.bannerPic}`}
+                  alt={banner.acaName}
+                  className="w-full h-[200px] bg-gray-300 rounded-xl object-cover"
+                  onClick={() => handleAcademyClick(Number(banner.acaId))}
+                  style={{ cursor: "pointer" }}
+                />
+              </SwiperSlide>
+            ))
+          ) : (
+            <div></div>
+          )}
+          <SwiperSlide>
             <img
               src="/ai2.png"
               alt="main_banner"
@@ -684,5 +739,21 @@ function HomePage() {
     </div>
   );
 }
+
+// bannerPosition에 따른 경로 매핑 함수 추가
+// const getBannerPosition = (position: number) => {
+//   switch (position) {
+//     case 1:
+//       return "top"; // 상단 배너
+//     case 2:
+//       return "right"; // 하단 배너
+//     // case 3:
+//     //   return "right"; // 우측 배너
+//     case 4:
+//       return "right"; // 메인 하단 배너
+//     default:
+//       return "bottom";
+//   }
+// };
 
 export default HomePage;
