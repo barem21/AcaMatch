@@ -210,10 +210,10 @@ const AcaRevenue = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="flex items-center justify-center text-center w-[200px]">
-                  {item.createdAt.split(".")[0]}
+                  {item?.createdAt?.split(".")[0]}
                 </div>
                 <div className="flex items-center justify-center text-center w-[100px]">
-                  {item.price.toLocaleString()}원
+                  {item?.price?.toLocaleString()}원
                 </div>
                 <div className="flex items-center justify-center w-[132px]">
                   <p
@@ -285,20 +285,20 @@ const AcaRevenue = (): JSX.Element => {
                   </p>
                   <p className="flex justify-between">
                     <span className="font-semibold">주문 ID:</span>
-                    <span>{orderDetails.partnerOrderId}</span>
+                    <span>{orderDetails?.partnerOrderId}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-semibold">결제 금액:</span>
-                    <span>{orderDetails.price.toLocaleString()}원</span>
+                    <span>{orderDetails?.price?.toLocaleString()}원</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-semibold">수수료:</span>
-                    <span>{orderDetails.fee.toLocaleString()}원</span>
+                    <span>{orderDetails?.fee?.toLocaleString()}원</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-semibold">구매 시간:</span>
                     <span>
-                      {new Date(orderDetails.createdAt).toLocaleString()}
+                      {new Date(orderDetails?.createdAt)?.toLocaleString()}
                     </span>
                   </p>
                 </div>

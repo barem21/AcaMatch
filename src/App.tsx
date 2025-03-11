@@ -14,7 +14,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Support from "./pages/Support";
 import AcademyDetail from "./pages/academyDetail/AcademyDetail";
 import AcaManagement from "./pages/admin/AcaManagement.tsx";
-import DashBoard from "./pages/admin/DashBoard.tsx";
+import DashBoard from "./pages/admin/DashBoard/DashBoard.tsx";
 import Paymentanager from "./pages/admin/Paymentanager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
 import LoginPage from "./pages/member/LoginPage";

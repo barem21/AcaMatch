@@ -44,7 +44,7 @@ const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await axios.get("/api/banner/all");
+        const response = await axios.get("/api/banner/all?page=1&size=1000");
 
         // bannerShow === 1 && bannerPosition === 4 && bannerType === 1 인 배너만 필터링
         const filteredBanners = response.data.resultData.filter(

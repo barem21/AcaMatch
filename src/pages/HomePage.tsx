@@ -204,7 +204,7 @@ function HomePage() {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await axios.get("/api/banner/all");
+        const response = await axios.get("/api/banner/all?page=1&size=1000");
         const banners = response.data.resultData;
 
         // 메인 배너 (position: 2, show: 1, type: 1)만 필터링

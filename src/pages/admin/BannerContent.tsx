@@ -13,22 +13,23 @@ interface PremiumAcademy {
   startDate?: string;
   endDate?: string;
   preCheck: number;
+  bannerType?: number;
   createdAt: string;
-  bannerType?: number; // bannerType이 없을 수도 있으므로 선택적(`?`) 속성으로 설정
+  countPremium?: number;
 }
 
 const BannerContent = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  // const [searchParams, _setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [premiumAcademies, setPremiumAcademies] = useState<PremiumAcademy[]>(
     [],
   );
   const [totalItems, setTotalItems] = useState(0);
 
-  // 페이지네이션 상태 추가
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(30); // 기본값: 30개씩 보기
+  // 쿼리스트링에서 현재 페이지와 페이지 크기를 가져오기
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const pageSize = Number(searchParams.get("size")) || 30;
 
   // 승인/미승인 모달 관련 상태 추가
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,18 +54,26 @@ const BannerContent = () => {
     { acaId: number; acaName: string }[]
   >([]);
 
-  // 학원 목록 불러오기 (페이지네이션 적용)
-  const fetchPremiumAcademies = async (page = 1, size = pageSize) => {
+  // 학원 목록 불러오기
+  const fetchPremiumAcademies = async () => {
     try {
-      const response = await jwtAxios.get("/api/academy/premium/bannerType", {
-        params: { page, size },
-      });
-      const { resultData } = response.data;
+      const response = await jwtAxios.get(
+        `/api/academy/premium/bannerType?page=${currentPage}&size=${pageSize}`,
+      );
+      const { resultData, totalItems } = response.data;
 
-      setPremiumAcademies(resultData);
-      setTotalItems(1000); // 임시로 전체 개수를 1000개로 설정
-    } catch (error) {
-      console.error("Error fetching premium academies:", error);
+      // Filter academies that have bannerType property
+      const filteredAcademies = resultData.filter(
+        (academy: PremiumAcademy) => "bannerType" in academy,
+      );
+
+      setPremiumAcademies(filteredAcademies);
+      setTotalItems(totalItems || filteredAcademies.length);
+    } catch (error: any) {
+      console.error(
+        "Error fetching premium academies:",
+        error.response?.data || error.message,
+      );
       message.error("프리미엄 학원 목록을 불러오는데 실패했습니다.");
     }
   };
@@ -75,7 +84,7 @@ const BannerContent = () => {
     try {
       await jwtAxios.delete(`/api/academy/premium/${acaId}`);
       message.success("삭제되었습니다.");
-      fetchPremiumAcademies(currentPage, pageSize); // 목록 새로고침
+      fetchPremiumAcademies(); // 목록 새로고침
     } catch (error) {
       console.error("Error deleting premium academy:", error);
       message.error("삭제에 실패했습니다.");
@@ -103,33 +112,35 @@ const BannerContent = () => {
         selectedBannerType === 1 ? "승인되었습니다." : "승인 취소되었습니다.",
       );
       setIsModalOpen(false);
-      fetchPremiumAcademies(currentPage, pageSize); // 목록 새로고침
+      fetchPremiumAcademies(); // 목록 새로고침
     } catch (error) {
       console.error("Error updating approval status:", error);
       message.error("승인 상태 변경에 실패했습니다.");
     }
   };
 
-  // 페이지 변경 시 데이터 새로 불러오기
+  // 페이지 변경 시 쿼리스트링 업데이트
   const onPageChange = (page: number) => {
-    setCurrentPage(page);
-    fetchPremiumAcademies(page, pageSize);
+    setSearchParams({ page: page.toString(), size: pageSize.toString() });
   };
 
-  // 출력 개수 변경 시 데이터 새로 불러오기
+  // 페이지 크기 변경 시 쿼리스트링 업데이트
   const onPageSizeChange = (size: number) => {
-    setPageSize(size);
-    setCurrentPage(1); // 페이지를 1페이지로 초기화
-    fetchPremiumAcademies(1, size);
+    setSearchParams({ page: "1", size: size.toString() }); // 변경 시 1페이지로 초기화
   };
 
   // 학원 목록 가져오기 함수 추가
   const fetchAcademyList = async () => {
     try {
-      const response = await jwtAxios.get("/api/academy/premium");
+      const response = await jwtAxios.get(
+        `/api/academy/premium/bannerType?page=1&size=1000`,
+      );
       setAcademyList(response.data.resultData);
-    } catch (error) {
-      console.error("학원 목록 가져오기 실패:", error);
+    } catch (error: any) {
+      console.error(
+        "학원 목록 가져오기 실패:",
+        error.response?.data || error.message,
+      );
       message.error("학원 목록을 불러오는데 실패했습니다.");
     }
   };
@@ -194,7 +205,7 @@ const BannerContent = () => {
       setIsRegisterModalOpen(false);
       setFileList({ top: [], bottom: [], right: [] });
       setSelectedAcademy(0);
-      fetchPremiumAcademies(currentPage, pageSize);
+      fetchPremiumAcademies();
     } catch (error) {
       console.error("배너 등록 실패:", error);
       message.error("배너 등록에 실패했습니다.");
@@ -203,12 +214,9 @@ const BannerContent = () => {
 
   // 컴포넌트 마운트 시 학원 목록 가져오기
   useEffect(() => {
-    fetchAcademyList();
-  }, []);
-
-  useEffect(() => {
-    fetchPremiumAcademies(currentPage, pageSize);
-  }, []);
+    fetchAcademyList(); // 학원 목록 가져오기
+    fetchPremiumAcademies(); // 페이지네이션 적용된 프리미엄 학원 목록 가져오기
+  }, [searchParams]); // searchParams가 변경될 때마다 실행
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -320,7 +328,6 @@ const BannerContent = () => {
           ))}
         </div>
 
-        {/* 페이지네이션 유지 */}
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
             current={currentPage}
@@ -331,7 +338,6 @@ const BannerContent = () => {
           />
         </div>
 
-        {/* CustomModal 유지 */}
         <CustomModal
           visible={isModalOpen}
           title="승인 상태 변경"
@@ -346,7 +352,6 @@ const BannerContent = () => {
           button2Text="확인"
         />
 
-        {/* 배너 등록 모달 추가 */}
         <CustomModal
           visible={isRegisterModalOpen}
           title="배너 등록"
@@ -359,11 +364,13 @@ const BannerContent = () => {
                   placeholder="학원을 선택해주세요"
                   onChange={value => setSelectedAcademy(value)}
                 >
-                  {academyList?.map(academy => (
-                    <Select.Option key={academy.acaId} value={academy.acaId}>
-                      {academy.acaName}
-                    </Select.Option>
-                  ))}
+                  {academyList
+                    ?.filter(academy => !("bannerType" in academy))
+                    .map(academy => (
+                      <Select.Option key={academy.acaId} value={academy.acaId}>
+                        {academy.acaName}
+                      </Select.Option>
+                    ))}
                 </Select>
               </div>
               <div>

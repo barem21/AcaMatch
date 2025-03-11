@@ -6,9 +6,9 @@ import { useState } from "react";
 import { CiCalendarDate } from "react-icons/ci";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import jwtAxios from "../../apis/jwt";
+import jwtAxios from "../../../apis/jwt";
 import { useRecoilValue } from "recoil";
-import userInfo from "../../atoms/userInfo";
+import userInfo from "../../../atoms/userInfo";
 
 const COLORS = {
   학원수: "#F28C6A",
@@ -32,6 +32,18 @@ interface ChartData {
   data: DataPoint[];
 }
 
+// Update interface for user count data
+interface UserCountData {
+  registerDate: string;
+  totalUserCount: number; // userCount -> totalUserCount로 변경
+}
+
+// Update interface for cost count data
+interface CostCountData {
+  registerDate: string;
+  academyCostCount: number;
+}
+
 const generateData = (
   id: DataKey,
   min: number,
@@ -48,14 +60,12 @@ const generateData = (
 
 const thisMonthData: ChartData[] = [
   generateData("학원수", 50, 500, 31),
-  generateData("회원수", 30, 400, 31),
-  generateData("결제내역", 10, 350, 31),
+  // 결제내역 데이터는 API에서 가져올 예정
 ];
 
 const lastMonthData: ChartData[] = [
   generateData("학원수", 40, 450, 30),
-  generateData("회원수", 20, 350, 30),
-  generateData("결제내역", 5, 300, 30),
+  // 결제내역 데이터는 API에서 가져올 예정
 ];
 
 // const academyApprovals = [
@@ -226,11 +236,173 @@ function DashBoard() {
     });
   }, [selectedItem, selectedMonth, selectedCategory, selectedTimeRange]);
 
+  // Add state for user registration data
+  const [userRegistrationData, setUserRegistrationData] = useState<ChartData[]>(
+    [],
+  );
+
+  // Add state for cost data
+  const [costData, setCostData] = useState<ChartData[]>([]);
+
+  // Add function to fetch user registration data
+  const fetchUserRegistrationData = async (period: MonthKey) => {
+    try {
+      const apiPeriod = period === "이번 달" ? "이번달" : "지난달";
+      const response = await jwtAxios.get(
+        `/api/academy-manager/GetUserCount/${apiPeriod}`,
+      );
+      const { resultData } = response.data;
+
+      // Get current date to determine days in month
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = period === "이번 달" ? now.getMonth() : now.getMonth() - 1;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Create an array with all days of the month initialized to 0
+      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
+        x: (index + 1).toString().padStart(2, "0"),
+        y: 0,
+      }));
+
+      // Update counts for days that have data
+      if (resultData && Array.isArray(resultData)) {
+        resultData.forEach((item: UserCountData) => {
+          const day = parseInt(item.registerDate.split("-")[2]);
+          if (day >= 1 && day <= daysInMonth) {
+            allDaysData[day - 1].y = item.totalUserCount; // userCount -> totalUserCount로 변경
+          }
+        });
+      }
+
+      // Transform to chart format
+      const chartData: ChartData = {
+        id: "회원수",
+        color: COLORS["회원수"],
+        data: allDaysData,
+      };
+
+      setUserRegistrationData([chartData]);
+
+      if (selectedItem === "회원수") {
+        setSelectedData([chartData]);
+      }
+    } catch (error) {
+      console.error("Error fetching user registration data:", error);
+      // Set empty data with zeros when error occurs
+      const emptyData: ChartData = {
+        id: "회원수",
+        color: COLORS["회원수"],
+        data: Array.from({ length: 31 }, (_, index) => ({
+          x: (index + 1).toString().padStart(2, "0"),
+          y: 0,
+        })),
+      };
+      setUserRegistrationData([emptyData]);
+      if (selectedItem === "회원수") {
+        setSelectedData([emptyData]);
+      }
+    }
+  };
+
+  // Add function to fetch cost data
+  const fetchCostData = async (period: MonthKey) => {
+    try {
+      const apiPeriod = period === "이번 달" ? "이번달" : "지난달";
+      const response = await jwtAxios.get(
+        `/api/academy-manager/GetAcademyCostCount/${apiPeriod}`,
+      );
+      const { resultData } = response.data;
+
+      // Get current date to determine days in month
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = period === "이번 달" ? now.getMonth() : now.getMonth() - 1;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Create an array with all days of the month initialized to 0
+      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
+        x: (index + 1).toString().padStart(2, "0"),
+        y: 0,
+      }));
+      console.log(allDaysData);
+
+      // Update counts for days that have data
+      if (resultData && Array.isArray(resultData)) {
+        resultData.forEach((item: CostCountData) => {
+          const day = parseInt(item.registerDate.split("-")[2]);
+          if (day >= 1 && day <= daysInMonth) {
+            allDaysData[day - 1].y = item.academyCostCount; // Updated to use academyCostCount
+          }
+        });
+      }
+
+      // Transform to chart format
+      const chartData: ChartData = {
+        id: "결제내역",
+        color: COLORS["결제내역"],
+        data: allDaysData,
+      };
+
+      setCostData([chartData]);
+
+      if (selectedItem === "결제내역") {
+        setSelectedData([chartData]);
+      }
+    } catch (error) {
+      console.error("Error fetching cost data:", error);
+      // Set empty data with zeros when error occurs
+      const emptyData: ChartData = {
+        id: "결제내역",
+        color: COLORS["결제내역"],
+        data: Array.from({ length: 31 }, (_, index) => ({
+          x: (index + 1).toString().padStart(2, "0"),
+          y: 0,
+        })),
+      };
+
+      setCostData([emptyData]);
+      if (selectedItem === "결제내역") {
+        setSelectedData([emptyData]);
+      }
+    }
+  };
+
+  // Update useEffect to fetch both user and cost data
+  useEffect(() => {
+    fetchUserRegistrationData(selectedMonth);
+    fetchCostData(selectedMonth);
+  }, [selectedMonth]);
+
+  // Update handleMonthClick
+  const handleMonthClick = (e: { key: string }) => {
+    const monthKey = e.key as MonthKey;
+    setSelectedMonth(monthKey);
+
+    if (selectedItem === "회원수") {
+      fetchUserRegistrationData(monthKey);
+    } else if (selectedItem === "결제내역") {
+      fetchCostData(monthKey);
+    } else {
+      const dataSource = monthKey === "이번 달" ? thisMonthData : lastMonthData;
+      setSelectedData(dataSource.filter(d => d.id === selectedItem));
+    }
+  };
+
+  // Update handleCategoryClick
   const handleCategoryClick = (e: { key: string }) => {
-    setSelectedItem(e.key as DataKey);
-    const dataSource =
-      selectedMonth === "이번 달" ? thisMonthData : lastMonthData;
-    setSelectedData(dataSource.filter(d => d.id === (e.key as DataKey)));
+    const newItem = e.key as DataKey;
+    setSelectedItem(newItem);
+
+    if (newItem === "회원수") {
+      setSelectedData(userRegistrationData);
+    } else if (newItem === "결제내역") {
+      setSelectedData(costData);
+    } else {
+      const dataSource =
+        selectedMonth === "이번 달" ? thisMonthData : lastMonthData;
+      setSelectedData(dataSource.filter(d => d.id === newItem));
+    }
   };
 
   // Add state for search data
@@ -282,12 +454,6 @@ function DashBoard() {
       ? searchData[selectedTimeRange]
       : pieChartData[selectedCategory][selectedTimeRange];
 
-  const handleMonthClick = (e: { key: string }) => {
-    const monthKey = e.key as MonthKey;
-    setSelectedMonth(monthKey);
-    const dataSource = monthKey === "이번 달" ? thisMonthData : lastMonthData;
-    setSelectedData(dataSource.filter(d => d.id === (selectedItem as DataKey)));
-  };
   // ResponsivePie용 카테고리 선택 이벤트
   const handleCategoryClick2 = (e: { key: string }) => {
     console.log("선택된 카테고리:", e.key);
@@ -417,78 +583,89 @@ function DashBoard() {
             </div>
 
             <div style={{ height: "300px" }}>
-              <ResponsiveLine
-                key={`${selectedMonth}-${selectedItem}`}
-                data={selectedData}
-                margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
-                xScale={{ type: "point" }}
-                yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
-                gridXValues={[]}
-                theme={{
-                  grid: {
-                    line: {
-                      stroke: "#ccc",
-                      strokeWidth: 1,
-                      strokeDasharray: "2 2",
+              {selectedData && selectedData.length > 0 ? (
+                <ResponsiveLine
+                  key={`${selectedMonth}-${selectedItem}`}
+                  data={selectedData}
+                  margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+                  xScale={{ type: "point" }}
+                  yScale={{
+                    type: "linear",
+                    min: 0,
+                    max: "auto",
+                    stacked: false,
+                  }}
+                  gridXValues={[]}
+                  theme={{
+                    grid: {
+                      line: {
+                        stroke: "#ccc",
+                        strokeWidth: 1,
+                        strokeDasharray: "2 2",
+                      },
                     },
-                  },
-                }}
-                axisBottom={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legendOffset: 36,
-                  legendPosition: "middle",
-                }}
-                axisLeft={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: 0,
-                  legendOffset: -40,
-                  legendPosition: "middle",
-                  tickValues: Array.from(
-                    { length: maxValue / 100 + 1 },
-                    (_, i) => i * 100,
-                  ),
-                }}
-                colors={({ id }) => COLORS[id as DataKey]}
-                lineWidth={4}
-                enablePoints={false}
-                useMesh={true}
-                legends={[
-                  {
-                    anchor: "top-left",
-                    direction: "row",
-                    justify: false,
-                    translateX: 0,
-                    translateY: -30,
-                    itemsSpacing: 10,
-                    itemDirection: "left-to-right",
-                    itemWidth: 80,
-                    itemHeight: 20,
-                    itemOpacity: 0.75,
-                    symbolSize: 12,
-                    symbolShape: "circle",
-                  },
-                ]}
-                tooltip={({ point }) => (
-                  <div
-                    style={{
-                      background: "white",
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                      border: `1px solid ${point.color}`,
-                      fontSize: "12px",
-                      fontWeight: "bold",
-                      color: "#333",
-                    }}
-                  >
-                    {point.data.y instanceof Date
-                      ? point.data.y.toLocaleString()
-                      : String(point.data.y)}
-                  </div>
-                )}
-              />
+                  }}
+                  axisBottom={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    tickRotation: 0,
+                    legendOffset: 36,
+                    legendPosition: "middle",
+                  }}
+                  axisLeft={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    tickRotation: 0,
+                    legendOffset: -40,
+                    legendPosition: "middle",
+                    tickValues: Array.from(
+                      { length: maxValue / 100 + 1 },
+                      (_, i) => i * 100,
+                    ),
+                  }}
+                  colors={({ id }) => COLORS[id as DataKey]}
+                  lineWidth={4}
+                  enablePoints={false}
+                  useMesh={true}
+                  legends={[
+                    {
+                      anchor: "top-left",
+                      direction: "row",
+                      justify: false,
+                      translateX: 0,
+                      translateY: -30,
+                      itemsSpacing: 10,
+                      itemDirection: "left-to-right",
+                      itemWidth: 80,
+                      itemHeight: 20,
+                      itemOpacity: 0.75,
+                      symbolSize: 12,
+                      symbolShape: "circle",
+                    },
+                  ]}
+                  tooltip={({ point }) => (
+                    <div
+                      style={{
+                        background: "white",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        border: `1px solid ${point.color}`,
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      {point.data.y instanceof Date
+                        ? point.data.y.toLocaleString()
+                        : String(point.data.y)}
+                    </div>
+                  )}
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-gray-500">
+                  데이터가 없습니다
+                </div>
+              )}
             </div>
           </div>
           <ul className="flex gap-[12px]">
