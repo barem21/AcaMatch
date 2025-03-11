@@ -15,6 +15,7 @@ const PaymentSuccess = () => {
       console.log("Payment tokens:", { pgToken, Tid });
 
       if (!pgToken || !Tid) {
+        localStorage.removeItem("paymentTid");
         message.error("결제 정보가 올바르지 않습니다.");
         return;
       }
@@ -27,6 +28,7 @@ const PaymentSuccess = () => {
         setIsPaymentComplete(true);
       } catch (error) {
         console.error("Payment completion error:", error);
+        localStorage.removeItem("paymentTid");
         message.error("결제 완료 처리 중 오류가 발생했습니다.");
       }
     };

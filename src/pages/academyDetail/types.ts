@@ -13,8 +13,10 @@ export interface Class {
   classStartTime: string;
   classEndTime: string;
   classPrice: number;
-  classDay: string | null;
-  classCategoryName: string | null;
+  classDay: string | null | undefined;
+  classCategoryName: string | null | undefined;
+  userCertification?: number;
+  productId?: number;
 }
 
 export interface Review {
@@ -28,6 +30,7 @@ export interface Review {
   reviewClassName: string;
   joinClassId: number;
   banReview: number;
+  classId: number;
   reviewPics?: string[]; // 미디어 리뷰용
 }
 
@@ -54,6 +57,19 @@ export interface AcademyResponse {
   };
 }
 
+export interface Book {
+  bookId: number;
+  bookName: string;
+  bookWriter: string;
+  bookPublisher: string;
+  bookPrice: number;
+  bookPic?: string;
+  bookAmount: number;
+  bookComment: string;
+  manager: string;
+  classId: number;
+}
+
 export interface AcademyData {
   acaId: number;
   acaName: string;
@@ -72,14 +88,7 @@ export interface AcademyData {
   mediaReviews: Review[]; // 추가
   generalReviewCount: number; // 추가
   mediaReviewCount: number; // 추가
-  books?: {
-    bookId: number;
-    bookName: string;
-    bookWriter: string;
-    bookPublisher: string;
-    bookPrice: number;
-    bookPic?: string;
-  }[];
+  books?: Book[];
 }
 
 export interface MapPosition {
@@ -91,17 +100,4 @@ export interface KakaoMapProps {
   address: string;
   height?: string;
   level?: number;
-}
-
-export interface AcademyClass {
-  classId: number;
-  className: string;
-  classComment: string;
-  classStartDate: string;
-  classEndDate: string;
-  classStartTime: string;
-  classEndTime: string;
-  classPrice: number;
-  classDay?: string; // 선택적 속성
-  classCategoryName?: string; // 선택적 속성
 }

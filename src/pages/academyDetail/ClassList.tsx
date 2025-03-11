@@ -1,10 +1,10 @@
 import { Pagination } from "antd";
 import DOMPurify from "dompurify";
 import { useRef, useState } from "react";
-import { AcademyClass } from "./types";
+import { Class } from "./types";
 
 interface ClassListProps {
-  classes: AcademyClass[];
+  classes: Class[];
 }
 
 const ClassList = ({ classes }: ClassListProps) => {

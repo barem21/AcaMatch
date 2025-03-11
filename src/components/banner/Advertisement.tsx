@@ -21,21 +21,6 @@ interface Banner {
   bannerType: number;
 }
 
-const getBannerPositionFolder = (position: number) => {
-  switch (position) {
-    case 1:
-      return "top";
-    case 2:
-      return "bottom";
-    case 3:
-      return "left";
-    case 4:
-      return "right";
-    default:
-      return "etc";
-  }
-};
-
 const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
   const swiperRef = useRef<SwiperType>();
   const [banners, setBanners] = useState<Banner[]>([]);

@@ -5,13 +5,12 @@ import type { UploadFile } from "antd/es/upload/interface";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import MainButton from "../button/MainButton";
 import { SecondaryButton } from "./Modal";
-import { AcademyClass } from "../../pages/academyDetail/types";
+import { Class } from "../../pages/academyDetail/types";
 
 interface ReviewModalProps {
   onClose: () => void;
@@ -19,7 +18,7 @@ interface ReviewModalProps {
   academyId: number;
   existingReview?: any;
   classId?: number;
-  classes?: AcademyClass[];
+  classes?: Class[];
 }
 
 type ReviewType = "general" | "media";
@@ -27,7 +26,7 @@ type ReviewType = "general" | "media";
 function ReviewModal({
   onClose,
   joinClassId,
-  academyId,
+  // academyId,
   existingReview,
   classId,
   classes = [],
@@ -41,13 +40,13 @@ function ReviewModal({
     existingReview?.reviewPics?.length ? "media" : "general",
   );
   const [user] = useRecoilState(userInfo);
-  const selectedClassId =
-    Form.useWatch("classId", form) ||
-    existingReview?.classId ||
-    classId ||
-    joinClassId[0];
+  // const selectedClassId =
+  //   Form.useWatch("classId", form) ||
+  //   existingReview?.classId ||
+  //   classId ||
+  //   joinClassId[0];
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     console.log(existingReview.joinClassId);

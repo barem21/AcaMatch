@@ -1,48 +1,30 @@
 import { DownOutlined } from "@ant-design/icons";
-import { ResponsiveLine } from "@nivo/line";
-import { ResponsivePie } from "@nivo/pie";
 import { Button, Dropdown, Menu } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CiCalendarDate } from "react-icons/ci";
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import jwtAxios from "../../../apis/jwt";
+import { useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
+import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
-
-const COLORS = {
-  학원수: "#F28C6A",
-  회원수: "#6FCF97",
-  결제내역: "#6AA7F9",
-} as const;
-
-type DataKey = keyof typeof COLORS;
-type MonthKey = "이번 달" | "지난 달";
-type WeekKey = "이번주" | "지난주";
-type CategoryKey = "최근 검색" | "방문 통계";
-
-interface DataPoint {
-  x: string;
-  y: number;
-}
-
-interface ChartData {
-  id: DataKey;
-  color: string;
-  data: DataPoint[];
-}
-
-// Update interface for user count data
-interface UserCountData {
-  registerDate: string;
-  totalUserCount: number; // userCount -> totalUserCount로 변경
-}
-
-// Update interface for cost count data
-interface CostCountData {
-  registerDate: string;
-  academyCostCount: number;
-}
+import AcademyApprovalList from "./AcademyApprovalList";
+import LineChart from "./LineChart";
+import NoticeList from "./NoticeList";
+import PieChart from "./PieChart";
+import ReportedUserList from "./ReportedUserList";
+import Stats from "./Stats";
+import {
+  BoardItem,
+  CategoryKey,
+  ChartData,
+  COLORS,
+  CostCountData,
+  CostInfo,
+  DataKey,
+  MonthKey,
+  SearchInfo,
+  UserCountData,
+  WeekKey,
+} from "./types";
 
 const generateData = (
   id: DataKey,
@@ -63,10 +45,10 @@ const thisMonthData: ChartData[] = [
   // 결제내역 데이터는 API에서 가져올 예정
 ];
 
-const lastMonthData: ChartData[] = [
-  generateData("학원수", 40, 450, 30),
-  // 결제내역 데이터는 API에서 가져올 예정
-];
+// const lastMonthData: ChartData[] = [
+//   generateData("학원수", 40, 450, 30),
+//   // 결제내역 데이터는 API에서 가져올 예정
+// ];
 
 // const academyApprovals = [
 //   { date: "2024-02-15", name: "서울 학원", status: "대기중" },
@@ -74,17 +56,12 @@ const lastMonthData: ChartData[] = [
 //   { date: "2024-02-17", name: "대구 학원", status: "대기중" },
 // ];
 
-const reportedUsers = [
-  { user: "user123", type: "욕설", count: 3, status: "미처리" },
-  { user: "user456", type: "스팸", count: 5, status: "처리 완료" },
-  { user: "user789", type: "부적절한 콘텐츠", count: 2, status: "미처리" },
-];
-
-// Add interface for search info
-interface SearchInfo {
-  tagCount: number;
-  tagName: string;
-  totalTagCount: number;
+interface ReportedUser {
+  email: string;
+  name: string;
+  reportsType: string;
+  processingStatus: number;
+  reportCount: number;
 }
 
 const pieChartData: Record<
@@ -129,26 +106,14 @@ const timePeriods: Record<WeekKey, string> = {
   지난주: getWeekRange(1),
 };
 
-// BoardItem 인터페이스 추가
-interface BoardItem {
-  boardId: number;
-  userId: number;
-  boardName: string;
-  createdAt: string;
-  name: string;
-  totalCount: number;
-}
-
-// Add interface for API response
-interface CostInfo {
-  costCount: number;
-  sumFee: number;
-  saleRate: number;
+interface AcademyCountData {
+  registerDate: string;
+  totalAcademyCount: number;
 }
 
 function DashBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<DataKey>(
     (searchParams.get("category") as DataKey) || "학원수",
   );
@@ -178,6 +143,8 @@ function DashBoard() {
   const [academyApprovals, setAcademyApprovals] = useState<
     { date: string; name: string; status: string }[]
   >([]);
+
+  const [reportedUsers, setReportedUsers] = useState<ReportedUser[]>([]);
 
   const statsData = [
     {
@@ -244,6 +211,9 @@ function DashBoard() {
   // Add state for cost data
   const [costData, setCostData] = useState<ChartData[]>([]);
 
+  // Add state for academy count data
+  const [academyCountData, setAcademyCountData] = useState<ChartData[]>([]);
+
   // Add function to fetch user registration data
   const fetchUserRegistrationData = async (period: MonthKey) => {
     try {
@@ -253,29 +223,40 @@ function DashBoard() {
       );
       const { resultData } = response.data;
 
-      // Get current date to determine days in month
+      // 현재 날짜 정보 가져오기
       const now = new Date();
-      const year = now.getFullYear();
-      const month = period === "이번 달" ? now.getMonth() : now.getMonth() - 1;
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
 
-      // Create an array with all days of the month initialized to 0
-      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
+      // 목표 월 계산 (이번 달 또는 지난 달)
+      const targetMonth =
+        period === "이번 달" ? currentMonth : currentMonth - 1;
+      const targetYear = currentYear;
+
+      // 해당 월의 총 일수 계산
+      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+      // 이번 달의 경우 현재 날짜까지만, 지난 달의 경우 월말까지 표시
+      const maxDay = period === "이번 달" ? currentDay : daysInMonth;
+
+      // maxDay까지의 날짜 배열 생성 (초기값 0으로 설정)
+      const allDaysData = Array.from({ length: maxDay }, (_, index) => ({
         x: (index + 1).toString().padStart(2, "0"),
         y: 0,
       }));
 
-      // Update counts for days that have data
+      // API 응답 데이터로 실제 값 업데이트
       if (resultData && Array.isArray(resultData)) {
         resultData.forEach((item: UserCountData) => {
           const day = parseInt(item.registerDate.split("-")[2]);
-          if (day >= 1 && day <= daysInMonth) {
-            allDaysData[day - 1].y = item.totalUserCount; // userCount -> totalUserCount로 변경
+          if (day >= 1 && day <= maxDay) {
+            allDaysData[day - 1].y = item.totalUserCount;
           }
         });
       }
 
-      // Transform to chart format
+      // 차트 데이터 형식으로 변환
       const chartData: ChartData = {
         id: "회원수",
         color: COLORS["회원수"],
@@ -289,11 +270,13 @@ function DashBoard() {
       }
     } catch (error) {
       console.error("Error fetching user registration data:", error);
-      // Set empty data with zeros when error occurs
+      const now = new Date();
+      const maxDay = period === "이번 달" ? now.getDate() : 31;
+
       const emptyData: ChartData = {
         id: "회원수",
         color: COLORS["회원수"],
-        data: Array.from({ length: 31 }, (_, index) => ({
+        data: Array.from({ length: maxDay }, (_, index) => ({
           x: (index + 1).toString().padStart(2, "0"),
           y: 0,
         })),
@@ -314,30 +297,40 @@ function DashBoard() {
       );
       const { resultData } = response.data;
 
-      // Get current date to determine days in month
+      // 현재 날짜 정보 가져오기
       const now = new Date();
-      const year = now.getFullYear();
-      const month = period === "이번 달" ? now.getMonth() : now.getMonth() - 1;
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
 
-      // Create an array with all days of the month initialized to 0
-      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
+      // 목표 월 계산 (이번 달 또는 지난 달)
+      const targetMonth =
+        period === "이번 달" ? currentMonth : currentMonth - 1;
+      const targetYear = currentYear;
+
+      // 해당 월의 총 일수 계산
+      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+      // 이번 달의 경우 현재 날짜까지만, 지난 달의 경우 월말까지 표시
+      const maxDay = period === "이번 달" ? currentDay : daysInMonth;
+
+      // maxDay까지의 날짜 배열 생성 (초기값 0으로 설정)
+      const allDaysData = Array.from({ length: maxDay }, (_, index) => ({
         x: (index + 1).toString().padStart(2, "0"),
         y: 0,
       }));
-      console.log(allDaysData);
 
-      // Update counts for days that have data
+      // API 응답 데이터로 실제 값 업데이트
       if (resultData && Array.isArray(resultData)) {
         resultData.forEach((item: CostCountData) => {
           const day = parseInt(item.registerDate.split("-")[2]);
-          if (day >= 1 && day <= daysInMonth) {
-            allDaysData[day - 1].y = item.academyCostCount; // Updated to use academyCostCount
+          if (day >= 1 && day <= maxDay) {
+            allDaysData[day - 1].y = item.academyCostCount;
           }
         });
       }
 
-      // Transform to chart format
+      // 차트 데이터 형식으로 변환
       const chartData: ChartData = {
         id: "결제내역",
         color: COLORS["결제내역"],
@@ -351,16 +344,17 @@ function DashBoard() {
       }
     } catch (error) {
       console.error("Error fetching cost data:", error);
-      // Set empty data with zeros when error occurs
+      const now = new Date();
+      const maxDay = period === "이번 달" ? now.getDate() : 31;
+
       const emptyData: ChartData = {
         id: "결제내역",
         color: COLORS["결제내역"],
-        data: Array.from({ length: 31 }, (_, index) => ({
+        data: Array.from({ length: maxDay }, (_, index) => ({
           x: (index + 1).toString().padStart(2, "0"),
           y: 0,
         })),
       };
-
       setCostData([emptyData]);
       if (selectedItem === "결제내역") {
         setSelectedData([emptyData]);
@@ -368,42 +362,162 @@ function DashBoard() {
     }
   };
 
-  // Update useEffect to fetch both user and cost data
-  useEffect(() => {
-    fetchUserRegistrationData(selectedMonth);
-    fetchCostData(selectedMonth);
-  }, [selectedMonth]);
+  // 학원 수 데이터를 가져오는 함수
+  const fetchAcademyCount = async (period: MonthKey) => {
+    try {
+      const apiPeriod = period === "이번 달" ? "이번달" : "지난달";
+      const response = await jwtAxios.get(
+        `/api/academy-manager/GetAcademyCount/${apiPeriod}`,
+      );
+      const { resultData } = response.data;
 
-  // Update handleMonthClick
-  const handleMonthClick = (e: { key: string }) => {
-    const monthKey = e.key as MonthKey;
-    setSelectedMonth(monthKey);
+      // 현재 날짜 정보 가져오기
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
 
-    if (selectedItem === "회원수") {
-      fetchUserRegistrationData(monthKey);
-    } else if (selectedItem === "결제내역") {
-      fetchCostData(monthKey);
-    } else {
-      const dataSource = monthKey === "이번 달" ? thisMonthData : lastMonthData;
-      setSelectedData(dataSource.filter(d => d.id === selectedItem));
+      // 목표 월 계산 (이번 달 또는 지난 달)
+      const targetMonth =
+        period === "이번 달" ? currentMonth : currentMonth - 1;
+      const targetYear = currentYear;
+
+      // 해당 월의 총 일수 계산
+      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+      // 이번 달의 경우 현재 날짜까지만, 지난 달의 경우 월말까지 표시
+      const maxDay = period === "이번 달" ? currentDay : daysInMonth;
+
+      // maxDay까지의 날짜 배열 생성 (초기값 0으로 설정)
+      const allDaysData = Array.from({ length: maxDay }, (_, index) => ({
+        x: (index + 1).toString().padStart(2, "0"),
+        y: 0,
+      }));
+
+      // API 응답 데이터로 실제 값 업데이트
+      if (resultData && Array.isArray(resultData)) {
+        resultData.forEach((item: AcademyCountData) => {
+          const day = parseInt(item.registerDate.split("-")[2]);
+          if (day >= 1 && day <= maxDay) {
+            allDaysData[day - 1].y = item.totalAcademyCount;
+          }
+        });
+      }
+
+      // 차트 데이터 형식으로 변환
+      const chartData: ChartData = {
+        id: "학원수",
+        color: COLORS["학원수"],
+        data: allDaysData,
+      };
+
+      // 상태 업데이트
+      setAcademyCountData([chartData]);
+
+      if (selectedItem === "학원수") {
+        setSelectedData([chartData]);
+      }
+    } catch (error) {
+      console.error("Error fetching academy count data:", error);
+
+      // 에러 발생 시 빈 데이터로 초기화
+      const now = new Date();
+      const maxDay = period === "이번 달" ? now.getDate() : 31;
+
+      const emptyData: ChartData = {
+        id: "학원수",
+        color: COLORS["학원수"],
+        data: Array.from({ length: maxDay }, (_, index) => ({
+          x: (index + 1).toString().padStart(2, "0"),
+          y: 0,
+        })),
+      };
+
+      // 에러 상태 업데이트
+      setAcademyCountData([emptyData]);
+      if (selectedItem === "학원수") {
+        setSelectedData([emptyData]);
+      }
     }
   };
 
-  // Update handleCategoryClick
-  const handleCategoryClick = (e: { key: string }) => {
+  // 초기 데이터 로딩
+  useEffect(() => {
+    const loadInitialData = async () => {
+      // 학원수 데이터 로드
+      await fetchAcademyCount(selectedMonth);
+
+      // 회원수 데이터 로드
+      await fetchUserRegistrationData(selectedMonth);
+
+      // 결제내역 데이터 로드
+      await fetchCostData(selectedMonth);
+    };
+
+    loadInitialData();
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
+
+  // 월 변경 시 모든 데이터 다시 로드
+  useEffect(() => {
+    const loadMonthlyData = async () => {
+      if (selectedItem === "학원수") {
+        await fetchAcademyCount(selectedMonth);
+      } else if (selectedItem === "회원수") {
+        await fetchUserRegistrationData(selectedMonth);
+      } else if (selectedItem === "결제내역") {
+        await fetchCostData(selectedMonth);
+      }
+    };
+
+    loadMonthlyData();
+  }, [selectedMonth]);
+
+  // handleCategoryClick 수정
+  const handleCategoryClick = async (e: { key: string }) => {
     const newItem = e.key as DataKey;
     setSelectedItem(newItem);
 
-    if (newItem === "회원수") {
+    // 카테고리 변경 시 해당 데이터 로드
+    if (newItem === "학원수") {
+      await fetchAcademyCount(selectedMonth);
+      setSelectedData(academyCountData);
+    } else if (newItem === "회원수") {
+      await fetchUserRegistrationData(selectedMonth);
       setSelectedData(userRegistrationData);
     } else if (newItem === "결제내역") {
+      await fetchCostData(selectedMonth);
       setSelectedData(costData);
-    } else {
-      const dataSource =
-        selectedMonth === "이번 달" ? thisMonthData : lastMonthData;
-      setSelectedData(dataSource.filter(d => d.id === newItem));
     }
   };
+
+  // handleMonthClick 수정
+  const handleMonthClick = async (e: { key: string }) => {
+    const monthKey = e.key as MonthKey;
+    setSelectedMonth(monthKey);
+
+    // 월 변경 시 현재 선택된 카테고리의 데이터 로드
+    if (selectedItem === "학원수") {
+      await fetchAcademyCount(monthKey);
+      setSelectedData(academyCountData);
+    } else if (selectedItem === "회원수") {
+      await fetchUserRegistrationData(monthKey);
+      setSelectedData(userRegistrationData);
+    } else if (selectedItem === "결제내역") {
+      await fetchCostData(monthKey);
+      setSelectedData(costData);
+    }
+  };
+
+  // 데이터 변경 시 selectedData 업데이트
+  useEffect(() => {
+    if (selectedItem === "학원수") {
+      setSelectedData(academyCountData);
+    } else if (selectedItem === "회원수") {
+      setSelectedData(userRegistrationData);
+    } else if (selectedItem === "결제내역") {
+      setSelectedData(costData);
+    }
+  }, [selectedItem, academyCountData, userRegistrationData, costData]);
 
   // Add state for search data
   const [searchData, setSearchData] = useState<
@@ -551,6 +665,25 @@ function DashBoard() {
     fetchCostInfo();
   }, []);
 
+  // 신고된 유저 목록 가져오기
+  const fetchReportedUsers = async () => {
+    try {
+      const response = await jwtAxios.get("/api/reports/getUserList");
+      if (response.data && response.data.resultData) {
+        setReportedUsers(response.data.resultData);
+        console.log("Reported users:", response.data.resultData); // 데이터 확인용 로그
+      }
+    } catch (error) {
+      console.error("Error fetching reported users:", error);
+      setReportedUsers([]); // 에러 시 빈 배열로 초기화
+    }
+  };
+
+  // 컴포넌트 마운트 시 데이터 가져오기
+  useEffect(() => {
+    fetchReportedUsers();
+  }, []);
+
   return (
     <div className="box-border m-[5px] mt-0 gap-5 w-full max-w-full h-[430px] justify-center align-top">
       <h1 className="w-full font-bold text-xl pb-3">
@@ -563,13 +696,11 @@ function DashBoard() {
         <div className="flex flex-col w-[calc(100%-412px)] gap-[12px]">
           <div className="w-full gap-0 border rounded-lg ">
             <div className="flex justify-between w-full p-3 border-b items-center">
-              {/* <StyledDropdown> */}
               <Dropdown overlay={categoryMenu} trigger={["click"]}>
                 <Button type="text" className="flex justify-between w-[120px]">
                   {selectedItem} <DownOutlined />
                 </Button>
               </Dropdown>
-              {/* </StyledDropdown> */}
 
               <Dropdown overlay={monthMenu} trigger={["click"]}>
                 <Button
@@ -583,118 +714,24 @@ function DashBoard() {
             </div>
 
             <div style={{ height: "300px" }}>
-              {selectedData && selectedData.length > 0 ? (
-                <ResponsiveLine
-                  key={`${selectedMonth}-${selectedItem}`}
-                  data={selectedData}
-                  margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
-                  xScale={{ type: "point" }}
-                  yScale={{
-                    type: "linear",
-                    min: 0,
-                    max: "auto",
-                    stacked: false,
-                  }}
-                  gridXValues={[]}
-                  theme={{
-                    grid: {
-                      line: {
-                        stroke: "#ccc",
-                        strokeWidth: 1,
-                        strokeDasharray: "2 2",
-                      },
-                    },
-                  }}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legendOffset: 36,
-                    legendPosition: "middle",
-                  }}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    tickRotation: 0,
-                    legendOffset: -40,
-                    legendPosition: "middle",
-                    tickValues: Array.from(
-                      { length: maxValue / 100 + 1 },
-                      (_, i) => i * 100,
-                    ),
-                  }}
-                  colors={({ id }) => COLORS[id as DataKey]}
-                  lineWidth={4}
-                  enablePoints={false}
-                  useMesh={true}
-                  legends={[
-                    {
-                      anchor: "top-left",
-                      direction: "row",
-                      justify: false,
-                      translateX: 0,
-                      translateY: -30,
-                      itemsSpacing: 10,
-                      itemDirection: "left-to-right",
-                      itemWidth: 80,
-                      itemHeight: 20,
-                      itemOpacity: 0.75,
-                      symbolSize: 12,
-                      symbolShape: "circle",
-                    },
-                  ]}
-                  tooltip={({ point }) => (
-                    <div
-                      style={{
-                        background: "white",
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        border: `1px solid ${point.color}`,
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: "#333",
-                      }}
-                    >
-                      {point.data.y instanceof Date
-                        ? point.data.y.toLocaleString()
-                        : String(point.data.y)}
-                    </div>
-                  )}
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-gray-500">
-                  데이터가 없습니다
-                </div>
-              )}
+              <LineChart
+                selectedData={selectedData}
+                selectedMonth={selectedMonth}
+                selectedItem={selectedItem}
+                maxValue={maxValue}
+              />
             </div>
           </div>
-          <ul className="flex gap-[12px]">
-            {statsData?.map(item => (
-              <li
-                key={item.id}
-                className="flex flex-col w-full h-[80px] rounded-lg justify-center items-center border border-[#E3EBF6]"
-              >
-                <span className="text-[18px] font-semibold">{item.value}</span>
-                {item.label && (
-                  <span className="text-[#A4ABC5] text-[13px]">
-                    {item.label}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
+          <Stats statsData={statsData} />
         </div>
         <div className="flex-col w-[calc(100%-1193px)] max-w-[394px] 2xl:max-w-[402px] min-w-[350px]">
           <div className="w-full justify-center mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
-            {/* <div className="w-[394px] mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]"> */}
             <div className="flex justify-between w-full p-3 border-b items-center">
-              {/* 카테고리 선택 드롭다운 */}
               <Dropdown overlay={categoryMenu2} trigger={["click"]}>
                 <Button type="text" className="flex justify-between w-[150px]">
                   {selectedCategory} <DownOutlined />
                 </Button>
               </Dropdown>
-              {/* 주 선택 드롭다운 */}
               <Dropdown overlay={timeRangeMenu} trigger={["click"]}>
                 <Button
                   type="text"
@@ -706,153 +743,19 @@ function DashBoard() {
                 </Button>
               </Dropdown>
             </div>
-            <div
-              style={{
-                height: "200px",
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {pieData && pieData.length > 0 ? (
-                <ResponsivePie
-                  data={pieData}
-                  margin={{ top: 40, right: 40, bottom: 60, left: 60 }}
-                  innerRadius={0.9}
-                  padAngle={2}
-                  cornerRadius={3}
-                  colors={({ data }) => data.color}
-                  enableArcLabels={false}
-                />
-              ) : (
-                <div className="h-full w-full mx-auto flex items-center justify-center text-gray-500">
-                  데이터가 없습니다
-                </div>
-              )}
-            </div>
+            <PieChart pieData={pieData} />
 
             <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] min-w-[350px] text-gray-700 text-sm gap-[12px] font-semibold">
               <CiCalendarDate size={"20px"} style={{ strokeWidth: 1 }} />
               {timePeriods[selectedTimeRange]}
             </div>
           </div>
-          <div className="border rounded-lg h-[120px] min-w-[350px]">
-            <div>
-              <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA]">
-                <li
-                  className="flex justify-center items-center w-[200px] cursor-pointer"
-                  onClick={() => navigate("/admin/notice-content")}
-                >
-                  공지사항
-                </li>
-                <li className="flex justify-center items-center min-w-32">
-                  작성일
-                </li>
-              </ul>
-              {notices.map((notice, index) => (
-                <ul key={index} className="flex mx-auto w-full h-[30px]">
-                  <li
-                    className="flex justify-center items-center min-w-[175px] w-[200px] cursor-pointer"
-                    onClick={() =>
-                      navigate(
-                        `/admin/notice-content/view?boardId=${notice.boardId}`,
-                      )
-                    }
-                  >
-                    <span
-                      className="truncate pl-3 pr-3"
-                      title={notice.boardName}
-                    >
-                      {notice.boardName}
-                    </span>
-                  </li>
-                  <li className="flex justify-center items-center min-w-32 text-gray-500 text-sm">
-                    {notice.createdAt}
-                  </li>
-                </ul>
-              ))}
-            </div>
-          </div>
+          <NoticeList notices={notices} />
         </div>
       </div>
       <div className="flex mt-[12px] gap-[12px]">
-        <div className="w-full border rounded-[4px] h-fit">
-          <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
-            학원 승인 대기
-          </span>
-          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              신청일
-            </li>
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              학원명
-            </li>
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              요청상태
-            </li>
-          </ul>
-          <div className="overflow-hidden">
-            {academyApprovals.slice(0, 5).map((item, index, array) => (
-              <ul
-                key={index}
-                className={`flex mx-auto w-full h-[30px] ${index !== array.length - 1 ? "border-b" : ""}`}
-              >
-                <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                  {item.date}
-                </li>
-                <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                  {item.name}
-                </li>
-                <li className="flex justify-center items-center w-1/3 text-[#242424]">
-                  <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
-                    {item.status}
-                  </p>
-                </li>
-              </ul>
-            ))}
-          </div>
-        </div>
-        <div className="w-full border rounded-[4px]">
-          <span className="flex p-4 items-center w-full h-[47px] border-b">
-            신고된 유저 목록
-          </span>
-          <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              유저정보
-            </li>
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              신고 유형
-            </li>
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              신고 횟수
-            </li>
-            <li className="flex justify-center items-center w-full text-[#303E67]">
-              처리상태
-            </li>
-          </ul>
-          <div className="overflow-hidden">
-            {reportedUsers.map((user, index, array) => (
-              <ul
-                key={index}
-                className={`flex mx-auto w-full h-[30px] ${index !== array.length - 1 ? "border-b" : ""}`}
-              >
-                <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                  {user.user}
-                </li>
-                <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                  {user.type}
-                </li>
-                <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                  {user.count}
-                </li>
-                <li className="flex justify-center items-center w-1/4 text-[#242424]">
-                  {user.status}
-                </li>
-              </ul>
-            ))}
-          </div>
-        </div>
+        <AcademyApprovalList academyApprovals={academyApprovals} />
+        <ReportedUserList reportedUsers={reportedUsers} />
       </div>
     </div>
   );

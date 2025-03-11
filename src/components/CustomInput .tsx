@@ -81,7 +81,9 @@ function CustomInput({
               padding,
               fontSize: "14px",
             }}
-            classNames="max-[640px]:w-full"
+            classNames={{
+              wrapper: "max-[640px]:w-full",
+            }}
           />
         </InputStyle>
       ) : (
@@ -97,7 +99,9 @@ function CustomInput({
             padding,
             fontSize: "14px",
           }}
-          classNames="max-[640px]:w-full"
+          classNames={{
+            wrapper: "max-[640px]:w-full",
+          }}
         />
       )}
       {children}

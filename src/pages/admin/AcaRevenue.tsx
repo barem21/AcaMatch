@@ -9,10 +9,10 @@ interface RevenueData {
   acaName: string;
   address: string;
   acaPic: string;
-  price: number;
-  status: number;
-  createdAt: string;
-  costId: number;
+  totalPrice: number;
+  latestStatus: number;
+  totalCount: number;
+  costIds: string;
 }
 
 interface OrderDetails {
@@ -29,7 +29,7 @@ const AcaRevenue = (): JSX.Element => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
 
@@ -46,7 +46,7 @@ const AcaRevenue = (): JSX.Element => {
 
   useEffect(() => {
     fetchRevenueData();
-  }, [status, year, month, page]);
+  }, [status, year, month, page, size]);
 
   const fetchRevenueData = async () => {
     setLoading(true);
@@ -61,8 +61,11 @@ const AcaRevenue = (): JSX.Element => {
         },
       });
 
+      console.log("API Response:", response.data.resultData);
       setRevenueData(response.data.resultData);
-      setTotalItems(response.data.resultData.length);
+      if (response.data.resultData.length > 0) {
+        setTotalCount(response.data.resultData[0].totalCount);
+      }
     } catch (error) {
       console.error("데이터 불러오기 실패:", error);
       message.error("데이터를 불러오는 데 실패했습니다.");
@@ -92,6 +95,16 @@ const AcaRevenue = (): JSX.Element => {
 
   const onChange = () => {
     form.submit();
+  };
+
+  // 현재 선택된 월의 마지막 날짜 구하기
+  const getLastDayOfMonth = () => {
+    return new Date(parseInt(year), parseInt(month), 0).getDate();
+  };
+
+  // 정산일 표시 형식
+  const getSettlementDate = () => {
+    return `${year}-${month.padStart(2, "0")}-${getLastDayOfMonth()}`;
   };
 
   return (
@@ -187,56 +200,66 @@ const AcaRevenue = (): JSX.Element => {
           {loading ? (
             <p className="text-center p-4">데이터 로딩 중...</p>
           ) : revenueData.length > 0 ? (
-            revenueData.map(item => (
-              <div
-                key={item.costId}
-                className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
-              >
-                <div className="flex justify-start items-center w-[50%]">
-                  <div className="flex items-center gap-3 cursor-pointer">
-                    <div className="w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
-                      <img
-                        src={`http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`}
-                        className="w-full h-full object-cover"
-                        alt={item.acaName}
-                      />
-                    </div>
-                    <div>
-                      <h4>{item.acaName}</h4>
-                      <p className="text-[#1761FD] text-[12px]">
-                        [{item.address}]
-                      </p>
+            revenueData.map(item => {
+              console.log("Item status:", item.latestStatus);
+              return (
+                <div
+                  key={item.acaId}
+                  className="loop-content flex justify-between align-middle p-2 pl-3 border-b"
+                >
+                  <div className="flex justify-start items-center w-[50%]">
+                    <div className="flex items-center gap-3 cursor-pointer">
+                      <div className="w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                        <img
+                          src={`http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`}
+                          className="w-full h-full object-cover"
+                          alt={item.acaName}
+                        />
+                      </div>
+                      <div>
+                        <h4>{item.acaName}</h4>
+                        <p className="text-[#1761FD] text-[12px]">
+                          [{item.address}]
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center justify-center text-center w-[200px]">
+                    {getSettlementDate()}
+                  </div>
+                  <div className="flex items-center justify-center text-center w-[100px]">
+                    {item.totalPrice.toLocaleString()}원
+                  </div>
+                  <div className="flex items-center justify-center w-[132px]">
+                    <p
+                      className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center ${
+                        item.latestStatus === 0
+                          ? "bg-[#f8a57d]"
+                          : "bg-[#90b1c4]"
+                      }`}
+                    >
+                      {/* {console.log("Rendering status:", item.latestStatus)} */}
+                      {item.latestStatus === 0 ? "미정산" : "정산완료"}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center w-[132px]">
+                    <button
+                      onClick={() =>
+                        fetchOrderDetails(Number(item.costIds.split(",")[0]))
+                      }
+                      className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300"
+                    >
+                      주문내역
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-center w-[72px] ">
+                    <button>
+                      <FaRegTrashAlt className="w-3 text-gray-400" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-center text-center w-[200px]">
-                  {item?.createdAt?.split(".")[0]}
-                </div>
-                <div className="flex items-center justify-center text-center w-[100px]">
-                  {item?.price?.toLocaleString()}원
-                </div>
-                <div className="flex items-center justify-center w-[132px]">
-                  <p
-                    className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center ${item.status === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"}`}
-                  >
-                    {item.status === 1 ? "정산완료" : "미정산"}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center w-[132px]">
-                  <button
-                    onClick={() => fetchOrderDetails(item.costId)}
-                    className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300"
-                  >
-                    주문내역
-                  </button>
-                </div>
-                <div className="flex items-center justify-center w-[72px] ">
-                  <button>
-                    <FaRegTrashAlt className="w-3 text-gray-400" />
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="text-center p-4 text-gray-500 border-b">
               데이터가 없습니다.
@@ -245,9 +268,16 @@ const AcaRevenue = (): JSX.Element => {
         </div>
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
-            defaultCurrent={page}
-            total={totalItems}
+            current={page}
+            total={totalCount}
+            pageSize={size}
             showSizeChanger={false}
+            onChange={newPage => {
+              setSearchParams({
+                ...Object.fromEntries(searchParams.entries()),
+                page: newPage.toString(),
+              });
+            }}
           />
         </div>
       </div>

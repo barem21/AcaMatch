@@ -132,21 +132,6 @@ function HomePage() {
     navigate(`/academy/detail?id=${acaId}&page=1&size=10`);
   };
 
-  const getBannerPositionFolder = (position: number) => {
-    switch (position) {
-      case 1:
-        return "top";
-      case 2:
-        return "bottom";
-      case 3:
-        return "left";
-      case 4:
-        return "right";
-      default:
-        return "etc";
-    }
-  };
-
   // 거리별
   useEffect(() => {
     const accessToken = getCookie("accessToken");

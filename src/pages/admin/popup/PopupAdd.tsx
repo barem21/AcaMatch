@@ -199,9 +199,9 @@ const PopupAdd = () => {
         new Blob([JSON.stringify(popupData.p)], { type: "application/json" }),
       );
 
-      // FormData 내용 확인
-      const formDataContent = JSON.parse(await formData.get("p").text());
-      console.log("FormData에 포함된 내용:", formDataContent);
+      // // FormData 내용 확인
+      // const formDataContent = JSON.parse(await formData.get("p").text());
+      // console.log("FormData에 포함된 내용:", formDataContent);
 
       // 이미지가 있을 경우 추가
       if (values.registrationType === "image" && values.popupImage) {

@@ -1,42 +1,26 @@
-import { Input, message, Pagination } from "antd";
+import { message, Pagination } from "antd";
 import DOMPurify from "dompurify";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
-import CustomModal from "../../components/modal/Modal";
-import { useRecoilState, useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
-import { useSearchParams } from "react-router-dom";
-
-// Book 인터페이스 수정
-interface Book {
-  bookId: number;
-  bookName: string;
-  bookAmount: number;
-  bookComment: string;
-  bookPic: string;
-  bookPrice: number;
-  manager: string;
-  classId: number; // 클래스 ID 추가
-}
+import CustomModal from "../../components/modal/Modal";
+import { Book } from "./types";
 
 interface BookListProps {
-  books?: Book[];
-  classes?: { classId: number; className: string }[];
+  books: Book[];
+  selectedClassId?: number;
 }
 
-const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
+const BookList = ({ books, selectedClassId }: BookListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isPaymentMode, setIsPaymentMode] = useState(false);
-  const [buyerName, setBuyerName] = useState("");
-  const [buyerEmail, setBuyerEmail] = useState("");
+  const [_isPaymentMode, setIsPaymentMode] = useState(false);
   const currentUserInfo = useRecoilValue(userInfo);
   const pageSize = 5;
-  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
 
-  // 클래스별 교재 필터링
   useEffect(() => {
     if (selectedClassId) {
       const booksForClass = books.filter(
@@ -192,9 +176,7 @@ const BookList: React.FC<BookListProps> = ({ books = [], classes = [] }) => {
                 </p>
               </div>
               <div className="text-sm text-gray-500 mt-2">
-                클래스:{" "}
-                {classes.find(c => c.classId === book.classId)?.className ||
-                  "미지정"}
+                클래스: {book.classId ? "지정됨" : "미지정"}
               </div>
             </div>
           ))

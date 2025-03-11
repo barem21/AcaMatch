@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Calendar, message, Radio } from "antd";
+import { message, Radio } from "antd";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
@@ -14,12 +14,11 @@ import LikeButton from "../../components/button/LikeButton";
 import MainButton from "../../components/button/MainButton";
 import CustomModal from "../../components/modal/Modal";
 import AcademyCalendar from "./AcademyCalendar";
+import BookList from "./BookList";
 import ClassList from "./ClassList";
 import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
-import BookList from "./BookList";
-import { AcademyClass, AcademyData, Review } from "./types";
-import axios from "axios";
+import { AcademyData, Class, Review } from "./types";
 
 declare global {
   interface Window {
@@ -229,6 +228,15 @@ const LinkModal: React.FC<LinkModalProps> = () => {
   );
 };
 
+// interface AcademyClass {
+//   classId: number;
+//   className: string;
+//   classStartDate: string;
+//   classEndDate: string;
+//   classPrice: number;
+//   productId: number;
+// }
+
 const AcademyDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -297,8 +305,8 @@ const AcademyDetail = () => {
   const fetchData = async () => {
     try {
       const url = userId
-        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`
-        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`;
+        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&generalStartIdx=${(Number(page) - 1) * size}&mediaStartIdx=${(Number(page) - 1) * size}&page=${page}&size=${size}`
+        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&generalStartIdx=${(Number(page) - 1) * size}&mediaStartIdx=${(Number(page) - 1) * size}&page=${page}&size=${size}`;
 
       const response = await jwtAxios.get(url);
 
@@ -388,51 +396,91 @@ const AcademyDetail = () => {
   };
 
   const handleButton1Click = () => setIsModalVisible(false);
-  const handleButton2Click = async () => {
-    try {
-      const res = await jwtAxios.post("/api/joinClass", {
-        classId: selectClass,
-        userId: userId,
-        discount: 0,
-        certification: 1,
-      });
-      console.log(selectClass, userId);
-      if (res.data.resultMessage === "이미 수강 신청하였습니다.")
-        message.success("이미 수강중 입니다");
-      else message.success("수강 신청이 완료되었습니다.");
 
-      console.log(res);
-    } catch (error) {
-      console.log(error);
+  // 수강신청 및 결제 처리 함수
+  const handleButton2Click = async () => {
+    if (!checkIsAuthenticated()) {
+      navigate("/log-in");
+      message.error("로그인이 필요한 서비스입니다.");
+      return;
     }
-    setIsModalVisible(false);
+
+    if (!selectClass) {
+      message.error("수강할 강좌를 선택해주세요.");
+      return;
+    }
+
+    try {
+      // 선택된 클래스 찾기
+      const selectedClassInfo = academyData?.classes.find(
+        c => c.classId === selectClass,
+      );
+
+      if (!selectedClassInfo) {
+        message.error("선택된 강좌 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      // 결제 준비 요청
+      const response = await jwtAxios.post("/api/payment/ready", {
+        products: [
+          {
+            productId: selectedClassInfo.productId,
+            quantity: 1,
+          },
+        ],
+        userId: userId,
+        joinClassId: selectClass,
+      });
+
+      if (response.data.resultData.next_redirect_pc_url) {
+        // tid를 localStorage에 저장
+        localStorage.setItem("paymentTid", response.data.resultData.tid);
+
+        // 결제 창 열기
+        window.open(
+          response.data.resultData.next_redirect_pc_url,
+          "KakaoPayment",
+          "width=800,height=800",
+        );
+
+        setIsModalVisible(false);
+      } else {
+        localStorage.removeItem("paymentTid");
+        message.error("결제 페이지 생성에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      localStorage.removeItem("paymentTid");
+      message.error("결제 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const handleClassSelect = (classId: number) => {
     setSelectClass(classId);
   };
 
-  const fetchAcademyDetails = async () => {
-    try {
-      const url = userId
-        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`
-        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`;
+  // const fetchAcademyDetails = async () => {
+  //   try {
+  //     const url = userId
+  //       ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`
+  //       : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`;
 
-      const response = await axios.get(url);
-      console.log(response);
+  //     const response = await axios.get(url);
+  //     console.log(response);
 
-      if (response.data?.resultData) {
-        setAcademyData(response.data.resultData);
-        setIsLiked(response.data.resultData.isLiked ?? false);
-      } else {
-        console.error("학원 상세 정보가 없습니다.");
-        setIsLiked(false);
-      }
-    } catch (error) {
-      console.error("학원 상세 정보를 가져오는데 실패했습니다.", error);
-      setIsLiked(false);
-    }
-  };
+  //     if (response.data?.resultData) {
+  //       setAcademyData(response.data.resultData);
+  //       setIsLiked(response.data.resultData.isLiked ?? false);
+  //     } else {
+  //       console.error("학원 상세 정보가 없습니다.");
+  //       setIsLiked(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("학원 상세 정보를 가져오는데 실패했습니다.", error);
+  //     setIsLiked(false);
+  //   }
+  // };
 
   if (loading) {
     return (
@@ -638,7 +686,7 @@ const AcademyDetail = () => {
         )}
 
         {items[1].isActive && (
-          <ClassList classes={academyData.classes as AcademyClass[]} />
+          <ClassList classes={academyData.classes as Class[]} />
         )}
 
         {items[2].isActive && (
@@ -659,7 +707,7 @@ const AcademyDetail = () => {
 
       <CustomModal
         visible={isModalVisible}
-        title={"수강등록"}
+        title="수강신청"
         content={
           <>
             <div className="flex flex-col gap-2 max-h-[2000px]">
@@ -670,25 +718,30 @@ const AcademyDetail = () => {
                     checked={selectClass === classItem.classId}
                     onChange={() => handleClassSelect(classItem.classId)}
                   >
-                    <div className="flex items-center line-clamp-1">
-                      <p className="text-[16px] font-[400] line-clamp-1">
-                        {classItem.className}{" "}
-                      </p>
-                      <p className="text-[14px] line-clamp-1">
-                        ({classItem.classStartDate}~{classItem.classEndDate})
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center line-clamp-1">
+                        <p className="text-[16px] font-[400] line-clamp-1">
+                          {classItem.className}{" "}
+                        </p>
+                        <p className="text-[14px] line-clamp-1 ml-2">
+                          ({classItem.classStartDate}~{classItem.classEndDate})
+                        </p>
+                      </div>
+                      <p className="text-[14px] text-[#507A95]">
+                        수강료: {classItem.classPrice.toLocaleString()}원
                       </p>
                     </div>
                   </Radio>
                 ))}
               </CustomScrollbar>
-              <p className="mt-[15px]">수강등록 하시겠습니까?</p>
+              <p className="mt-[15px]">선택한 강좌를 수강신청 하시겠습니까?</p>
             </div>
           </>
         }
         onButton1Click={handleButton1Click}
         onButton2Click={handleButton2Click}
-        button1Text={"취소"}
-        button2Text={"확인"}
+        button1Text="취소"
+        button2Text="결제하기"
         modalWidth={400}
       />
       {/* {isLink && <LinkModal></LinkModal>} */}

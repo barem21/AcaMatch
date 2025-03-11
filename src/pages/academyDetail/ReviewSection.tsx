@@ -6,23 +6,22 @@ import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
 import ReviewModal from "../../components/modal/ReviewModal";
-import { AcademyClass, Review } from "./types"; // types.ts에서 Review 타입을 임포트
+import { Class, Review } from "./types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/free-mode";
 
 interface ReviewSectionProps {
   star: number;
   reviewCount: number;
-  renderStars: (rating: number) => JSX.Element;
-  academyId?: number;
-  classes: AcademyClass[];
+  renderStars: (star: number) => JSX.Element | JSX.Element[];
+  academyId: number;
+  classes: Class[];
   generalReviews: Review[];
   mediaReviews: Review[];
   generalReviewCount: number;
   mediaReviewCount: number;
-  onReviewUpdate?: () => void;
+  onReviewUpdate: () => Promise<void>;
 }
 
 interface ClassItem {
@@ -70,7 +69,7 @@ const ReviewSection = ({
   mediaReviewCount,
   onReviewUpdate,
 }: ReviewSectionProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [_searchParams, setSearchParams] = useSearchParams();
   const [generalPage, setGeneralPage] = useState(1);
   const [mediaPage, setMediaPage] = useState(1);
   const pageSize = 10;
@@ -158,17 +157,17 @@ const ReviewSection = ({
       });
       console.log(res);
 
-      // Assuming generalReviews and mediaReviews are arrays of reviews
-      const updatedGeneralReviews = generalReviews.filter(
-        review => review.reviewId !== deleteReviewId,
-      );
-      const updatedMediaReviews = mediaReviews.filter(
-        review => review.reviewId !== deleteReviewId,
-      );
+      // // Assuming generalReviews and mediaReviews are arrays of reviews
+      // const updatedGeneralReviews = generalReviews.filter(
+      //   review => review.reviewId !== deleteReviewId,
+      // );
+      // const updatedMediaReviews = mediaReviews.filter(
+      //   review => review.reviewId !== deleteReviewId,
+      // );
 
-      // Update the state with the new reviews
-      setGeneralReviews(updatedGeneralReviews);
-      setMediaReviews(updatedMediaReviews);
+      // // Update the state with the new reviews
+      // setGeneralReviews(updatedGeneralReviews);
+      // setMediaReviews(updatedMediaReviews);
     } catch (error) {
       console.error("리뷰 삭제 실패:", error);
     }
@@ -310,7 +309,7 @@ const ReviewSection = ({
                       grabCursor={true}
                       className="w-full"
                     >
-                      {review.reviewPics.map((pic, i) => (
+                      {review.reviewPics.map((pic: string, i: number) => (
                         <SwiperSlide key={i} className="w-[120px] h-[120px]">
                           <img
                             src={`http://112.222.157.157:5233/pic/reviews/${review.reviewId}/images/${pic}`}
