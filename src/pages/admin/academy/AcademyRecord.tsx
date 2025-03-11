@@ -430,11 +430,18 @@ function AcademyRecord() {
           `/api/grade/status?acaId=${acaId}&classId=${classId}`,
         );
         const formatted = res.data.resultData.map((item: any) => ({
-          value: item.subjectId,
-          label: item.subjectName,
+          value: item.examId,
+          label: item.examName,
         }));
         setMyAcademyTestList(formatted);
-        //console.log(res.data.resultData);
+        //console.log("test list : ", res.data.resultData);
+
+        //페이지 들어오면 ant design 처리용 기본값 세팅
+        form3.setFieldsValue({
+          examId: examId,
+          search: "",
+          showCnt: 40,
+        });
       } catch (error) {
         console.log(error);
       }
@@ -464,7 +471,7 @@ function AcademyRecord() {
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-24 text-sm">수강생 검색</label>
-                <Form.Item name="subjectId" className="mb-0">
+                <Form.Item name="examId" className="mb-0">
                   <Select
                     showSearch
                     placeholder="강좌 선택"

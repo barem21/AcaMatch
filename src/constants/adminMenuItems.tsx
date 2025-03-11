@@ -244,6 +244,29 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
   },
 ];
 
+// 강사용 메뉴 (roleId === 4)
+export const teacherMenuItems: (MenuItem | Divider)[] = [
+  {
+    type: "item",
+    icon: <FaChalkboardTeacher />,
+    label: "강사 등록",
+    link: "/admin/academy",
+    active: false,
+    list: [
+      {
+        label: "신청 내역",
+        link: "/admin/teacher/list",
+        active: false,
+      },
+      {
+        label: "등록 신청",
+        link: "/admin/teacher/add",
+        active: false,
+      },
+    ],
+  },
+];
+
 // roleId에 따라 메뉴 반환하는 함수
 export const getMenuItems = (
   roleId: string | number | null,
@@ -255,5 +278,9 @@ export const getMenuItems = (
   // roleId를 숫자로 변환
   const role = typeof roleId === "string" ? parseInt(roleId, 10) : roleId;
 
-  return role === 0 ? adminMenuItems : academyMenuItems;
+  return role === 0
+    ? adminMenuItems
+    : role === 4
+      ? teacherMenuItems
+      : academyMenuItems;
 };

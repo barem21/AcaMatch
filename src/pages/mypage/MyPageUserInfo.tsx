@@ -150,6 +150,7 @@ function MyPageUserInfo() {
   switch (currentUserInfo.roleId) {
     case 0: //관리자
     case 3: //학원관계자
+    case 4: //강사
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
         { label: "학원 관리자", isActive: false, link: "/admin" },
