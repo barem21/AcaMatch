@@ -166,7 +166,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       };
     });
 
-    // 🚀 타입 강제 변환
     setMenuItems(updatedItems as (MenuItem | Divider)[]);
   }, [currentUserInfo.roleId, location.pathname]);
 

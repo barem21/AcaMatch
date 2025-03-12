@@ -50,7 +50,7 @@ const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
 
   return (
     <div
-      className="w-1/2 border-2 border-[#999999] rounded-lg p-1"
+      className="w-[132px] border-2 border-[#999999] rounded-lg p-1"
       style={{ height: `${height + 50}px` }}
     >
       <div className="h-full flex flex-col">

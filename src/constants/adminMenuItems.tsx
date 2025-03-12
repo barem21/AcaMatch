@@ -5,6 +5,8 @@ import {
   FaCreditCard,
   FaBullhorn,
   FaShieldAlt,
+  FaUserGraduate,
+  FaUserEdit,
 } from "react-icons/fa";
 
 export interface MenuItem {
@@ -261,6 +263,39 @@ export const teacherMenuItems: (MenuItem | Divider)[] = [
       {
         label: "등록 신청",
         link: "/admin/teacher/add",
+        active: false,
+      },
+    ],
+  },
+  {
+    type: "item",
+    icon: <FaUserGraduate />,
+    label: "학생 관리",
+    link: "",
+    active: false,
+    list: [
+      {
+        label: "출석 관리",
+        link: "/admin/checkIn",
+        active: false,
+      },
+      {
+        label: "성적 관리",
+        link: "/admin",
+        active: false,
+      },
+    ],
+  },
+  {
+    type: "item",
+    icon: <FaUserEdit />,
+    label: "강사 정보",
+    link: "",
+    active: false,
+    list: [
+      {
+        label: "정보 수정",
+        link: "",
         active: false,
       },
     ],

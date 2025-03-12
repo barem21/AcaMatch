@@ -6,10 +6,8 @@ interface BannerLayoutProps {
 
 const BannerLayout = ({ position }: BannerLayoutProps) => {
   return (
-    <div className="absolute right-0 w-[280px] h-[100%] max-[640px]:hidden">
-      <div
-        className={`flex ${position === "right" ? "sticky top-[100px] p-4 pl-0" : "pr-0 "} space-y-4 justify-end items-center`}
-      >
+    <div className="fixed right-[10px] top-[100px] p-4 pl-0 left-[auto] max-[1380px]:hidden max-[640px]:hidden">
+      <div className={`flex space-y-4 justify-end items-center`}>
         <Advertisement id="1" />
       </div>
     </div>

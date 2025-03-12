@@ -156,18 +156,6 @@ const ReviewSection = ({
         data: { acaId: academyId, userId: user.userId },
       });
       console.log(res);
-
-      // // Assuming generalReviews and mediaReviews are arrays of reviews
-      // const updatedGeneralReviews = generalReviews.filter(
-      //   review => review.reviewId !== deleteReviewId,
-      // );
-      // const updatedMediaReviews = mediaReviews.filter(
-      //   review => review.reviewId !== deleteReviewId,
-      // );
-
-      // // Update the state with the new reviews
-      // setGeneralReviews(updatedGeneralReviews);
-      // setMediaReviews(updatedMediaReviews);
     } catch (error) {
       console.error("리뷰 삭제 실패:", error);
     }
@@ -195,29 +183,7 @@ const ReviewSection = ({
       </div>
 
       <div className="flex justify-between items-center">
-        <div className="flex gap-4">
-          {/* <h3 className="text-[18px] font-bold h-[47px] max-[640px]:h-auto">
-            Reviews
-          </h3> */}
-          {/* <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 rounded ${
-                generalPage === 1 ? "bg-[#3B77D8] text-white" : "bg-gray-100"
-              }`}
-              onClick={() => setGeneralPage(1)}
-            >
-              일반 리뷰 ({generalReviewCount})
-            </button>
-            <button
-              className={`px-4 py-2 rounded ${
-                mediaPage === 1 ? "bg-[#3B77D8] text-white" : "bg-gray-100"
-              }`}
-              onClick={() => setMediaPage(1)}
-            >
-              미디어 리뷰 ({mediaReviewCount})
-            </button>
-          </div> */}
-        </div>
+        <div className="flex gap-4"></div>
         {isClassIn && (
           <button
             className="small_line_button bg-[#3B77D8]"
