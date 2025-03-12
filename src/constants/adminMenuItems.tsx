@@ -275,15 +275,17 @@ export const teacherMenuItems: (MenuItem | Divider)[] = [
     active: false,
     list: [
       {
-        label: "출석 관리",
-        link: "/admin/checkIn",
+        label: "출석 및 성적관리",
+        link: "/admin/academy",
         active: false,
       },
+      /*
       {
         label: "성적 관리",
-        link: "/admin",
+        link: "/admin/academy",
         active: false,
       },
+      */
     ],
   },
   {
@@ -295,7 +297,7 @@ export const teacherMenuItems: (MenuItem | Divider)[] = [
     list: [
       {
         label: "정보 수정",
-        link: "",
+        link: "/admin/profile",
         active: false,
       },
     ],

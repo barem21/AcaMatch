@@ -34,7 +34,7 @@ const TeacherAdd = () => {
   const academyList = async () => {
     try {
       const res = await axios.get(
-        `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
+        `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree?page=1&size=1000`,
       );
       setMyAcademyList(res.data.resultData);
       academyClassList();
@@ -83,7 +83,7 @@ const TeacherAdd = () => {
   };
 
   const onFinished = async (values: any) => {
-    console.log(values);
+    //console.log(values);
     if (roleId === 4) {
       const data = {
         classId: values.classId,
@@ -93,8 +93,12 @@ const TeacherAdd = () => {
         isActive: 1,
       };
       const res = await axios.post("/api/teacher", data);
-      console.log(res.data.resultdata);
-      navigate("../add");
+      //console.log(res.data.resultData);
+
+      if (res.data.resultData === 1) {
+        message.success("강사등록 신청이 완료되었습니다.");
+        navigate("../list");
+      }
     } else {
       message.error("강사 회원만 등록신청이 가능합니다.");
       return;

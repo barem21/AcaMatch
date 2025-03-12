@@ -2,15 +2,14 @@ import koLocale from "@fullcalendar/core/locales/ko";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
-import { Checkbox, Form, message, Select } from "antd";
-import type { CheckboxChangeEvent } from "antd/es/checkbox";
+import { Button, Checkbox, Form, message, notification, Select } from "antd";
+import axios from "axios";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import jwtAxios from "../../../apis/jwt";
-import axios from "axios";
-import { useRecoilValue } from "recoil";
-import userInfo from "../../../atoms/userInfo";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import jwtAxios from "../../../apis/jwt";
+import userInfo from "../../../atoms/userInfo";
 
 /*
 interface BoardItem {
@@ -43,15 +42,25 @@ interface classListType {
   teacherName: string;
 }
 
+interface studentListType {
+  birth: string;
+  name: string;
+  phone: string;
+  userId: number;
+  userPic: string;
+  joinClassId: number;
+}
+
 const CheckIn = () => {
   const [form] = Form.useForm();
+  const [form2] = Form.useForm();
   const navigate = useNavigate();
   const { userId, roleId } = useRecoilValue(userInfo);
   const [myAcademyList, setMyAcademyList] = useState([]); //학원 목록
   const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
   const [events, setEvents] = useState<Event[]>([]);
-  //const [_selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
-  const [checkedList, setCheckedList] = useState<number[]>([]);
+  const [attendanceDate, setAttendanceDate] = useState<string | null>(null);
+  const [studentList, setStudentList] = useState<studentListType[]>([]);
   const [searchParams] = useSearchParams();
 
   const acaId = parseInt(searchParams.get("acaId") || "0", 0);
@@ -80,7 +89,7 @@ const CheckIn = () => {
   };
 
   // acaId와 acaName만 남기기
-  const simplifiedData = myAcademyList.map(
+  const simplifiedData = myAcademyList?.map(
     ({ acaId: value, acaName: label }) => ({
       value,
       label,
@@ -101,12 +110,25 @@ const CheckIn = () => {
   };
 
   // acaId와 acaName만 남기기
-  const simplifiedData2 = classList.map(
+  const simplifiedData2 = classList?.map(
     ({ classId: value, className: label }) => ({
       value,
       label,
     }),
   );
+
+  //수강생 목록
+  const academyStudentList = async () => {
+    try {
+      const res = await axios.get(
+        `/api/acaClass/acaClassUser?classId=${classId}&page=1`,
+      );
+      setStudentList(res.data.resultData);
+      //console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // 현재 날짜 기준으로 해당 월의 시작일과 종료일 계산
   const getCurrentMonthRange = () => {
@@ -202,26 +224,71 @@ const CheckIn = () => {
   //   }
   // };
 
-  const onCheckboxChange = (index: number) => (e: CheckboxChangeEvent) => {
-    if (e.target.checked) {
-      setCheckedList([...checkedList, index]);
+  // 날짜 클릭 시 호출될 함수
+  const handleDateClick = (info: any) => {
+    const clickedDate = info.dateStr; // 클릭한 날짜 정보 (YYYY-MM-DD 형식)
+    setAttendanceDate(clickedDate); // 상태 업데이트
+
+    // 오늘 날짜보다 이후 날짜가 선택된 경우
+    const today = dayjs().format("YYYY-MM-DD");
+    if (dayjs(clickedDate).isAfter(today, "day")) {
+      notification.error({
+        message: "경고",
+        description: "오늘 이후의 날짜는 선택할 수 없습니다.",
+      });
     } else {
-      setCheckedList(checkedList.filter(item => item !== index));
+      //기존 쿼리 스트링에 date를 추가
+      const url = new URL(window.location.href);
+      url.searchParams.set("date", clickedDate); // date 파라미터 추가
+      window.history.pushState({}, "", url); // URL 업데이트
     }
   };
 
   //검색
   const onFinished = async (values: any) => {
-    console.log(values);
-
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
     navigate(`?${queryParams}`); //쿼리스트링 url에 추가
   };
 
+  //출석상태 저장
+  const onFinishedSe = async (values: any) => {
+    console.log(values);
+
+    if (!attendanceDate) {
+      notification.error({
+        message: "경고",
+        description: "날짜가 선택되지 않았습니다.",
+      });
+      return;
+    }
+
+    for (let i = 0; i < values.joinClassId.length; i++) {
+      const data = {
+        joinClassId: values.joinClassId[i],
+        attendanceDate: attendanceDate,
+        status: values.status,
+      };
+
+      try {
+        const res = await axios.post("/api/attendance", data);
+        //console.log(res.data.resultData);
+        if (res.data.resultData === 1) {
+          message.success("출석정보가 저장되었습니다.");
+        } else {
+          message.error("출석정보가 저장이 실패되었습니다.");
+        }
+      } catch (error) {
+        console.log(error);
+        message.error("출석정보가 저장이 실패되었습니다.");
+      }
+    }
+  };
+
   useEffect(() => {
     academyList(); //학원 목록
     academyClassList(); //강좌 목록
+    academyStudentList(); //수강생 목록
     fetchAttendanceData();
   }, []);
 
@@ -278,17 +345,17 @@ const CheckIn = () => {
             </div>
           </Form>
 
-          <div className="p-4 pb-0 pt-0 flex gap-4 justify-center border-b">
-            <div className="justify-center w-[1200px] pt-2">
+          <div className="p-4 pb-0 pt-0 pr-0 flex gap-4 justify-center border-b">
+            <div className="justify-center w-full pt-2">
               <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
                 locale={koLocale}
                 events={events}
                 headerToolbar={{
-                  left: "prev,next today",
+                  left: "prev,next",
                   center: "title",
-                  right: "dayGridMonth",
+                  right: "today",
                 }}
                 height="620px"
                 eventContent={eventInfo => {
@@ -296,48 +363,59 @@ const CheckIn = () => {
                     <div className="p-1 text-xs">{eventInfo.event.title}</div>
                   );
                 }}
+                dateClick={handleDateClick} // 날짜 클릭 이벤트 핸들러
               />
             </div>
-            <div className="flex flex-col w-[300px] h-[640px] border-l border-[#EEEEEE]">
-              {/* 헤더 */}
-              <div className="flex flex-col justify-center px-5 h-20 border-b border-[#EEEEEE]">
-                <h2 className="text-base font-medium leading-10 flex items-center tracking-wide uppercase text-[#303E67]">
-                  수강생 목록 및 일괄 출석처리
-                </h2>
-              </div>
+            <Form form={form2} onFinish={values => onFinishedSe(values)}>
+              <div className="flex flex-col w-[300px] h-[640px] border-l border-[#EEEEEE]">
+                {/* 헤더 */}
+                <div className="flex flex-col justify-center px-5 h-16 border-b border-[#EEEEEE]">
+                  <h2 className="text-base font-medium leading-10 flex items-center tracking-wide uppercase text-[#303E67]">
+                    수강생 목록 및 일괄 출석처리
+                  </h2>
+                </div>
 
-              {/* 수강생 목록 */}
-              <div className="flex flex-col flex-1">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-row items-center px-5 h-10 gap-2.5"
-                  >
-                    <Checkbox
-                      onChange={onCheckboxChange(index)}
-                      checked={checkedList.includes(index)}
-                      className="flex justify-center items-center"
+                {/* 수강생 목록 */}
+                <div className="flex justify-center items-center p-4 border-b">
+                  <h6 className="w-1/2">출석상태 선택</h6>
+                  <Form.Item name="status" className="w-full mb-0">
+                    <Select
+                      defaultValue={"출석"}
+                      options={[
+                        { value: "출석", label: "출석" },
+                        { value: "결석", label: "결석" },
+                        { value: "지각", label: "지각" },
+                        { value: "조퇴", label: "조퇴" },
+                      ]}
                     />
-                    <span className="flex items-center h-10 text-sm font-medium tracking-wide uppercase text-[#666666]">
-                      홍길동
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  </Form.Item>
+                </div>
 
-              {/* 하단 버튼 */}
-              <div className="flex justify-center items-center px-5 h-20 bg-[#303E67]">
-                <button
-                  className="w-full h-10 font-bold text-base leading-10 flex items-center justify-center tracking-wide uppercase text-white"
-                  onClick={() => {
-                    console.log("선택된 학생들:", checkedList);
-                    // 여기에 출석 처리 로직 추가
-                  }}
+                <div className="flex flex-col items flex-1 p-5">
+                  <Form.Item name="joinClassId">
+                    <Checkbox.Group>
+                      {studentList?.map(item => (
+                        <Checkbox
+                          key={item.joinClassId}
+                          value={item.joinClassId}
+                          className="w-full"
+                        >
+                          {item.name}
+                        </Checkbox>
+                      ))}
+                    </Checkbox.Group>
+                  </Form.Item>
+                </div>
+
+                {/* 하단 버튼 */}
+                <Button
+                  htmlType="submit"
+                  className="w-full flex justify-center items-center px-5 h-20 bg-[#303E67] text-white !rounded-none"
                 >
                   출석정보 저장하기
-                </button>
+                </Button>
               </div>
-            </div>
+            </Form>
           </div>
         </div>
       </div>

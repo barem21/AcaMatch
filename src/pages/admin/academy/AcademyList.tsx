@@ -21,6 +21,7 @@ interface myAcademyListType {
   name: string;
   reportsCount: number;
   acaId: number;
+  acaAgree: number;
 }
 
 function AcademyList() {
@@ -104,7 +105,7 @@ function AcademyList() {
             (values.search !== null ? "?acaName=" + values.search : ""),
         );
         setMyAcademyList(res.data.resultData);
-        console.log("admin : ", res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
           "/api/academy/getAcademyListByUserId?signedUserId=" +
@@ -112,7 +113,7 @@ function AcademyList() {
             (values.search !== null ? "&acaName=" + values.search : ""),
         );
         setMyAcademyList(res.data.resultData);
-        console.log("academy : ", res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
       }
     } catch (error) {
       console.log(error);
@@ -247,13 +248,16 @@ function AcademyList() {
               담당자
             </div>
             <div className="flex items-center justify-center min-w-20">
-              신고횟수
+              신고 횟수
             </div>
             {/* <div className="flex items-center justify-center min-w-24">
               승인
             </div> */}
-            <div className="flex items-center justify-center min-w-24">
-              강의관리
+            <div className="flex items-center justify-center min-w-20">
+              강의 관리
+            </div>
+            <div className="flex items-center justify-center min-w-20">
+              강사 관리
             </div>
             <div className="flex items-center justify-center min-w-24">
               관리
@@ -305,15 +309,33 @@ function AcademyList() {
               <div className="flex items-center justify-center min-w-20">
                 {item.reportsCount}회
               </div>
-              <div className="flex items-center justify-center min-w-24">
-                <button
-                  className="small_line_button"
-                  onClick={() =>
-                    navigate(`../academy/class?acaId=${item.acaId}`)
-                  }
-                >
-                  강의관리
-                </button>
+              <div className="flex items-center justify-center min-w-20">
+                {item.acaAgree === 1 ? (
+                  <button
+                    className="small_line_button"
+                    onClick={() =>
+                      navigate(`../academy/class?acaId=${item.acaId}`)
+                    }
+                  >
+                    강의관리
+                  </button>
+                ) : (
+                  "승인대기"
+                )}
+              </div>
+              <div className="flex items-center justify-center min-w-20">
+                {item.acaAgree === 1 ? (
+                  <button
+                    className="small_line_button"
+                    onClick={() =>
+                      navigate(`../teacher/list?acaId=${item.acaId}`)
+                    }
+                  >
+                    강사관리
+                  </button>
+                ) : (
+                  "-"
+                )}
               </div>
               {/* <div className="flex items-center justify-center min-w-24">
                 {item.acaAgree === 1 ? (
