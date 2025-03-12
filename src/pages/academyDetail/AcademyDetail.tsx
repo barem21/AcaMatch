@@ -278,39 +278,64 @@ const AcademyDetail = () => {
     return !!accessToken; // accessToken이 존재하면 true, 없으면 false
   };
 
-  // const getRandomUniqueNumber = () => {
-  //   if (usedRandomNumbers.size === 10) {
-  //     usedRandomNumbers.clear(); // 모든 숫자가 사용되면 초기화
-  //   }
-
-  //   let randomNum;
-  //   do {
-  //     randomNum = Math.floor(Math.random() * 10) + 1; // 1~10 사이의 랜덤 숫자
-  //   } while (usedRandomNumbers.has(randomNum));
-
-  //   usedRandomNumbers.add(randomNum);
-  //   return randomNum;
-  // };
-
   const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
 
   // 스크롤 참조 추가
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Add state for general reviews pagination
+  const [generalPage, setGeneralPage] = useState(1);
   const [generalReviews, setGeneralReviews] = useState<Review[]>([]);
+  const [totalGeneralReviewCount, setTotalGeneralReviewCount] = useState(0);
+
+  // Add new state for media reviews pagination
+  const [mediaPage, setMediaPage] = useState(1);
   const [mediaReviews, setMediaReviews] = useState<Review[]>([]);
-  const [generalReviewCount, setGeneralReviewCount] = useState<number>(0);
-  const [mediaReviewCount, setMediaReviewCount] = useState<number>(0);
+  const [totalMediaReviewCount, setTotalMediaReviewCount] = useState(0);
+
+  // Separate fetch function for media reviews
+  const fetchMediaReviews = async () => {
+    try {
+      const response = await jwtAxios.get(
+        `/api/academy/getMediaReview?mediaStartIndx=${(mediaPage - 1) * size}&acaId=${acaId}&size=${size}`,
+      );
+
+      if (response.data.resultData) {
+        setMediaReviews(response.data.resultData.mediaReviews);
+        setTotalMediaReviewCount(
+          response.data.resultData.totalMediaReviewCount,
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch media reviews:", error);
+    }
+  };
+
+  // Separate fetch function for general reviews
+  const fetchGeneralReviews = async () => {
+    try {
+      const response = await jwtAxios.get(
+        `/api/academy/getGeneralReview?generalStartIndx=${(generalPage - 1) * size}&acaId=${acaId}&size=${size}`,
+      );
+
+      if (response.data.resultData) {
+        const { generalReviews, totalGeneralReviewCount } =
+          response.data.resultData;
+        setGeneralReviews(generalReviews);
+        setTotalGeneralReviewCount(totalGeneralReviewCount);
+      }
+    } catch (error) {
+      console.error("Failed to fetch general reviews:", error);
+    }
+  };
 
   const fetchData = async () => {
     try {
       const url = userId
-        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&generalStartIdx=${(Number(page) - 1) * size}&mediaStartIdx=${(Number(page) - 1) * size}&page=${page}&size=${size}`
-        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&generalStartIdx=${(Number(page) - 1) * size}&mediaStartIdx=${(Number(page) - 1) * size}&page=${page}&size=${size}`;
+        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}`
+        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}`;
 
       const response = await jwtAxios.get(url);
-
-      console.log(response.data.resultData);
 
       if (response.data.resultData) {
         const data = response.data.resultData;
@@ -320,25 +345,7 @@ const AcademyDetail = () => {
         if (data.addressDto?.address) {
           setAddress(data.addressDto.address);
         }
-        setGeneralReviews(data.generalReviews || []);
-        setMediaReviews(data.mediaReviews || []);
-        setGeneralReviewCount(data.generalReviewCount || 0);
-        setMediaReviewCount(data.mediaReviewCount || 0);
       }
-      const params = new URLSearchParams(searchParams);
-
-      if (params.get("review")) {
-        setItems(prevItems =>
-          prevItems.map((item, index) => ({
-            ...item,
-            isActive: index === 2, // index가 2(후기 탭)일 때 true, 나머지는 false
-          })),
-        );
-      }
-      // console.log(`/pic/academy/${academyData.acaId}/${academyData.acaPic}`);
-      // console.log("📌 API 응답 데이터:", response.data.resultData);
-
-      // console.log(response.data.resultData);
     } catch (error) {
       console.error("Failed to fetch academy data:", error);
       setError("학원 정보를 불러오는데 실패했습니다.");
@@ -349,7 +356,7 @@ const AcademyDetail = () => {
 
   useEffect(() => {
     fetchData();
-  }, [acaId, userId, page, size]);
+  }, [acaId, userId]);
 
   const handleTabClick = (index: number) => {
     const updatedItems = items.map((item, idx) => ({
@@ -460,27 +467,23 @@ const AcademyDetail = () => {
     setSelectClass(classId);
   };
 
-  // const fetchAcademyDetails = async () => {
-  //   try {
-  //     const url = userId
-  //       ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`
-  //       : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}&generalStartIdx=${(page - 1) * size}&mediaStartIdx=${(page - 1) * size}&page=${page}&size=${size}`;
+  // Add useEffect for general reviews
+  useEffect(() => {
+    if (items[2].isActive) {
+      fetchGeneralReviews();
+      fetchMediaReviews();
+    }
+  }, [generalPage, mediaPage, acaId, items[2].isActive]);
 
-  //     const response = await axios.get(url);
-  //     console.log(response);
+  // Add general page change handler
+  const handleGeneralPageChange = (page: number) => {
+    setGeneralPage(page);
+  };
 
-  //     if (response.data?.resultData) {
-  //       setAcademyData(response.data.resultData);
-  //       setIsLiked(response.data.resultData.isLiked ?? false);
-  //     } else {
-  //       console.error("학원 상세 정보가 없습니다.");
-  //       setIsLiked(false);
-  //     }
-  //   } catch (error) {
-  //     console.error("학원 상세 정보를 가져오는데 실패했습니다.", error);
-  //     setIsLiked(false);
-  //   }
-  // };
+  // Add media page change handler
+  const handleMediaPageChange = (page: number) => {
+    setMediaPage(page);
+  };
 
   if (loading) {
     return (
@@ -698,9 +701,16 @@ const AcademyDetail = () => {
             classes={academyData?.classes || []}
             generalReviews={generalReviews}
             mediaReviews={mediaReviews}
-            generalReviewCount={generalReviewCount}
-            mediaReviewCount={mediaReviewCount}
-            onReviewUpdate={fetchData}
+            generalReviewCount={totalGeneralReviewCount}
+            mediaReviewCount={totalMediaReviewCount}
+            onReviewUpdate={() => {
+              fetchGeneralReviews();
+              fetchMediaReviews();
+            }}
+            onMediaPageChange={handleMediaPageChange}
+            onGeneralPageChange={handleGeneralPageChange}
+            mediaPage={mediaPage}
+            generalPage={generalPage}
           />
         )}
       </div>

@@ -22,6 +22,10 @@ interface ReviewSectionProps {
   generalReviewCount: number;
   mediaReviewCount: number;
   onReviewUpdate: () => Promise<void>;
+  onMediaPageChange: (page: number) => void;
+  onGeneralPageChange: (page: number) => void;
+  mediaPage: number;
+  generalPage: number;
 }
 
 interface ClassItem {
@@ -68,10 +72,12 @@ const ReviewSection = ({
   generalReviewCount,
   mediaReviewCount,
   onReviewUpdate,
+  onMediaPageChange,
+  onGeneralPageChange,
+  mediaPage,
+  generalPage,
 }: ReviewSectionProps) => {
   const [_searchParams, setSearchParams] = useSearchParams();
-  const [generalPage, setGeneralPage] = useState(1);
-  const [mediaPage, setMediaPage] = useState(1);
   const pageSize = 10;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [user, _setUser] = useRecoilState(userInfo);
@@ -89,21 +95,11 @@ const ReviewSection = ({
   );
 
   const handleGeneralPageChange = (page: number) => {
-    setGeneralPage(page);
-    setSearchParams(prevParams => {
-      const newParams = new URLSearchParams(prevParams);
-      newParams.set("generalPage", String(page));
-      return newParams;
-    });
+    onGeneralPageChange(page);
   };
 
   const handleMediaPageChange = (page: number) => {
-    setMediaPage(page);
-    setSearchParams(prevParams => {
-      const newParams = new URLSearchParams(prevParams);
-      newParams.set("mediaPage", String(page));
-      return newParams;
-    });
+    onMediaPageChange(page);
   };
 
   const getData = async () => {

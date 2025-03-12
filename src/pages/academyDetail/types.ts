@@ -30,8 +30,11 @@ export interface Review {
   reviewClassName: string;
   joinClassId: number;
   banReview: number;
+  writerPic: string;
   classId: number;
-  reviewPics?: string[]; // 미디어 리뷰용
+  reviewPics?: string[]; // Optional for media reviews only
+  totalGeneralReviewCount?: number; // For general reviews
+  totalMediaReviewCount?: number; // For media reviews
 }
 
 export interface AcademyResponse {
