@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import jwtAxios from "../../../apis/jwt";
+//import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
 
 /*
@@ -51,6 +51,28 @@ interface studentListType {
   joinClassId: number;
 }
 
+interface studentList2Type {
+  birth: string;
+  name: string;
+  phone: string;
+  userId: number;
+  userPic: string;
+  joinClassId: number;
+  attendance: {
+    attendanceId: number;
+    name: string;
+    status: string;
+    userId: number;
+  };
+}
+
+interface AttendanceType {
+  attendanceId: number;
+  name: string;
+  status: string;
+  userId: number;
+}
+
 const CheckIn = () => {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
@@ -61,6 +83,7 @@ const CheckIn = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [attendanceDate, setAttendanceDate] = useState<string | null>(null);
   const [studentList, setStudentList] = useState<studentListType[]>([]);
+  const [mergeData, setMergeData] = useState<studentList2Type[]>([]);
   const [searchParams] = useSearchParams();
 
   const acaId = parseInt(searchParams.get("acaId") || "0", 0);
@@ -140,13 +163,13 @@ const CheckIn = () => {
   // 출석 데이터 조회
   const fetchAttendanceData = async () => {
     const { startDate, endDate } = getCurrentMonthRange();
-    const academyId = 2;
-    const classId = 2;
+    //const academyId = acaId;
+    //const classId = classId;
 
     try {
-      const response = await jwtAxios.get(`/api/attendance`, {
+      const response = await axios.get(`/api/attendance`, {
         params: {
-          acaId: academyId,
+          acaId: acaId,
           classId: classId,
           startDate: startDate,
           endDate: endDate,
@@ -198,7 +221,7 @@ const CheckIn = () => {
     console.log(value);
     form.submit();
     //setSelectedAcademy(value);
-    //fetchAttendanceData();
+    fetchAttendanceData();
     // fetchAttendanceData(value);
   };
 
@@ -225,22 +248,62 @@ const CheckIn = () => {
   // };
 
   // 날짜 클릭 시 호출될 함수
-  const handleDateClick = (info: any) => {
+  const handleDateClick = async (info: any) => {
     const clickedDate = info.dateStr; // 클릭한 날짜 정보 (YYYY-MM-DD 형식)
     setAttendanceDate(clickedDate); // 상태 업데이트
+    academyStudentList(); //수강생 목록
+
+    //날짜 선택하면 기존 선택값 초기화
+    form2.setFieldsValue({
+      status: "출석",
+      joinClassId: [],
+    });
 
     // 오늘 날짜보다 이후 날짜가 선택된 경우
     const today = dayjs().format("YYYY-MM-DD");
     if (dayjs(clickedDate).isAfter(today, "day")) {
       notification.error({
-        message: "경고",
+        message: "알림 메시지 : ",
         description: "오늘 이후의 날짜는 선택할 수 없습니다.",
       });
     } else {
+      //학생별 출석정보 확인하기
+      const res = await axios.get(
+        `/api/attendance/user?acaId=${acaId}&classId=${classId}&attendanceDate=${clickedDate}`,
+      );
+      //console.log(res.data.resultData);
+
+      // 사용자 배열과 출석 배열을 userId를 기준으로 합치기
+      const mergedData = studentList.map(user => {
+        // userId가 같은 출석 정보를 찾음
+        const attendanceData = res.data.resultData.find(
+          (att: AttendanceType) => att.userId === user.userId,
+        );
+        // 출석 정보가 있으면 합침
+        return attendanceData
+          ? { ...user, attendance: attendanceData }
+          : { ...user, attendance: null };
+      });
+      //console.log(mergedData);
+      setMergeData(mergedData);
+      //console.log(mergedData);
+
       //기존 쿼리 스트링에 date를 추가
       const url = new URL(window.location.href);
       url.searchParams.set("date", clickedDate); // date 파라미터 추가
       window.history.pushState({}, "", url); // URL 업데이트
+
+      // 선택한 날짜에 대해 색을 적용
+      const allCells = document.querySelectorAll(".fc-day");
+
+      allCells.forEach((cell: any) => {
+        // 셀의 데이터 날짜와 선택한 날짜를 비교
+        if (cell.getAttribute("data-date") === clickedDate) {
+          cell.style.backgroundColor = "#ddd"; // 선택된 날짜에 파란색 배경
+        } else {
+          cell.style.backgroundColor = ""; // 선택되지 않은 날짜는 기본 배경
+        }
+      });
     }
   };
 
@@ -253,12 +316,20 @@ const CheckIn = () => {
 
   //출석상태 저장
   const onFinishedSe = async (values: any) => {
-    console.log(values);
+    //console.log(values);
 
     if (!attendanceDate) {
       notification.error({
-        message: "경고",
+        message: "알림 : ",
         description: "날짜가 선택되지 않았습니다.",
+      });
+      return;
+    }
+
+    if (values.joinClassId === undefined) {
+      notification.error({
+        message: "알림 : ",
+        description: "학생이 선택되지 않았습니다.",
       });
       return;
     }
@@ -278,6 +349,14 @@ const CheckIn = () => {
         } else {
           message.error("출석정보가 저장이 실패되었습니다.");
         }
+        fetchAttendanceData(); //출석정보 갱신
+        setStudentList([]); //수강생 목록 초기화
+
+        //날짜 선택하면 기존 선택값 초기화
+        form2.setFieldsValue({
+          status: "출석",
+          joinClassId: [],
+        });
       } catch (error) {
         console.log(error);
         message.error("출석정보가 저장이 실패되었습니다.");
@@ -298,13 +377,12 @@ const CheckIn = () => {
       acaId: acaId ? acaId : 0,
       classId: classId ? classId : 0,
     });
-  }, []);
 
-  // useEffect(() => {
-  //   if (userId) {
-  //     fetchBoardList();
-  //   }
-  // }, [userId]);
+    //페이지 들어오면 ant design 처리용 기본값 세팅
+    form2.setFieldsValue({
+      status: "출석",
+    });
+  }, []);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -366,6 +444,7 @@ const CheckIn = () => {
                 dateClick={handleDateClick} // 날짜 클릭 이벤트 핸들러
               />
             </div>
+
             <Form form={form2} onFinish={values => onFinishedSe(values)}>
               <div className="flex flex-col w-[300px] h-[640px] border-l border-[#EEEEEE]">
                 {/* 헤더 */}
@@ -380,7 +459,6 @@ const CheckIn = () => {
                   <h6 className="w-1/2">출석상태 선택</h6>
                   <Form.Item name="status" className="w-full mb-0">
                     <Select
-                      defaultValue={"출석"}
                       options={[
                         { value: "출석", label: "출석" },
                         { value: "결석", label: "결석" },
@@ -391,20 +469,41 @@ const CheckIn = () => {
                   </Form.Item>
                 </div>
 
-                <div className="flex flex-col items flex-1 p-5">
-                  <Form.Item name="joinClassId">
-                    <Checkbox.Group>
-                      {studentList?.map(item => (
-                        <Checkbox
-                          key={item.joinClassId}
-                          value={item.joinClassId}
-                          className="w-full"
-                        >
-                          {item.name}
-                        </Checkbox>
-                      ))}
-                    </Checkbox.Group>
-                  </Form.Item>
+                <div className="flex flex-col items flex-1 p-4">
+                  {mergeData?.length > 0 ? (
+                    <Form.Item name="joinClassId">
+                      <Checkbox.Group value={[19, 20]}>
+                        {mergeData?.map(item => (
+                          <Checkbox
+                            key={item.joinClassId}
+                            value={item.joinClassId}
+                            className="w-full"
+                          >
+                            {item.name}
+                            {item.attendance?.status ? (
+                              item.attendance?.status === "결석" ? (
+                                <span className="ml-1.5 text-red-500 text-[13px] font-semibold">
+                                  ({item.attendance?.status})
+                                </span>
+                              ) : (
+                                <span className="ml-1.5 text-blue-500 text-[13px] font-semibold">
+                                  ({item.attendance?.status})
+                                </span>
+                              )
+                            ) : (
+                              <span className="ml-1.5 text-gray-400 text-[13px] font-semibold">
+                                (미처리)
+                              </span>
+                            )}
+                          </Checkbox>
+                        ))}
+                      </Checkbox.Group>
+                    </Form.Item>
+                  ) : (
+                    <div className="text-gray-500">
+                      출석 처리할 날짜를 선택해 주세요.
+                    </div>
+                  )}
                 </div>
 
                 {/* 하단 버튼 */}
