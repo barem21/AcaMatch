@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { userInfo } from "../atoms/userInfo";
 import {
@@ -9,7 +9,7 @@ import {
   MenuItem,
   // SubMenuItem,
 } from "../constants/adminMenuItems";
-import { getCookie, setCookie } from "../utils/cookie";
+import { getCookie, setCookie, removeCookie } from "../utils/cookie";
 import AdminFooter from "./admin/Footer";
 import AdminHeader from "./admin/Header";
 import Sidebar from "./admin/Sidebar";
@@ -18,6 +18,7 @@ import Footer from "./footer/Footer";
 import Header from "./header/Header";
 import ScrollButton from "./ScrollButton";
 import PopupWindow from "./popup/PopupWindow";
+import jwtAxios from "../apis/jwt";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -36,6 +37,7 @@ interface PopupData {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const currentUserInfo = useRecoilValue(userInfo);
   const location = useLocation();
+  const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<(MenuItem | Divider)[]>(() => {
     const roleId = currentUserInfo?.roleId;
     return getMenuItems(roleId);
@@ -174,6 +176,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       mainRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const logOut = async () => {
+    try {
+      const res = await jwtAxios.post("/api/user/log-out", {});
+      console.log(res);
+      removeCookie("accessToken");
+      removeCookie("message");
+      removeCookie("isOpen");
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUserInfo.roleId === 0 && !isAdminPage) {
+      logOut();
+    }
+  }, [currentUserInfo.roleId, isAdminPage]);
 
   return (
     <div className="flex mobile-width" ref={mainRef}>

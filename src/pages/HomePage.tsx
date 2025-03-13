@@ -358,7 +358,7 @@ function HomePage() {
       <div
         className="w-[990px] h-[400px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[640px]:h-[400px] max-[640px]:w-full"
         style={{
-          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner.jpg)`,
+          backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner_1.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -648,7 +648,7 @@ function HomePage() {
                 onClick={() => handleAcademyClick(Number(card.acaId))}
               >
                 <img
-                  className="h-56 bg-gray-200 rounded-xl object-cover"
+                  className="h-[195px] bg-gray-200 rounded-xl object-cover"
                   src={card.image}
                   alt={card.subject}
                 />

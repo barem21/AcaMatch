@@ -29,6 +29,8 @@ function LoginPage() {
       const { remember, ...loginData } = values; // remember 값을 분리
 
       const response = await axios.post("/api/user/sign-in", loginData);
+      console.log(response.data.resultData);
+
       const { name, roleId, userId } = response.data.resultData;
 
       setCookie("accessToken", response.data.resultData.accessToken, {
@@ -45,8 +47,13 @@ function LoginPage() {
         // 체크 해제되어 있으면 이메일 쿠키 삭제
         removeCookie("email");
       }
+      console.log(roleId);
 
-      navigate("/");
+      if (response.data.resultData.userRole === 0) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
       setUserInfo({
         name,
         roleId: String(roleId),

@@ -22,16 +22,23 @@ const LineChart = ({
     );
   }
 
+  // 데이터의 최대값 계산
+  const dataMax = Math.max(
+    ...selectedData.flatMap(d => d.data.map((point: any) => point.y)),
+  );
+  // 적절한 눈금 간격 계산 (예: 최대값을 5로 나누어 사용)
+  const tickInterval = Math.ceil(dataMax / 5);
+
   return (
     <ResponsiveLine
       key={`${selectedMonth}-${selectedItem}`}
       data={selectedData}
-      margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+      margin={{ top: 50, right: 50, bottom: 50, left: 60 }} // left margin 증가
       xScale={{ type: "point" }}
       yScale={{
         type: "linear",
         min: 0,
-        max: "auto",
+        max: Math.ceil(dataMax * 1.1), // 최대값보다 약간 더 높게 설정
         stacked: false,
       }}
       gridXValues={[]}
@@ -57,10 +64,12 @@ const LineChart = ({
         tickRotation: 0,
         legendOffset: -40,
         legendPosition: "middle",
+        // 눈금 값 동적 생성
         tickValues: Array.from(
-          { length: maxValue / 100 + 1 },
-          (_, i) => i * 100,
+          { length: 6 }, // 5개의 구간으로 나누기
+          (_, i) => Math.round(i * tickInterval),
         ),
+        format: value => value.toLocaleString(),
       }}
       colors={({ id }) => COLORS[id as DataKey]}
       lineWidth={4}
