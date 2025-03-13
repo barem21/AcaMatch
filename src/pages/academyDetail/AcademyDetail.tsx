@@ -268,10 +268,19 @@ const AcademyDetail = () => {
   const reviewTab = searchParams.get("review");
 
   const [items, setItems] = useState([
-    { label: "상세 학원정보", isActive: !reviewTab },
+    { label: "상세 학원정보", isActive: false },
     { label: "수업정보", isActive: false },
     { label: "후기 & 리뷰", isActive: false },
   ]);
+
+  // 초기 탭 설정을 위한 useEffect 추가
+  useEffect(() => {
+    const updatedItems = items.map((item, idx) => ({
+      ...item,
+      isActive: reviewTab ? idx === 2 : idx === 0,
+    }));
+    setItems(updatedItems);
+  }, [searchParams]);
 
   const checkIsAuthenticated = () => {
     const accessToken = cookies.get("accessToken");
@@ -478,12 +487,20 @@ const AcademyDetail = () => {
   // Add general page change handler
   const handleGeneralPageChange = (page: number) => {
     setGeneralPage(page);
+    setMediaPage(page); // 두 페이지를 동기화
   };
 
   // Add media page change handler
   const handleMediaPageChange = (page: number) => {
     setMediaPage(page);
+    setGeneralPage(page); // 두 페이지를 동기화
   };
+
+  // 수강 가능한 클래스만 필터링
+  const availableClasses =
+    academyData?.classes?.filter(
+      classItem => classItem.userCertification === 0,
+    ) || [];
 
   if (loading) {
     return (
@@ -722,36 +739,47 @@ const AcademyDetail = () => {
           <>
             <div className="flex flex-col gap-2 max-h-[2000px]">
               <CustomScrollbar>
-                {academyData.classes.map(classItem => (
-                  <Radio
-                    key={classItem.classId}
-                    checked={selectClass === classItem.classId}
-                    onChange={() => handleClassSelect(classItem.classId)}
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center line-clamp-1">
-                        <p className="text-[16px] font-[400] line-clamp-1">
-                          {classItem.className}{" "}
-                        </p>
-                        <p className="text-[14px] line-clamp-1 ml-2">
-                          ({classItem.classStartDate}~{classItem.classEndDate})
+                {availableClasses.length > 0 ? (
+                  availableClasses.map(classItem => (
+                    <Radio
+                      key={classItem.classId}
+                      checked={selectClass === classItem.classId}
+                      onChange={() => handleClassSelect(classItem.classId)}
+                    >
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center line-clamp-1">
+                          <p className="text-[16px] font-[400] line-clamp-1">
+                            {classItem.className}{" "}
+                          </p>
+                          <p className="text-[14px] line-clamp-1 ml-2">
+                            ({classItem.classStartDate}~{classItem.classEndDate}
+                            )
+                          </p>
+                        </div>
+                        <p className="text-[14px] text-[#507A95]">
+                          수강료: {classItem.classPrice.toLocaleString()}원
                         </p>
                       </div>
-                      <p className="text-[14px] text-[#507A95]">
-                        수강료: {classItem.classPrice.toLocaleString()}원
-                      </p>
-                    </div>
-                  </Radio>
-                ))}
+                    </Radio>
+                  ))
+                ) : (
+                  <div className="text-center py-4 text-gray-500">
+                    신청 가능한 클래스가 없습니다.
+                  </div>
+                )}
               </CustomScrollbar>
-              <p className="mt-[15px]">선택한 강좌를 수강신청 하시겠습니까?</p>
+              {availableClasses.length > 0 && (
+                <p className="mt-[15px]">
+                  선택한 강좌를 수강신청 하시겠습니까?
+                </p>
+              )}
             </div>
           </>
         }
         onButton1Click={handleButton1Click}
         onButton2Click={handleButton2Click}
         button1Text="취소"
-        button2Text="결제하기"
+        button2Text={availableClasses.length > 0 ? "결제하기" : "확인"}
         modalWidth={400}
       />
       {/* {isLink && <LinkModal></LinkModal>} */}

@@ -39,6 +39,11 @@ interface SelectedImageInfo {
   imageName: string;
 }
 
+// 리뷰 타입을 확장하여 타입 구분을 추가
+interface ReviewWithType extends Review {
+  type: "media" | "general";
+}
+
 const styles = {
   stats: {
     container:
@@ -94,12 +99,25 @@ const ReviewSection = ({
     null,
   );
 
-  const handleGeneralPageChange = (page: number) => {
-    onGeneralPageChange(page);
-  };
+  // 통합된 리뷰 목록 생성
+  const combinedReviews: ReviewWithType[] = [
+    ...mediaReviews.map(review => ({ ...review, type: "media" as const })),
+    ...generalReviews.map(review => ({ ...review, type: "general" as const })),
+  ];
 
-  const handleMediaPageChange = (page: number) => {
-    onMediaPageChange(page);
+  // 전체 리뷰 수
+  const totalReviewCount = mediaReviewCount + generalReviewCount;
+
+  // 통합 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    const mediaCount = Math.min(
+      pageSize,
+      mediaReviewCount - (page - 1) * pageSize,
+    );
+    if (mediaCount > 0) {
+      onMediaPageChange(page);
+    }
+    onGeneralPageChange(page);
   };
 
   const getData = async () => {
@@ -191,7 +209,7 @@ const ReviewSection = ({
         )}
       </div>
 
-      {/* 미디어 리뷰 섹션 */}
+      {/* 미디어 후기 섹션 */}
       <div className="mb-8">
         <h3 className="text-[18px] font-bold mb-4">
           후기 {mediaReviewCount} 개
@@ -224,9 +242,7 @@ const ReviewSection = ({
                           <div className="flex gap-2">
                             <button
                               className="small_line_button bg-[#3B77D8] text-[14px]"
-                              style={{
-                                color: "#fff",
-                              }}
+                              style={{ color: "#fff" }}
                               onClick={() => {
                                 setIsModalVisible(true);
                                 setEditReview(review);
@@ -272,7 +288,10 @@ const ReviewSection = ({
                       className="w-full"
                     >
                       {review.reviewPics.map((pic: string, i: number) => (
-                        <SwiperSlide key={i} className="w-[120px] h-[120px]">
+                        <SwiperSlide
+                          key={i}
+                          style={{ width: "120px", height: "120px" }}
+                        >
                           <img
                             src={`http://112.222.157.157:5233/pic/reviews/${review.reviewId}/images/${pic}`}
                             alt={`Review image ${i + 1}`}
@@ -293,19 +312,21 @@ const ReviewSection = ({
             ))
           ) : (
             <div className="flex justify-center items-center text-[14px] text-gray-500 border rounded-[8px] h-[142px]">
-              <span>후기가 없습니다.</span>
+              <span>등록된 후기가 없습니다.</span>
             </div>
           )}
         </div>
-        <div className="flex justify-center mt-4">
-          <Pagination
-            current={mediaPage}
-            total={mediaReviewCount}
-            pageSize={pageSize}
-            onChange={handleMediaPageChange}
-            showSizeChanger={false}
-          />
-        </div>
+        {mediaReviews?.length > 0 && (
+          <div className="flex justify-center mt-4">
+            <Pagination
+              current={mediaPage}
+              total={mediaReviewCount}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              showSizeChanger={false}
+            />
+          </div>
+        )}
       </div>
 
       {/* 일반 리뷰 섹션 */}
@@ -335,6 +356,9 @@ const ReviewSection = ({
                         <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
                           {review.reviewClassName}
                         </span>
+                        <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                          {review.type === "media" ? "포토리뷰" : "일반리뷰"}
+                        </span>
                       </div>
                       <div>
                         {review.reviewUserId === Number(user.userId) && (
@@ -349,7 +373,7 @@ const ReviewSection = ({
                                 setEditReview(review);
                               }}
                             >
-                              리뷰수정
+                              후기수정
                             </button>
                             <button
                               className="small_line_button bg-[#fff] text-[14px] text-[#242424]"
@@ -358,7 +382,7 @@ const ReviewSection = ({
                                 setIsDeleteModalVisible(true);
                               }}
                             >
-                              리뷰삭제
+                              후기삭제
                             </button>
                           </div>
                         )}
@@ -382,19 +406,21 @@ const ReviewSection = ({
             ))
           ) : (
             <div className="flex justify-center items-center text-[14px] text-gray-500 border rounded-[8px] h-[142px]">
-              <span>등록된 일반 리뷰가 없습니다.</span>
+              <span>등록된 리뷰가 없습니다.</span>
             </div>
           )}
         </div>
-        <div className="flex justify-center mt-4 mb-[40px]">
-          <Pagination
-            current={generalPage}
-            total={generalReviewCount}
-            pageSize={pageSize}
-            onChange={handleGeneralPageChange}
-            showSizeChanger={false}
-          />
-        </div>
+        {generalReviews?.length > 0 && (
+          <div className="flex justify-center mt-4 mb-[40px]">
+            <Pagination
+              current={generalPage}
+              total={generalReviewCount}
+              pageSize={pageSize}
+              onChange={handlePageChange}
+              showSizeChanger={false}
+            />
+          </div>
+        )}
       </div>
 
       {isModalVisible && (

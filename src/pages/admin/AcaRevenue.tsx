@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import CustomModal from "../../components/modal/Modal";
 
 interface RevenueData {
   acaId: number;
@@ -23,6 +24,7 @@ interface OrderDetails {
   createdAt: string;
   orderType: number;
 }
+
 const AcaRevenue = (): JSX.Element => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -32,6 +34,15 @@ const AcaRevenue = (): JSX.Element => {
   const [totalCount, setTotalCount] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+
+  // 확인 모달의 상태를 관리하는 state
+  const [confirmModal, setConfirmModal] = useState({
+    visible: false, // 모달 표시 여부
+    acaId: 0, // 학원 ID
+    newStatus: 0, // 변경할 상태 값
+    costIds: "", // 정산 ID 목록
+    message: "", // 모달에 표시할 메시지
+  });
 
   // 기본값: 현재 연도와 월
   const currentYear = new Date().getFullYear();
@@ -105,6 +116,66 @@ const AcaRevenue = (): JSX.Element => {
   // 정산일 표시 형식
   const getSettlementDate = () => {
     return `${year}-${month.padStart(2, "0")}-${getLastDayOfMonth()}`;
+  };
+
+  // 상태 변경을 처리하는 함수 추가
+  const handleStatusChange = (
+    acaId: number,
+    newStatus: number,
+    costIds: string,
+  ) => {
+    setConfirmModal({
+      visible: true,
+      acaId,
+      newStatus,
+      costIds,
+      // 새로운 상태가 1(정산완료)이면 정산 확인, 아니면 정산 취소 확인
+      message:
+        newStatus === 1 ? "정산하시겠습니까?" : "정산을 취소하시겠습니까?",
+    });
+  };
+
+  // 상태 변경을 실제로 처리하는 함수
+  const handleConfirmStatusChange = async () => {
+    try {
+      const { acaId, newStatus, costIds } = confirmModal;
+
+      // API 호출하여 상태 변경
+      const res = await axios.put(`/api/academyCost/updateStatus/${costIds}`);
+
+      // 모달 초기화 및 데이터 새로고침
+      setConfirmModal({
+        visible: false,
+        acaId: 0,
+        newStatus: 0,
+        costIds: "",
+        message: "",
+      });
+      fetchRevenueData();
+      if (res.data.resultData === 1) {
+        // 성공 메시지 표시
+        message.success(
+          newStatus === 1 ? "정산이 완료되었습니다." : "정산이 취소되었습니다.",
+        );
+      } else {
+        message.error("상태 변경에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("상태 변경 실패:", error);
+      message.error("상태 변경에 실패했습니다.");
+    }
+  };
+
+  // 주문상세보기 처리 함수 수정
+  const handleOrderDetail = (acaName: string) => {
+    // 해당 월의 시작일과 마지막 날짜 구성
+    const startDate = `${year}-${month.padStart(2, "0")}-01`;
+    const endDate = `${year}-${month.padStart(2, "0")}-${getLastDayOfMonth()}`;
+
+    // 수정된 URL 형식으로 이동
+    navigate(
+      `/admin/paymentmanager?startDate=${startDate}&endDate=${endDate}&acaName=${encodeURIComponent(acaName)}&page=1`,
+    );
   };
 
   return (
@@ -192,9 +263,9 @@ const AcaRevenue = (): JSX.Element => {
             <div className="flex items-center justify-center w-[132px]">
               주문내역
             </div>
-            <div className="flex items-center justify-center w-[72px]">
+            {/* <div className="flex items-center justify-center w-[72px]">
               삭제
-            </div>
+            </div> */}
           </div>
 
           {loading ? (
@@ -231,32 +302,34 @@ const AcaRevenue = (): JSX.Element => {
                     {item.totalPrice.toLocaleString()}원
                   </div>
                   <div className="flex items-center justify-center w-[132px]">
-                    <p
-                      className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center ${
-                        item.latestStatus === 0
-                          ? "bg-[#f8a57d]"
-                          : "bg-[#90b1c4]"
-                      }`}
+                    <select
+                      className="p-1 border rounded-lg"
+                      value={item.latestStatus}
+                      onChange={e =>
+                        handleStatusChange(
+                          item.acaId,
+                          Number(e.target.value),
+                          item.costIds,
+                        )
+                      }
                     >
-                      {/* {console.log("Rendering status:", item.latestStatus)} */}
-                      {item.latestStatus === 0 ? "미정산" : "정산완료"}
-                    </p>
+                      <option value="0">미정산</option>
+                      <option value="1">정산완료</option>
+                    </select>
                   </div>
                   <div className="flex items-center justify-center w-[132px]">
                     <button
-                      onClick={() =>
-                        fetchOrderDetails(Number(item.costIds.split(",")[0]))
-                      }
+                      onClick={() => handleOrderDetail(item.acaName)}
                       className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300"
                     >
                       주문내역
                     </button>
                   </div>
-                  <div className="flex items-center justify-center w-[72px] ">
+                  {/* <div className="flex items-center justify-center w-[72px] ">
                     <button>
                       <FaRegTrashAlt className="w-3 text-gray-400" />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               );
             })
@@ -281,77 +354,27 @@ const AcaRevenue = (): JSX.Element => {
           />
         </div>
       </div>
-      {modalVisible && (
-        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="relative bg-white w-[500px] rounded-lg shadow-lg">
-            {/* 모달 헤더 */}
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold">주문 상세 정보</h3>
-              <button
-                onClick={() => setModalVisible(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* 모달 컨텐츠 */}
-            <div className="p-6">
-              {orderDetails ? (
-                <div className="space-y-3">
-                  <p className="flex justify-between">
-                    <span className="font-semibold">구매자:</span>
-                    <span>{orderDetails.name}</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="font-semibold">타입</span>
-                    <span>
-                      {orderDetails.orderType === 0
-                        ? "학원"
-                        : orderDetails.orderType === 1
-                          ? "책"
-                          : "프리미엄 학원"}
-                    </span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="font-semibold">주문 ID:</span>
-                    <span>{orderDetails?.partnerOrderId}</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="font-semibold">결제 금액:</span>
-                    <span>{orderDetails?.price?.toLocaleString()}원</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="font-semibold">수수료:</span>
-                    <span>{orderDetails?.fee?.toLocaleString()}원</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span className="font-semibold">구매 시간:</span>
-                    <span>
-                      {new Date(orderDetails?.createdAt)?.toLocaleString()}
-                    </span>
-                  </p>
-                </div>
-              ) : (
-                <div className="flex justify-center items-center h-20">
-                  <p>로딩 중...</p>
-                </div>
-              )}
-            </div>
-
-            {/* 모달 푸터 */}
-            <div className="flex justify-center p-4 border-t">
-              <Button
-                onClick={() => setModalVisible(false)}
-                className="w-full h-14 text-sm"
-                // className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-              >
-                닫기
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 상태 변경 확인 모달 */}
+      <CustomModal
+        visible={confirmModal.visible}
+        title="정산 상태 변경"
+        content={confirmModal.message}
+        onButton1Click={() => {
+          // 취소 시 모달 초기화 및 데이터 새로고침
+          setConfirmModal({
+            visible: false,
+            acaId: 0,
+            newStatus: 0,
+            costIds: "",
+            message: "",
+          });
+          fetchRevenueData(); // 상태 되돌리기
+        }}
+        onButton2Click={handleConfirmStatusChange}
+        button1Text="취소"
+        button2Text="확인"
+        modalWidth={400}
+      />
     </div>
   );
 };

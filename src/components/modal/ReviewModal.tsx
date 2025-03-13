@@ -40,6 +40,8 @@ function ReviewModal({
     existingReview?.reviewPics?.length ? "media" : "general",
   );
   const [user] = useRecoilState(userInfo);
+  const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
+
   // const selectedClassId =
   //   Form.useWatch("classId", form) ||
   //   existingReview?.classId ||
@@ -49,17 +51,25 @@ function ReviewModal({
   // const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(existingReview.joinClassId);
+    // existingReview가 있을 때만 실행
     if (existingReview) {
       form.setFieldsValue({
         comment: existingReview.reviewComment,
-        classId: existingReview.joinClassId,
+        classId: existingReview.classId, // joinClassId 대신 classId 사용
         reviewType: existingReview.reviewPics?.length ? "media" : "general",
       });
 
       setRating(existingReview.reviewStar);
 
-      setFileList([]);
+      if (existingReview.reviewPics) {
+        const existingFiles = existingReview.reviewPics.map((pic: string) => ({
+          uid: pic,
+          name: pic,
+          status: "done",
+          url: `http://112.222.157.157:5233/pic/reviews/${existingReview.reviewId}/images/${pic}`,
+        }));
+        setFileList(existingFiles);
+      }
     }
   }, [existingReview, form]);
 
@@ -82,7 +92,14 @@ function ReviewModal({
     return true;
   };
 
-  const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+  const handleChange: UploadProps["onChange"] = ({
+    fileList: newFileList,
+    file,
+  }) => {
+    if (file.status === "removed" && existingReview) {
+      const removedFileName = file.name;
+      setDeletedFiles(prev => [...prev, removedFileName]);
+    }
     setFileList(newFileList);
   };
 
@@ -100,11 +117,19 @@ function ReviewModal({
 
       const reviewData = {
         userId: user.userId,
-        certification: 1,
         classId: form.getFieldValue("classId"),
         comment: values.comment.trim(),
         star: rating,
+        reviewId: existingReview?.reviewId || 0,
       };
+
+      // 리뷰 데이터 로그
+      console.log("리뷰 데이터:", reviewData);
+      console.log(
+        "새로운 파일:",
+        fileList.filter(file => file.originFileObj),
+      );
+      console.log("삭제된 파일:", deletedFiles);
 
       formData.append(
         "review",
@@ -113,22 +138,37 @@ function ReviewModal({
         }),
       );
 
+      // FormData 내용 확인
+      console.log("FormData 내용:");
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
       fileList.forEach(file => {
         if (file.originFileObj) {
           formData.append("files", file.originFileObj, file.originFileObj.name);
         }
       });
 
-      const endpoint = existingReview
-        ? `/api/image-review/update/${existingReview.reviewId}`
-        : "/api/image-review/create";
-
-      await jwtAxios.post(endpoint, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Accept: "application/json",
-        },
+      deletedFiles.forEach(fileName => {
+        formData.append("deletedFiles", fileName);
       });
+
+      if (existingReview) {
+        await jwtAxios.post(`/api/image-review/update`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Accept: "application/json",
+          },
+        });
+      } else {
+        await jwtAxios.post("/api/image-review/create", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Accept: "application/json",
+          },
+        });
+      }
 
       message.success(
         existingReview ? "리뷰가 수정되었습니다." : "리뷰가 등록되었습니다.",
@@ -180,6 +220,9 @@ function ReviewModal({
     );
   };
 
+  // 수강 중인 클래스만 필터링
+  const activeCourses = classes.filter(cls => cls.userCertification === 1);
+
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
       <div className="flex flex-col items-center w-[500px] bg-white rounded-xl p-6 gap-6">
@@ -189,7 +232,11 @@ function ReviewModal({
           layout="vertical"
           className="w-full"
           initialValues={{
-            classId: existingReview?.classId || classId || joinClassId[0],
+            classId:
+              existingReview?.classId ||
+              classId ||
+              activeCourses[0]?.classId ||
+              null,
             comment: existingReview?.reviewComment || "",
             reviewType: existingReview?.reviewPics?.length
               ? "media"
@@ -224,7 +271,7 @@ function ReviewModal({
             </Radio.Group>
           </Form.Item>
 
-          {/* Class Selection */}
+          {/* Class Selection - 수강 중인 클래스만 표시 */}
           <Form.Item
             label="수강 중인 클래스"
             name="classId"
@@ -232,17 +279,15 @@ function ReviewModal({
             rules={[{ required: true, message: "클래스를 선택해주세요" }]}
           >
             <Radio.Group>
-              {(classes || [])
-                .filter(cls => joinClassId.includes(cls.classId))
-                .map(cls => (
-                  <Radio
-                    key={cls.classId}
-                    value={cls.classId}
-                    className="block mb-2"
-                  >
-                    {cls.className} {cls.classId}
-                  </Radio>
-                ))}
+              {activeCourses.map(cls => (
+                <Radio
+                  key={cls.classId}
+                  value={cls.classId}
+                  className="block mb-2"
+                >
+                  {cls.className}
+                </Radio>
+              ))}
             </Radio.Group>
           </Form.Item>
 

@@ -108,12 +108,12 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
     type: "item",
     icon: <FaCreditCard />,
     label: "결제 및 지출 관리",
-    link: "/admin/paymentanager",
+    link: "/admin/paymentmanager",
     active: false,
     list: [
       {
         label: "학원별 결제 내역",
-        link: "/admin/paymentanager",
+        link: "/admin/paymentmanager",
         active: false,
       },
       {
@@ -241,7 +241,7 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
     type: "item",
     icon: <FaCreditCard />,
     label: "결제 및 지출 관리",
-    link: "/admin/paymentanager",
+    link: "/admin/paymentmanager",
     active: false,
   },
 ];
