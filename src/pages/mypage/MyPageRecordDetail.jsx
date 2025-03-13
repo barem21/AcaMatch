@@ -169,7 +169,8 @@ function MyPageRecordDetail() {
       const res = await jwtAxios.get(
         `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
       );
-      console.log(res);
+      console.log("grade result : ", res.data.resultData);
+
       setTestStudentList(res.data.resultData);
       setAcademyInfo(() => params.get("acaName"));
       // console.log(res.data.resultData.acaName);

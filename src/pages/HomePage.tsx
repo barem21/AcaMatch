@@ -353,10 +353,10 @@ function HomePage() {
   // };
 
   return (
-    <div className="flex flex-col w-full items-center px-4 py-[36px] max-[640px]:py-[16px] gap-8 mx-auto">
+    <div className="flex flex-col w-full items-center px-4 py-[24px] max-[640px]:py-[16px] gap-8 mx-auto">
       {/* 메인 베너 */}
       <div
-        className="w-[990px] h-[540px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[640px]:h-[400px] max-[640px]:w-full"
+        className="w-[990px] h-[400px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[640px]:h-[400px] max-[640px]:w-full"
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner.jpg)`,
           backgroundSize: "cover",
@@ -404,7 +404,7 @@ function HomePage() {
 
       {/* 인기 태그 */}
       <div className="w-full max-w-[990px] ">
-        <h2 className="text-2xl font-bold mb-6">인기 태그</h2>
+        <h2 className="text-2xl font-bold mb-5">인기 태그</h2>
         <div className="flex flex-wrap gap-5 justify-start items-center">
           {popularTag && popularTag.length > 0 ? (
             popularTag.map((subject, index) => (
@@ -425,7 +425,7 @@ function HomePage() {
       </div>
 
       <div className="w-full max-w-[990px] max-[640px]:hidden">
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold mb-5">
           {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
         </h2>
         {academies && academies.length > 0 ? (
@@ -611,7 +611,7 @@ function HomePage() {
 
       {/* 서비스 현황 */}
       <div className="w-full max-w-[990px]">
-        <h2 className="text-2xl font-bold font-lexend mb-7">서비스 현황</h2>
+        <h2 className="text-2xl font-bold font-lexend mb-5">서비스 현황</h2>
         {service && service.length > 0 ? (
           <div className="grid grid-cols-3 gap-6 max-[640px]:grid-cols-1">
             {service.map((stat, index) => (
@@ -638,7 +638,7 @@ function HomePage() {
 
       {/* 화제가 되고 있는 학원 */}
       <div className="w-full max-w-[990px] max-[640px]:hidden">
-        <h2 className="text-2xl font-bold mb-7">화제가 되고 있는 학원</h2>
+        <h2 className="text-2xl font-bold mb-5">화제가 되고 있는 학원</h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <div className="grid grid-cols-4 gap-6">
             {bestAcademyCards.map((card, index) => (

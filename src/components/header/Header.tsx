@@ -27,15 +27,50 @@ const menuItems = [
 ];
 
 const MobileMenuWrap = styled.div`
+  #mobileMenuBg {
+    display: none;
+  }
+  #mobileMenuBg.show {
+    display: block;
+    background: rgba(0, 0, 0, 0.75);
+  }
   #mobileMenuWrap {
-    left: auto;
-    right: -100%;
-    padding: 20px;
-    transition: all 0.3s ease;
-    z-index: 2;
+    transform: translateX(-100%);
+    transition: all 0.5s ease;
+    z-index: 1000;
   }
   #mobileMenuWrap.show {
-    right: -50%;
+    transform: translateX(0);
+  }
+  #mobileMenuWrap .wrapper {
+    position: relative;
+    height: 100vh;
+    max-width: 300px;
+    padding: 20px;
+    background-color: #3b77d8;
+  }
+  #mobileMenuWrap .wrapper > ul > li,
+  #mobileMenuWrap .wrapper > ul > li > a {
+    color: #fff;
+    font-weight: bold;
+  }
+  #mobileMenuWrap .wrapper > ul > li {
+    padding: 15px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  #mobileMenuWrap .wrapper > ul > li:first-child {
+    border-top: none;
+  }
+  #mobileMenuWrap .wrapper > ul > li > ul {
+    margin-top: 10px;
+    padding: 0px;
+    padding-left: 0px;
+  }
+  #mobileMenuWrap .wrapper > ul > li > ul li a {
+    color: #fff;
+    opacity: 0.75;
+    font-size: 14px;
+    font-weight: 400;
   }
 `;
 
@@ -309,26 +344,160 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         </button>
       </div>
 
-      <MobileMenuWrap>
+      <MobileMenuWrap className="min-[640px]:hidden">
+        <div
+          id="mobileMenuBg"
+          className={`${isMenuOpen ? "show" : "hide"} fixed top-0 left-0 w-full h-full`}
+        ></div>
+
         <div
           id="mobileMenuWrap"
-          className={`${isMenuOpen ? "show" : "hide"} fixed top-[64px] w-full h-[calc(100vh-60px)] bg-gray-100`}
+          className={`${isMenuOpen ? "show" : "hide"} fixed top-0 left-0 w-full h-[100vh]`}
         >
-          <ul>
-            <li onClick={() => navigate("/")}>모바일 메뉴</li>
-            <li>
-              <Link to={"/academy?page=1&size=10"}>학원 검색</Link>
-            </li>
-            <li>
-              <Link to={"/hotAcademy"}>화제의 학원</Link>
-            </li>
-            <li>
-              <Link to={"/support"}>고객지원</Link>
-            </li>
-            <li>
-              <Link to={"/mypage/user"}>마이페이지</Link>
-            </li>
-          </ul>
+          <div className="wrapper">
+            <button
+              className="absolute right-[-45px] top-6 size-8 text-white text-2xl"
+              onClick={() => toggleMobileMenu()}
+            >
+              &times;
+            </button>
+
+            <div className="flex mb-3">
+              <Link
+                to={"/log-in"}
+                onClick={() => toggleMobileMenu()}
+                className="flex w-full h-10 justify-center items-center bg-blue-800 text-white font-bold"
+              >
+                로그인
+              </Link>
+              <Link
+                to={"/signup"}
+                onClick={() => toggleMobileMenu()}
+                className="flex w-full h-10 justify-center items-center bg-white text-blue-800 font-bold"
+              >
+                회원가입
+              </Link>
+            </div>
+
+            <ul>
+              <li>
+                <Link
+                  to={"/academy?page=1&size=10"}
+                  onClick={() => toggleMobileMenu()}
+                >
+                  학원 검색
+                </Link>
+              </li>
+              <li>
+                <Link to={"/hotAcademy"} onClick={() => toggleMobileMenu()}>
+                  화제의 학원
+                </Link>
+              </li>
+              <li>
+                <Link to={"/support"} onClick={() => toggleMobileMenu()}>
+                  고객지원
+                </Link>
+                <ul>
+                  <li>
+                    <Link to={"/support"} onClick={() => toggleMobileMenu()}>
+                      자주하는 질문
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to={"/support/inquiryList"}
+                      onClick={() => toggleMobileMenu()}
+                    >
+                      1:1 문의
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <Link to={"/mypage/user"} onClick={() => toggleMobileMenu()}>
+                  마이페이지
+                </Link>
+                <ul>
+                  <li>
+                    <Link
+                      to={"/mypage/user"}
+                      onClick={() => toggleMobileMenu()}
+                    >
+                      회원정보 관리
+                    </Link>
+                  </li>
+                  {currentUserInfo.roleId === 1 && (
+                    <>
+                      <li>
+                        <Link to={"/mypage"} onClick={() => toggleMobileMenu()}>
+                          나의 학원정보
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to={"/mypage/parent"}
+                          onClick={() => toggleMobileMenu()}
+                        >
+                          보호자 정보
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to={"/mypage/record"}
+                          onClick={() => toggleMobileMenu()}
+                        >
+                          나의 성적확인
+                        </Link>
+                      </li>
+                    </>
+                  )}
+
+                  {currentUserInfo.roleId === 2 && (
+                    <>
+                      <li>
+                        <Link
+                          to={"/mypage/child"}
+                          onClick={() => toggleMobileMenu()}
+                        >
+                          자녀 관리
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to={"/mypage"} onClick={() => toggleMobileMenu()}>
+                          자녀 학원정보
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to={"/mypage/record"}
+                          onClick={() => toggleMobileMenu()}
+                        >
+                          자녀 성적확인
+                        </Link>
+                      </li>
+                    </>
+                  )}
+
+                  <li>
+                    <Link
+                      to={"/mypage/like"}
+                      onClick={() => toggleMobileMenu()}
+                    >
+                      나의 좋아요 목록
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to={"/mypage/review"}
+                      onClick={() => toggleMobileMenu()}
+                    >
+                      나의 리뷰 목록
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
       </MobileMenuWrap>
     </header>

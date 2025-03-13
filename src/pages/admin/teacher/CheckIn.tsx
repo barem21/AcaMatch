@@ -155,7 +155,11 @@ const CheckIn = () => {
 
   // 현재 날짜 기준으로 해당 월의 시작일과 종료일 계산
   const getCurrentMonthRange = () => {
-    const startDate = dayjs().startOf("month").format("YYYY-MM-DD");
+    //const startDate = dayjs().startOf("month").format("YYYY-MM-DD");
+    const startDate = dayjs()
+      .subtract(3, "month")
+      .startOf("month")
+      .format("YYYY-MM-DD"); //3달전부터
     const endDate = dayjs().endOf("month").format("YYYY-MM-DD");
     return { startDate, endDate };
   };

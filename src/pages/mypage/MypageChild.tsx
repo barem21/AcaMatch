@@ -1,15 +1,29 @@
-import { useRecoilValue } from "recoil";
-import userInfo from "../../atoms/userInfo";
+import { message, Pagination } from "antd";
 import { useEffect, useState } from "react";
-import SideBar from "../../components/SideBar";
-import { Button, Form, message, Pagination } from "antd";
-import jwtAxios from "../../apis/jwt";
 import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import jwtAxios from "../../apis/jwt";
+import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
+import SideBar from "../../components/SideBar";
+
+interface mypageChildListType {
+  userId: number;
+  name: string;
+  email: string;
+  phone: string;
+  birth: string;
+  userPic: string;
+  certification: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 function MypageChild() {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [myypageChildList, setMypageChildList] = useState([]);
+  const [mypageChildList, setMypageChildList] = useState<mypageChildListType[]>(
+    [],
+  );
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
 
@@ -56,7 +70,7 @@ function MypageChild() {
   };
 
   //자녀요청 승인
-  const certificationRequest = async datas => {
+  const certificationRequest = async (datas: any) => {
     try {
       const res = await jwtAxios.get(`/api/user/relationship/${datas}`);
       if (res.data.resultData === 1) {
@@ -101,18 +115,18 @@ function MypageChild() {
             </div>
           </div>
 
-          {myypageChildList?.length === 0 && (
+          {mypageChildList?.length === 0 && (
             <div className="p-4 text-center border-b">
               등록된 자녀가 없습니다.
             </div>
           )}
-          {myypageChildList === null && (
+          {mypageChildList === null && (
             <div className="p-4 text-center border-b">
               등록된 자녀가 없습니다.
             </div>
           )}
 
-          {myypageChildList?.map((item, index) => (
+          {mypageChildList?.map((item, index) => (
             <div
               key={index}
               className="loop-content flex justify-between align-middle p-4 border-b"
@@ -123,7 +137,7 @@ function MypageChild() {
                     <img
                       src={
                         item.userPic
-                          ? `http://112.222.157.156:5223/pic/user/${item.userId}/${item.userPic}`
+                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.userPic}`
                           : "/aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
@@ -147,7 +161,7 @@ function MypageChild() {
                   <button
                     type="button"
                     className="small_line_button"
-                    onClick={e => certificationRequest(item.userId)}
+                    onClick={() => certificationRequest(item.userId)}
                   >
                     요청승인
                   </button>
@@ -164,7 +178,7 @@ function MypageChild() {
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
             defaultCurrent={1}
-            total={myypageChildList?.length}
+            total={mypageChildList?.length}
             showSizeChanger={false}
           />
         </div>
