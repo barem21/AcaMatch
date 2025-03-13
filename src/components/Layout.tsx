@@ -251,7 +251,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 >
                   {children}
                 </main>
-                <BannerLayout position="right" />
+                <BannerLayout />
               </div>
             </>
           ) : (

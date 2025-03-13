@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Button, DatePicker, Form, Pagination, Select } from "antd";
+import { Button, DatePicker, Form, Pagination, Select, Input } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -19,30 +19,127 @@ interface AcademyList {
 function PaymentManager() {
   const [form] = Form.useForm();
   const [academyList, setAcademyList] = useState<AcademyList[] | null>(null);
-  const [startDate, setStartDate] = useState<Dayjs | null>(
-    dayjs().subtract(7, "day"),
-  );
-  const [endDate, setEndDate] = useState<Dayjs | null>(dayjs());
-  const [orderType, setOrderType] = useState<number>(0); // 0: 학원, 1: 교재
   const [searchParams, setSearchParams] = useSearchParams();
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchAcaName, setSearchAcaName] = useState(
+    searchParams.get("acaName") || "",
+  );
+  const [inputAcaName, setInputAcaName] = useState("");
 
-  // URL에서 페이지 번호 및 페이지 크기 가져오기
+  // URL에서 모든 파라미터 가져오기
   const currentPage = Number(searchParams.get("page")) || 1;
   const pageSize = Number(searchParams.get("size")) || 30;
-  const [totalCount, setTotalCount] = useState(0);
+  const orderType = Number(searchParams.get("orderType")) || 0;
+  const startDateStr = searchParams.get("startDate");
+  const endDateStr = searchParams.get("endDate");
+
+  // 날짜 상태를 URL 파라미터에서 초기화
+  const [startDate, setStartDate] = useState<Dayjs | null>(
+    startDateStr ? dayjs(startDateStr) : null,
+  );
+  const [endDate, setEndDate] = useState<Dayjs | null>(
+    endDateStr ? dayjs(endDateStr) : null,
+  );
+
+  const updateSearchParams = (updates: Record<string, string | null>) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null) {
+        newSearchParams.delete(key);
+      } else {
+        newSearchParams.set(key, value);
+      }
+    });
+
+    setSearchParams(newSearchParams);
+  };
+
+  const handleStartChange = (date: Dayjs | null) => {
+    setStartDate(date);
+    updateSearchParams({
+      startDate: date ? date.format("YYYY-MM-DD") : null,
+    });
+  };
+
+  const handleEndChange = (date: Dayjs | null) => {
+    setEndDate(date);
+    updateSearchParams({
+      endDate: date ? date.format("YYYY-MM-DD") : null,
+    });
+  };
+
+  const handleOrderTypeChange = (value: string) => {
+    if (value === "all") {
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete("orderType");
+      setSearchParams(newSearchParams);
+    } else {
+      updateSearchParams({ orderType: value });
+    }
+  };
+
+  const handleButtonClick = (days: number) => {
+    let newStartDate: Dayjs;
+    const newEndDate: Dayjs = dayjs();
+
+    if (days === -1) {
+      newStartDate = dayjs().subtract(1, "day");
+    } else if (days === 7) {
+      newStartDate = dayjs().subtract(7, "day");
+    } else if (days === 30) {
+      newStartDate = dayjs().subtract(30, "day");
+    } else {
+      newStartDate = dayjs();
+    }
+
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+    updateSearchParams({
+      startDate: newStartDate.format("YYYY-MM-DD"),
+      endDate: newEndDate.format("YYYY-MM-DD"),
+    });
+  };
+
+  const handlePageChange = (page: number) => {
+    updateSearchParams({
+      page: page.toString(),
+    });
+  };
+
+  const handleAcaNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputAcaName(e.target.value);
+  };
+
+  const handleSearch = () => {
+    updateSearchParams({
+      acaName: inputAcaName || null,
+      page: "1",
+    });
+  };
 
   // API에서 학원 결제 내역을 가져오는 함수 (Axios 사용)
   const fetchAcademyList = async () => {
-    if (!startDate || !endDate) return;
-
     const url = `/api/academy/GetAcademyListByAcaNameOrderType`;
-    const params = {
-      startDate: startDate.format("YYYY-MM-DD"),
-      endDate: endDate.format("YYYY-MM-DD"),
-      orderType,
+
+    const params: any = {
       page: currentPage,
       size: pageSize,
+      acaName: searchParams.get("acaName") || undefined,
     };
+
+    const orderTypeParam = searchParams.get("orderType");
+    if (orderTypeParam) {
+      params.orderType = orderTypeParam;
+    }
+
+    // 날짜가 있을 때만 파라미터에 추가
+    if (startDate) {
+      params.startDate = startDate.format("YYYY-MM-DD");
+    }
+    if (endDate) {
+      params.endDate = endDate.format("YYYY-MM-DD");
+    }
 
     try {
       const response = await jwtAxios.get(url, { params });
@@ -72,36 +169,7 @@ function PaymentManager() {
 
   useEffect(() => {
     fetchAcademyList();
-  }, [startDate, endDate, orderType, currentPage, pageSize]);
-
-  const handleStartChange = (date: Dayjs | null) => {
-    setStartDate(date);
-    if (endDate && date && date.isAfter(endDate)) {
-      setEndDate(null);
-    }
-  };
-
-  const handleEndChange = (date: Dayjs | null) => {
-    setEndDate(date);
-  };
-
-  const handleButtonClick = (days: number) => {
-    let newStartDate: Dayjs;
-    const newEndDate: Dayjs = dayjs(); // 오늘 날짜
-
-    if (days === -1) {
-      newStartDate = dayjs().subtract(1, "day");
-    } else if (days === 7) {
-      newStartDate = dayjs().subtract(7, "day"); // 7일 전부터 오늘까지
-    } else if (days === 30) {
-      newStartDate = dayjs().subtract(30, "day"); // 30일 전부터 오늘까지
-    } else {
-      newStartDate = dayjs(); // 기본적으로 오늘
-    }
-
-    setStartDate(newStartDate);
-    setEndDate(newEndDate);
-  };
+  }, [searchParams]); // searchParams가 변경될 때마다 API 호출
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -117,15 +185,25 @@ function PaymentManager() {
               <div className="flex items-center gap-1">
                 <label className="w-24 text-sm">주문 통합검색</label>
                 <Select
-                  placeholder="학원비"
+                  placeholder="전체"
                   className="select-admin-basic"
-                  value={orderType.toString()}
-                  onChange={value => setOrderType(Number(value))}
+                  value={searchParams.get("orderType") || "all"}
+                  onChange={handleOrderTypeChange}
                   options={[
+                    { value: "all", label: "전체" },
                     { value: "0", label: "학원비" },
                     { value: "1", label: "교재" },
                   ]}
                 />
+                <Input
+                  placeholder="학원명 검색"
+                  className="w-[200px]"
+                  value={inputAcaName}
+                  onChange={handleAcaNameChange}
+                />
+                <Button className="btn-admin-basic" onClick={handleSearch}>
+                  검색하기
+                </Button>
                 <DatePicker
                   className="w-[130px]"
                   onChange={handleStartChange}
@@ -163,9 +241,6 @@ function PaymentManager() {
                 >
                   한달
                 </Button>
-                <Button className="btn-admin-basic" onClick={fetchAcademyList}>
-                  검색하기
-                </Button>
               </div>
             </div>
           </Form>
@@ -176,7 +251,7 @@ function PaymentManager() {
             <div className="w-[8%] text-center">결제금액</div>
             <div className="w-[8%] text-center">주문자</div>
             <div className="w-[8%] text-center">처리상태</div>
-            <div className="w-[8%] text-center">삭제</div>
+            {/* <div className="w-[8%] text-center">삭제</div> */}
           </div>
 
           {academyList?.map((item, index) => (
@@ -193,28 +268,32 @@ function PaymentManager() {
               <div className="w-[8%] text-center">{item.paymentDate}</div>
               <div className="w-[8%] text-center">{item.paymentAmount}</div>
               <div className="w-[8%] text-center">{item.orderer}</div>
-              <div className="w-[8%] text-center">{item.processingStatus}</div>
-              <div className="w-[8%] text-center flex justify-center">
+              <div className="w-[8%] text-center">
+                <p
+                  className={`w-[80px] pb-[1px] rounded-md text-white text-[12px] text-center mx-auto ${
+                    item.processingStatus === "결제대기"
+                      ? "bg-[#f8a57d]"
+                      : "bg-[#90b1c4]"
+                  }`}
+                >
+                  {item.processingStatus}
+                </p>
+              </div>
+              {/* <div className="w-[8%] text-center flex justify-center">
                 <FaPen className="mx-2 text-gray-400 cursor-pointer" />
                 <FaRegTrashAlt className="mx-2 text-gray-400 cursor-pointer" />
-              </div>
+              </div> */}
             </div>
           ))}
-
-          <div className="flex justify-center items-center m-6">
-            <Pagination
-              current={currentPage}
-              total={totalCount}
-              pageSize={pageSize}
-              showSizeChanger={false}
-              onChange={page =>
-                setSearchParams({
-                  page: page.toString(),
-                  size: pageSize.toString(),
-                })
-              }
-            />
-          </div>
+        </div>
+        <div className="flex justify-center items-center m-6">
+          <Pagination
+            current={currentPage}
+            total={totalCount}
+            pageSize={pageSize}
+            showSizeChanger={false}
+            onChange={handlePageChange}
+          />
         </div>
       </div>
     </div>

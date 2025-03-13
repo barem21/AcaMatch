@@ -15,7 +15,7 @@ import Support from "./pages/Support";
 import AcademyDetail from "./pages/academyDetail/AcademyDetail";
 import AcaManagement from "./pages/admin/AcaManagement.tsx";
 import DashBoard from "./pages/admin/DashBoard/DashBoard.tsx";
-import Paymentanager from "./pages/admin/Paymentanager.tsx";
+import PaymentManager from "./pages/admin/PaymentManager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
 import LoginPage from "./pages/member/LoginPage";
 import SignupEnd from "./pages/member/SignupEnd";
@@ -176,7 +176,7 @@ function App() {
                 {/* <Route path="memberInfo" element={<MemberInfo />} /> */}
                 <Route path="profile" element={<MemberInfo />} />
                 <Route path="acamanager" element={<AcaManagement />} />
-                <Route path="paymentanager" element={<Paymentanager />} />
+                <Route path="paymentmanager" element={<PaymentManager />} />
                 <Route path="acarevenue" element={<AcaRevenue />} />
                 <Route path="notice-content" element={<NoticeContent />} />
                 <Route path="notice-content/add" element={<NoticeAdd />} />
