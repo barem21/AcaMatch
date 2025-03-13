@@ -616,7 +616,7 @@ const AcademySearch = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-start gap-3 w-full mt-[65px] max-[640px]:mt-0 max-[640px]:p-4">
+        <div className="flex flex-col items-start gap-3 w-full max-w-[980px] mt-[65px] max-[640px]:mt-0 max-[640px]:p-4">
           {/* 상단 검색 영역 */}
           <div className="flex flex-row flex-wrap justify-between items-start gap-3 w-full h-[72px] max-[640px]:h-auto">
             <div className="flex flex-col w-[288px] min-w-[288px] h-10 max-[640px]:h-auto">
@@ -657,7 +657,7 @@ const AcademySearch = () => {
               {/* <CiSearch className="text-[24px] font-bold  text-brand-placeholder absolute right-[10px] bottom-[15px] " /> */}
             </div>
             <div
-              className="flex items-center text-brand-placeholder pl-[11px] w-[440px] h-[56px] bg-[#ffffff] border border-[#DBE3E6] rounded-[12px] justify-between pr-[10px] cursor-pointer max-[640px]:w-full"
+              className="flex items-center text-brand-placeholder pl-[11px] w-[420px] h-[56px] bg-[#ffffff] border border-[#DBE3E6] rounded-[12px] justify-between pr-[10px] cursor-pointer max-[640px]:w-full"
               onClick={() => setIsModalVisible(true)}
             >
               <span>
@@ -667,7 +667,7 @@ const AcademySearch = () => {
             </div>
 
             <button
-              className="items-center border p-[2px] w-[60px] h-[56px] rounded-md text-[14px]"
+              className="items-center border p-[2px] w-[80px] h-[56px] rounded-md text-[14px]"
               onClick={() => {
                 setTimeout(() => {
                   navigate("/academy?page=1", { replace: true });
@@ -740,9 +740,16 @@ const AcademySearch = () => {
                   <div className="flex justify-center items-center w-full max-[640px]:flex-col max-[640px]:justify-start max-[640px]:p-4">
                     <div className="flex justify-start items-center w-full">
                       <span className="text-[14px] text-brand-default">
-                        {Number(academy.premium) === 1
-                          ? `(광고)${academy.acaName} `
-                          : academy.acaName}
+                        {Number(academy.premium) === 1 ? (
+                          <>
+                            <span className="text-brand-placeholder p-[2px] pt-0 w-[30px] border border-b rounded-[4px] text-[12px]">
+                              광고
+                            </span>
+                            {academy.acaName}
+                          </>
+                        ) : (
+                          academy.acaName
+                        )}
                       </span>
                     </div>
 

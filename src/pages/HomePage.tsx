@@ -725,20 +725,4 @@ function HomePage() {
   );
 }
 
-// bannerPosition에 따른 경로 매핑 함수 추가
-// const getBannerPosition = (position: number) => {
-//   switch (position) {
-//     case 1:
-//       return "top"; // 상단 배너
-//     case 2:
-//       return "right"; // 하단 배너
-//     // case 3:
-//     //   return "right"; // 우측 배너
-//     case 4:
-//       return "right"; // 메인 하단 배너
-//     default:
-//       return "bottom";
-//   }
-// };
-
 export default HomePage;
