@@ -4,6 +4,7 @@ import type { Swiper as SwiperType } from "swiper";
 import { Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface AdvertisementProps {
   id: string;
@@ -24,6 +25,7 @@ interface Banner {
 const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
   const swiperRef = useRef<SwiperType>();
   const [banners, setBanners] = useState<Banner[]>([]);
+  const navigate = useNavigate();
 
   // 오른쪽 배너 가져오기
   useEffect(() => {
@@ -47,6 +49,9 @@ const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
 
     fetchBanners();
   }, []);
+  const handleAcademyClick = (acaId: number) => {
+    navigate(`/academy/detail?id=${acaId}&page=1&size=10`);
+  };
 
   return (
     <div
@@ -76,6 +81,11 @@ const Advertisement = ({ id, height = 300 }: AdvertisementProps) => {
                   src={`http://112.222.157.157:5233/pic/banner/${banner.acaId}/right/${banner.bannerPic}`}
                   alt="banner"
                   className="w-full h-full object-cover rounded-lg"
+                  onClick={() => {
+                    handleAcademyClick(Number(banner.acaId));
+                    // console.log(banner.acaId);
+                  }}
+                  style={{ cursor: "pointer" }}
                 />
               </SwiperSlide>
             ))
