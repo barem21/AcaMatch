@@ -118,7 +118,7 @@ function AcademyRecord() {
 
   //수강생 목록 다운로드(엑셀)
   const handle2Button2Click = async () => {
-    const res = await axios.get(`/api/grade/export?subjectId=${examId}`);
+    const res = await axios.get(`/api/grade/export?examId=${examId}`);
     if (res.data.resultData) {
       window.open(res.data.resultData);
     }
