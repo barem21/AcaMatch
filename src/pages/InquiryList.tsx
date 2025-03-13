@@ -8,11 +8,26 @@ import CustomModal from "../components/modal/Modal";
 import SideBar from "../components/SideBar";
 import { Cookies } from "react-cookie";
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+  createdAt: string;
+  acaAgree: number;
+  comment: string;
+  acaPhone: string;
+  address: string;
+  name: string;
+  acaPic: string;
+  acaPics: string;
+  reportsCount: number;
+  premium: number;
+}
+
 function InquiryList() {
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { userId, roleId } = useRecoilValue(userInfo); // Recoil에서 userId 가져오기
-  const [myAcademyList, setMyAcademyList] = useState([]);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
   const cookies = new Cookies();
 
   const titleName = "고객지원";
@@ -74,10 +89,13 @@ function InquiryList() {
   }, []);
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
-      <div className="flex flex-col w-full">
-        <h1 className="title-font">1:1 학원별 문의</h1>
+
+      <div className="w-full max-[640px]:p-4">
+        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+          1:1 학원별 문의
+        </h1>
         <div className="flex flex-col w-full border border-[#DBE3E6] rounded-xl">
           {/* 테이블 헤더 */}
           <div className="flex flex-row h-[46px] items-center justify-center">

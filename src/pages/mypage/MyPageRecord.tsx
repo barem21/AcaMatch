@@ -225,7 +225,7 @@ function MyPageRecord() {
                     className="small_line_button cursor-pointer max-[640px]:w-full max-[640px]:text-center"
                     onClick={() =>
                       navigate(
-                        `/mypage/record/detail?acaId=${item.acaId}&acaName=${item.acaName}`,
+                        `/mypage/record/detail?acaId=${item.acaId}&acaName=${item.acaName}&classId=${item.classId}`,
                       )
                     }
                   >

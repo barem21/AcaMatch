@@ -3,21 +3,38 @@ import { useRecoilValue } from "recoil";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
 import userInfo from "../../atoms/userInfo";
-import { getCookie } from "../../utils/cookie";
+//import { getCookie } from "../../utils/cookie";
 import { message, Pagination } from "antd";
 import { useNavigate } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
 import { Cookies } from "react-cookie";
 
+interface mypageAcademyListType {
+  acaId: number;
+  acaPics: string;
+  acaPic: string;
+  acaName: string;
+  classList: [
+    {
+      classId: number;
+      className: string;
+      startDate: string;
+      endDate: string;
+    },
+  ];
+}
+
 function MyPage() {
   const cookies = new Cookies();
-  const [resultTitle, setResultTitle] = useState("");
-  const [resultMessage, setResultMessage] = useState("");
-  const [mypageAcademyList, setMypageAcademyList] = useState([]); //내 학원 내역
+  const [resultTitle, _setResultTitle] = useState("");
+  const [resultMessage, _setResultMessage] = useState("");
+  const [mypageAcademyList, setMypageAcademyList] = useState<
+    mypageAcademyListType[]
+  >([]); //내 학원 내역
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { roleId, userId } = useRecoilValue(userInfo);
-  const accessToken = getCookie("accessToken");
+  //const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
   const pageSize = 10;
 
@@ -53,15 +70,18 @@ function MyPage() {
       ];
       break;
   }
-  const scrollRef = useRef(null);
+  //const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
+  /*
   const handleScrollToTop = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
   };
+  */
 
-  const myAcademyList = async page => {
+  const myAcademyList = async (page: any) => {
     //자녀목록 호출
     let checkUserId = userId; //기본은 본인 아이디
     if (roleId === 2) {
@@ -125,7 +145,7 @@ function MyPage() {
     }
   }, []);
 
-  const handlePageChange = page => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -187,7 +207,7 @@ function MyPage() {
                     <img
                       src={
                         item.acaPic
-                          ? `http://112.222.157.156:5223/pic/academy/${item.acaId}/${item.acaPic}`
+                          ? `http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
                           : "aca_image_1.png"
                       }
                       className="max-w-fit max-h-full object-cover"
