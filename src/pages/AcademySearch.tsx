@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { Checkbox, Dropdown, Form, Input, Menu, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import MainButton from "../components/button/MainButton";
 import LocationModal from "../components/modal/LocationModal";
 import axios from "axios";
@@ -594,7 +594,7 @@ const AcademySearch = () => {
       <div className="flex flex-row justify-between w-full gap-[12px] max-[640px]:flex-col">
         <div className="flex mt-[75px] max-[640px]:mt-7 max-[640px]:p-4">
           <div className="flex-col-start gap-4 w-[288px] h-[916px] max-[640px]:w-full max-[640px]:h-auto">
-            <div className="flex items-start pb-5 max-[640px]:hidden">
+            <div className="flex items-start w-[100%] justify-between pb-5 max-[640px]:hidden">
               <h2 className="text-[24px] font-[500] leading-[21px] text-brand-default mb-[15px]">
                 카테고리
               </h2>
@@ -657,7 +657,7 @@ const AcademySearch = () => {
               {/* <CiSearch className="text-[24px] font-bold  text-brand-placeholder absolute right-[10px] bottom-[15px] " /> */}
             </div>
             <div
-              className="flex items-center text-brand-placeholder pl-[11px] w-[460px] h-[56px] bg-[#ffffff] border border-[#DBE3E6] rounded-[12px] justify-between pr-[10px] cursor-pointer max-[640px]:w-full"
+              className="flex items-center text-brand-placeholder pl-[11px] w-[440px] h-[56px] bg-[#ffffff] border border-[#DBE3E6] rounded-[12px] justify-between pr-[10px] cursor-pointer max-[640px]:w-full"
               onClick={() => setIsModalVisible(true)}
             >
               <span>
@@ -665,6 +665,29 @@ const AcademySearch = () => {
               </span>
               <SlArrowDown />
             </div>
+
+            <button
+              className="items-center border p-[2px] w-[60px] h-[56px] rounded-md text-[14px]"
+              onClick={() => {
+                setTimeout(() => {
+                  navigate("/academy?page=1", { replace: true });
+                }, 0);
+                console.log(search);
+                const params = new URLSearchParams(search);
+
+                setCurrentPage(Number(params.get("page")));
+                selectedFilters.age.length = 0;
+                selectedFilters.level.length = 0;
+                setSearchValue("");
+                setSelectedLocation(-1);
+                setSelectedLocationText("지역 검색");
+                // onFinish("");
+                form.resetFields();
+                updateSearchState(params);
+              }}
+            >
+              초기화
+            </button>
             {/* <div className="w-5 h-5 bg-brand-default" /> */}
           </div>
 
