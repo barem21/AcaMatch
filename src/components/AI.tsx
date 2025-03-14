@@ -77,17 +77,24 @@ const AI: React.FC<TestGradeId> = () => {
     }
   };
 
-  // OpenAI API 호출 (이미지 & 텍스트 분석)
+  // OpenAI API 호출 수정
   const analyzeInput = async () => {
     setLoading(true);
-    setIsLoading(true); //로딩중 열기
+    setIsLoading(true);
 
     try {
       const messages: any[] = [
         {
           role: "system",
-          content:
-            "넌 학원 선생이다. 아래 학생의 성적 데이터를 분석하여 발전한 점, 잘하는 과목, 부족한 과목을 구체적으로 설명해라. 또한, 과목별로 성적 변화 패턴을 반영하여 학습 방향을 제안해라. 150자 이하로 답변해라.",
+          content: `당신은 학원 선생님입니다. 학생의 성적 데이터나 시험지를 분석하여 다음 형식으로 답변해주세요:
+
+1. [전반적 평가] - 전체적인 성적 수준과 두드러진 특징
+2. [강점 분석] - 잘하는 영역과 그 이유
+3. [개선점] - 보완이 필요한 부분
+4. [학습 전략] - 성적 향상을 위한 구체적인 학습 방법
+5. [특이사항] - 특별히 주목할 만한 패턴이나 변화
+
+답변은 150자 이내로 작성하되, 구체적이고 실용적인 조언을 포함해주세요.`,
         },
       ];
 
@@ -96,22 +103,26 @@ const AI: React.FC<TestGradeId> = () => {
       }
 
       if (image) {
-        const reader = new FileReader();
-        reader.readAsDataURL(image);
-        reader.onload = async () => {
-          const base64Image = reader.result as string;
+        try {
+          const reader = new FileReader();
+          reader.readAsDataURL(image);
+
+          const base64Image = await new Promise<string>((resolve, reject) => {
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+          });
+
           messages.push({
             role: "user",
             content: [
               {
                 type: "text",
-                text: "넌 학원 선생이다. 아래 학생의 성적 데이터를 분석하여 오답과 정답에 대해 잘하는 점과 부족한 점에 대해 150자 이하로 답변해라. 그리고 시험지의 동그라미가 있으면 정답 대각선으로 빨간선이 끄어져있으면 틀린것으로 간주해라",
+                text: "시험지를 분석하여 정답과 오답 패턴을 파악하고, 위 형식에 맞춰 구체적인 피드백을 제공해주세요. 시험지의 동그라미는 정답, 대각선으로 그어진 빨간선은 오답으로 간주합니다.",
               },
               { type: "image_url", image_url: { url: base64Image } },
             ],
           });
 
-          // OpenAI API 요청
           const response = await openai?.chat.completions.create({
             model: "gpt-4-turbo",
             messages,
@@ -120,27 +131,19 @@ const AI: React.FC<TestGradeId> = () => {
           setAnalysisResult(
             response?.choices[0].message.content || "분석 실패",
           );
-          setLoading(false);
-          setIsLoading(false); //로딩중 닫기
-        };
-        return;
+        } catch (error) {
+          console.error("이미지 처리 오류:", error);
+          message.error("이미지 처리 중 오류가 발생했습니다.");
+        }
       } else {
         message.error("분석할 이미지 파일을 첨부해주세요.");
-        return;
       }
-
-      const response = await openai?.chat.completions.create({
-        model: "gpt-4-turbo",
-        messages,
-      });
-
-      setAnalysisResult(response?.choices[0].message.content || "분석 실패");
     } catch (error) {
       console.error("입력 분석 오류:", error);
       setAnalysisResult("분석 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
-      //setIsLoading(false); //로딩중 닫기
+      setIsLoading(false);
     }
   };
 
@@ -212,12 +215,10 @@ const AI: React.FC<TestGradeId> = () => {
 
       {/* 분석 결과 표시 */}
       {analysisResult && (
-        <div className="w-full">
-          <div className="mt-4 p-4 border rounded-md bg-gray-100 w-full">
-            <h2 className="mb-3 p-3 pt-2 pb-2 bg-white border rounded-md text-lg font-semibold">
-              분석결과 확인 📢
-            </h2>
-            <p>{analysisResult}</p>
+        <div className="max-h-[400px] mt-4 p-4 border rounded-md bg-gray-100 w-full">
+          <h2 className="mb-3 text-lg font-semibold">📢 분석 결과</h2>
+          <div className="max-h-[250px] overflow-y-auto">
+            <p className="whitespace-pre-line">{analysisResult}</p>
           </div>
           {/* <button
             type="button"
@@ -345,9 +346,11 @@ export const AIText: React.FC<AITextProps> = ({ textInput }) => {
 
       {/* 분석 결과 */}
       {analysisResult && (
-        <div className="mt-4 p-4 border rounded-md bg-gray-100 w-full">
+        <div className="max-h-[400px] mt-4 p-4 border rounded-md bg-gray-100 w-full">
           <h2 className="mb-3 text-lg font-semibold">📢 분석 결과</h2>
-          <p>{analysisResult}</p>
+          <div className="max-h-[250px] overflow-y-auto">
+            <p>{analysisResult}</p>
+          </div>
         </div>
       )}
       {loading && (

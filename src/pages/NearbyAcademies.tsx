@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-function HotAcademy() {
+const NearbyAcademies = () => {
   // const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -151,7 +151,7 @@ function HotAcademy() {
       </div>
     </div>
   );
-}
+};
 
 // 스켈레톤 컴포넌트
 const SkeletonCard = () => (
@@ -206,4 +206,4 @@ const AcademyCard = ({ academy }: { academy: any }) => {
   );
 };
 
-export default HotAcademy;
+export default NearbyAcademies;

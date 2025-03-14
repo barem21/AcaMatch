@@ -21,15 +21,17 @@ function PaymentManager() {
   const [academyList, setAcademyList] = useState<AcademyList[] | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [totalCount, setTotalCount] = useState(0);
-  const [searchAcaName, setSearchAcaName] = useState(
-    searchParams.get("acaName") || "",
-  );
+  // const [searchAcaName, setSearchAcaName] = useState(
+  //   searchParams.get("acaName") || "",
+  // );
   const [inputAcaName, setInputAcaName] = useState("");
 
   // URL에서 모든 파라미터 가져오기
   const currentPage = Number(searchParams.get("page")) || 1;
-  const pageSize = Number(searchParams.get("size")) || 30;
-  const orderType = Number(searchParams.get("orderType")) || 0;
+  const [pageSize, setPageSize] = useState<number>(
+    Number(searchParams.get("size")) || 30, // size 파라미터가 없을 경우 기본값 30
+  );
+  // const orderType = Number(searchParams.get("orderType")) || 0;
   const startDateStr = searchParams.get("startDate");
   const endDateStr = searchParams.get("endDate");
 
@@ -133,7 +135,6 @@ function PaymentManager() {
       params.orderType = orderTypeParam;
     }
 
-    // 날짜가 있을 때만 파라미터에 추가
     if (startDate) {
       params.startDate = startDate.format("YYYY-MM-DD");
     }
@@ -145,17 +146,17 @@ function PaymentManager() {
       const response = await jwtAxios.get(url, { params });
       const data = response.data;
 
-      if (data.resultData) {
+      if (data.resultData && data.resultData.length > 0) {
         const formattedData = data.resultData.map((item: any) => ({
           acaName: item.acaName,
-          classOrBookName: item.classOrBookName, // 강좌명 or 책
-          paymentDate: item.createdAt.split(" ")[0], // YYYY-MM-DD 형식 추출
-          paymentAmount: item.price.toLocaleString(), // 결제 금액을 콤마 포함된 문자열로 변환
+          classOrBookName: item.classOrBookName,
+          paymentDate: item.createdAt.split(" ")[0],
+          paymentAmount: item.price.toLocaleString(),
           orderer: item.name,
           processingStatus: item.costStatus === 2 ? "결제완료" : "결제대기",
         }));
         setAcademyList(formattedData);
-        setTotalCount(data.totalCount); // 전체 데이터 개수 저장
+        setTotalCount(data.resultData[0].totalCount);
       } else {
         setAcademyList([]);
         setTotalCount(0);
@@ -242,6 +243,27 @@ function PaymentManager() {
                   한달
                 </Button>
               </div>
+              <div className="flex gap-2">
+                <Form.Item name="size" className="mb-0">
+                  <Select
+                    className="select-admin-basic"
+                    defaultValue={30} // 기본값 설정
+                    value={pageSize} // 현재 상태값
+                    onChange={value => {
+                      setPageSize(value); // 상태 업데이트
+                      updateSearchParams({
+                        size: value.toString(),
+                        page: "1",
+                      });
+                    }}
+                    options={[
+                      { value: 30, label: "30개씩 보기" },
+                      { value: 40, label: "40개씩 보기" },
+                      { value: 50, label: "50개씩 보기" },
+                    ]}
+                  />
+                </Form.Item>
+              </div>
             </div>
           </Form>
 
@@ -292,7 +314,11 @@ function PaymentManager() {
             total={totalCount}
             pageSize={pageSize}
             showSizeChanger={false}
-            onChange={handlePageChange}
+            onChange={page => {
+              updateSearchParams({
+                page: page.toString(),
+              });
+            }}
           />
         </div>
       </div>

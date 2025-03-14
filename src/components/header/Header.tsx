@@ -21,7 +21,7 @@ const SecondaryButton = styled(MainButton)`
 
 const menuItems = [
   { label: "학원 검색", link: "/academy?page=1" },
-  { label: "화제의 학원", link: "/hotAcademy" },
+  { label: "추천 학원", link: "/hotAcademy" },
   { label: "고객지원", link: "/support" },
   { label: "마이페이지", link: "/mypage" },
 ];
@@ -390,7 +390,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
               </li>
               <li>
                 <Link to={"/hotAcademy"} onClick={() => toggleMobileMenu()}>
-                  화제의 학원
+                  추천 학원
                 </Link>
               </li>
               <li>

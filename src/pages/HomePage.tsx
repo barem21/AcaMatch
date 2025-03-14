@@ -65,6 +65,23 @@ interface Banner {
 //   return randomNum;
 // };
 
+// 랜덤 이미지 로직 추가
+const usedRandomNumbers = new Set<number>();
+
+const getRandomUniqueNumber = () => {
+  if (usedRandomNumbers.size === 10) {
+    usedRandomNumbers.clear(); // 모든 숫자가 사용되면 초기화
+  }
+
+  let randomNum;
+  do {
+    randomNum = Math.floor(Math.random() * 10) + 1; // 1~10 사이의 랜덤 숫자
+  } while (usedRandomNumbers.has(randomNum));
+
+  usedRandomNumbers.add(randomNum);
+  return randomNum;
+};
+
 function HomePage() {
   const navigate = useNavigate();
 
@@ -118,12 +135,8 @@ function HomePage() {
   const randomNumbersRef = useRef<{ [key: number]: number }>({});
 
   const getAcademyImageUrl = (acaId: number, pic: string) => {
-    if (!pic || pic === "default.jpg") {
-      // 학원별로 고유한 랜덤 숫자를 설정
-      if (!randomNumbersRef.current[acaId]) {
-        randomNumbersRef.current[acaId] = Math.floor(Math.random() * 10) + 1; // 1~10 사이 랜덤
-      }
-      return `/default_academy${randomNumbersRef.current[acaId]}.jpg`;
+    if (pic === "default.jpg" || pic === undefined || pic === null) {
+      return `/default_academy${getRandomUniqueNumber()}.jpg`;
     }
     return `http://112.222.157.157:5233/pic/academy/${acaId}/${pic}`;
   };
@@ -160,23 +173,43 @@ function HomePage() {
               },
             },
           );
-          setAcademies(academyResponse.data.resultData);
+
+          // 학원 데이터 가공
+          const updatedAcademies = academyResponse.data.resultData.map(
+            (item: any) => ({
+              ...item,
+              acaPic: getAcademyImageUrl(item.acaId, item.acaPic),
+            }),
+          );
+
+          setAcademies(updatedAcademies);
         } catch (error) {
           console.error("위치 정보 또는 학원 정보 가져오기 실패:", error);
           // 실패 시 기본 학원 목록 로드
           const response = await axios.get("/api/academy/AcademyDefault");
-          setAcademies(response.data.resultData);
+          const defaultAcademies = response.data.resultData.map(
+            (item: any) => ({
+              ...item,
+              acaPic: getAcademyImageUrl(item.acaId, item.acaPic),
+            }),
+          );
+          setAcademies(defaultAcademies);
         }
       };
 
-      // IP 기반 위치 정보 가져오기 실행
       getLocationByIP();
     } else {
       // 비로그인 상태일 때는 기본 학원 목록 가져오기
       const fetchDefaultAcademies = async () => {
         try {
           const response = await axios.get("/api/academy/AcademyDefault");
-          setAcademies(response.data.resultData);
+          const defaultAcademies = response.data.resultData.map(
+            (item: any) => ({
+              ...item,
+              acaPic: getAcademyImageUrl(item.acaId, item.acaPic),
+            }),
+          );
+          setAcademies(defaultAcademies);
         } catch (error) {
           console.error("기본 학원 목록을 가져오는 데 실패했습니다.", error);
         }
@@ -440,7 +473,7 @@ function HomePage() {
                 }}
               >
                 <img
-                  src={`http://112.222.157.157:5233/pic/academy/${academy.acaId}/${academy.acaPic}`}
+                  src={academy.acaPic}
                   alt={academy.acaName}
                   className="w-full h-[178px] rounded-xl object-cover"
                 />
@@ -492,7 +525,7 @@ function HomePage() {
                   onClick={() => handleAcademyClick(academy.acaId)}
                 >
                   <img
-                    src={getAcademyImageUrl(academy.acaId, academy.acaPic)}
+                    src={academy.acaPic}
                     alt={academy.acaName}
                     className="w-full h-[160px] rounded-xl object-cover"
                   />
