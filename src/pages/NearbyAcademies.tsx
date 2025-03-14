@@ -15,8 +15,8 @@ const NearbyAcademies = () => {
   const [showSkeleton, setShowSkeleton] = useState(false);
   // const [hasMore, setHasMore] = useState(true);
   const pageSize = 10;
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userLocation, setUserLocation] = useState<{
+  const [_isLoggedIn, setIsLoggedIn] = useState(false);
+  const [_userLocation, setUserLocation] = useState<{
     lat: number;
     lon: number;
   } | null>(null);

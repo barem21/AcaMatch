@@ -1,17 +1,16 @@
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BsBuilding, BsClock } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
 import { LiaUserFriendsSolid } from "react-icons/lia";
 import { useNavigate } from "react-router-dom";
-import CustomInput from "../components/CustomInput ";
-import MainButton from "../components/button/MainButton";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import { FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { Autoplay, FreeMode, Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import CustomInput from "../components/CustomInput ";
+import MainButton from "../components/button/MainButton";
 import { getCookie } from "../utils/cookie";
 
 interface Academy {
