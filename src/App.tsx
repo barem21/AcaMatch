@@ -191,7 +191,7 @@ function App() {
                   <Route path="list" element={<TeacherList />} />
                 </Route>
                 <Route path="academy" element={<AcademyList />} />
-                <Route path="academy/arrow" element={<AcademyArrow />} />
+                <Route path="arrow-list" element={<AcademyArrow />} />
                 <Route path="academy/add" element={<AcademyAdd />} />
                 <Route path="academy/edit" element={<AcademyEdit />} />
                 <Route path="academy/class" element={<AcademyClassList />} />
@@ -205,11 +205,8 @@ function App() {
                 <Route path="academy/student" element={<AcademyStudent />} />
                 <Route path="academy/testList" element={<AcademyTestList />} />
                 <Route path="academy/record" element={<AcademyRecord />} />
-                <Route path="academy/premium" element={<AcademyPremium />} />
-                <Route
-                  path="academy/premium-req"
-                  element={<AcademyPremiumReq />}
-                />
+                <Route path="premium" element={<AcademyPremium />} />
+                <Route path="premium-req" element={<AcademyPremiumReq />} />
                 <Route
                   path="academy/textbook"
                   element={<AcademyTextbookList />}
