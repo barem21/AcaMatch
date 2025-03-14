@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { message, Radio } from "antd";
+import { message, Radio, Select } from "antd";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
@@ -19,6 +19,7 @@ import ClassList from "./ClassList";
 import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
 import { AcademyData, Class, Review } from "./types";
+import { AiTwotoneAlert } from "react-icons/ai";
 
 declare global {
   interface Window {
@@ -254,6 +255,12 @@ const LinkModal: React.FC<LinkModalProps> = () => {
 //   classPrice: number;
 //   productId: number;
 // }
+
+// 신고 유형 인터페이스 추가
+interface ReportType {
+  name: string;
+  description: string;
+}
 
 const AcademyDetail = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -520,6 +527,55 @@ const AcademyDetail = () => {
       classItem => classItem.userCertification === 0,
     ) || [];
 
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportTypes, setReportTypes] = useState<ReportType[]>([]);
+  const [selectedReportType, setSelectedReportType] = useState<string>("");
+
+  // 신고 유형 목록 불러오기
+  useEffect(() => {
+    const fetchReportTypes = async () => {
+      try {
+        const response = await jwtAxios.get("/api/reports/reportsTypes");
+        setReportTypes(response.data);
+      } catch (error) {
+        console.error("Failed to fetch report types:", error);
+      }
+    };
+
+    fetchReportTypes();
+  }, []);
+
+  // 신고 처리 함수 수정
+  const handleReport = async () => {
+    if (!selectedReportType) {
+      message.error("신고 유형을 선택해주세요.");
+      return;
+    }
+
+    if (!userId) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/log-in");
+      return;
+    }
+
+    try {
+      await jwtAxios.post(`/api/reports/postReports`, null, {
+        params: {
+          reporter: userId,
+          acaId: acaId,
+          reportsType: selectedReportType,
+        },
+      });
+
+      message.success("신고가 접수되었습니다.");
+      setIsReportModalOpen(false);
+      setSelectedReportType("");
+    } catch (error) {
+      console.error("신고 처리 중 오류가 발생했습니다:", error);
+      alert("신고 처리 중 오류가 발생했습니다.");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -596,11 +652,17 @@ const AcademyDetail = () => {
             <div className={styles.content.mainContent}>
               <h2 className={`${styles.academy.title} relative`}>
                 {academyData.acaName}
-                <div className="flex items-center gap-2 text-2xl absolute right-[16px] top-[25px] ">
-                  {/* <button onClick={handleCopy}>
-                    <FaShare color="#507A95" />
-                  </button> */}
-                  <div>신고</div>
+                <div className="flex items-center gap-2 text-2xl absolute right-[16px] top-[25px]">
+                  <button
+                    onClick={() => setIsReportModalOpen(true)}
+                    className="flex items-center gap-1 text-[#507A95]"
+                  >
+                    <AiTwotoneAlert
+                      size={20}
+                      onClick={() => setIsReportModalOpen(true)}
+                      className="cursor-pointer mb-[2px]"
+                    />
+                  </button>
                   <LinkModal acaId={acaId} />
                 </div>
               </h2>
@@ -801,7 +863,39 @@ const AcademyDetail = () => {
         button2Text={availableClasses.length > 0 ? "결제하기" : "확인"}
         modalWidth={400}
       />
-      {/* {isLink && <LinkModal></LinkModal>} */}
+
+      <CustomModal
+        visible={isReportModalOpen}
+        title="학원 신고하기"
+        content={
+          <div className="flex flex-col gap-4 h-[104px]">
+            <p className="text-sm text-gray-600">신고 유형을 선택해주세요.</p>
+            <Select
+              value={selectedReportType}
+              onChange={value => setSelectedReportType(value)}
+              placeholder="신고 유형 선택"
+              style={{ width: "100%" }}
+            >
+              {reportTypes.map(type => (
+                <Select.Option key={type.name} value={type.name}>
+                  {type.name} - {type.description}
+                </Select.Option>
+              ))}
+            </Select>
+            {!selectedReportType && (
+              <p className="text-red-500 text-sm">신고 유형을 선택해주세요.</p>
+            )}
+          </div>
+        }
+        onButton1Click={() => {
+          setIsReportModalOpen(false);
+          setSelectedReportType("");
+        }}
+        onButton2Click={handleReport}
+        button1Text="취소"
+        button2Text="신고하기"
+        modalWidth={400}
+      />
     </div>
   );
 };

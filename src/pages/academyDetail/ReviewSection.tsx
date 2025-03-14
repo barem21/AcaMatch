@@ -9,6 +9,9 @@ import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
 import ReviewModal from "../../components/modal/ReviewModal";
 import { Class, Review } from "./types";
+import { AiTwotoneAlert } from "react-icons/ai";
+import { message } from "antd";
+import { Select } from "antd";
 
 interface ReviewSectionProps {
   star: number;
@@ -98,6 +101,11 @@ const ReviewSection = ({
     null,
   );
 
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportTypes, setReportTypes] = useState<ReportType[]>([]);
+  const [selectedReportType, setSelectedReportType] = useState<string>("");
+  const [reportedUserId, setReportedUserId] = useState<number | null>(null);
+
   // // 통합된 리뷰 목록 생성
   // const combinedReviews: ReviewWithType[] = [
   //   ...mediaReviews.map(review => ({ ...review, type: "media" as const })),
@@ -160,6 +168,19 @@ const ReviewSection = ({
     getData();
   }, [classes, user.userId]);
 
+  useEffect(() => {
+    const fetchReportTypes = async () => {
+      try {
+        const response = await jwtAxios.get("/api/reports/reportsTypes");
+        setReportTypes(response.data);
+      } catch (error) {
+        console.error("Failed to fetch report types:", error);
+      }
+    };
+
+    fetchReportTypes();
+  }, []);
+
   const handleDeleteReview = async () => {
     if (deleteReviewId === null) return;
     console.log(academyId, user.userId);
@@ -180,6 +201,95 @@ const ReviewSection = ({
       await onReviewUpdate();
     }
   };
+
+  const handleReport = async () => {
+    if (!selectedReportType) {
+      message.error("신고 유형을 선택해주세요.");
+      return;
+    }
+
+    if (!user.userId) {
+      message.error("로그인이 필요한 서비스입니다.");
+      return;
+    }
+
+    try {
+      await jwtAxios.post(`/api/reports/postReports`, null, {
+        params: {
+          reporter: user.userId,
+          reportedUser: reportedUserId,
+          reportsType: selectedReportType,
+        },
+      });
+
+      message.success("신고가 접수되었습니다.");
+      setIsReportModalOpen(false);
+      setSelectedReportType("");
+      setReportedUserId(null);
+    } catch (error) {
+      console.error("신고 처리 중 오류가 발생했습니다:", error);
+      message.error("신고 처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  const renderReviewHeader = (review: Review) => (
+    <div className={styles.reviews.header}>
+      <img
+        src="/aca_image_1.png"
+        alt="User"
+        className={styles.reviews.avatar}
+      />
+      <div className="w-full">
+        <div className="flex justify-between">
+          <div className={`${styles.reviews.text} flex items-center gap-2`}>
+            {review.reviewUserNickName}
+            <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {review.reviewClassName}
+            </span>
+          </div>
+          <div className="flex gap-2 items-center">
+            {review.reviewUserId !== Number(user.userId) && (
+              <button
+                onClick={() => {
+                  setReportedUserId(review.reviewUserId);
+                  setIsReportModalOpen(true);
+                }}
+                className="text-[#507A95] hover:text-[#3B77D8]"
+              >
+                <AiTwotoneAlert size={20} />
+              </button>
+            )}
+            {review.reviewUserId === Number(user.userId) && (
+              <div className="flex gap-2">
+                <button
+                  className="small_line_button bg-[#3B77D8] text-[14px]"
+                  style={{ color: "#fff" }}
+                  onClick={() => {
+                    setIsModalVisible(true);
+                    setEditReview(review);
+                  }}
+                >
+                  후기수정
+                </button>
+                <button
+                  className="small_line_button bg-[#fff] text-[14px] text-[#242424]"
+                  onClick={() => {
+                    setDeleteReviewId(review.reviewId);
+                    setIsDeleteModalVisible(true);
+                  }}
+                >
+                  후기삭제
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className={styles.reviews.text}>
+          {new Date(review.reviewCreatedAt).toLocaleDateString()}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col mx-auto p-[12px] max-[640px]:w-full">
@@ -220,53 +330,7 @@ const ReviewSection = ({
                 key={index}
                 className="flex flex-col mb-[24px] p-[16px] border rounded-[8px]"
               >
-                <div className={styles.reviews.header}>
-                  <img
-                    src="/aca_image_1.png"
-                    alt="User"
-                    className={styles.reviews.avatar}
-                  />
-                  <div className="w-full">
-                    <div className="flex">
-                      <div
-                        className={`${styles.reviews.text} w-[700px] flex items-center gap-2`}
-                      >
-                        {review.reviewUserNickName}
-                        <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {review.reviewClassName}
-                        </span>
-                      </div>
-                      <div>
-                        {review.reviewUserId === Number(user.userId) && (
-                          <div className="flex gap-2">
-                            <button
-                              className="small_line_button bg-[#3B77D8] text-[14px]"
-                              style={{ color: "#fff" }}
-                              onClick={() => {
-                                setIsModalVisible(true);
-                                setEditReview(review);
-                              }}
-                            >
-                              후기수정
-                            </button>
-                            <button
-                              className="small_line_button bg-[#fff] text-[14px] text-[#242424]"
-                              onClick={() => {
-                                setDeleteReviewId(review.reviewId);
-                                setIsDeleteModalVisible(true);
-                              }}
-                            >
-                              후기삭제
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className={styles.reviews.text}>
-                      {new Date(review.reviewCreatedAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
+                {renderReviewHeader(review)}
                 <div className={styles.reviews.rating}>
                   {renderStars(review.reviewStar)}
                   <span className="ml-2 text-[14px]">
@@ -340,58 +404,7 @@ const ReviewSection = ({
                 key={index}
                 className="flex flex-col mb-[24px] p-[16px] border rounded-[8px]"
               >
-                <div className={styles.reviews.header}>
-                  <img
-                    src="/aca_image_1.png"
-                    alt="User"
-                    className={styles.reviews.avatar}
-                  />
-                  <div className="w-full">
-                    <div className="flex">
-                      <div
-                        className={`${styles.reviews.text} w-[700px] flex items-center gap-2`}
-                      >
-                        {review.reviewUserNickName}
-                        <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {review.reviewClassName}
-                        </span>
-                        <span className="text-[12px] text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {review.type === "media" ? "포토리뷰" : "일반리뷰"}
-                        </span>
-                      </div>
-                      <div>
-                        {review.reviewUserId === Number(user.userId) && (
-                          <div className="flex gap-2">
-                            <button
-                              className="small_line_button bg-[#3B77D8] text-[14px]"
-                              style={{
-                                color: "#fff",
-                              }}
-                              onClick={() => {
-                                setIsModalVisible(true);
-                                setEditReview(review);
-                              }}
-                            >
-                              후기수정
-                            </button>
-                            <button
-                              className="small_line_button bg-[#fff] text-[14px] text-[#242424]"
-                              onClick={() => {
-                                setDeleteReviewId(review.reviewId);
-                                setIsDeleteModalVisible(true);
-                              }}
-                            >
-                              후기삭제
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className={styles.reviews.text}>
-                      {new Date(review.reviewCreatedAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
+                {renderReviewHeader(review)}
                 <div className={styles.reviews.rating}>
                   {renderStars(review.reviewStar)}
                   <span className="ml-2 text-[14px]">
@@ -471,6 +484,41 @@ const ReviewSection = ({
           </div>
         </div>
       )}
+
+      {/* 신고 모달 추가 */}
+      <CustomModal
+        visible={isReportModalOpen}
+        title="사용자 신고하기"
+        content={
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-gray-600">신고 유형을 선택해주세요.</p>
+            <Select
+              value={selectedReportType}
+              onChange={value => setSelectedReportType(value)}
+              placeholder="신고 유형 선택"
+              style={{ width: "100%" }}
+            >
+              {reportTypes.map(type => (
+                <Select.Option key={type.name} value={type.name}>
+                  {type.name} - {type.description}
+                </Select.Option>
+              ))}
+            </Select>
+            {!selectedReportType && (
+              <p className="text-red-500 text-sm">신고 유형을 선택해주세요.</p>
+            )}
+          </div>
+        }
+        onButton1Click={() => {
+          setIsReportModalOpen(false);
+          setSelectedReportType("");
+          setReportedUserId(null);
+        }}
+        onButton2Click={handleReport}
+        button1Text="취소"
+        button2Text="신고하기"
+        modalWidth={400}
+      />
     </div>
   );
 };

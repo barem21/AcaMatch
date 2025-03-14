@@ -1,6 +1,6 @@
 import { Button, DatePicker, Form, Input, Pagination, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
 
@@ -19,6 +19,7 @@ function PaymentManager() {
   const [academyList, setAcademyList] = useState<AcademyList[] | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [totalCount, setTotalCount] = useState(0);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   // const [searchAcaName, setSearchAcaName] = useState(
   //   searchParams.get("acaName") || "",
   // );
@@ -67,6 +68,13 @@ function PaymentManager() {
     updateSearchParams({
       endDate: date ? date.format("YYYY-MM-DD") : null,
     });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const handleOrderTypeChange = (value: string) => {
@@ -165,7 +173,7 @@ function PaymentManager() {
   }, [searchParams]); // searchParams가 변경될 때마다 API 호출
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top">
+    <div className="flex gap-5 w-full justify-center align-top" ref={scrollRef}>
       <div className="w-full">
         <h1 className="title-admin-font">
           학원별 결제 내역 (학원비/교제구매)

@@ -203,18 +203,12 @@ function DashBoard() {
     });
   }, [selectedItem, selectedMonth, selectedCategory, selectedTimeRange]);
 
-  // Add state for user registration data
   const [userRegistrationData, setUserRegistrationData] = useState<ChartData[]>(
     [],
   );
-
-  // Add state for cost data
   const [costData, setCostData] = useState<ChartData[]>([]);
-
-  // Add state for academy count data
   const [academyCountData, setAcademyCountData] = useState<ChartData[]>([]);
 
-  // Add function to fetch user registration data
   const fetchUserRegistrationData = async (period: MonthKey) => {
     try {
       const apiPeriod = period === "이번 달" ? "이번달" : "지난달";

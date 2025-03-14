@@ -72,20 +72,63 @@ const NearbyAcademies = () => {
       try {
         let location;
         if (accessToken) {
-          // IP 기반 위치 정보 가져오기
-          const locationResponse = await axios.get("https://ipapi.co/json/");
-          location = {
-            lat: locationResponse.data.latitude,
-            lon: locationResponse.data.longitude,
-          };
-          setUserLocation(location);
+          // 방법 1: ip-api.com 사용
+          try {
+            const locationResponse = await axios.get("http://ip-api.com/json");
+            location = {
+              lat: locationResponse.data.lat,
+              lon: locationResponse.data.lon,
+            };
+          } catch (error) {
+            // 방법 2: abstractapi.com 사용 (API 키 필요)
+            try {
+              const API_KEY = "your_api_key";
+              const locationResponse = await axios.get(
+                `https://ipgeolocation.abstractapi.com/v1/?api_key=${API_KEY}`,
+              );
+              location = {
+                lat: locationResponse.data.latitude,
+                lon: locationResponse.data.longitude,
+              };
+            } catch (error) {
+              // 방법 3: geolocation API 사용 (브라우저 내장)
+              location = await new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(
+                    position => {
+                      resolve({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                      });
+                    },
+                    error => {
+                      console.error("Error getting location:", error);
+                      // 실패시 기본 위치 (서울시청)
+                      resolve({
+                        lat: 37.5665,
+                        lon: 126.978,
+                      });
+                    },
+                  );
+                } else {
+                  // geolocation이 지원되지 않는 경우 기본 위치
+                  resolve({
+                    lat: 37.5665,
+                    lon: 126.978,
+                  });
+                }
+              });
+            }
+          }
         } else {
-          // 기본 위치 설정 (예: 서울시청)
+          // 로그인하지 않은 경우 기본 위치
           location = {
             lat: 37.5665,
             lon: 126.978,
           };
         }
+
+        setUserLocation(location);
 
         // 위치 기반 주변 학원 정보 가져오기
         const response = await axios.get(
@@ -99,6 +142,7 @@ const NearbyAcademies = () => {
             },
           },
         );
+        console.log(response.data.resultData);
 
         const updatedCards = response.data.resultData.map((item: any) => ({
           id: item.acaId,
@@ -116,6 +160,12 @@ const NearbyAcademies = () => {
         setAcademyData(updatedCards);
       } catch (error) {
         console.error("Error fetching academy data:", error);
+        // 에러 발생시 기본 위치 사용
+        const defaultLocation = {
+          lat: 37.5665,
+          lon: 126.978,
+        };
+        setUserLocation(defaultLocation);
       } finally {
         setLoading(false);
       }
@@ -227,10 +277,8 @@ const AcademyCard = ({ academy }: { academy: any }) => {
         </h3>
         <p className="text-sm text-[#507A95] leading-[21px] w-full">
           <p className="line-clamp-1">{academy.tags}</p>
-          <div className="flex justify-between">
-            <span>
-              {academy.starAvg} ({academy.reviewCount})
-            </span>
+          <div className="flex justify-between text-[14px]">
+            {academy.starAvg} ({academy.reviewCount} reviews)
           </div>
         </p>
       </div>

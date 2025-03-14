@@ -10,8 +10,6 @@ import userInfo from "../../atoms/userInfo";
 import { getCookie, removeCookie, setCookie } from "../../utils/cookie";
 import MainButton from "../button/MainButton";
 import { GiHamburgerMenu } from "react-icons/gi";
-import SockJS from "sockjs-client";
-import Stomp from "stompjs";
 
 const SecondaryButton = styled(MainButton)`
   &:hover {
@@ -88,8 +86,6 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const currentUserInfo = useRecoilValue(userInfo);
-  const [stompClient, setStompClient] = useState<Stomp.Client>();
-  const [connected, setConnected] = useState(false); // 연결 상태 추가
 
   useEffect(() => {
     const accessToken = cookies.get("accessToken");
@@ -122,62 +118,64 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   }, [setUserInfo]);
 
   useEffect(() => {
-    if (!currentUserInfo.userId) return;
+    const accessToken = cookies.get("accessToken");
+    if (!accessToken || !currentUserInfo.userId) return;
 
-    let client: Stomp.Client;
-    const socket = new SockJS("http://acamatch.site:5233/ws");
-    client = Stomp.over(socket);
+    // console.log(currentUserInfo.userId);
 
-    // 디버그 로그 비활성화
-    client.debug = null;
+    // console.log(
+    //   "SSE 연결 시도:",
+    //   `/api/notifications/subscribe/${currentUserInfo.userId}`,
+    // );
 
-    const connect = () => {
-      client.connect({}, () => {
-        console.log("WebSocket Connected");
-        setConnected(true);
-        setStompClient(client);
+    const eventSource = new EventSource(
+      `/api/notifications/subscribe/${currentUserInfo.userId}`,
+    );
 
-        // 사용자별 구독 설정
-        client.subscribe(`/queue/unread/${currentUserInfo.userId}`, message => {
-          const messageData = JSON.parse(message.body);
-          if (messageData.hasUnreadMessages) {
-            setCookie("message", "true", { path: "/" });
-            setNotifications(["읽지 않은 메시지가 있습니다."]);
-          }
-        });
-      });
+    eventSource.onopen = () => {
+      // console.log(" SSE 연결 성공!");
     };
 
-    connect();
-
-    // 컴포넌트 언마운트 시 연결 종료
-    return () => {
-      if (client && connected) {
-        client.disconnect(() => {
-          console.log("WebSocket disconnected");
-          setConnected(false);
-        });
+    eventSource.onmessage = () => {
+      // console.log("새 알림 수신:", event.data);
+      try {
+        // const data = JSON.parse(event.data);
+        setCookie("message", "true", { path: "/" });
+        setNotifications(_ => ["읽지 않은 메시지가 있습니다."]);
+      } catch (error) {
+        console.error("JSON 파싱 오류:", error);
       }
+    };
+
+    eventSource.onerror = error => {
+      console.error("SSE 오류 발생:", error);
+      eventSource.close();
+    };
+
+    return () => {
+      console.log("SSE 연결 종료");
+      eventSource.close();
     };
   }, [currentUserInfo.userId]);
 
-  // useEffect(() => {
-  //   const fetchUnreadMessages = async () => {
-  //     try {
-  //       const res = await jwtAxios.get("/api/chat/unread-message");
-  //       if (res.data.resultData) {
-  //         setCookie("message", "true", { path: "/" });
-  //         setNotifications(["읽지 않은 메시지가 있습니다."]);
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      try {
+        const res = await jwtAxios.get("/api/chat/unread-message");
+        if (res.data.resultData) {
+          setCookie("message", "true", { path: "/" });
+        }
+      } catch (error) {
+        console.log(error);
+      }
 
-  //   if (currentUserInfo.userId) {
-  //     fetchUnreadMessages();
-  //   }
-  // }, [currentUserInfo.userId]);
+      if (getCookie("message")) {
+        setNotifications(["1"]);
+      }
+    };
+
+    fetchUnreadMessages(); // 함수 호출
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

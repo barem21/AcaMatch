@@ -81,7 +81,7 @@ function MyPage() {
   };
   */
 
-  const myAcademyList = async (page: any) => {
+  const myAcademyList = async (page: number) => {
     //자녀목록 호출
     let checkUserId = userId; //기본은 본인 아이디
     if (roleId === 2) {
