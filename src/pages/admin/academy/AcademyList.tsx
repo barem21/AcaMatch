@@ -34,8 +34,9 @@ function AcademyList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  const state = parseInt(searchParams.get("state") || "1", 0);
   const search = searchParams.get("search");
-  const showCnt = parseInt(searchParams.get("showCnt") || "30", 0);
+  const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //학원 목록
   const academyList = async () => {
@@ -45,7 +46,8 @@ function AcademyList() {
         const res = await jwtAxios.get(
           "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
             (search !== null ? "?acaName=" + search : "") +
-            (showCnt !== null ? "&size=" + showCnt : ""),
+            (showCnt !== null ? (search ? "&" : "?") + "size=" + showCnt : "") +
+            (state !== null ? "&acaAgree=" + state : ""),
         );
         setMyAcademyList(res.data.resultData);
         console.log("admin : ", res.data.resultData);
@@ -103,7 +105,9 @@ function AcademyList() {
         //전체 관리자일 때
         const res = await jwtAxios.get(
           "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
-            (values.search !== null ? "?acaName=" + values.search : ""),
+            (values.search !== null ? "?acaName=" + values.search : "") +
+            (values.state !== null ? "&acaAgree=" + values.state : "") +
+            (values.showCnt !== null ? "&size=" + values.showCnt : ""),
         );
         setMyAcademyList(res.data.resultData);
         //console.log("admin : ", res.data.resultData);
@@ -136,7 +140,7 @@ function AcademyList() {
     form.setFieldsValue({
       state: 1,
       search: search ? search : "",
-      showCnt: 30,
+      showCnt: 10,
     });
   }, [currentUserInfo]);
 
@@ -167,9 +171,11 @@ function AcademyList() {
                     placeholder="처리상태"
                     optionFilterProp="label"
                     className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
                     options={[
+                      {
+                        value: "",
+                        label: "전체",
+                      },
                       {
                         value: 0,
                         label: "승인대기",
@@ -178,10 +184,6 @@ function AcademyList() {
                         value: 1,
                         label: "승인완료",
                       },
-                      // {
-                      //   value: 2,
-                      //   label: "승인거부",
-                      // },
                     ]}
                   />
                 </Form.Item>
@@ -208,16 +210,16 @@ function AcademyList() {
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 30,
-                        label: "30개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 100,
-                        label: "100개씩 보기",
                       },
                     ]}
                   />
@@ -236,13 +238,13 @@ function AcademyList() {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center min-w-32">
+            <div className="flex items-center justify-center min-w-24">
               등록일
             </div>
-            <div className="flex items-center justify-center min-w-40">
+            <div className="flex items-center justify-center min-w-32">
               학원 연락처
             </div>
-            <div className="flex items-center justify-center min-w-60">
+            <div className="flex items-center justify-center min-w-48">
               학원 주소
             </div>
             <div className="flex items-center justify-center min-w-24">
@@ -260,7 +262,7 @@ function AcademyList() {
             <div className="flex items-center justify-center min-w-20">
               강사 관리
             </div>
-            <div className="flex items-center justify-center min-w-24">
+            <div className="flex items-center justify-center min-w-20">
               관리
             </div>
           </div>
@@ -281,7 +283,7 @@ function AcademyList() {
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`class?acaId=${item.acaId}`)}
                 >
-                  <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
+                  <div className="flex justify-center items-center w-14 min-w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
                       src={
                         item.acaPic && item.acaPic !== "default_user.jpg"
@@ -292,16 +294,29 @@ function AcademyList() {
                       alt=" /"
                     />
                   </div>
-                  {item?.acaName}
+                  <div>
+                    <div className="flex mb-0.5">
+                      {item.acaAgree === 1 ? (
+                        <span className="flex items-center pl-1.5 pr-1.5 text-[12px] bg-gray-300 rounded-md">
+                          승인완료
+                        </span>
+                      ) : (
+                        <span className="flex items-center pl-1.5 pr-1.5 text-[12px] bg-red-400 rounded-md text-white">
+                          승인대기
+                        </span>
+                      )}
+                    </div>
+                    {item?.acaName}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center justify-center text-center min-w-32">
+              <div className="flex items-center justify-center text-center min-w-24">
                 {item.createdAt.substr(0, 10)}
               </div>
-              <div className="flex items-center justify-center text-center min-w-40">
+              <div className="flex items-center justify-center text-center min-w-32">
                 {item.acaPhone}
               </div>
-              <div className="flex items-center justify-center text-center min-w-60">
+              <div className="flex items-center justify-center text-center min-w-48">
                 {item.address}
               </div>
               <div className="flex items-center justify-center min-w-24">
@@ -345,7 +360,7 @@ function AcademyList() {
                   <span className="text-sm text-red-300">승인대기</span>
                 )}
               </div> */}
-              <div className="flex gap-4 items-center justify-center min-w-24">
+              <div className="flex gap-4 items-center justify-center min-w-20">
                 <button
                   onClick={() =>
                     navigate(`../academy/edit?acaId=${item.acaId}`)

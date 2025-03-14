@@ -27,7 +27,7 @@ function AcademyPremium(): JSX.Element {
     form.setFieldsValue({
       state: state ? parseInt(state) : "all",
       search: "",
-      showCnt: 40,
+      showCnt: 10,
     });
   }, []);
 
@@ -89,23 +89,23 @@ function AcademyPremium(): JSX.Element {
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />

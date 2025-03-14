@@ -25,7 +25,8 @@ function MemberList(): JSX.Element {
   const [memberList, setMemberList] = useState<memberListType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const state = parseInt(searchParams.get("state") || "1", 100);
+  const state = searchParams.get("state");
+  //const showCnt = parseInt(searchParams.get("state") || "10", 0);
 
   //회원삭제 팝업
   const handleButton1Click = () => {
@@ -35,12 +36,12 @@ function MemberList(): JSX.Element {
     setIsModalVisible(false);
   };
 
-  //학원 목록
+  //회원 목록
   const memberAllList = async () => {
     try {
-      const res = await axios.get("/api/user/search");
+      const res = await axios.get("/api/user/search?page=1&size=10");
       setMemberList(res.data.resultData.content);
-      console.log(res.data.resultData.content);
+      //console.log(res.data.resultData.content);
       return;
     } catch (error) {
       console.log(error);
@@ -55,6 +56,9 @@ function MemberList(): JSX.Element {
           (values.state ? "?userRole=" + values.state : "") +
           (values.search
             ? (values.state ? "&" : "?") + "name=" + values.search
+            : "") +
+          (values.showCnt
+            ? (values.state ? "&" : "?") + "size=" + values.showCnt
             : ""),
       );
       setMemberList(res.data.resultData.content);
@@ -77,9 +81,9 @@ function MemberList(): JSX.Element {
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      state: state ? state : "",
+      state: state ? state : null,
       search: "",
-      showCnt: 40,
+      showCnt: 10,
     });
   }, []);
 
@@ -103,8 +107,6 @@ function MemberList(): JSX.Element {
                     optionFilterProp="label"
                     className="select-admin-basic"
                     style={{ minWidth: "110px" }}
-                    // onChange={onChange}
-                    // onSearch={onSearch}
                     options={[
                       {
                         value: "",
@@ -144,23 +146,23 @@ function MemberList(): JSX.Element {
               <div className="flex gap-2">
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />

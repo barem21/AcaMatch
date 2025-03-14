@@ -1,4 +1,4 @@
-import { Button, Form, Input, Pagination, Select } from "antd";
+import { Button, Form, Input, message, Pagination, Select } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
@@ -23,7 +23,9 @@ function AcademyArrow(): JSX.Element {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const navigate = useNavigate();
+  const [academyId, setAcademyId] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
   const [searchParams] = useSearchParams();
 
@@ -62,6 +64,25 @@ function AcademyArrow(): JSX.Element {
     }
   };
 
+  //학원등록 승인
+  const handleButton1Click2 = (): void => {
+    setIsModalVisible2(false);
+    academyList();
+  };
+  const handleButton2Click2 = async () => {
+    const data = { acaId: academyId };
+    try {
+      const res = await axios.put("/api/academy/agree", data);
+      if (res.data.resultData === 1) {
+        academyList();
+        setIsModalVisible2(false);
+        message.success("학원등록 승인이 완료되었습니다.");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   //학원 검색
   const onFinished = async (values: any) => {
     try {
@@ -76,31 +97,19 @@ function AcademyArrow(): JSX.Element {
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`../academy/arrow?${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`../arrow-list?${queryParams}`); //쿼리스트링 url에 추가
   };
 
   const AcademyArrowChange = (value: number, acaId: number) => {
     if (value === 2) {
       //alert("거부사유 입력");
       setIsModalVisible(true);
+    } else if (value === 1) {
+      setAcademyId(acaId);
+      setIsModalVisible2(true);
     } else {
-      //alert(acaId);
-      if (confirm("승인완료 처리하시겠습니까?") === true) {
-        const academyUpdate = async () => {
-          const data = { acaId: acaId };
-          try {
-            const res = await axios.put("/api/academy/agree", data);
-            console.log("admin : ", res.data.resultData);
-            academyList();
-          } catch (error) {
-            console.log(error);
-          }
-        };
-        academyUpdate();
-      } else {
-        academyList();
-        return;
-      }
+      //setIsModalVisible2(true);
+      return;
     }
   };
 
@@ -135,7 +144,7 @@ function AcademyArrow(): JSX.Element {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
       search: "",
-      showCnt: 40,
+      showCnt: 10,
     });
   }, []);
 
@@ -168,23 +177,23 @@ function AcademyArrow(): JSX.Element {
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />
@@ -243,7 +252,14 @@ function AcademyArrow(): JSX.Element {
                       alt=" /"
                     />
                   </div>
-                  {item.acaName}
+                  <div>
+                    <div className="flex mb-0.5">
+                      <span className="flex items-center pl-1.5 pr-1.5 text-[12px] bg-red-400 rounded-md text-white">
+                        승인대기
+                      </span>
+                    </div>
+                    {item?.acaName}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center justify-center text-center min-w-32">
@@ -286,6 +302,19 @@ function AcademyArrow(): JSX.Element {
           <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
         </div>
       </div>
+
+      {isModalVisible2 && (
+        <CustomModal
+          visible={isModalVisible2}
+          title={"승인 처리"}
+          content={`선택하신 학원을 승인 처리하시겠습니까?`}
+          onButton1Click={handleButton1Click2}
+          onButton2Click={handleButton2Click2}
+          button1Text={"취소"}
+          button2Text={"승인"}
+          modalWidth={400}
+        />
+      )}
 
       <CustomModal
         visible={isModalVisible}
