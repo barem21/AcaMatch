@@ -1,9 +1,7 @@
-import axios from "axios";
-import { Button, DatePicker, Form, Pagination, Select, Input } from "antd";
+import { Button, DatePicker, Form, Input, Pagination, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 import jwtAxios from "../../apis/jwt";
 
 interface AcademyList {
@@ -100,12 +98,6 @@ function PaymentManager() {
     updateSearchParams({
       startDate: newStartDate.format("YYYY-MM-DD"),
       endDate: newEndDate.format("YYYY-MM-DD"),
-    });
-  };
-
-  const handlePageChange = (page: number) => {
-    updateSearchParams({
-      page: page.toString(),
     });
   };
 

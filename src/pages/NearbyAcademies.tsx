@@ -3,6 +3,7 @@ import SideBar from "../components/SideBar";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getCookie } from "../utils/cookie";
 
 const NearbyAcademies = () => {
   // const navigate = useNavigate();
@@ -14,6 +15,11 @@ const NearbyAcademies = () => {
   const [showSkeleton, setShowSkeleton] = useState(false);
   // const [hasMore, setHasMore] = useState(true);
   const pageSize = 10;
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
 
   const usedRandomNumbers = new Set<number>();
   const getRandomUniqueNumber = () => {
@@ -40,7 +46,8 @@ const NearbyAcademies = () => {
 
   const titleName = "학원목록";
   const menuItems = [
-    { label: "화제의 학원", isActive: true, link: "/hotAcademy" },
+    { label: "화제의 학원", isActive: false, link: "/hotAcademy" },
+    { label: "근처의 학원", isActive: true, link: "/nearby-academies" },
   ];
 
   const [academyData, setAcademyData] = useState<
@@ -49,37 +56,64 @@ const NearbyAcademies = () => {
       image: string;
       name: string;
       tags: string;
-      likeCount: string;
+      starAvg: string;
       reviewCount: number;
-      academyLikeCount: number;
+      distance: string;
+      totalCount: number;
     }>
   >([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      const accessToken = getCookie("accessToken");
+      setIsLoggedIn(!!accessToken);
+
       try {
-        const response = await axios.get("/api/academy/best", {
-          params: {
-            page: currentPage,
-            size: pageSize,
+        let location;
+        if (accessToken) {
+          // IP 기반 위치 정보 가져오기
+          const locationResponse = await axios.get("https://ipapi.co/json/");
+          location = {
+            lat: locationResponse.data.latitude,
+            lon: locationResponse.data.longitude,
+          };
+          setUserLocation(location);
+        } else {
+          // 기본 위치 설정 (예: 서울시청)
+          location = {
+            lat: 37.5665,
+            lon: 126.978,
+          };
+        }
+
+        // 위치 기반 주변 학원 정보 가져오기
+        const response = await axios.get(
+          "/api/academy/GetAcademyListByDistance",
+          {
+            params: {
+              lat: location.lat,
+              lon: location.lon,
+              page: currentPage,
+              size: pageSize,
+            },
           },
-        });
+        );
 
         const updatedCards = response.data.resultData.map((item: any) => ({
           id: item.acaId,
           image: getAcademyImageUrl(item.acaId, item.acaPic),
-          acaName: item.acaName || "학원 이름",
+          name: item.acaName || "학원 이름",
           tags: item.tagNames || "태그 정보 없음",
           starAvg: item.starAvg?.toFixed(1) || "0.0",
           reviewCount: item.reviewCount || 0,
-          academyLikeCount: item.academyLikeCount,
+          distance: item.distance
+            ? `${(item.distance / 1000).toFixed(1)}km`
+            : "거리 정보 없음",
+          totalCount: item.totalCount || 0,
         }));
 
-        // console.log(response);
-
         setAcademyData(updatedCards);
-        // setHasMore(updatedCards.length === pageSize);
       } catch (error) {
         console.error("Error fetching academy data:", error);
       } finally {
@@ -88,7 +122,7 @@ const NearbyAcademies = () => {
     };
 
     fetchData();
-  }, [currentPage]); // currentPage가 변경될 때마다 fetchData 실행
+  }, [currentPage]);
 
   // 스켈레톤 UI 표시 최적화
   useEffect(() => {
@@ -117,7 +151,7 @@ const NearbyAcademies = () => {
 
       <div className="w-full max-[640px]:p-4">
         <h1 className="title-font flex justify-between align-middle max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
-          화제의 학원
+          근처의 학원
         </h1>
         <div className="w-full gap-[12px] py-[16px] px-[16px] border rounded-lg overflow-hidden">
           <div className="flex flex-col gap-6">
@@ -137,10 +171,8 @@ const NearbyAcademies = () => {
           <Pagination
             current={currentPage}
             total={
-              academyData &&
-              academyData.length > 0 &&
-              academyData[0].academyLikeCount
-                ? Number(academyData[0].academyLikeCount)
+              academyData && academyData.length > 0 && academyData[0].totalCount
+                ? Number(academyData[0].totalCount)
                 : 1
             } // 전체 아이템 수
             pageSize={pageSize}
@@ -173,7 +205,6 @@ const SkeletonCard = () => (
 // 학원 카드 컴포넌트
 const AcademyCard = ({ academy }: { academy: any }) => {
   const navigate = useNavigate();
-  // console.log("여기", academy);
 
   return (
     <div
@@ -185,21 +216,22 @@ const AcademyCard = ({ academy }: { academy: any }) => {
       <div className="relative w-full max-[640px]:pb-[100%]">
         <img
           src={academy.image}
-          alt={academy.acaName}
+          alt={academy.name}
           className="w-[166px] h-[166px] rounded-xl object-cover max-[640px]:absolute max-[640px]:w-full max-[640px]:h-full"
         />
       </div>
 
       <div className="flex flex-col items-start w-full">
         <h3 className="text-base font-medium text-[#0E161B] leading-6 w-full line-clamp-1">
-          {academy.acaName}
+          {academy.name}
         </h3>
-        <p className="text-sm text-[#507A95] leading-[21px] w-full ">
+        <p className="text-sm text-[#507A95] leading-[21px] w-full">
           <p className="line-clamp-1">{academy.tags}</p>
-          <p className="text-sm line-clamp-1">
-            {/* {console.log(academy.starAvg)} */}
-            {academy.starAvg} ({academy.reviewCount} reviews)
-          </p>
+          <div className="flex justify-between">
+            <span>
+              {academy.starAvg} ({academy.reviewCount})
+            </span>
+          </div>
         </p>
       </div>
     </div>

@@ -25,7 +25,7 @@ type ReviewType = "general" | "media";
 
 function ReviewModal({
   onClose,
-  joinClassId,
+  // joinClassId,
   // academyId,
   existingReview,
   classId,

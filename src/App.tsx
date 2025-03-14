@@ -61,6 +61,7 @@ import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
 import TeacherList from "./pages/admin/teacher/TeacherList";
 import TeacherAdd from "./pages/admin/teacher/TeacherAdd";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import NearbyAcademies from "./pages/NearbyAcademies.tsx";
 
 function App() {
   useEffect(() => {
@@ -169,6 +170,7 @@ function App() {
                 <Route path="inquiry/detail" element={<InquiryDetail />} />
               </Route>
               <Route path="/hotAcademy" element={<HotAcademy />} />
+              <Route path="/nearby-academies" element={<NearbyAcademies />} />
 
               <Route path="/admin">
                 <Route index element={<DashBoard />} />

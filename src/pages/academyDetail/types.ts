@@ -32,9 +32,10 @@ export interface Review {
   banReview: number;
   writerPic: string;
   classId: number;
-  reviewPics?: string[]; // Optional for media reviews only
-  totalGeneralReviewCount?: number; // For general reviews
-  totalMediaReviewCount?: number; // For media reviews
+  reviewPics?: string[];
+  totalGeneralReviewCount?: number;
+  totalMediaReviewCount?: number;
+  type?: string;
 }
 
 export interface AcademyResponse {

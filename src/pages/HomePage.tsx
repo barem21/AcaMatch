@@ -132,7 +132,7 @@ function HomePage() {
   const handleButton1Click = () => {
     navigate(`academy?tagName=${searchValue}`);
   };
-  const randomNumbersRef = useRef<{ [key: number]: number }>({});
+  // const randomNumbersRef = useRef<{ [key: number]: number }>({});
 
   const getAcademyImageUrl = (acaId: number, pic: string) => {
     if (pic === "default.jpg" || pic === undefined || pic === null) {

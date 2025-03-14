@@ -1,7 +1,6 @@
-import { Button, Form, Pagination, Select, message } from "antd";
+import { Form, Pagination, Select, message } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../components/modal/Modal";
 
@@ -16,14 +15,14 @@ interface RevenueData {
   costIds: string;
 }
 
-interface OrderDetails {
-  name: string;
-  partnerOrderId: string;
-  price: number;
-  fee: number;
-  createdAt: string;
-  orderType: number;
-}
+// interface OrderDetails {
+//   name: string;
+//   partnerOrderId: string;
+//   price: number;
+//   fee: number;
+//   createdAt: string;
+//   orderType: number;
+// }
 
 const AcaRevenue = (): JSX.Element => {
   const [form] = Form.useForm();
@@ -32,8 +31,8 @@ const AcaRevenue = (): JSX.Element => {
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  // const [modalVisible, setModalVisible] = useState(false);
+  // const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
 
   // 확인 모달의 상태를 관리하는 state
   const [confirmModal, setConfirmModal] = useState({
@@ -85,19 +84,19 @@ const AcaRevenue = (): JSX.Element => {
     }
   };
 
-  const fetchOrderDetails = async (costId: number) => {
-    try {
-      const response = await axios.get(
-        `/api/academyCost/getAcademyCostInfoByCostId/${costId}`,
-      );
-      console.log(response.data.resultData);
-      setOrderDetails(response.data.resultData);
-      setModalVisible(true);
-    } catch (error) {
-      console.error("주문내역 불러오기 실패:", error);
-      message.error("주문내역을 불러오는 데 실패했습니다.");
-    }
-  };
+  // const fetchOrderDetails = async (costId: number) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `/api/academyCost/getAcademyCostInfoByCostId/${costId}`,
+  //     );
+  //     console.log(response.data.resultData);
+  //     setOrderDetails(response.data.resultData);
+  //     setModalVisible(true);
+  //   } catch (error) {
+  //     console.error("주문내역 불러오기 실패:", error);
+  //     message.error("주문내역을 불러오는 데 실패했습니다.");
+  //   }
+  // };
 
   const onFinished = (values: any) => {
     const queryParams = new URLSearchParams(values).toString();
@@ -138,7 +137,7 @@ const AcaRevenue = (): JSX.Element => {
   // 상태 변경을 실제로 처리하는 함수
   const handleConfirmStatusChange = async () => {
     try {
-      const { acaId, newStatus, costIds } = confirmModal;
+      const { newStatus, costIds } = confirmModal;
 
       // API 호출하여 상태 변경
       const res = await axios.put(`/api/academyCost/updateStatus/${costIds}`);

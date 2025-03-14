@@ -12,7 +12,7 @@ const LineChart = ({
   selectedData,
   selectedMonth,
   selectedItem,
-  maxValue,
+  // maxValue,
 }: LineChartProps) => {
   if (!selectedData || selectedData.length === 0) {
     return (
@@ -57,6 +57,7 @@ const LineChart = ({
         tickRotation: 0,
         legendOffset: 36,
         legendPosition: "middle",
+        format: value => `${parseInt(value)}일`,
       }}
       axisLeft={{
         tickSize: 5,
@@ -64,12 +65,17 @@ const LineChart = ({
         tickRotation: 0,
         legendOffset: -40,
         legendPosition: "middle",
-        // 눈금 값 동적 생성
-        tickValues: Array.from(
-          { length: 6 }, // 5개의 구간으로 나누기
-          (_, i) => Math.round(i * tickInterval),
+        tickValues: Array.from({ length: 6 }, (_, i) =>
+          Math.round(i * tickInterval),
         ),
-        format: value => value.toLocaleString(),
+        format: value => {
+          const unit = {
+            학원수: "개",
+            회원수: "명",
+            결제내역: "건",
+          }[selectedItem];
+          return `${value.toLocaleString()}${unit}`;
+        },
       }}
       colors={({ id }) => COLORS[id as DataKey]}
       lineWidth={4}

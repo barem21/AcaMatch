@@ -1,15 +1,14 @@
 import { Pagination } from "antd";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
+import "swiper/css";
+import { FreeMode } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
 import ReviewModal from "../../components/modal/ReviewModal";
 import { Class, Review } from "./types";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode } from "swiper/modules";
-import "swiper/css";
 
 interface ReviewSectionProps {
   star: number;
@@ -39,10 +38,10 @@ interface SelectedImageInfo {
   imageName: string;
 }
 
-// 리뷰 타입을 확장하여 타입 구분을 추가
-interface ReviewWithType extends Review {
-  type: "media" | "general";
-}
+// // 리뷰 타입을 확장하여 타입 구분을 추가
+// interface ReviewWithType extends Review {
+//   type: "media" | "general";
+// }
 
 const styles = {
   stats: {
@@ -82,7 +81,7 @@ const ReviewSection = ({
   mediaPage,
   generalPage,
 }: ReviewSectionProps) => {
-  const [_searchParams, setSearchParams] = useSearchParams();
+  // const [_searchParams, setSearchParams] = useSearchParams();
   const pageSize = 10;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [user, _setUser] = useRecoilState(userInfo);
@@ -99,14 +98,14 @@ const ReviewSection = ({
     null,
   );
 
-  // 통합된 리뷰 목록 생성
-  const combinedReviews: ReviewWithType[] = [
-    ...mediaReviews.map(review => ({ ...review, type: "media" as const })),
-    ...generalReviews.map(review => ({ ...review, type: "general" as const })),
-  ];
+  // // 통합된 리뷰 목록 생성
+  // const combinedReviews: ReviewWithType[] = [
+  //   ...mediaReviews.map(review => ({ ...review, type: "media" as const })),
+  //   ...generalReviews.map(review => ({ ...review, type: "general" as const })),
+  // ];
 
-  // 전체 리뷰 수
-  const totalReviewCount = mediaReviewCount + generalReviewCount;
+  // // 전체 리뷰 수
+  // const totalReviewCount = mediaReviewCount + generalReviewCount;
 
   // 통합 페이지 변경 핸들러
   const handlePageChange = (page: number) => {

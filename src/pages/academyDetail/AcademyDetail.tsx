@@ -142,15 +142,33 @@ const LinkModal: React.FC<LinkModalProps> = () => {
     e.stopPropagation();
   };
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 이벤트 버블링 방지
     setIsLink(true);
+
     try {
-      // 현재 브라우저의 URL을 그대로 복사
+      // 현재 브라우저의 URL을 가져옴
       const currentURL = window.location.href;
+
+      // Clipboard API 사용
       await navigator.clipboard.writeText(currentURL);
       message.success("링크가 복사되었습니다!");
     } catch (error) {
-      message.error("링크 복사에 실패했습니다.");
+      console.error("링크 복사 실패:", error);
+
+      // Clipboard API 지원이 안되는 경우, input을 활용한 복사
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = window.location.href;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        message.success("링크가 복사되었습니다!");
+      } catch (fallbackError) {
+        console.error("대체 복사 실패:", fallbackError);
+        message.error("링크 복사에 실패했습니다. 수동으로 복사해주세요.");
+      }
     }
   };
 
@@ -582,6 +600,7 @@ const AcademyDetail = () => {
                   {/* <button onClick={handleCopy}>
                     <FaShare color="#507A95" />
                   </button> */}
+                  <div>신고</div>
                   <LinkModal acaId={acaId} />
                 </div>
               </h2>
@@ -720,9 +739,9 @@ const AcademyDetail = () => {
             mediaReviews={mediaReviews}
             generalReviewCount={totalGeneralReviewCount}
             mediaReviewCount={totalMediaReviewCount}
-            onReviewUpdate={() => {
-              fetchGeneralReviews();
-              fetchMediaReviews();
+            onReviewUpdate={async () => {
+              await fetchGeneralReviews();
+              await fetchMediaReviews();
             }}
             onMediaPageChange={handleMediaPageChange}
             onGeneralPageChange={handleGeneralPageChange}

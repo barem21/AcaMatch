@@ -1,12 +1,12 @@
 import { DownOutlined } from "@ant-design/icons";
 import styled from "@emotion/styled";
 import { Checkbox, Dropdown, Form, Input, Menu, Pagination } from "antd";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MainButton from "../components/button/MainButton";
 import LocationModal from "../components/modal/LocationModal";
-import axios from "axios";
 
 interface FilterOption {
   label: string;
