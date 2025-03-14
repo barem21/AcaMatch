@@ -685,15 +685,15 @@ function DashBoard() {
   }, []);
 
   return (
-    <div className="box-border m-[5px] mt-0 gap-5 w-full max-w-full h-[430px] justify-center align-top">
+    <div className="box-border w-full max-w-full justify-center align-top">
       <h1 className="w-full font-bold text-xl pb-3">
         주요 통계 및 요약
         <div className="flex">
           <p>결제 및 지출 관리 {"/"} </p> <p>&nbsp;대시보드</p>
         </div>
       </h1>
-      <div className="flex gap-[12px] w-full">
-        <div className="flex flex-col w-[calc(100%-412px)] gap-[12px]">
+      <div className="flex w-full">
+        <div className="flex flex-col w-[calc(100%-362px)] mr-3 gap-[12px]">
           <div className="w-full gap-0 border rounded-lg ">
             <div className="flex justify-between w-full p-3 border-b items-center">
               <Dropdown overlay={categoryMenu} trigger={["click"]}>
@@ -724,7 +724,8 @@ function DashBoard() {
           </div>
           <Stats statsData={statsData} />
         </div>
-        <div className="flex-col w-[calc(100%-1193px)] max-w-[394px] 2xl:max-w-[402px] min-w-[350px]">
+
+        <div className="flex-col w-[350px]">
           <div className="w-full justify-center mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
             <div className="flex justify-between w-full p-3 border-b items-center">
               <Dropdown overlay={categoryMenu2} trigger={["click"]}>
@@ -753,7 +754,8 @@ function DashBoard() {
           <NoticeList notices={notices} />
         </div>
       </div>
-      <div className="flex mt-[12px] gap-[12px]">
+
+      <div className="flex mt-[12px]">
         <AcademyApprovalList academyApprovals={academyApprovals} />
         <ReportedUserList reportedUsers={reportedUsers} />
       </div>

@@ -199,7 +199,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex mobile-width" ref={mainRef}>
       {isAdminPage ? (
-        <>
+        <div className="w-full min-w-[1280px]">
           {location.pathname === "/admin" && <PopupWindow isAdmin={true} />}
           <Sidebar
             isOpen={isOpen}
@@ -254,7 +254,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               )}
           </div>
-        </>
+        </div>
       ) : (
         <div className="flex flex-col flex-1 relative">
           {isLayoutVisible && !isAdminPage && (

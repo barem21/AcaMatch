@@ -34,8 +34,8 @@ function AcademyList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  //const state = parseInt(searchParams.get("state") || "1", 0);
   const search = searchParams.get("search");
+  const showCnt = parseInt(searchParams.get("showCnt") || "30", 0);
 
   //학원 목록
   const academyList = async () => {
@@ -44,7 +44,8 @@ function AcademyList() {
         //전체 관리자일 때
         const res = await jwtAxios.get(
           "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
-            (search !== null ? "?acaName=" + search : ""),
+            (search !== null ? "?acaName=" + search : "") +
+            (showCnt !== null ? "&size=" + showCnt : ""),
         );
         setMyAcademyList(res.data.resultData);
         console.log("admin : ", res.data.resultData);

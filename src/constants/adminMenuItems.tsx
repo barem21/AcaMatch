@@ -62,7 +62,7 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
       },
       {
         label: "학원 등록 승인",
-        link: "/admin/academy/arrow",
+        link: "/admin/arrow-list",
         active: false,
       },
       // {
@@ -72,14 +72,16 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
       // },
       {
         label: "프리미엄 학원 관리",
-        link: "/admin/academy/premium",
+        link: "/admin/premium",
         active: false,
       },
+      /*
       {
         label: "프리미엄 학원 신청",
         link: "/admin/academy/premium-req",
         active: false,
       },
+      */
     ],
   },
   {

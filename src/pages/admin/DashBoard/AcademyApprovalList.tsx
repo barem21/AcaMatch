@@ -12,7 +12,7 @@ const AcademyApprovalList = ({
   academyApprovals,
 }: AcademyApprovalListProps) => {
   return (
-    <div className="w-full border rounded-[4px] h-fit">
+    <div className="w-full border rounded-[4px] h-fit mr-3">
       <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
         학원 승인 대기
       </span>
