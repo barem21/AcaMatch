@@ -19,7 +19,6 @@ interface AcademyApprovalListProps {
   data: UserApproval[] | AcademyApproval[];
   roleId: number;
 }
-
 const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
   // 데이터가 없거나 배열이 아닌 경우 처리
   if (!data || !Array.isArray(data) || data.length === 0) {
@@ -111,7 +110,10 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
   const academyApprovals = data as AcademyApproval[];
   return (
     <div className="w-full border rounded-[4px] h-fit mr-3">
-      <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
+      <span
+        className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b cursor-pointer"
+        onClick={() => navigate("arrow-list")}
+      >
         학원 승인 대기
       </span>
       <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">

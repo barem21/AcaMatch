@@ -10,12 +10,12 @@ import {
 } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { useRecoilValue } from "recoil";
-import userInfo from "../../../atoms/userInfo";
+//import { useRecoilValue } from "recoil";
+//import userInfo from "../../../atoms/userInfo";
 import dayjs from "dayjs";
+import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import jwtAxios from "../../../apis/jwt";
 import CustomModal from "../../../components/modal/Modal";
 import { Cookies } from "react-cookie";
 const { RangePicker } = DatePicker;
@@ -28,6 +28,8 @@ const AcademyInfo = styled.div`
   }
   .ant-form-item-label label {
     min-width: 130px !important;
+    color: #676d9c;
+    font-size: 13px;
   }
   .ant-form-item-required::before {
     content: "" !important;
@@ -107,30 +109,29 @@ const AcademyInfo = styled.div`
   }
 `;
 
-function AcademyClassEdit() {
+function AcademyClassAdd() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
-  const currentUserInfo = useRecoilValue(userInfo);
+  //const currentUserInfo = useRecoilValue(userInfo);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [resultMessage, setResultMessage] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+
   const acaId = searchParams.get("acaId");
-  const classId = searchParams.get("classId");
 
   const handleButton1Click = () => {
     setIsModalVisible(false);
-    navigate(`../academy/class?acaId=${acaId}`);
+    navigate(`../class?acaId=${acaId}`);
   };
 
   const handleButton2Click = () => {
     setIsModalVisible(false);
-    navigate(`../academy/class?acaId=${acaId}`);
+    navigate(`../class?acaId=${acaId}`);
   };
 
   const initialValues = {
     acaId: "",
-    classId: "",
     className: "",
     classComment: "",
     startDate: "",
@@ -140,83 +141,44 @@ function AcademyClassEdit() {
     price: "",
   };
 
-  //강좌정보 가져오기
-  const academyGetInfo = async () => {
-    try {
-      const res = await jwtAxios.get(`/api/acaClass/detail?acaId=${acaId}`);
-      for (let i = 0; i < res.data.resultData.length; i++) {
-        if (res.data.resultData[i].classId === parseInt(classId)) {
-          console.log(res.data.resultData[i]);
-
-          // 데이터를 받아온 즉시 form 값 설정
-          form.setFieldsValue({
-            //acaId: res.data.resultData[i].acaId,
-            //classId: res.data.resultData[i].classId,
-            className: res.data.resultData[i].className,
-            classComment: res.data.resultData[i].classComment,
-            classDate: [
-              dayjs(res.data.resultData[i].startDate, "YYYY-MM-DD"),
-              dayjs(res.data.resultData[i].endDate, "YYYY-MM-DD"),
-            ],
-            startTime: dayjs(
-              res.data.resultData[i].startTime.substr(0, 5),
-              "HH:mm",
-            ),
-            endTime: dayjs(
-              res.data.resultData[i].endTime.substr(0, 5),
-              "HH:mm",
-            ),
-            price: res.data.resultData[i].price,
-            day: res.data.resultData[i].day,
-            yearsAndLevel: res.data.resultData[i].yearsAndLevel,
-          });
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const onFinished = async values => {
+  const onFinished = (values: any) => {
+    //alert("학원 등록 완료");
     //console.log(values);
-
     const startDate = dayjs(values.classDate[0].$d).format("YYYY-MM-DD");
     const endDate = dayjs(values.classDate[1].$d).format("YYYY-MM-DD");
     const startTimes = dayjs(values.startTime.$d).format("HH:mm");
     const endTimes = dayjs(values.endTime.$d).format("HH:mm");
+    //console.log(startDate, endDate, startTimes, endTimes);
 
-    const datas = {
-      acaId: acaId,
-      classId: classId,
-      className: values.className,
-      classComment: values.classComment,
-      startDate: startDate,
-      endDate: endDate,
-      startTime: startTimes,
-      endTime: endTimes,
-      price: values.price,
-    };
+    const postClass = async () => {
+      const datas = {
+        acaId: acaId,
+        className: values.className,
+        classComment: values.classComment,
+        startDate: startDate,
+        endDate: endDate,
+        startTime: startTimes,
+        endTime: endTimes,
+        price: values.price,
+      };
+      //console.log(datas);
 
-    try {
-      const res = await jwtAxios.put("/api/acaClass", datas);
-      console.log(res.data.resultData);
-
-      if (res.data.resultData === 1) {
-        //alert("강좌 수정 완료");
-        setResultMessage("강좌 수정이 완료되었습니다.");
-        setIsModalVisible(true);
-      } else {
-        setResultMessage("강좌 수정이 실패되었습니다. 다시 시도해 주세요.");
-        setIsModalVisible(true);
+      try {
+        const res = await axios.post("/api/acaClass", datas);
+        //console.log(res.data);
+        if (res.data.resultData === 1) {
+          setResultMessage("수업등록이 완료되었습니다.");
+          setIsModalVisible(true);
+        } else {
+          setResultMessage("수업등록이 실패되었습니다. 다시 시도해 주세요.");
+          setIsModalVisible(true);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
-    }
+    };
+    postClass();
   };
-
-  useEffect(() => {
-    academyGetInfo();
-  }, [currentUserInfo]);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
@@ -226,12 +188,12 @@ function AcademyClassEdit() {
   }, []);
 
   return (
-    <AcademyInfo className="w-full  pb-12">
-      <div className="flex gap-5 w-full justify-center align-top">
+    <AcademyInfo className="w-full">
+      <div className="flex gap-5 w-full justify-center pb-10">
         <div className="w-full">
           <h1 className="title-admin-font">
-            강의 수정
-            <p>학원관리 &gt; 강의 관리 &gt; 강의 등록/수정</p>
+            강의 등록
+            <p>학원관리 &gt; 강의 관리 &gt; 강의 등록</p>
           </h1>
 
           <div className="max-w-3xl p-3 pl-6 pr-6 border rounded-md">
@@ -261,7 +223,10 @@ function AcademyClassEdit() {
                   { required: true, message: "강좌 기간을 입력해 주세요." },
                 ]}
               >
-                <RangePicker placeholder={["강좌 시작일", "강좌 종료일"]} />
+                <RangePicker
+                  className="input-admin-basic"
+                  placeholder={["강좌 시작일", "강좌 종료일"]}
+                />
               </Form.Item>
 
               <Form.Item
@@ -337,14 +302,14 @@ function AcademyClassEdit() {
                 <button
                   type="button"
                   className="btn-admin-cancel"
-                  onClick={e => navigate(-1)}
+                  onClick={() => navigate(-1)}
                 >
                   취소하기
                 </button>
 
                 <Form.Item className="mb-0">
                   <Button htmlType="submit" className="btn-admin-ok">
-                    수정하기
+                    등록하기
                   </Button>
                 </Form.Item>
               </div>
@@ -354,7 +319,7 @@ function AcademyClassEdit() {
           {resultMessage && (
             <CustomModal
               visible={isModalVisible}
-              title={"수업수정 완료"}
+              title={"수업등록 완료"}
               content={resultMessage}
               onButton1Click={handleButton1Click}
               onButton2Click={handleButton2Click}
@@ -369,4 +334,4 @@ function AcademyClassEdit() {
   );
 }
 
-export default AcademyClassEdit;
+export default AcademyClassAdd;

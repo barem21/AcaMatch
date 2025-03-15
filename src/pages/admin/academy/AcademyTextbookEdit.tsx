@@ -187,7 +187,7 @@ function AcademyTextbookEdit(): JSX.Element {
       const res = await axios.put("/api/book/updateBook", formData, header);
       if (res.data.resultData === 1) {
         message.success("수정이 완료되었습니다.");
-        navigate(`../academy/textBook?acaId=${acaId}&classId=${classId}`);
+        navigate(`../textbook?acaId=${acaId}&classId=${classId}`);
       }
     } catch (error) {
       console.log(error);

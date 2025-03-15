@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 interface StatsItemProps {
   id: number;
   value: string;
@@ -9,12 +11,15 @@ interface StatsProps {
 }
 
 const Stats = ({ statsData }: StatsProps) => {
+  const navigate = useNavigate();
+
   return (
     <ul className="flex gap-[12px]">
       {statsData?.map(item => (
         <li
           key={item.id}
-          className="flex flex-col w-full h-[80px] rounded-lg justify-center items-center border border-[#E3EBF6]"
+          className="flex flex-col w-full h-[80px] rounded-lg justify-center items-center border border-[#E3EBF6] cursor-pointer"
+          onClick={() => navigate("paymentmanager")}
         >
           <span className="text-[18px] font-semibold">{item.value}</span>
           {item.label && (

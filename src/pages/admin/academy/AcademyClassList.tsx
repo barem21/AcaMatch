@@ -22,12 +22,17 @@ interface classListType {
   teacherName: string;
 }
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 function AcademyClassList() {
   const [form] = Form.useForm();
   const cookies = new Cookies();
-  const currentUserInfo = useRecoilValue(userInfo);
+  const { userId, roleId } = useRecoilValue(userInfo);
   const [classId, setClassId] = useState<number>(0);
-  const [myAcademyList, setMyAcademyList] = useState([]);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModalVisible2, setIsModalVisible2] = useState(false);
   const [isModalVisible3, setIsModalVisible3] = useState(false);
@@ -35,31 +40,29 @@ function AcademyClassList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const acaId = parseInt(searchParams.get("acaId") || "1", 0);
-  const showCnt = parseInt(searchParams.get("showCnt") || "30", 0);
+  //const acaId = parseInt(searchParams.get("acaId") || "1", 0);
+  const acaId = parseInt(searchParams.get("acaId") || "", 0);
+  const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
-  //학원 목록
+  //전체학원 목록
   const academyList = async () => {
     try {
-      if (currentUserInfo.roleId === 0) {
+      if (roleId === 0) {
         //전체 관리자일 때
-        const res = await axios.get(
-          `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
-        );
+        const res = await axios.get(`/api/menuOut/academy`);
         setMyAcademyList(res.data.resultData);
-        console.log("admin : ", res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
-          `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
         );
         setMyAcademyList(res.data.resultData);
-        console.log("academy : ", res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
       }
     } catch (error) {
       console.log(error);
     }
   };
-
   // acaId와 acaName만 남기기
   const simplifiedData = myAcademyList.map(
     ({ acaId: value, acaName: label }) => ({
@@ -67,18 +70,15 @@ function AcademyClassList() {
       label,
     }),
   );
-
   //console.log(simplifiedData);
 
   //강좌 목록
   const academyClassList = async () => {
     try {
       const res = await axios.get(
-        "/api/acaClass" +
-          (acaId && "?acaId=" + acaId) +
-          (acaId ? "&" : "?") +
-          "page=1&size=" +
-          (showCnt ? showCnt : 30),
+        "/api/acaClass?page=1&size=" +
+          (showCnt ? showCnt : 10) +
+          (acaId && "&acaId=" + acaId),
       );
       setClassList(res.data.resultData);
       console.log("classList : ", res.data.resultData);
@@ -139,13 +139,14 @@ function AcademyClassList() {
   const onFinished = async (values: any) => {
     //console.log(values);
     const queryParams = new URLSearchParams(values).toString(); // 쿼리 문자열로 변환
-    navigate(`../academy/class?${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`../class?${queryParams}`); //쿼리스트링 url에 추가
 
     try {
       const res = await axios.get(
         "/api/acaClass?page=1&size=" +
           (values.showCnt ? values.showCnt : 40) +
-          (values.acaId ? "&acaId=" + values.acaId : ""),
+          (values.acaId ? "&acaId=" + values.acaId : "") +
+          (values.search ? "&keyword2=" + values.search : ""),
       );
       setClassList(res.data.resultData);
       console.log("search : ", res.data.resultData);
@@ -167,9 +168,10 @@ function AcademyClassList() {
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      acaId: acaId ? acaId : "",
+      //acaId: acaId ? acaId : "",
+      acaId: acaId ? acaId : null,
       search: "",
-      showCnt: 40,
+      showCnt: 10,
     });
   }, []);
 
@@ -184,23 +186,22 @@ function AcademyClassList() {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          강의목록
-          <p>학원 관리 &gt; 학원 강의목록</p>
+          강의 관리
+          <p>학원 관리 &gt; 강의 관리</p>
         </h1>
 
         <div className="board-wrap">
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-24 text-sm">강의 검색</label>
+                <label className="mr-3 text-sm">학원 선택</label>
                 <Form.Item name="acaId" className="mb-0">
                   <Select
                     showSearch
                     placeholder="학원 선택"
                     optionFilterProp="label"
-                    className="select-admin-basic"
-                    //onChange={onChange}
-                    //onSearch={onSearch}
+                    className="select-admin-basic !min-w-52"
+                    onChange={onChange}
                     options={simplifiedData}
                   />
                 </Form.Item>
@@ -227,16 +228,16 @@ function AcademyClassList() {
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />
@@ -245,9 +246,7 @@ function AcademyClassList() {
                 {acaId ? (
                   <Button
                     className="btn-admin-basic"
-                    onClick={() =>
-                      navigate(`../academy/classAdd?acaId=${acaId}`)
-                    }
+                    onClick={() => navigate(`../class-add?acaId=${acaId}`)}
                   >
                     + 강의 신규등록
                   </Button>
@@ -304,13 +303,13 @@ function AcademyClassList() {
                   className="flex items-center gap-4 pl-2 cursor-pointer"
                   onClick={() =>
                     navigate(
-                      `/admin/academy/student?acaId=${acaId}&classId=${item.classId}`,
+                      `/admin/class-student?acaId=${acaId}&classId=${item.classId}`,
                     )
                   }
                 >
                   <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
-                      src={`http://112.222.157.157:5233/pic/academy/${acaId}/${item.acaPic}`}
+                      src={`http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`}
                       alt=""
                       className="max-w-fit max-h-full object-cover"
                     />
@@ -319,7 +318,7 @@ function AcademyClassList() {
                 </div>
               </div>
               <div className="flex items-center justify-center w-40">
-                홍길동 / {item.teacherId}
+                {item.teacherName ? item.teacherName : "-"}
               </div>
               <div className="flex items-center justify-center w-44">
                 {item.startDate}
@@ -332,7 +331,7 @@ function AcademyClassList() {
                   className="small_line_button"
                   onClick={() =>
                     navigate(
-                      `../teacher/checkIn?acaId=${acaId}&classId=${item.classId}`,
+                      `../check-in?acaId=${acaId}&classId=${item.classId}`,
                     )
                   }
                 >
@@ -344,7 +343,7 @@ function AcademyClassList() {
                   className="small_line_button"
                   onClick={() =>
                     navigate(
-                      `../academy/textBook?acaId=${acaId}&classId=${item.classId}`,
+                      `../textbook?acaId=${acaId}&classId=${item.classId}`,
                     )
                   }
                 >
@@ -355,9 +354,7 @@ function AcademyClassList() {
                 <button
                   className="small_line_button"
                   onClick={() =>
-                    navigate(
-                      `../academy/testList?acaId=${acaId}&classId=${item.classId}`,
-                    )
+                    navigate(`../test?acaId=${acaId}&classId=${item.classId}`)
                   }
                 >
                   테스트 목록
@@ -367,7 +364,7 @@ function AcademyClassList() {
                 <button
                   onClick={() =>
                     navigate(
-                      `../academy/classEdit?acaId=${acaId}&classId=${item.classId}`,
+                      `../class-edit?acaId=${acaId}&classId=${item.classId}`,
                     )
                   }
                 >

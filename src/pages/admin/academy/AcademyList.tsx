@@ -227,7 +227,7 @@ function AcademyList() {
 
                 <Button
                   className="btn-admin-basic"
-                  onClick={() => navigate("/admin/academy/add")}
+                  onClick={() => navigate("/admin/academy-add")}
                 >
                   + 학원 신규등록
                 </Button>
@@ -281,7 +281,7 @@ function AcademyList() {
               <div className="flex justify-start items-center w-full">
                 <div
                   className="flex items-center gap-3 cursor-pointer"
-                  onClick={() => navigate(`class?acaId=${item.acaId}`)}
+                  onClick={() => navigate(`../class?acaId=${item.acaId}`)}
                 >
                   <div className="flex justify-center items-center w-14 min-w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
@@ -329,9 +329,7 @@ function AcademyList() {
                 {item.acaAgree === 1 ? (
                   <button
                     className="small_line_button"
-                    onClick={() =>
-                      navigate(`../academy/class?acaId=${item.acaId}`)
-                    }
+                    onClick={() => navigate(`../class?acaId=${item.acaId}`)}
                   >
                     강의관리
                   </button>
@@ -343,9 +341,7 @@ function AcademyList() {
                 {item.acaAgree === 1 ? (
                   <button
                     className="small_line_button"
-                    onClick={() =>
-                      navigate(`../teacher/list?acaId=${item.acaId}`)
-                    }
+                    onClick={() => navigate(`../teacher?acaId=${item.acaId}`)}
                   >
                     강사관리
                   </button>

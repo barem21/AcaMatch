@@ -73,12 +73,17 @@ interface AttendanceType {
   userId: number;
 }
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 const CheckIn = () => {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const navigate = useNavigate();
   const { userId, roleId } = useRecoilValue(userInfo);
-  const [myAcademyList, setMyAcademyList] = useState([]); //학원 목록
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
   const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
   const [events, setEvents] = useState<Event[]>([]);
   const [attendanceDate, setAttendanceDate] = useState<string | null>(null);
@@ -86,17 +91,15 @@ const CheckIn = () => {
   const [mergeData, setMergeData] = useState<studentList2Type[]>([]);
   const [searchParams] = useSearchParams();
 
-  const acaId = parseInt(searchParams.get("acaId") || "0", 0);
-  const classId = parseInt(searchParams.get("classId") || "0", 0);
+  const acaId = parseInt(searchParams.get("acaId") || "", 0);
+  const classId = parseInt(searchParams.get("classId") || "", 0);
 
-  //검색조건용 학원 목록
+  //전체학원 목록
   const academyList = async () => {
     try {
       if (roleId === 0) {
         //전체 관리자일 때
-        const res = await axios.get(
-          `/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree`,
-        );
+        const res = await axios.get(`/api/menuOut/academy`);
         setMyAcademyList(res.data.resultData);
         //console.log("admin : ", res.data.resultData);
       } else {
@@ -110,9 +113,8 @@ const CheckIn = () => {
       console.log(error);
     }
   };
-
   // acaId와 acaName만 남기기
-  const simplifiedData = myAcademyList?.map(
+  const simplifiedData = myAcademyList.map(
     ({ acaId: value, acaName: label }) => ({
       value,
       label,
@@ -120,18 +122,17 @@ const CheckIn = () => {
   );
 
   //강좌 목록
-  const academyClassList = async () => {
+  const academyClassList = async (value: number) => {
     try {
       const res = await axios.get(
-        `/api/acaClass?acaId=${acaId}&page=1&size=30`,
+        `/api/menuOut/class?acaId=${value ? value : acaId}`,
       );
       setClassList(res.data.resultData);
-      console.log("classList : ", res.data.resultData);
+      //console.log("classList : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
-
   // acaId와 acaName만 남기기
   const simplifiedData2 = classList?.map(
     ({ classId: value, className: label }) => ({
@@ -141,10 +142,10 @@ const CheckIn = () => {
   );
 
   //수강생 목록
-  const academyStudentList = async () => {
+  const academyStudentList = async (value: number) => {
     try {
       const res = await axios.get(
-        `/api/acaClass/acaClassUser?classId=${classId}&page=1`,
+        `/api/acaClass/acaClassUser?classId=${value}&page=1`,
       );
       setStudentList(res.data.resultData);
       //console.log(res.data.resultData);
@@ -165,16 +166,14 @@ const CheckIn = () => {
   };
 
   // 출석 데이터 조회
-  const fetchAttendanceData = async () => {
+  const fetchAttendanceData = async (value: number) => {
     const { startDate, endDate } = getCurrentMonthRange();
-    //const academyId = acaId;
-    //const classId = classId;
 
     try {
       const response = await axios.get(`/api/attendance`, {
         params: {
           acaId: acaId,
-          classId: classId,
+          classId: value,
           startDate: startDate,
           endDate: endDate,
         },
@@ -221,41 +220,33 @@ const CheckIn = () => {
     }
   };
 
+  //학원 선택
   const handleAcademyChange = (value: number) => {
-    console.log(value);
+    //console.log(value);
+    form.setFieldsValue({
+      classId: null,
+    });
     form.submit();
-    //setSelectedAcademy(value);
-    fetchAttendanceData();
-    // fetchAttendanceData(value);
+    academyClassList(value); //강좌목록
   };
 
-  // const handleDateClick = async (info: any) => {
-  //   if (!selectedAcademy) {
-  //     message.warning("학원을 먼저 선택해주세요.");
-  //     return;
-  //   }
-
-  //   // 출석 체크 로직 구현
-  //   try {
-  //     await jwtAxios.post("/api/attendance", {
-  //       academyId: selectedAcademy,
-  //       date: info.dateStr,
-  //       userId,
-  //     });
-
-  //     fetchAttendanceData(selectedAcademy);
-  //     message.success("출석이 등록되었습니다.");
-  //   } catch (error) {
-  //     console.error("Error marking attendance:", error);
-  //     message.error("출석 등록에 실패했습니다.");
-  //   }
-  // };
+  //강좌선택
+  const handleClassChange = (value: number) => {
+    //console.log(value);
+    form.submit();
+    fetchAttendanceData(value);
+  };
 
   // 날짜 클릭 시 호출될 함수
   const handleDateClick = async (info: any) => {
     const clickedDate = info.dateStr; // 클릭한 날짜 정보 (YYYY-MM-DD 형식)
     setAttendanceDate(clickedDate); // 상태 업데이트
-    academyStudentList(); //수강생 목록
+    academyStudentList(classId); //수강생 목록
+
+    if (!classId) {
+      alert("강좌를 선택해 주세요.");
+      return;
+    }
 
     //날짜 선택하면 기존 선택값 초기화
     form2.setFieldsValue({
@@ -278,7 +269,7 @@ const CheckIn = () => {
       //console.log(res.data.resultData);
 
       // 사용자 배열과 출석 배열을 userId를 기준으로 합치기
-      const mergedData = studentList.map(user => {
+      const mergedData = studentList?.map(user => {
         // userId가 같은 출석 정보를 찾음
         const attendanceData = res.data.resultData.find(
           (att: AttendanceType) => att.userId === user.userId,
@@ -321,7 +312,20 @@ const CheckIn = () => {
   //출석상태 저장
   const onFinishedSe = async (values: any) => {
     //console.log(values);
-
+    if (!acaId) {
+      notification.error({
+        message: "알림 : ",
+        description: "학원이 선택되지 않았습니다.",
+      });
+      return;
+    }
+    if (!classId) {
+      notification.error({
+        message: "알림 : ",
+        description: "강좌가 선택되지 않았습니다.",
+      });
+      return;
+    }
     if (!attendanceDate) {
       notification.error({
         message: "알림 : ",
@@ -353,7 +357,7 @@ const CheckIn = () => {
         } else {
           message.error("출석정보가 저장이 실패되었습니다.");
         }
-        fetchAttendanceData(); //출석정보 갱신
+        fetchAttendanceData(classId); //출석정보 갱신
         setStudentList([]); //수강생 목록 초기화
 
         //날짜 선택하면 기존 선택값 초기화
@@ -370,16 +374,17 @@ const CheckIn = () => {
 
   useEffect(() => {
     academyList(); //학원 목록
-    academyClassList(); //강좌 목록
-    academyStudentList(); //수강생 목록
-    fetchAttendanceData();
+    academyClassList(acaId); //강좌 목록
+    if (classId) {
+      fetchAttendanceData(classId); //출석부
+    }
   }, []);
 
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      acaId: acaId ? acaId : 0,
-      classId: classId ? classId : 0,
+      acaId: acaId ? acaId : null,
+      classId: classId ? classId : null,
     });
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
@@ -400,26 +405,26 @@ const CheckIn = () => {
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-28 text-sm">학원 선택</label>
+                <label className="mr-3 text-sm">학원 선택</label>
                 <Form.Item name="acaId" className="mb-0 mr-[10px]">
                   <Select
                     showSearch
                     placeholder="학원을 선택하세요"
                     optionFilterProp="label"
-                    className="select-admin-basic w-[300px]"
+                    className="select-admin-basic !min-w-52"
                     onChange={handleAcademyChange}
                     options={simplifiedData}
                   />
                 </Form.Item>
 
-                <label className="w-28 text-sm">강좌 선택</label>
+                <label className="mr-3 ml-10 text-sm">강좌 선택</label>
                 <Form.Item name="classId" className="mb-0">
                   <Select
                     showSearch
                     placeholder="강좌를 선택하세요"
                     optionFilterProp="label"
-                    className="select-admin-basic w-[300px]"
-                    onChange={handleAcademyChange}
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleClassChange}
                     options={simplifiedData2}
                   />
                 </Form.Item>
