@@ -111,7 +111,7 @@ const TeacherList = () => {
 
           <button
             className="btn-admin-basic border text-sm pl-3 pr-3 mb-3"
-            onClick={() => navigate("../add")}
+            onClick={() => navigate("../teacher-add")}
           >
             + 강사 등록신청
           </button>

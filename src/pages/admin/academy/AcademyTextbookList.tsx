@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import CustomModal from "../../../components/modal/Modal";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../../atoms/userInfo";
 
 interface classListType {
   acaPic: string;
@@ -26,39 +28,114 @@ interface textBookListType {
   manager: string;
 }
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 function AcademyTextbookList(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const [searchParams, _setSearchParams] = useSearchParams();
-  const [classList, setClassList] = useState<classListType[]>([]);
-  const [textBookList, setTextBookList] = useState<textBookListType[]>([]);
+  const { userId, roleId } = useRecoilValue(userInfo);
+  const [searchParams] = useSearchParams();
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
+  const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
+  const [textBookList, setTextBookList] = useState<textBookListType[]>([]); //교제 목록
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [textBookId, setTextBookId] = useState<number>(0);
 
-  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
-  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
-  const showCnt: number = parseInt(searchParams.get("showCnt") || "0", 0);
+  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+  const showCnt: number = parseInt(searchParams.get("showCnt") || "10", 0);
+
+  //전체학원 목록
+  const academyList = async () => {
+    try {
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(`/api/menuOut/academy`);
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //강좌 목록
+  const academyClassList = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/menuOut/class?acaId=${value ? value : acaId}`,
+      );
+      setClassList(res.data.resultData);
+      console.log("classList : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData2 = classList?.map(
+    ({ classId: value, className: label }) => ({
+      value,
+      label,
+    }),
+  );
 
   //교재목록 호출
-  const getTextBookList = async () => {
+  const getTextBookList = async (value: number) => {
     try {
-      const res = await axios.get(`/api/book/getBookList/${classId}`);
-      //console.log(res.data.resultData);
+      const res = await axios.get(
+        `/api/book/getBookList/${value ? value : classId}`,
+      );
       setTextBookList(res.data.resultData);
+      //console.log("book list : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
 
+  //학원 선택
+  const handleAcademyChange = (value: number) => {
+    //console.log(value);
+    form.setFieldsValue({
+      classId: null,
+    });
+    form.submit();
+    academyClassList(value); //강좌목록
+    //getTextBookList(value); //교제목록
+    setTextBookList([]);
+  };
+
+  //강좌선택
+  const handleClassChange = (value: number) => {
+    //alert(value);
+    form.submit();
+    getTextBookList(value); //교제목록
+  };
+
   //학원 검색
   const onFinished = async (values: any) => {
-    console.log(values);
+    //console.log(values);
 
     try {
       const res = await axios.get(
-        `/api/book/GetBookListByAcaNameBookName?bookName=${values.search}&size=${showCnt}`,
+        `/api/book/getBookList/${values.classId}&size=${showCnt}`,
       );
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
       setTextBookList(res.data.resultData);
     } catch (error) {
       console.log(error);
@@ -66,12 +143,7 @@ function AcademyTextbookList(): JSX.Element {
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`../academy/textBook?acaId=${acaId}&${queryParams}`); //쿼리스트링 url에 추가
-  };
-
-  const onChange = (values: any) => {
-    console.log(values);
-    form.submit();
+    navigate(`../textbook?${queryParams}`); //쿼리스트링 url에 추가
   };
 
   //교재삭제 팝업
@@ -84,11 +156,11 @@ function AcademyTextbookList(): JSX.Element {
   const DeleteTextBook = async (bookId: number) => {
     try {
       const res = await axios.delete(`/api/book/deleteBook?bookId=${bookId}`);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
 
       if (res.data.resultData === 1) {
         message.success("등록된 교재을 삭제하였습니다.");
-        getTextBookList();
+        getTextBookList(classId);
       }
     } catch (error) {
       message.error("교재 삭제가 실패되었습니다.");
@@ -106,33 +178,19 @@ function AcademyTextbookList(): JSX.Element {
   };
 
   useEffect(() => {
-    //페이지 들어오면 ant design 처리용 기본값 세팅
-    form.setFieldsValue({
-      classId: classId ? classId : "all",
-      search: "",
-      showCnt: 40,
-    });
+    academyList(); //학원 목록
+    academyClassList(acaId); //강좌 목록
+    getTextBookList(classId); //교재 목록
   }, []);
 
   useEffect(() => {
-    //강좌 목록
-    const academyClassList = async () => {
-      try {
-        const res = await axios.get(
-          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1&size=${showCnt}`,
-        );
-        const formatted = res.data.resultData.map((item: any) => ({
-          value: item.classId,
-          label: item.className,
-        }));
-        setClassList(formatted);
-        //console.log(res.data.resultData);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    academyClassList();
-    getTextBookList();
+    //페이지 들어오면 ant design 처리용 기본값 세팅
+    form.setFieldsValue({
+      acaId: acaId ? acaId : null,
+      classId: classId ? classId : null,
+      search: "",
+      showCnt: 10,
+    });
   }, []);
 
   return (
@@ -147,16 +205,27 @@ function AcademyTextbookList(): JSX.Element {
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-24 text-sm">교재 검색</label>
-                <Form.Item name="classId" className="mb-0">
+                <label className="mr-3 text-sm">학원 선택</label>
+                <Form.Item name="acaId" className="mb-0">
                   <Select
                     showSearch
                     placeholder="학원 선택"
                     optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
-                    options={classList}
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleAcademyChange}
+                    options={simplifiedData}
+                  />
+                </Form.Item>
+
+                <label className="mr-3 ml-10 text-sm">강좌 선택</label>
+                <Form.Item name="classId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="강좌를 선택하세요"
+                    optionFilterProp="label"
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleClassChange}
+                    options={simplifiedData2}
                   />
                 </Form.Item>
 
@@ -176,23 +245,22 @@ function AcademyTextbookList(): JSX.Element {
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
-                    onChange={onChange}
-                    // onSearch={onSearch}
+                    onChange={handleClassChange}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />
@@ -202,7 +270,7 @@ function AcademyTextbookList(): JSX.Element {
                   className="btn-admin-basic"
                   onClick={() =>
                     navigate(
-                      `../academy/textbookAdd?acaId=${acaId}&classId=${classId}`,
+                      `../textbook-add?acaId=${acaId}&classId=${classId}`,
                     )
                   }
                 >
@@ -267,7 +335,7 @@ function AcademyTextbookList(): JSX.Element {
                 <button
                   onClick={() =>
                     navigate(
-                      `../academy/textbookEdit?acaId=${acaId}&classId=${classId}&bookId=${item.bookId}`,
+                      `../textbook-edit?acaId=${acaId}&classId=${classId}&bookId=${item.bookId}`,
                     )
                   }
                 >
