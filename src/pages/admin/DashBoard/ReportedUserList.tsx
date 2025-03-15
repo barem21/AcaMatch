@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 interface ReportedUser {
   email: string;
   name: string;
@@ -11,6 +13,8 @@ interface ReportedUserListProps {
 }
 
 const ReportedUserList = ({ reportedUsers }: ReportedUserListProps) => {
+  const navigate = useNavigate();
+
   // 처리상태를 문자열로 변환하는 함수
   const getStatusText = (status: number) => {
     switch (status) {
@@ -25,7 +29,10 @@ const ReportedUserList = ({ reportedUsers }: ReportedUserListProps) => {
 
   return (
     <div className="w-full border rounded-[4px] h-fit">
-      <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
+      <span
+        className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b cursor-pointer"
+        onClick={() => navigate("rep-member")}
+      >
         신고된 유저 목록
       </span>
       <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">

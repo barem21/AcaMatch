@@ -7,6 +7,58 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 //import { useRecoilValue } from "recoil";
 //import userInfo from "../../../atoms/userInfo";
 import CustomModal from "../../../components/modal/Modal";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../../atoms/userInfo";
+
+const TestList = styled.div`
+  button {
+    //display: none !important;
+  }
+  .addOk button,
+  .title-font button,
+  .small_line_button,
+  .ant-form-item-control-input button {
+    display: flex !important;
+  }
+`;
+const AddTest = styled.div`
+  div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+  }
+  .ant-row,
+  .ant-form-item-control-input {
+    width: 100%;
+  }
+  .ant-col > label {
+    width: 110px;
+  }
+
+  .ant-col > label::before {
+    content: "" !important;
+  }
+  .ant-col > label::after {
+    content: "*" !important;
+    margin-top: 5px;
+    color: #ff4400;
+    font-size: 1.25rem;
+  }
+  .ant-form-item-additional {
+    width: 100%;
+    font-size: 14px;
+  }
+`;
+
+interface classListType {
+  acaPic: string;
+  acaPics: string;
+  classId: number;
+  className: string;
+  endDate: string;
+  name: string;
+  startDate: string;
+}
 
 interface myAcademyTestListType {
   acaPics: string;
@@ -20,65 +72,32 @@ interface myAcademyTestListType {
   teacherName: string;
 }
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 function AcademyTestList() {
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const cookies = new Cookies();
-  //const currentUserInfo = useRecoilValue(userInfo);
+  const { userId, roleId } = useRecoilValue(userInfo);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
+  const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
   const [myAcademyTestList, setMyAcademyTestList] = useState<
     myAcademyTestListType[]
-  >([]);
+  >([]); //테스트 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isModal2Visible, setIsModal2Visible] = useState(false);
-  const [resultMessage, setResultMessage] = useState("");
-  const [academyInfo, setAcademyInfo] = useState("");
+  const [resultMessage, _setResultMessage] = useState("");
   const [radioValue, _setRadioValue] = useState(1);
-  const [classList, setClassList] = useState([]);
   const navigate = useNavigate();
-  const [searchParams, _setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
-  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
-
-  const TestList = styled.div`
-    button {
-      //display: none !important;
-    }
-    .addOk button,
-    .title-font button,
-    .small_line_button,
-    .ant-form-item-control-input button {
-      display: flex !important;
-    }
-  `;
-  const AddTest = styled.div`
-    div {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0px;
-    }
-    .ant-row,
-    .ant-form-item-control-input {
-      width: 100%;
-    }
-    .ant-col > label {
-      width: 110px;
-    }
-
-    .ant-col > label::before {
-      content: "" !important;
-    }
-    .ant-col > label::after {
-      content: "*" !important;
-      margin-top: 5px;
-      color: #ff4400;
-      font-size: 1.25rem;
-    }
-    .ant-form-item-additional {
-      width: 100%;
-      font-size: 14px;
-    }
-  `;
+  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+  const showCnt: number = parseInt(searchParams.get("showCnt") || "10", 0);
+  //const search: string | null = searchParams.get("search");
 
   const handleButton1Click = () => {
     setIsModalVisible(false);
@@ -108,22 +127,58 @@ function AcademyTestList() {
     subjectName: "",
   };
 
-  //학원정보 가져오기
-  const academyGetInfo = async () => {
+  //전체학원 목록
+  const academyList = async () => {
     try {
-      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
-      setAcademyInfo(res.data.resultData.acaName);
-      //console.log(res.data.resultData.acaName);
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(`/api/menuOut/academy`);
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
     } catch (error) {
       console.log(error);
     }
   };
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
 
-  //과목별 등록된 테스트 목록 가져오기
-  const academyTestList = async () => {
+  //강좌 목록
+  const academyClassList = async (value: number) => {
     try {
       const res = await axios.get(
-        `/api/grade/status?acaId=${acaId}&classId=${classId}`,
+        `/api/menuOut/class?acaId=${value ? value : acaId}`,
+      );
+      setClassList(res.data.resultData);
+      //console.log("classList : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData2 = classList?.map(
+    ({ classId: value, className: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //과목별 등록된 테스트 목록 가져오기
+  const academyTestListRequest = async (value: number, search: string) => {
+    try {
+      const res = await axios.get(
+        `/api/grade/status?page=1&size=${showCnt}&acaId=${acaId}&classId=${value ? value : classId}${search ? "&keyword3=" + search : search}`,
       );
       setMyAcademyTestList(res.data.resultData);
       console.log(res.data.resultData);
@@ -132,31 +187,42 @@ function AcademyTestList() {
     }
   };
 
+  //학원 선택
+  const handleAcademyChange = (value: number) => {
+    //console.log(value);
+    form2.setFieldsValue({
+      classId: null,
+    });
+    form2.submit();
+    academyClassList(value); //강좌목록
+    setMyAcademyTestList([]);
+  };
+
+  //강좌선택
+  const handleClassChange = (value: number) => {
+    form2.submit();
+    academyTestListRequest(value, ""); //테스트 목록
+  };
+
   //전송하기
   const onFinished = async (values: any) => {
-    console.log(values);
+    //console.log(values);
 
-    values.classId = classId;
-    const res = await axios.post("/api/exam", values);
-    if (res.data.resultData === 1) {
-      form.resetFields(); //초기화
-      setIsModal2Visible(true);
-      setIsModalVisible(false);
-      academyTestList(); //목록 다시 호출
-    }
-    if (res.data.resultData === 0) {
-      setIsModal2Visible(true);
-    }
-    setResultMessage(res.data.resultMessage); //결과 메시지
+    // 쿼리 문자열로 변환
+    const queryParams = new URLSearchParams(values).toString();
+    navigate(`../test?${queryParams}`); //쿼리스트링 url에 추가
   };
 
   //테스트 검색
   const onFinishedSe = async (values: any) => {
     console.log(values);
+    //academyTestList(values.classId);
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`../academy/testList?acaId=${acaId}&${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`../test?${queryParams}`); //쿼리스트링 url에 추가
+
+    academyTestListRequest(values.classId, values.search); //테스트 목록
   };
 
   const onChange = () => {
@@ -164,52 +230,29 @@ function AcademyTestList() {
   };
 
   useEffect(() => {
-    academyGetInfo();
-
-    //페이지 들어오면 ant design 처리용 기본값 세팅
-    form2.setFieldsValue({
-      classId: classId ? classId : "all",
-      search: "",
-      showCnt: 40,
-    });
-  }, []);
-
-  useEffect(() => {
-    academyTestList();
-  }, []);
-
-  useEffect(() => {
-    //강좌 목록
-    const academyClassList = async () => {
-      try {
-        const res = await axios.get(
-          `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1`,
-        );
-        const formatted = res.data.resultData.map((item: any) => ({
-          value: item.classId,
-          label: item.className,
-        }));
-        setClassList(formatted);
-        //console.log(res.data.resultData);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    academyClassList();
-  }, []);
-
-  useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
     }
+
+    //페이지 들어오면 ant design 처리용 기본값 세팅
+    form2.setFieldsValue({
+      acaId: acaId ? acaId : null,
+      classId: classId ? classId : null,
+      search: "",
+      showCnt: 10,
+    });
+
+    academyList(); //학원 목록
+    academyClassList(acaId); //강좌 목록
+    academyTestListRequest(classId, ""); //테스트 목록
   }, []);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
       <TestList className="w-full">
         <h1 className="title-admin-font">
-          {academyInfo}의 테스트 목록
+          테스트 목록
           <p>학원관리 &gt; 강좌목록 &gt; 테스트 목록</p>
         </h1>
 
@@ -217,18 +260,30 @@ function AcademyTestList() {
           <Form form={form2} onFinish={values => onFinishedSe(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-24 text-sm">테스트 검색</label>
+                <label className="mr-3 text-sm">학원 선택</label>
+                <Form.Item name="acaId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="학원 선택"
+                    optionFilterProp="label"
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleAcademyChange}
+                    options={simplifiedData}
+                  />
+                </Form.Item>
+
+                <label className="mr-3 ml-10 text-sm">강좌 선택</label>
                 <Form.Item name="classId" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="강좌 선택"
+                    placeholder="강좌를 선택하세요"
                     optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
-                    options={classList}
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleClassChange}
+                    options={simplifiedData2}
                   />
                 </Form.Item>
+
                 <Form.Item name="search" className="mb-0">
                   <input
                     placeholder="테스트 명을 입력해 주세요."
@@ -243,23 +298,23 @@ function AcademyTestList() {
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />
@@ -288,7 +343,17 @@ function AcademyTestList() {
             </div>
           </div>
 
+          {!myAcademyTestList && (
+            <div className="loop-content w-full p-4 border-b text-center">
+              등록된 테스트가 없습니다.
+            </div>
+          )}
           {myAcademyTestList === null && (
+            <div className="loop-content w-full p-4 border-b text-center">
+              등록된 테스트가 없습니다.
+            </div>
+          )}
+          {myAcademyTestList?.length === 0 && (
             <div className="loop-content w-full p-4 border-b text-center">
               등록된 테스트가 없습니다.
             </div>
@@ -336,7 +401,7 @@ function AcademyTestList() {
                   className="small_line_button"
                   onClick={() =>
                     navigate(
-                      `../academy/record?acaId=${acaId}&classId=${classId}&examId=${item.examId}`,
+                      `../test-record?acaId=${acaId}&classId=${classId}&examId=${item.examId}`,
                     )
                   }
                 >

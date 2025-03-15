@@ -66,11 +66,31 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         link: "/admin/arrow-list",
         active: false,
       },
-      // {
-      //   label: "강의 관리",
-      //   link: "/admin/academy/class",
-      //   active: false,
-      // },
+      {
+        label: "강의 관리",
+        link: "/admin/class",
+        active: false,
+      },
+      {
+        label: "강사 관리",
+        link: "/admin/teacher",
+        active: false,
+      },
+      {
+        label: "출석 관리",
+        link: "/admin/check-in",
+        active: false,
+      },
+      {
+        label: "교제 관리",
+        link: "/admin/textbook",
+        active: false,
+      },
+      {
+        label: "테스트 관리",
+        link: "/admin/test",
+        active: false,
+      },
       {
         label: "프리미엄 학원 관리",
         link: "/admin/premium",
@@ -226,6 +246,31 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
       {
         label: "학원 등록/수정/삭제",
         link: "/admin/academy",
+        active: false,
+      },
+      {
+        label: "강의 관리",
+        link: "/admin/class",
+        active: false,
+      },
+      {
+        label: "강사 관리",
+        link: "/admin/teacher",
+        active: false,
+      },
+      {
+        label: "출석 관리",
+        link: "/admin/check-in",
+        active: false,
+      },
+      {
+        label: "교제 관리",
+        link: "/admin/textbook",
+        active: false,
+      },
+      {
+        label: "테스트 관리",
+        link: "/admin/test",
         active: false,
       },
       {

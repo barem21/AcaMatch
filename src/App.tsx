@@ -59,7 +59,7 @@ import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import AcademyLike from "./pages/admin/academy/AcademyLike";
 import AcademyReview from "./pages/admin/academy/AcademyReview";
 import BannerView from "./pages/admin/BannerView.tsx";
-import CheckIn from "./pages/admin/teacher/CheckIn.tsx";
+import CheckIn from "./pages/admin/academy/CheckIn.tsx";
 import TeacherList from "./pages/admin/teacher/TeacherList";
 import TeacherAdd from "./pages/admin/teacher/TeacherAdd";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
@@ -177,7 +177,6 @@ function App() {
               <Route path="/admin">
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
-                {/* <Route path="memberInfo" element={<MemberInfo />} /> */}
                 <Route path="profile" element={<MemberInfo />} />
                 <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentmanager" element={<PaymentManager />} />
@@ -189,42 +188,28 @@ function App() {
                 <Route path="popup-content/add" element={<PopupAdd />} />
                 <Route path="banner-content" element={<BannerContent />} />
                 <Route path="banner-content/view" element={<BannerView />} />
-                <Route path="teacher">
-                  <Route path="checkIn" element={<CheckIn />} />
-                  <Route path="add" element={<TeacherAdd />} />
-                  <Route path="list" element={<TeacherList />} />
-                </Route>
+                <Route path="check-in" element={<CheckIn />} />
                 <Route path="academy" element={<AcademyList />} />
                 <Route path="arrow-list" element={<AcademyArrow />} />
-                <Route path="academy/add" element={<AcademyAdd />} />
+                <Route path="academy-add" element={<AcademyAdd />} />
                 <Route path="academy/edit" element={<AcademyEdit />} />
-                <Route path="academy/class" element={<AcademyClassList />} />
-                <Route path="academy/classAdd" element={<AcademyClassAdd />} />
-                <Route
-                  path="academy/classEdit"
-                  element={<AcademyClassEdit />}
-                />
+                <Route path="class" element={<AcademyClassList />} />
+                <Route path="class-add" element={<AcademyClassAdd />} />
+                <Route path="class-edit" element={<AcademyClassEdit />} />
+                <Route path="class-student" element={<AcademyStudent />} />
                 <Route path="academy/like" element={<AcademyLike />} />
                 <Route path="academy/review" element={<AcademyReview />} />
-                <Route path="academy/student" element={<AcademyStudent />} />
-                <Route path="academy/testList" element={<AcademyTestList />} />
-                <Route path="academy/record" element={<AcademyRecord />} />
+                <Route path="test" element={<AcademyTestList />} />
+                <Route path="test-record" element={<AcademyRecord />} />
                 <Route path="premium" element={<AcademyPremium />} />
                 <Route path="premium-req" element={<AcademyPremiumReq />} />
-                <Route
-                  path="academy/textbook"
-                  element={<AcademyTextbookList />}
-                />
-                <Route
-                  path="academy/textbookAdd"
-                  element={<AcademyTextbookAdd />}
-                />
-                <Route
-                  path="academy/textbookEdit"
-                  element={<AcademyTextbookEdit />}
-                />
+                <Route path="textbook" element={<AcademyTextbookList />} />
+                <Route path="textbook-add" element={<AcademyTextbookAdd />} />
+                <Route path="textbook-edit" element={<AcademyTextbookEdit />} />
                 <Route path="rep-member" element={<ReportMember />} />
                 <Route path="rep-academy" element={<ReportAcademy />} />
+                <Route path="teacher" element={<TeacherList />} />
+                <Route path="teacher-add" element={<TeacherAdd />} />
               </Route>
 
               <Route path="/404" element={<NotFoundPage />} />

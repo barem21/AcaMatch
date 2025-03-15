@@ -6,6 +6,21 @@ import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import { Cookies } from "react-cookie";
 
+interface classListType {
+  acaPic: string;
+  acaPics: string;
+  classId: number;
+  className: string;
+  endDate: string;
+  name: string;
+  startDate: string;
+}
+
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 interface studentListType {
   userId: number;
   userPic: string;
@@ -14,44 +29,62 @@ interface studentListType {
   birth: string;
 }
 
-interface classListType {
-  classId: number;
-  acaPics: string;
-  acaPic: string;
-  className: string;
-  startDate: string;
-  endDate: string;
-  name: string;
-}
-
 function AcademyStudent() {
   const [form] = Form.useForm();
   const cookies = new Cookies();
-  const currentUserInfo = useRecoilValue(userInfo);
+  const { roleId, userId } = useRecoilValue(userInfo);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
+  const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
   const [studentList, setStudentList] = useState<studentListType[]>([]);
   const [academyInfo, setAcademyInfo] = useState("");
-  const [classList, setClassList] = useState<classListType[]>([]);
 
-  const acaId = parseInt(searchParams.get("acaId") || "1", 0);
-  const classId = parseInt(searchParams.get("classId") || "1", 0);
-  const showCnt = parseInt(searchParams.get("showCnt") || "1", 30);
+  const acaId = parseInt(searchParams.get("acaId") || "", 0);
+  const classId = parseInt(searchParams.get("classId") || "", 0);
+  const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
-  //강좌 목록
-  const academyClassList = async () => {
+  //전체학원 목록
+  const academyList = async () => {
     try {
-      const res = await axios.get(
-        `/api/acaClass?acaId=${acaId ? acaId : 0}&page=1&size=${showCnt ? showCnt : 30}`,
-      );
-      setClassList(res.data.resultData);
-      console.log(res.data.resultData);
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(`/api/menuOut/academy`);
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
     } catch (error) {
       console.log(error);
     }
   };
   // acaId와 acaName만 남기기
-  const simplifiedData = classList.map(
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //강좌 목록
+  const academyClassList = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/menuOut/class?acaId=${value ? value : acaId}`,
+      );
+      setClassList(res.data.resultData);
+      //console.log("classList : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData2 = classList?.map(
     ({ classId: value, className: label }) => ({
       value,
       label,
@@ -59,13 +92,13 @@ function AcademyStudent() {
   );
 
   //수강생 목록
-  const academyStudentList = async () => {
+  const academyStudentList = async (values: any) => {
     try {
       const res = await axios.get(
-        `/api/acaClass/acaClassUser?classId=${classId}&page=1`,
+        `/api/acaClass/acaClassUser?classId=${values.classId}&page=1`,
       );
       setStudentList(res.data.resultData);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -76,19 +109,38 @@ function AcademyStudent() {
     try {
       const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
       setAcademyInfo(res.data.resultData.acaName);
-      console.log(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
   };
 
+  //학원 선택
+  const handleAcademyChange = (value: number) => {
+    //console.log(value);
+    form.setFieldsValue({
+      classId: null,
+    });
+    form.submit();
+    academyClassList(value); //강좌목록
+    setStudentList([]); //학원 선택하면 목록 초기화
+  };
+
+  //강좌선택
+  const handleClassChange = () => {
+    //console.log(value);
+    form.submit();
+  };
+
   //학원 검색
   const onFinished = async (values: any) => {
-    console.log(values);
+    //console.log(values);
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`../academy/student?${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`../class-student?${queryParams}`); //쿼리스트링 url에 추가
+
+    academyStudentList(values);
   };
 
   const onChange = () => {
@@ -96,26 +148,26 @@ function AcademyStudent() {
   };
 
   useEffect(() => {
-    academyClassList();
     academyGetInfo();
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      classId: classId ? classId : "all",
+      acaId: acaId ? acaId : null,
+      classId: classId ? classId : null,
       search: "",
-      showCnt: 40,
+      showCnt: 10,
     });
   }, []);
-
-  useEffect(() => {
-    academyStudentList();
-  }, [currentUserInfo]);
 
   useEffect(() => {
     if (!cookies.get("accessToken")) {
       navigate("/log-in");
       message.error("로그인이 필요한 서비스입니다.");
     }
+
+    academyList(); //학원 목록
+    academyClassList(acaId); //강좌 목록
+    academyStudentList({ classId: classId }); //학생 목록
   }, []);
 
   return (
@@ -130,18 +182,30 @@ function AcademyStudent() {
           <Form form={form} onFinish={values => onFinished(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-24 text-sm">수강생 검색</label>
-                <Form.Item name="classId" className="mb-0">
+                <label className="mr-3 text-sm">학원 선택</label>
+                <Form.Item name="acaId" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="강좌 선택"
+                    placeholder="학원 선택"
                     optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
-                    // onSearch={onSearch}
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleAcademyChange}
                     options={simplifiedData}
                   />
                 </Form.Item>
+
+                <label className="mr-3 ml-10 text-sm">강좌 선택</label>
+                <Form.Item name="classId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="강좌를 선택하세요"
+                    optionFilterProp="label"
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleClassChange}
+                    options={simplifiedData2}
+                  />
+                </Form.Item>
+
                 <Form.Item name="search" className="mb-0">
                   <Input
                     className="input-admin-basic w-60"
@@ -156,23 +220,23 @@ function AcademyStudent() {
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
                     // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />

@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 interface AcademyApproval {
   date: string;
   name: string;
@@ -11,9 +13,14 @@ interface AcademyApprovalListProps {
 const AcademyApprovalList = ({
   academyApprovals,
 }: AcademyApprovalListProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="w-full border rounded-[4px] h-fit mr-3">
-      <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
+      <span
+        className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b cursor-pointer"
+        onClick={() => navigate("arrow-list")}
+      >
         학원 승인 대기
       </span>
       <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
