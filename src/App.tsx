@@ -34,6 +34,8 @@ import AcaRevenue from "./pages/admin/AcaRevenue.tsx";
 import BannerContent from "./pages/admin/BannerContent.tsx";
 import MemberInfo from "./pages/admin/MemberInfo";
 import MemberList from "./pages/admin/MemberList";
+import ReportMember from "./pages/admin/ReportMember";
+import ReportAcademy from "./pages/admin/ReportAcademy";
 import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
 import NoticeContent from "./pages/admin/NoticeContent.tsx";
 import NoticeView from "./pages/admin/NoticeView.tsx";
@@ -221,7 +223,10 @@ function App() {
                   path="academy/textbookEdit"
                   element={<AcademyTextbookEdit />}
                 />
+                <Route path="rep-member" element={<ReportMember />} />
+                <Route path="rep-academy" element={<ReportAcademy />} />
               </Route>
+
               <Route path="/404" element={<NotFoundPage />} />
               <Route path="/success" element={<PaymentSuccess />} />
               <Route path="*" element={<NotFoundPage />} />

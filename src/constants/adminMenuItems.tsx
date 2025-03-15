@@ -7,6 +7,7 @@ import {
   FaShieldAlt,
   FaUserGraduate,
   FaUserEdit,
+  FaBan,
 } from "react-icons/fa";
 
 export interface MenuItem {
@@ -103,6 +104,25 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
       */
+    ],
+  },
+  {
+    type: "item",
+    icon: <FaBan />,
+    label: "신고 관리",
+    link: "/admin/report",
+    active: false,
+    list: [
+      {
+        label: "회원 신고",
+        link: "/admin/rep-member",
+        active: false,
+      },
+      {
+        label: "학원 신고",
+        link: "/admin/rep-academy",
+        active: false,
+      },
     ],
   },
   { type: "divider" },
