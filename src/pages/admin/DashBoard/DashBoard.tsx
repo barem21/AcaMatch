@@ -1,6 +1,6 @@
 import { DownOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Menu } from "antd";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CiCalendarDate } from "react-icons/ci";
 import { useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
@@ -20,9 +20,7 @@ import {
   CostCountData,
   CostInfo,
   DataKey,
-  MonthKey,
   SearchInfo,
-  UserCountData,
   WeekKey,
 } from "./types";
 
@@ -44,17 +42,6 @@ const thisMonthData: ChartData[] = [
   generateData("학원수", 50, 500, 31),
   // 결제내역 데이터는 API에서 가져올 예정
 ];
-
-// const lastMonthData: ChartData[] = [
-//   generateData("학원수", 40, 450, 30),
-//   // 결제내역 데이터는 API에서 가져올 예정
-// ];
-
-// const academyApprovals = [
-//   { date: "2024-02-15", name: "서울 학원", status: "대기중" },
-//   { date: "2024-02-16", name: "부산 학원", status: "대기중" },
-//   { date: "2024-02-17", name: "대구 학원", status: "대기중" },
-// ];
 
 interface ReportedUser {
   email: string;
@@ -111,21 +98,28 @@ interface AcademyCountData {
   totalAcademyCount: number;
 }
 
+// 타입 정의 수정
+interface DateSelection {
+  year: number;
+  month: number;
+}
+
 function DashBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
-  // const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<DataKey>(
     (searchParams.get("category") as DataKey) || "학원수",
   );
-  const [selectedMonth, setSelectedMonth] = useState<MonthKey>(
-    (searchParams.get("month") as MonthKey) || "이번 달",
-  );
+  const [selectedDate, setSelectedDate] = useState<DateSelection>(() => {
+    const now = new Date();
+    return {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+    };
+  });
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
     (searchParams.get("pieCategory") as CategoryKey) || "최근 검색",
   );
-  const [selectedTimeRange, setSelectedTimeRange] = useState<WeekKey>(
-    (searchParams.get("week") as WeekKey) || "이번주",
-  );
+  const [selectedTimeRange, setSelectedTimeRange] = useState<WeekKey>("이번주");
   const [selectedData, setSelectedData] = useState<ChartData[]>(thisMonthData);
   const [notices, setNotices] = useState<BoardItem[]>([]);
   const maxValue =
@@ -133,16 +127,15 @@ function DashBoard() {
       Math.max(...selectedData.flatMap(d => d.data.map(point => point.y))) /
         100,
     ) * 100;
-  const { userId } = useRecoilValue(userInfo);
+  const { userId, roleId } = useRecoilValue(userInfo);
   const [statsInfo, setStatsInfo] = useState<CostInfo>({
     costCount: 0,
     sumFee: 0,
     saleRate: 0,
   });
 
-  const [academyApprovals, setAcademyApprovals] = useState<
-    { date: string; name: string; status: string }[]
-  >([]);
+  const [approvalData, setApprovalData] = useState<any[]>([]);
+  const [academyApprovals, setAcademyApprovals] = useState<any[]>([]);
 
   const [reportedUsers, setReportedUsers] = useState<ReportedUser[]>([]);
 
@@ -168,6 +161,21 @@ function DashBoard() {
     },
   ];
 
+  const fetchApprovalData = async () => {
+    try {
+      if (roleId === 3) {
+        // 학원 관리자용 API
+        const response = await jwtAxios.get(
+          `/api/academy-manager/GetUserInfoList/${userId}`,
+        );
+        setApprovalData(response.data.resultData);
+      }
+    } catch (error) {
+      console.error("Error fetching approval data:", error);
+      setApprovalData([]);
+    }
+  };
+
   const fetchAcademyApprovals = async () => {
     try {
       const response = await jwtAxios.get(
@@ -190,18 +198,23 @@ function DashBoard() {
       console.error("Error fetching academy approvals:", error);
     }
   };
+
   useEffect(() => {
-    fetchAcademyApprovals();
-  }, []);
+    if (roleId === 3) {
+      fetchApprovalData();
+    } else {
+      fetchAcademyApprovals();
+    }
+  }, [roleId, userId]);
 
   useEffect(() => {
     setSearchParams({
       category: selectedItem,
-      month: selectedMonth,
+      month: selectedDate.month.toString(),
       pieCategory: selectedCategory,
       week: selectedTimeRange,
     });
-  }, [selectedItem, selectedMonth, selectedCategory, selectedTimeRange]);
+  }, [selectedItem, selectedDate.month, selectedCategory, selectedTimeRange]);
 
   const [userRegistrationData, setUserRegistrationData] = useState<ChartData[]>(
     [],
@@ -209,48 +222,51 @@ function DashBoard() {
   const [costData, setCostData] = useState<ChartData[]>([]);
   const [academyCountData, setAcademyCountData] = useState<ChartData[]>([]);
 
-  const fetchUserRegistrationData = async (period: MonthKey) => {
+  // 년/월 선택 핸들러
+  const handleYearMonthChange = (date: DateSelection) => {
+    setSelectedDate(date);
+  };
+
+  // fetchUserRegistrationData 수정
+  const fetchUserRegistrationData = async (date: DateSelection) => {
     try {
-      const apiPeriod = period === "이번 달" ? "이번달" : "지난달";
-      const response = await jwtAxios.get(
-        `/api/academy-manager/GetUserCount/${apiPeriod}`,
-      );
+      const response = await jwtAxios.get(`/api/academy-manager/GetUserCount`, {
+        params: {
+          year: date.year,
+          month: date.month,
+        },
+      });
       const { resultData } = response.data;
 
-      // 현재 날짜 정보 가져오기
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-      const currentDay = now.getDate();
-
-      // 목표 월 계산 (이번 달 또는 지난 달)
-      const targetMonth =
-        period === "이번 달" ? currentMonth : currentMonth - 1;
-      const targetYear = currentYear;
-
       // 해당 월의 총 일수 계산
-      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const daysInMonth = new Date(date.year, date.month, 0).getDate();
 
-      // 이번 달의 경우 현재 날짜까지만, 지난 달의 경우 월말까지 표시
-      const maxDay = period === "이번 달" ? currentDay : daysInMonth;
-
-      // maxDay까지의 날짜 배열 생성 (초기값 0으로 설정)
-      const allDaysData = Array.from({ length: maxDay }, (_, index) => ({
+      // 날짜 배열 생성 (초기값 0으로 설정)
+      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
         x: (index + 1).toString().padStart(2, "0"),
         y: 0,
       }));
 
-      // API 응답 데이터로 실제 값 업데이트
+      // API 응답 데이터로 실제 값 업데이트 (누적 계산)
       if (resultData && Array.isArray(resultData)) {
-        resultData.forEach((item: UserCountData) => {
-          const day = parseInt(item.registerDate.split("-")[2]);
-          if (day >= 1 && day <= maxDay) {
-            allDaysData[day - 1].y = item.totalUserCount;
-          }
-        });
+        let accumulatedCount = 0;
+
+        // 날짜별 데이터를 객체로 변환하여 빠른 접근
+        const dateMap = new Map(
+          resultData.map(item => [
+            parseInt(item.registerDate.split("-")[2]),
+            item.totalUserCount,
+          ]),
+        );
+
+        // 각 날짜에 대해 누적값 계산
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayCount = dateMap.get(day) || 0;
+          accumulatedCount += dayCount;
+          allDaysData[day - 1].y = accumulatedCount;
+        }
       }
 
-      // 차트 데이터 형식으로 변환
       const chartData: ChartData = {
         id: "회원수",
         color: COLORS["회원수"],
@@ -258,22 +274,22 @@ function DashBoard() {
       };
 
       setUserRegistrationData([chartData]);
-
       if (selectedItem === "회원수") {
         setSelectedData([chartData]);
       }
     } catch (error) {
       console.error("Error fetching user registration data:", error);
-      const now = new Date();
-      const maxDay = period === "이번 달" ? now.getDate() : 31;
-
+      // 에러 시 빈 데이터 설정
       const emptyData: ChartData = {
         id: "회원수",
         color: COLORS["회원수"],
-        data: Array.from({ length: maxDay }, (_, index) => ({
-          x: (index + 1).toString().padStart(2, "0"),
-          y: 0,
-        })),
+        data: Array.from(
+          { length: new Date(date.year, date.month, 0).getDate() },
+          (_, index) => ({
+            x: (index + 1).toString().padStart(2, "0"),
+            y: 0,
+          }),
+        ),
       };
       setUserRegistrationData([emptyData]);
       if (selectedItem === "회원수") {
@@ -283,33 +299,24 @@ function DashBoard() {
   };
 
   // Add function to fetch cost data
-  const fetchCostData = async (period: MonthKey) => {
+  const fetchCostData = async (date: DateSelection) => {
     try {
-      const apiPeriod = period === "이번 달" ? "이번달" : "지난달";
       const response = await jwtAxios.get(
-        `/api/academy-manager/GetAcademyCostCount/${apiPeriod}`,
+        `/api/academy-manager/GetAcademyCostCount`,
+        {
+          params: {
+            year: date.year,
+            month: date.month,
+          },
+        },
       );
       const { resultData } = response.data;
 
-      // 현재 날짜 정보 가져오기
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-      const currentDay = now.getDate();
-
-      // 목표 월 계산 (이번 달 또는 지난 달)
-      const targetMonth =
-        period === "이번 달" ? currentMonth : currentMonth - 1;
-      const targetYear = currentYear;
-
       // 해당 월의 총 일수 계산
-      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const daysInMonth = new Date(date.year, date.month, 0).getDate();
 
-      // 이번 달의 경우 현재 날짜까지만, 지난 달의 경우 월말까지 표시
-      const maxDay = period === "이번 달" ? currentDay : daysInMonth;
-
-      // maxDay까지의 날짜 배열 생성 (초기값 0으로 설정)
-      const allDaysData = Array.from({ length: maxDay }, (_, index) => ({
+      // 날짜 배열 생성
+      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
         x: (index + 1).toString().padStart(2, "0"),
         y: 0,
       }));
@@ -318,13 +325,12 @@ function DashBoard() {
       if (resultData && Array.isArray(resultData)) {
         resultData.forEach((item: CostCountData) => {
           const day = parseInt(item.registerDate.split("-")[2]);
-          if (day >= 1 && day <= maxDay) {
+          if (day >= 1 && day <= daysInMonth) {
             allDaysData[day - 1].y = item.academyCostCount;
           }
         });
       }
 
-      // 차트 데이터 형식으로 변환
       const chartData: ChartData = {
         id: "결제내역",
         color: COLORS["결제내역"],
@@ -339,7 +345,7 @@ function DashBoard() {
     } catch (error) {
       console.error("Error fetching cost data:", error);
       const now = new Date();
-      const maxDay = period === "이번 달" ? now.getDate() : 31;
+      const maxDay = date.month === now.getMonth() + 1 ? now.getDate() : 31;
 
       const emptyData: ChartData = {
         id: "결제내역",
@@ -357,33 +363,24 @@ function DashBoard() {
   };
 
   // 학원 수 데이터를 가져오는 함수
-  const fetchAcademyCount = async (period: MonthKey) => {
+  const fetchAcademyCount = async (date: DateSelection) => {
     try {
-      const apiPeriod = period === "이번 달" ? "이번달" : "지난달";
       const response = await jwtAxios.get(
-        `/api/academy-manager/GetAcademyCount/${apiPeriod}`,
+        `/api/academy-manager/GetAcademyCount`,
+        {
+          params: {
+            year: date.year,
+            month: date.month,
+          },
+        },
       );
       const { resultData } = response.data;
 
-      // 현재 날짜 정보 가져오기
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-      const currentDay = now.getDate();
-
-      // 목표 월 계산 (이번 달 또는 지난 달)
-      const targetMonth =
-        period === "이번 달" ? currentMonth : currentMonth - 1;
-      const targetYear = currentYear;
-
       // 해당 월의 총 일수 계산
-      const daysInMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+      const daysInMonth = new Date(date.year, date.month, 0).getDate();
 
-      // 이번 달의 경우 현재 날짜까지만, 지난 달의 경우 월말까지 표시
-      const maxDay = period === "이번 달" ? currentDay : daysInMonth;
-
-      // maxDay까지의 날짜 배열 생성 (초기값 0으로 설정)
-      const allDaysData = Array.from({ length: maxDay }, (_, index) => ({
+      // 날짜 배열 생성
+      const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
         x: (index + 1).toString().padStart(2, "0"),
         y: 0,
       }));
@@ -392,13 +389,12 @@ function DashBoard() {
       if (resultData && Array.isArray(resultData)) {
         resultData.forEach((item: AcademyCountData) => {
           const day = parseInt(item.registerDate.split("-")[2]);
-          if (day >= 1 && day <= maxDay) {
+          if (day >= 1 && day <= daysInMonth) {
             allDaysData[day - 1].y = item.totalAcademyCount;
           }
         });
       }
 
-      // 차트 데이터 형식으로 변환
       const chartData: ChartData = {
         id: "학원수",
         color: COLORS["학원수"],
@@ -416,7 +412,7 @@ function DashBoard() {
 
       // 에러 발생 시 빈 데이터로 초기화
       const now = new Date();
-      const maxDay = period === "이번 달" ? now.getDate() : 31;
+      const maxDay = date.month === now.getMonth() + 1 ? now.getDate() : 31;
 
       const emptyData: ChartData = {
         id: "학원수",
@@ -439,68 +435,81 @@ function DashBoard() {
   useEffect(() => {
     const loadInitialData = async () => {
       // 학원수 데이터 로드
-      await fetchAcademyCount(selectedMonth);
+      await fetchAcademyCount(selectedDate);
 
       // 회원수 데이터 로드
-      await fetchUserRegistrationData(selectedMonth);
+      await fetchUserRegistrationData(selectedDate);
 
       // 결제내역 데이터 로드
-      await fetchCostData(selectedMonth);
+      await fetchCostData(selectedDate);
     };
 
     loadInitialData();
   }, []); // 컴포넌트 마운트 시 한 번만 실행
 
-  // 월 변경 시 모든 데이터 다시 로드
+  // useEffect 수정
   useEffect(() => {
     const loadMonthlyData = async () => {
       if (selectedItem === "학원수") {
-        await fetchAcademyCount(selectedMonth);
+        await fetchAcademyCount(selectedDate);
       } else if (selectedItem === "회원수") {
-        await fetchUserRegistrationData(selectedMonth);
+        await fetchUserRegistrationData(selectedDate);
       } else if (selectedItem === "결제내역") {
-        await fetchCostData(selectedMonth);
+        await fetchCostData(selectedDate);
       }
     };
 
     loadMonthlyData();
-  }, [selectedMonth]);
+  }, [selectedDate, selectedItem]);
 
-  // handleCategoryClick 수정
-  const handleCategoryClick = async (e: { key: string }) => {
-    const newItem = e.key as DataKey;
-    setSelectedItem(newItem);
+  // 핸들러 함수들
+  const handleTimeRangeClick = useCallback((e: { key: string }) => {
+    setSelectedTimeRange(e.key as WeekKey);
+  }, []);
 
-    // 카테고리 변경 시 해당 데이터 로드
-    if (newItem === "학원수") {
-      await fetchAcademyCount(selectedMonth);
-      setSelectedData(academyCountData);
-    } else if (newItem === "회원수") {
-      await fetchUserRegistrationData(selectedMonth);
-      setSelectedData(userRegistrationData);
-    } else if (newItem === "결제내역") {
-      await fetchCostData(selectedMonth);
-      setSelectedData(costData);
+  const handleCategoryClick = useCallback((e: { key: string }) => {
+    if (e.key === "학원수" || e.key === "회원수" || e.key === "결제내역") {
+      setSelectedItem(e.key as DataKey);
     }
-  };
+  }, []);
 
-  // handleMonthClick 수정
-  const handleMonthClick = async (e: { key: string }) => {
-    const monthKey = e.key as MonthKey;
-    setSelectedMonth(monthKey);
-
-    // 월 변경 시 현재 선택된 카테고리의 데이터 로드
-    if (selectedItem === "학원수") {
-      await fetchAcademyCount(monthKey);
-      setSelectedData(academyCountData);
-    } else if (selectedItem === "회원수") {
-      await fetchUserRegistrationData(monthKey);
-      setSelectedData(userRegistrationData);
-    } else if (selectedItem === "결제내역") {
-      await fetchCostData(monthKey);
-      setSelectedData(costData);
+  const handleCategoryClick2 = useCallback((e: { key: string }) => {
+    if (pieChartData[e.key as CategoryKey]) {
+      setSelectedCategory(e.key as CategoryKey);
     }
-  };
+  }, []);
+
+  // 메뉴 컴포넌트들을 useMemo로 메모이제이션
+  const categoryMenu = useMemo(
+    () => (
+      <Menu onClick={handleCategoryClick}>
+        <Menu.Item key="학원수">학원수</Menu.Item>
+        <Menu.Item key="회원수">회원수</Menu.Item>
+        <Menu.Item key="결제내역">결제내역</Menu.Item>
+      </Menu>
+    ),
+    [handleCategoryClick],
+  );
+
+  const categoryMenu2 = useMemo(
+    () => (
+      <Menu onClick={handleCategoryClick2}>
+        <Menu.Item key="최근 검색">최근검색</Menu.Item>
+        <Menu.Item key="방문 통계">방문통계</Menu.Item>
+      </Menu>
+    ),
+    [handleCategoryClick2],
+  );
+
+  const timeRangeMenu = useMemo(
+    () => (
+      <Menu onClick={handleTimeRangeClick}>
+        <Menu.Item key="이번주">이번주</Menu.Item>
+        <Menu.Item key="지난주">지난주</Menu.Item>
+      </Menu>
+    ),
+    [handleTimeRangeClick],
+  );
 
   // 데이터 변경 시 selectedData 업데이트
   useEffect(() => {
@@ -561,49 +570,6 @@ function DashBoard() {
     selectedCategory === "최근 검색"
       ? searchData[selectedTimeRange]
       : pieChartData[selectedCategory][selectedTimeRange];
-
-  // ResponsivePie용 카테고리 선택 이벤트
-  const handleCategoryClick2 = (e: { key: string }) => {
-    console.log("선택된 카테고리:", e.key);
-    if (pieChartData[e.key as CategoryKey]) {
-      setSelectedCategory(e.key as CategoryKey);
-    } else {
-      console.warn(`잘못된 카테고리 선택: ${e.key}`);
-    }
-  };
-
-  const categoryMenu = (
-    <Menu onClick={handleCategoryClick}>
-      <Menu.Item key="학원수">학원수</Menu.Item>
-      <Menu.Item key="회원수">회원수</Menu.Item>
-      <Menu.Item key="결제내역">결제내역</Menu.Item>
-    </Menu>
-  );
-
-  const categoryMenu2 = (
-    <Menu onClick={handleCategoryClick2}>
-      <Menu.Item key="최근 검색">최근검색</Menu.Item>
-      <Menu.Item key="방문 통계">방문통계</Menu.Item>
-    </Menu>
-  );
-
-  const monthMenu = (
-    <Menu onClick={handleMonthClick}>
-      <Menu.Item key="이번 달">이번 달</Menu.Item>
-      <Menu.Item key="지난 달">지난 달</Menu.Item>
-    </Menu>
-  );
-
-  const handleTimeRangeClick = (e: { key: string }) => {
-    setSelectedTimeRange(e.key as WeekKey);
-  };
-
-  const timeRangeMenu = (
-    <Menu onClick={handleTimeRangeClick}>
-      <Menu.Item key="이번주">이번주</Menu.Item>
-      <Menu.Item key="지난주">지난주</Menu.Item>
-    </Menu>
-  );
 
   // 공지사항 데이터를 가져오는 함수
   const fetchNotices = async () => {
@@ -688,29 +654,76 @@ function DashBoard() {
       </h1>
       <div className="flex w-full">
         <div className="flex flex-col w-[calc(100%-362px)] mr-3 gap-[12px]">
-          <div className="w-full gap-0 border rounded-lg ">
+          <div className="w-full gap-0 border rounded-lg">
             <div className="flex justify-between w-full p-3 border-b items-center">
               <Dropdown overlay={categoryMenu} trigger={["click"]}>
                 <Button type="text" className="flex justify-between w-[120px]">
                   {selectedItem} <DownOutlined />
                 </Button>
               </Dropdown>
-
-              <Dropdown overlay={monthMenu} trigger={["click"]}>
-                <Button
-                  type="text"
-                  className="flex justify-between w-[120px]"
-                  size="small"
+              <div className="flex gap-2">
+                <Dropdown
+                  overlay={
+                    <Menu
+                      onClick={e =>
+                        handleYearMonthChange({
+                          ...selectedDate,
+                          year: Number(e.key),
+                        })
+                      }
+                    >
+                      {Array.from(
+                        { length: 5 },
+                        (_, i) => new Date().getFullYear() - i,
+                      ).map(year => (
+                        <Menu.Item key={year}>{year}년</Menu.Item>
+                      ))}
+                    </Menu>
+                  }
+                  trigger={["click"]}
                 >
-                  {selectedMonth} <DownOutlined />
-                </Button>
-              </Dropdown>
+                  <Button
+                    type="text"
+                    size="small"
+                    className="flex justify-between w-[100px]"
+                  >
+                    {selectedDate.year}년 <DownOutlined />
+                  </Button>
+                </Dropdown>
+                <Dropdown
+                  overlay={
+                    <Menu
+                      onClick={e =>
+                        handleYearMonthChange({
+                          ...selectedDate,
+                          month: Number(e.key),
+                        })
+                      }
+                    >
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                        month => (
+                          <Menu.Item key={month}>{month}월</Menu.Item>
+                        ),
+                      )}
+                    </Menu>
+                  }
+                  trigger={["click"]}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    className="flex justify-between w-[80px]"
+                  >
+                    {selectedDate.month}월 <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </div>
             </div>
 
             <div style={{ height: "300px" }}>
               <LineChart
                 selectedData={selectedData}
-                selectedMonth={selectedMonth}
+                selectedMonth={selectedDate.month.toString()}
                 selectedItem={selectedItem}
                 maxValue={maxValue}
               />
@@ -750,7 +763,10 @@ function DashBoard() {
       </div>
 
       <div className="flex mt-[12px]">
-        <AcademyApprovalList academyApprovals={academyApprovals} />
+        <AcademyApprovalList
+          data={roleId === 3 ? approvalData : academyApprovals}
+          roleId={roleId}
+        />
         <ReportedUserList reportedUsers={reportedUsers} />
       </div>
     </div>
