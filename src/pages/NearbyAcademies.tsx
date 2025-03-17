@@ -5,6 +5,11 @@ import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getCookie } from "../utils/cookie";
 
+interface Location {
+  lat: number;
+  lon: number;
+}
+
 const NearbyAcademies = () => {
   // const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,10 +21,7 @@ const NearbyAcademies = () => {
   // const [hasMore, setHasMore] = useState(true);
   const pageSize = 10;
   const [_isLoggedIn, setIsLoggedIn] = useState(false);
-  const [_userLocation, setUserLocation] = useState<{
-    lat: number;
-    lon: number;
-  } | null>(null);
+  const [_userLocation, setUserLocation] = useState<Location | null>(null);
 
   const usedRandomNumbers = new Set<number>();
   const getRandomUniqueNumber = () => {
@@ -70,7 +72,7 @@ const NearbyAcademies = () => {
       setIsLoggedIn(!!accessToken);
 
       try {
-        let location;
+        let location: Location;
         if (accessToken) {
           // 방법 1: ip-api.com 사용
           try {
@@ -92,7 +94,7 @@ const NearbyAcademies = () => {
               };
             } catch (error) {
               // 방법 3: geolocation API 사용 (브라우저 내장)
-              location = await new Promise((resolve, reject) => {
+              location = await new Promise<Location>(resolve => {
                 if (navigator.geolocation) {
                   navigator.geolocation.getCurrentPosition(
                     position => {

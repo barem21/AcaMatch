@@ -111,12 +111,18 @@ const NoticeContent = () => {
     if (value === "server") {
       setSelectedAcaId(null);
       navigate("/admin/notice-content");
+    } else if (value === "academy" && myAcademyList.length > 0) {
+      const firstAcademy = myAcademyList[0];
+      setSelectedAcaId(firstAcademy.acaId);
+      navigate(`/admin/notice-content?acaId=${firstAcademy.acaId}`);
     }
   };
 
   const handleAcademyChange = (value: number) => {
     setSelectedAcaId(value);
+    setCurrentPage(1);
     navigate(`/admin/notice-content?acaId=${value}`);
+    fetchBoardList(1, pageSize);
   };
 
   useEffect(() => {
@@ -128,6 +134,13 @@ const NoticeContent = () => {
         search: "",
         showCnt: pageSize,
       });
+
+      const params = new URLSearchParams(location.search);
+      if (!params.get("acaId")) {
+        setNoticeType("server");
+        setSelectedAcaId(null);
+      }
+
       fetchBoardList(currentPage, pageSize);
     }
   }, [userId]);
@@ -145,6 +158,17 @@ const NoticeContent = () => {
           `/api/academy/getAcademyListByUserId?signedUserId=${userId}&acaAgree=1`,
         );
         setMyAcademyList(res.data.resultData);
+
+        if (res.data.resultData.length > 0) {
+          const params = new URLSearchParams(location.search);
+          const acaId = params.get("acaId");
+
+          if (!acaId) {
+            const firstAcademy = res.data.resultData[0];
+            setSelectedAcaId(firstAcademy.acaId);
+            navigate(`/admin/notice-content?acaId=${firstAcademy.acaId}`);
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch academy list:", error);
       }
@@ -158,11 +182,19 @@ const NoticeContent = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const acaId = params.get("acaId");
+
     if (acaId) {
       setNoticeType("academy");
       setSelectedAcaId(Number(acaId));
+      fetchBoardList(currentPage, pageSize);
     }
   }, [location.search]);
+
+  useEffect(() => {
+    if (noticeType === "academy" && selectedAcaId) {
+      fetchBoardList(currentPage, pageSize);
+    }
+  }, [selectedAcaId]);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -232,7 +264,19 @@ const NoticeContent = () => {
                 {(roleId !== 3 || noticeType !== "server") && (
                   <Button
                     className="btn-admin-basic"
-                    onClick={() => navigate("/admin/notice-content/add")}
+                    onClick={() => {
+                      if (
+                        roleId === 3 &&
+                        noticeType === "academy" &&
+                        selectedAcaId
+                      ) {
+                        navigate(
+                          `/admin/notice-content/add?acaId=${selectedAcaId}`,
+                        );
+                      } else {
+                        navigate("/admin/notice-content/add");
+                      }
+                    }}
                   >
                     + 공지사항 등록
                   </Button>
@@ -310,11 +354,20 @@ const NoticeContent = () => {
                 <div className="flex items-center justify-center min-w-[132px]">
                   <p
                     className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
-                    onClick={() =>
+                    onClick={() => {
+                      const queryParams = new URLSearchParams();
+                      queryParams.append("boardId", item.boardId.toString());
+                      if (
+                        roleId === 3 &&
+                        noticeType === "academy" &&
+                        selectedAcaId
+                      ) {
+                        queryParams.append("acaId", selectedAcaId.toString());
+                      }
                       navigate(
-                        `/admin/notice-content/add?boardId=${item.boardId}`,
-                      )
-                    }
+                        `/admin/notice-content/add?${queryParams.toString()}`,
+                      );
+                    }}
                   >
                     수정하기
                   </p>

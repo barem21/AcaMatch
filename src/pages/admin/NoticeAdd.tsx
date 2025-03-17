@@ -10,20 +10,19 @@ const NoticeAdd = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { userId } = useRecoilValue(userInfo);
+  const { userId, roleId } = useRecoilValue(userInfo);
   const boardId = searchParams.get("boardId");
+  const acaId = searchParams.get("acaId");
   const isEdit = !!boardId;
 
   const fetchBoardDetail = async () => {
-    if (!userId || !boardId) return;
+    if (!boardId) return;
 
     try {
-      // URL 파라미터에서 직접 데이터 가져오기
       const urlParams = new URLSearchParams(window.location.search);
       const boardName = urlParams.get("boardName");
       const boardComment = urlParams.get("boardComment");
 
-      // URL에 데이터가 있는 경우 해당 데이터 사용
       if (boardName && boardComment) {
         form.setFieldsValue({
           title: decodeURIComponent(boardName),
@@ -32,13 +31,17 @@ const NoticeAdd = () => {
         return;
       }
 
-      // URL에 데이터가 없는 경우 API 호출
-      const response = await jwtAxios.get(`/api/board`, {
-        params: {
-          boardId: boardId,
-          userId: userId,
-        },
-      });
+      const params: any = {
+        boardId: boardId,
+      };
+
+      if (roleId === 3 && acaId) {
+        params.acaId = acaId;
+      } else {
+        params.userId = userId;
+      }
+
+      const response = await jwtAxios.get(`/api/board`, { params });
 
       const boardDetail = response.data.resultData;
       if (boardDetail) {
@@ -56,14 +59,19 @@ const NoticeAdd = () => {
   const onFinished = async (values: any) => {
     try {
       const formData = new FormData();
-      formData.append("userId", (userId ?? -1).toString());
+
+      if (roleId === 3 && acaId) {
+        formData.append("acaId", acaId);
+      } else {
+        formData.append("userId", (userId ?? -1).toString());
+      }
+
       formData.append("boardName", values.title);
       formData.append("boardComment", values.content);
 
       let response;
 
       if (isEdit) {
-        // 수정 시 PUT 요청
         formData.append("boardId", boardId!);
         response = await jwtAxios.put("/api/board", formData, {
           headers: {
@@ -71,20 +79,22 @@ const NoticeAdd = () => {
           },
         });
       } else {
-        // 신규 등록 시 POST 요청
         response = await jwtAxios.post("/api/board", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
         });
       }
-      console.log(response);
 
       if (response.data.resultMessage) {
         message.success(
           isEdit ? "공지사항이 수정되었습니다." : "공지사항이 등록되었습니다.",
         );
-        navigate("/admin/notice-content");
+        if (roleId === 3 && acaId) {
+          navigate(`/admin/notice-content?acaId=${acaId}`);
+        } else {
+          navigate("/admin/notice-content");
+        }
       }
     } catch (error) {
       console.error("Error details:", error);

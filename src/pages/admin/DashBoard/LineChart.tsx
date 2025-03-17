@@ -1,5 +1,6 @@
 import { ResponsiveLine } from "@nivo/line";
 import { COLORS, DataKey } from "./types";
+import { useEffect, useState } from "react";
 
 interface LineChartProps {
   selectedData: any[];
@@ -14,6 +15,14 @@ const LineChart = ({
   selectedItem,
   // maxValue,
 }: LineChartProps) => {
+  // 차트 키를 상태로 관리하여 데이터 변경 시 차트를 강제로 다시 렌더링
+  const [chartKey, setChartKey] = useState(`${selectedMonth}-${selectedItem}`);
+
+  // 데이터가 변경될 때마다 차트 키를 업데이트
+  useEffect(() => {
+    setChartKey(`${selectedMonth}-${selectedItem}-${Date.now()}`);
+  }, [selectedData, selectedMonth, selectedItem]);
+
   if (!selectedData || selectedData.length === 0) {
     return (
       <div className="h-full w-full flex items-center justify-center text-gray-500">
@@ -22,23 +31,44 @@ const LineChart = ({
     );
   }
 
+  // 현재 날짜 정보 가져오기
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // JavaScript는 0부터 시작하므로 +1
+  const currentDay = now.getDate();
+
+  // 선택된 월이 현재 월인지 확인
+  const isCurrentMonth = parseInt(selectedMonth) === currentMonth;
+
+  // 현재 월일 경우 오늘 날짜까지만 데이터 필터링
+  const filteredData = selectedData.map(dataset => ({
+    ...dataset,
+    data: dataset.data.filter((point: any) => {
+      const day = parseInt(point.x);
+      return !isCurrentMonth || day <= currentDay;
+    }),
+  }));
+
   // 데이터의 최대값 계산
   const dataMax = Math.max(
-    ...selectedData.flatMap(d => d.data.map((point: any) => point.y)),
+    ...filteredData.flatMap(d => d.data.map((point: any) => point.y)),
   );
-  // 적절한 눈금 간격 계산 (예: 최대값을 5로 나누어 사용)
-  const tickInterval = Math.ceil(dataMax / 5);
+
+  // 최대값이 0이면 기본값 5 사용, 아니면 적절한 간격 계산
+  const tickInterval = dataMax === 0 ? 1 : Math.ceil(dataMax / 5);
+
+  // 최대 y값 계산 (데이터가 없으면 5, 있으면 데이터 최대값의 1.1배)
+  const yMax = dataMax === 0 ? 5 : Math.ceil(dataMax * 1.1);
 
   return (
     <ResponsiveLine
-      key={`${selectedMonth}-${selectedItem}`}
-      data={selectedData}
-      margin={{ top: 50, right: 50, bottom: 50, left: 60 }} // left margin 증가
+      key={chartKey} // 데이터 변경 시 차트를 강제로 다시 렌더링하기 위한 키
+      data={filteredData}
+      margin={{ top: 50, right: 50, bottom: 50, left: 60 }}
       xScale={{ type: "point" }}
       yScale={{
         type: "linear",
         min: 0,
-        max: Math.ceil(dataMax * 1.1), // 최대값보다 약간 더 높게 설정
+        max: yMax, // 계산된 최대값 사용
         stacked: false,
       }}
       gridXValues={[]}
