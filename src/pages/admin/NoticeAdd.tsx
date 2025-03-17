@@ -6,16 +6,6 @@ import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 
-// const InputWrapper = styled.div`
-//   width: 100%;
-//   .ant-input {
-//     height: 40px;
-//     border-radius: 4px;
-//   }
-//   .ant-form-item {
-//     width: 100%;
-//   }
-// `;
 const NoticeAdd = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -148,11 +138,6 @@ const NoticeAdd = () => {
                   className="w-full m-0"
                   rules={[{ required: true, message: "내용을 입력해주세요" }]}
                 >
-                  {/* <Input.TextArea
-                    rows={20}
-                    placeholder="내용을 입력해주세요"
-                    style={{ width: "100%" }}
-                  /> */}
                   <ReactQuill
                     placeholder="내용을 작성해 주세요."
                     className="h-[500px]"

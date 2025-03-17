@@ -24,22 +24,22 @@ import {
   WeekKey,
 } from "./types";
 
-const generateData = (
-  id: DataKey,
-  min: number,
-  max: number,
-  days: number,
-): ChartData => ({
-  id,
-  color: COLORS[id],
-  data: Array.from({ length: days }, (_, i) => ({
-    x: (i + 1).toString().padStart(2, "0"),
-    y: Math.floor(Math.random() * (max - min + 1)) + min,
-  })),
-});
+// const generateData = (
+//   id: DataKey,
+//   min: number,
+//   max: number,
+//   days: number,
+// ): ChartData => ({
+//   id,
+//   color: COLORS[id],
+//   data: Array.from({ length: days }, (_, i) => ({
+//     x: (i + 1).toString().padStart(2, "0"),
+//     y: Math.floor(Math.random() * (max - min + 1)) + min,
+//   })),
+// });
 
 const thisMonthData: ChartData[] = [
-  generateData("학원수", 50, 500, 31),
+  // generateData("학원수", 50, 500, 31),
   // 결제내역 데이터는 API에서 가져올 예정
 ];
 
@@ -577,7 +577,8 @@ function DashBoard() {
     try {
       const response = await jwtAxios.get(`/api/board/list`, {
         params: {
-          userId: userId,
+          // userId: userId,
+          userId: 1,
           page: 1,
           size: 3,
         },
@@ -765,7 +766,7 @@ function DashBoard() {
       <div className="flex mt-[12px]">
         <AcademyApprovalList
           data={roleId === 3 ? approvalData : academyApprovals}
-          roleId={roleId}
+          roleId={roleId as number}
         />
         <ReportedUserList reportedUsers={reportedUsers} />
       </div>

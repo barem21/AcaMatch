@@ -59,9 +59,10 @@ function InquiryList() {
     try {
       const res = await jwtAxios.get(
         roleId === 3
-          ? `/api/academy/getAcademyListByUserId?signedUserId=${userId}`
+          ? `/api/academy/getAcademyListByUserId?signedUserId=${userId}&acaAgree=1`
           : `/api/chat?user-id=${userId}`,
       );
+      console.log(res.data.resultData);
       if (roleId === 3) {
         setMyAcademyList(res.data.resultData);
       } else {

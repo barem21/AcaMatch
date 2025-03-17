@@ -553,7 +553,7 @@ const AcademyDetail = () => {
     }
 
     if (!userId) {
-      alert("로그인이 필요한 서비스입니다.");
+      // alert("로그인이 필요한 서비스입니다.");
       navigate("/log-in");
       return;
     }
@@ -572,7 +572,7 @@ const AcademyDetail = () => {
       setSelectedReportType("");
     } catch (error) {
       console.error("신고 처리 중 오류가 발생했습니다:", error);
-      alert("신고 처리 중 오류가 발생했습니다.");
+      // alert("신고 처리 중 오류가 발생했습니다.");
     }
   };
 

@@ -62,7 +62,7 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
             승인상태
           </li>
         </ul>
-        <div className="overflow-hidden">
+        <div className="overflow-hidden h-[150px]">
           {userApprovals.slice(0, 5).map((item, index, array) => (
             <ul
               key={index}
@@ -131,8 +131,8 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
         {academyApprovals.slice(0, 5).map((item, index, array) => (
           <ul
             key={index}
-            className={`flex mx-auto w-full h-[30px] text-[14px] ${
-              index !== array.length - 1 ? "border-b" : ""
+            className={`flex mx-auto w-full h-[30px] ${
+              index < 4 ? "border-b" : ""
             }`}
           >
             <li className="flex justify-center items-center w-1/3 text-[#242424] text-[14px]">
