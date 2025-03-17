@@ -71,7 +71,10 @@ function PaymentManager() {
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    updateSearchParams({
+      page: page.toString(),
+    });
+    // MyPage 컴포넌트와 동일한 방식으로 스크롤 처리
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -168,12 +171,38 @@ function PaymentManager() {
     }
   };
 
+  // 페이지 변경 감지를 위한 useEffect 추가
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]); // currentPage가 변경될 때마다 실행
+
+  // searchParams 변경 감지를 위한 useEffect
   useEffect(() => {
     fetchAcademyList();
-  }, [searchParams]); // searchParams가 변경될 때마다 API 호출
+  }, [searchParams]);
+
+  const handleSizeChange = (value: number) => {
+    // 먼저 스크롤을 실행
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }, 0);
+
+    setPageSize(value);
+    updateSearchParams({
+      size: value.toString(),
+      page: "1",
+    });
+  };
 
   return (
-    <div className="flex gap-5 w-full justify-center align-top" ref={scrollRef}>
+    <div
+      id="list-wrap"
+      ref={scrollRef}
+      className="flex gap-5 w-full justify-center align-top"
+    >
       <div className="w-full">
         <h1 className="title-admin-font">
           학원별 결제 내역 (학원비/교제구매)
@@ -247,15 +276,9 @@ function PaymentManager() {
                 <Form.Item name="size" className="mb-0">
                   <Select
                     className="select-admin-basic"
-                    defaultValue={30} // 기본값 설정
-                    value={pageSize} // 현재 상태값
-                    onChange={value => {
-                      setPageSize(value); // 상태 업데이트
-                      updateSearchParams({
-                        size: value.toString(),
-                        page: "1",
-                      });
-                    }}
+                    defaultValue={30}
+                    value={pageSize}
+                    onChange={handleSizeChange}
                     options={[
                       { value: 30, label: "30개씩 보기" },
                       { value: 40, label: "40개씩 보기" },
@@ -314,11 +337,7 @@ function PaymentManager() {
             total={totalCount}
             pageSize={pageSize}
             showSizeChanger={false}
-            onChange={page => {
-              updateSearchParams({
-                page: page.toString(),
-              });
-            }}
+            onChange={handlePageChange}
           />
         </div>
       </div>

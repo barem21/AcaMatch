@@ -1,7 +1,8 @@
 import { Button, Form, message, Pagination, Select } from "antd";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
@@ -25,28 +26,30 @@ const NoticeContent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(40);
   const [_searchText, setSearchText] = useState("");
-  const { userId } = useRecoilValue(userInfo);
+  const { userId, roleId } = useRecoilValue(userInfo);
+  const [noticeType, setNoticeType] = useState<"server" | "academy">("server");
+  const [myAcademyList, setMyAcademyList] = useState<
+    Array<{ acaId: number; acaName: string }>
+  >([]);
+  const [selectedAcaId, setSelectedAcaId] = useState<number | null>(null);
+  const location = useLocation();
 
   const fetchBoardList = async (page: number, size: number) => {
-    if (!userId) return;
-
     try {
-      const response = await jwtAxios.get(`/api/board/list`, {
-        params: {
-          userId: userId,
-          page: page,
-          size: size,
-        },
-      });
+      const params = {
+        ...(noticeType === "server" ? { userId: 1 } : { acaId: selectedAcaId }),
+        page,
+        size,
+      };
 
+      const response = await jwtAxios.get(`/api/board/list`, { params });
       const { resultData } = response.data;
-      console.log(resultData);
 
       if (resultData && resultData.length > 0) {
         setTotalItems(resultData[0].totalCount);
       }
 
-      const filteredData = resultData.filter(
+      const filteredData = resultData?.filter(
         (item: BoardItem | null): item is BoardItem => item !== null,
       );
 
@@ -79,7 +82,7 @@ const NoticeContent = () => {
     fetchBoardList(currentPage, pageSize);
   };
 
-  const selectOptions = boardList.map(item => ({
+  const selectOptions = boardList?.map(item => ({
     value: item.boardId,
     label: item.boardName,
   }));
@@ -103,6 +106,25 @@ const NoticeContent = () => {
     }
   };
 
+  const handleNoticeTypeChange = (value: "server" | "academy") => {
+    setNoticeType(value);
+    if (value === "server") {
+      setSelectedAcaId(null);
+      navigate("/admin/notice-content");
+    } else if (value === "academy" && myAcademyList.length > 0) {
+      const firstAcademy = myAcademyList[0];
+      setSelectedAcaId(firstAcademy.acaId);
+      navigate(`/admin/notice-content?acaId=${firstAcademy.acaId}`);
+    }
+  };
+
+  const handleAcademyChange = (value: number) => {
+    setSelectedAcaId(value);
+    setCurrentPage(1);
+    navigate(`/admin/notice-content?acaId=${value}`);
+    fetchBoardList(1, pageSize);
+  };
+
   useEffect(() => {
     if (userId) {
       form.setFieldsValue({
@@ -112,9 +134,67 @@ const NoticeContent = () => {
         search: "",
         showCnt: pageSize,
       });
+
+      const params = new URLSearchParams(location.search);
+      if (!params.get("acaId")) {
+        setNoticeType("server");
+        setSelectedAcaId(null);
+      }
+
       fetchBoardList(currentPage, pageSize);
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchBoardList(currentPage, pageSize);
+    }
+  }, [noticeType]);
+
+  useEffect(() => {
+    const fetchAcademyList = async () => {
+      try {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}&acaAgree=1`,
+        );
+        setMyAcademyList(res.data.resultData);
+
+        if (res.data.resultData.length > 0) {
+          const params = new URLSearchParams(location.search);
+          const acaId = params.get("acaId");
+
+          if (!acaId) {
+            const firstAcademy = res.data.resultData[0];
+            setSelectedAcaId(firstAcademy.acaId);
+            navigate(`/admin/notice-content?acaId=${firstAcademy.acaId}`);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch academy list:", error);
+      }
+    };
+
+    if (noticeType === "academy") {
+      fetchAcademyList();
+    }
+  }, [userId, noticeType]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const acaId = params.get("acaId");
+
+    if (acaId) {
+      setNoticeType("academy");
+      setSelectedAcaId(Number(acaId));
+      fetchBoardList(currentPage, pageSize);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (noticeType === "academy" && selectedAcaId) {
+      fetchBoardList(currentPage, pageSize);
+    }
+  }, [selectedAcaId]);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">
@@ -129,6 +209,39 @@ const NoticeContent = () => {
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
                 <label className="w-28 text-sm">공지사항 통합검색</label>
+                {roleId === 3 && (
+                  <div className="flex">
+                    <Select
+                      className="select-admin-basic w-[100px] mr-2"
+                      value={noticeType}
+                      onChange={handleNoticeTypeChange}
+                      options={[
+                        { value: "server", label: "사이트" },
+                        { value: "academy", label: "학원" },
+                      ]}
+                    />
+
+                    {noticeType === "academy" && (
+                      <Select
+                        showSearch
+                        className="select-admin-basic w-[200px] mr-2"
+                        placeholder="학원을 선택하세요"
+                        value={selectedAcaId}
+                        onChange={handleAcademyChange}
+                        optionFilterProp="label"
+                        filterOption={(input, option) =>
+                          (option?.label ?? "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
+                        options={myAcademyList.map(academy => ({
+                          value: academy.acaId,
+                          label: academy.acaName,
+                        }))}
+                      />
+                    )}
+                  </div>
+                )}
                 <Form.Item name="state" className="mb-0">
                   <Select
                     showSearch
@@ -148,12 +261,26 @@ const NoticeContent = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  className="btn-admin-basic"
-                  onClick={() => navigate("/admin/notice-content/add")}
-                >
-                  + 공지사항 등록
-                </Button>
+                {(roleId !== 3 || noticeType !== "server") && (
+                  <Button
+                    className="btn-admin-basic"
+                    onClick={() => {
+                      if (
+                        roleId === 3 &&
+                        noticeType === "academy" &&
+                        selectedAcaId
+                      ) {
+                        navigate(
+                          `/admin/notice-content/add?acaId=${selectedAcaId}`,
+                        );
+                      } else {
+                        navigate("/admin/notice-content/add");
+                      }
+                    }}
+                  >
+                    + 공지사항 등록
+                  </Button>
+                )}
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     placeholder="40개씩 보기"
@@ -227,11 +354,20 @@ const NoticeContent = () => {
                 <div className="flex items-center justify-center min-w-[132px]">
                   <p
                     className="w-[80px] pb-[1px] rounded-md text-[12px] text-center border border-gray-300 cursor-pointer"
-                    onClick={() =>
+                    onClick={() => {
+                      const queryParams = new URLSearchParams();
+                      queryParams.append("boardId", item.boardId.toString());
+                      if (
+                        roleId === 3 &&
+                        noticeType === "academy" &&
+                        selectedAcaId
+                      ) {
+                        queryParams.append("acaId", selectedAcaId.toString());
+                      }
                       navigate(
-                        `/admin/notice-content/add?boardId=${item.boardId}`,
-                      )
-                    }
+                        `/admin/notice-content/add?${queryParams.toString()}`,
+                      );
+                    }}
                   >
                     수정하기
                   </p>
@@ -250,8 +386,10 @@ const NoticeContent = () => {
               </div>
             ))
           ) : (
-            <div className="flex justify-center items-center h-[56px] border-b">
-              등록된 공지사항이 없습니다.
+            <div className="p-2 border-b">
+              <div className="flex justify-center items-center h-[56px]  ">
+                등록된 공지사항이 없습니다.
+              </div>
             </div>
           )}
         </div>

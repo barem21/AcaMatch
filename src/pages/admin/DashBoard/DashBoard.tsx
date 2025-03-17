@@ -17,29 +17,29 @@ import {
   CategoryKey,
   ChartData,
   COLORS,
-  CostCountData,
+  // CostCountData,
   CostInfo,
   DataKey,
   SearchInfo,
   WeekKey,
 } from "./types";
 
-const generateData = (
-  id: DataKey,
-  min: number,
-  max: number,
-  days: number,
-): ChartData => ({
-  id,
-  color: COLORS[id],
-  data: Array.from({ length: days }, (_, i) => ({
-    x: (i + 1).toString().padStart(2, "0"),
-    y: Math.floor(Math.random() * (max - min + 1)) + min,
-  })),
-});
+// const generateData = (
+//   id: DataKey,
+//   min: number,
+//   max: number,
+//   days: number,
+// ): ChartData => ({
+//   id,
+//   color: COLORS[id],
+//   data: Array.from({ length: days }, (_, i) => ({
+//     x: (i + 1).toString().padStart(2, "0"),
+//     y: Math.floor(Math.random() * (max - min + 1)) + min,
+//   })),
+// });
 
 const thisMonthData: ChartData[] = [
-  generateData("학원수", 50, 500, 31),
+  // generateData("학원수", 50, 500, 31),
   // 결제내역 데이터는 API에서 가져올 예정
 ];
 
@@ -72,26 +72,26 @@ const pieChartData: Record<
 };
 
 // 이번 주와 지난 주의 날짜 범위를 동적으로 생성하는 함수
-const getWeekRange = (weeksAgo: number = 0): string => {
-  const now = new Date();
-  const currentDay = now.getDay(); // 현재 요일 (0: 일요일, 1: 월요일, ... 6: 토요일)
-  const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay; // 월요일까지의 차이 계산
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday - weeksAgo * 7); // 해당 주의 월요일
+// const getWeekRange = (weeksAgo: number = 0): string => {
+//   const now = new Date();
+//   const currentDay = now.getDay(); // 현재 요일 (0: 일요일, 1: 월요일, ... 6: 토요일)
+//   const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay; // 월요일까지의 차이 계산
+//   const monday = new Date(now);
+//   monday.setDate(now.getDate() + diffToMonday - weeksAgo * 7); // 해당 주의 월요일
 
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6); // 해당 주의 일요일
+//   const sunday = new Date(monday);
+//   sunday.setDate(monday.getDate() + 6); // 해당 주의 일요일
 
-  const formatDate = (date: Date) =>
-    `${date.getFullYear()} ${String(date.getMonth() + 1).padStart(2, "0")} ${String(date.getDate()).padStart(2, "0")}`;
+//   const formatDate = (date: Date) =>
+//     `${date.getFullYear()} ${String(date.getMonth() + 1).padStart(2, "0")} ${String(date.getDate()).padStart(2, "0")}`;
 
-  return `${formatDate(monday)} ~ ${formatDate(sunday)}`;
-};
+//   return `${formatDate(monday)} ~ ${formatDate(sunday)}`;
+// };
 
-const timePeriods: Record<WeekKey, string> = {
-  이번주: getWeekRange(0),
-  지난주: getWeekRange(1),
-};
+// const timePeriods: Record<WeekKey, string> = {
+//   이번주: getWeekRange(0),
+//   지난주: getWeekRange(1),
+// };
 
 interface AcademyCountData {
   registerDate: string;
@@ -106,6 +106,12 @@ interface DateSelection {
 
 function DashBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { userId, roleId } = useRecoilValue(userInfo);
+
+  // 선택 가능한 항목 배열을 상단으로 이동
+  const selectableItems =
+    roleId === 3 ? ["회원수", "결제내역"] : ["학원수", "회원수", "결제내역"];
+
   const [selectedItem, setSelectedItem] = useState<DataKey>(
     (searchParams.get("category") as DataKey) || "학원수",
   );
@@ -119,7 +125,8 @@ function DashBoard() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
     (searchParams.get("pieCategory") as CategoryKey) || "최근 검색",
   );
-  const [selectedTimeRange, setSelectedTimeRange] = useState<WeekKey>("이번주");
+  const [selectedTimeRange, _setSelectedTimeRange] =
+    useState<WeekKey>("이번주");
   const [selectedData, setSelectedData] = useState<ChartData[]>(thisMonthData);
   const [notices, setNotices] = useState<BoardItem[]>([]);
   const maxValue =
@@ -127,7 +134,6 @@ function DashBoard() {
       Math.max(...selectedData.flatMap(d => d.data.map(point => point.y))) /
         100,
     ) * 100;
-  const { userId, roleId } = useRecoilValue(userInfo);
   const [statsInfo, setStatsInfo] = useState<CostInfo>({
     costCount: 0,
     sumFee: 0,
@@ -160,6 +166,10 @@ function DashBoard() {
       label: "판매율",
     },
   ];
+
+  const [searchData, setSearchData] = useState<
+    { id: string; label: string; value: number; color: string }[]
+  >([]);
 
   const fetchApprovalData = async () => {
     try {
@@ -230,12 +240,23 @@ function DashBoard() {
   // fetchUserRegistrationData 수정
   const fetchUserRegistrationData = async (date: DateSelection) => {
     try {
-      const response = await jwtAxios.get(`/api/academy-manager/GetUserCount`, {
-        params: {
-          year: date.year,
-          month: date.month,
-        },
-      });
+      // roleId에 따라 다른 API 엔드포인트 사용
+      const endpoint =
+        roleId === 3
+          ? `/api/academy-manager/GetUserCountByUserId`
+          : `/api/academy-manager/GetUserCount`;
+
+      const params: any = {
+        year: date.year,
+        month: date.month,
+      };
+
+      // roleId가 3일 때 userId 파라미터 추가
+      if (roleId === 3) {
+        params.userId = userId;
+      }
+
+      const response = await jwtAxios.get(endpoint, { params });
       const { resultData } = response.data;
 
       // 해당 월의 총 일수 계산
@@ -247,23 +268,34 @@ function DashBoard() {
         y: 0,
       }));
 
-      // API 응답 데이터로 실제 값 업데이트 (누적 계산)
+      // API 응답 데이터로 실제 값 업데이트
       if (resultData && Array.isArray(resultData)) {
-        let accumulatedCount = 0;
+        // roleId에 따라 다른 데이터 구조 처리
+        if (roleId === 3) {
+          // 새 API 응답 구조 처리 (paymentDate, paymentCount)
+          resultData.forEach(item => {
+            const day = parseInt(item.paymentDate.split("-")[2]);
+            if (day > 0 && day <= daysInMonth) {
+              const index = day - 1;
+              allDaysData[index].y = item.paymentCount;
+            }
+          });
+        } else {
+          // 기존 API 응답 구조 처리 (registerDate, count)
+          const dateMap = new Map(
+            resultData.map(item => [
+              parseInt(item.registerDate.split("-")[2]),
+              item.count,
+            ]),
+          );
 
-        // 날짜별 데이터를 객체로 변환하여 빠른 접근
-        const dateMap = new Map(
-          resultData.map(item => [
-            parseInt(item.registerDate.split("-")[2]),
-            item.totalUserCount,
-          ]),
-        );
-
-        // 각 날짜에 대해 누적값 계산
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dayCount = dateMap.get(day) || 0;
-          accumulatedCount += dayCount;
-          allDaysData[day - 1].y = accumulatedCount;
+          // 모든 날짜에 대해 데이터 설정
+          allDaysData.forEach((day, index) => {
+            const dayNumber = index + 1;
+            if (dateMap.has(dayNumber)) {
+              day.y = dateMap.get(dayNumber) || 0;
+            }
+          });
         }
       }
 
@@ -298,24 +330,31 @@ function DashBoard() {
     }
   };
 
-  // Add function to fetch cost data
-  const fetchCostData = async (date: DateSelection) => {
+  const fetchPaymentData = async (date: DateSelection) => {
     try {
-      const response = await jwtAxios.get(
-        `/api/academy-manager/GetAcademyCostCount`,
-        {
-          params: {
-            year: date.year,
-            month: date.month,
-          },
-        },
-      );
+      // roleId에 따라 다른 API 엔드포인트 사용
+      const endpoint =
+        roleId === 3
+          ? `/api/academy-manager/GetAcademyCostByUserId`
+          : `/api/academy-manager/GetAcademyCost`;
+
+      const params: any = {
+        year: date.year,
+        month: date.month,
+      };
+
+      // roleId가 3일 때 userId 파라미터 추가
+      if (roleId === 3) {
+        params.userId = userId;
+      }
+
+      const response = await jwtAxios.get(endpoint, { params });
       const { resultData } = response.data;
 
       // 해당 월의 총 일수 계산
       const daysInMonth = new Date(date.year, date.month, 0).getDate();
 
-      // 날짜 배열 생성
+      // 날짜 배열 생성 (초기값 0으로 설정)
       const allDaysData = Array.from({ length: daysInMonth }, (_, index) => ({
         x: (index + 1).toString().padStart(2, "0"),
         y: 0,
@@ -323,12 +362,33 @@ function DashBoard() {
 
       // API 응답 데이터로 실제 값 업데이트
       if (resultData && Array.isArray(resultData)) {
-        resultData.forEach((item: CostCountData) => {
-          const day = parseInt(item.registerDate.split("-")[2]);
-          if (day >= 1 && day <= daysInMonth) {
-            allDaysData[day - 1].y = item.academyCostCount;
-          }
-        });
+        // roleId에 따라 다른 데이터 구조 처리
+        if (roleId === 3) {
+          // 새 API 응답 구조 처리 (paymentDate, paymentCount)
+          resultData.forEach(item => {
+            const day = parseInt(item.paymentDate.split("-")[2]);
+            if (day > 0 && day <= daysInMonth) {
+              const index = day - 1;
+              allDaysData[index].y = item.paymentCount;
+            }
+          });
+        } else {
+          // 기존 API 응답 구조 처리 (paymentDate, count)
+          const dateMap = new Map(
+            resultData.map(item => [
+              parseInt(item.paymentDate.split("-")[2]),
+              item.count,
+            ]),
+          );
+
+          // 모든 날짜에 대해 데이터 설정
+          allDaysData.forEach((day, index) => {
+            const dayNumber = index + 1;
+            if (dateMap.has(dayNumber)) {
+              day.y = dateMap.get(dayNumber) || 0;
+            }
+          });
+        }
       }
 
       const chartData: ChartData = {
@@ -338,22 +398,22 @@ function DashBoard() {
       };
 
       setCostData([chartData]);
-
       if (selectedItem === "결제내역") {
         setSelectedData([chartData]);
       }
     } catch (error) {
-      console.error("Error fetching cost data:", error);
-      const now = new Date();
-      const maxDay = date.month === now.getMonth() + 1 ? now.getDate() : 31;
-
+      console.error("Error fetching payment data:", error);
+      // 에러 시 빈 데이터 설정
       const emptyData: ChartData = {
         id: "결제내역",
         color: COLORS["결제내역"],
-        data: Array.from({ length: maxDay }, (_, index) => ({
-          x: (index + 1).toString().padStart(2, "0"),
-          y: 0,
-        })),
+        data: Array.from(
+          { length: new Date(date.year, date.month, 0).getDate() },
+          (_, index) => ({
+            x: (index + 1).toString().padStart(2, "0"),
+            y: 0,
+          }),
+        ),
       };
       setCostData([emptyData]);
       if (selectedItem === "결제내역") {
@@ -435,17 +495,34 @@ function DashBoard() {
   useEffect(() => {
     const loadInitialData = async () => {
       // 학원수 데이터 로드
-      await fetchAcademyCount(selectedDate);
+      if (roleId !== 3) {
+        await fetchAcademyCount(selectedDate);
+      }
 
       // 회원수 데이터 로드
       await fetchUserRegistrationData(selectedDate);
 
       // 결제내역 데이터 로드
-      await fetchCostData(selectedDate);
+      await fetchPaymentData(selectedDate);
+
+      // roleId에 따라 초기 선택 항목 설정
+      if (roleId === 3) {
+        setSelectedItem("회원수");
+        setSelectedData(userRegistrationData);
+      } else {
+        // 기본 선택 항목에 따른 데이터 설정
+        if (selectedItem === "학원수") {
+          setSelectedData(academyCountData);
+        } else if (selectedItem === "회원수") {
+          setSelectedData(userRegistrationData);
+        } else if (selectedItem === "결제내역") {
+          setSelectedData(costData);
+        }
+      }
     };
 
     loadInitialData();
-  }, []); // 컴포넌트 마운트 시 한 번만 실행
+  }, [roleId]); // roleId가 변경될 때마다 실행
 
   // useEffect 수정
   useEffect(() => {
@@ -455,7 +532,7 @@ function DashBoard() {
       } else if (selectedItem === "회원수") {
         await fetchUserRegistrationData(selectedDate);
       } else if (selectedItem === "결제내역") {
-        await fetchCostData(selectedDate);
+        await fetchPaymentData(selectedDate);
       }
     };
 
@@ -463,9 +540,9 @@ function DashBoard() {
   }, [selectedDate, selectedItem]);
 
   // 핸들러 함수들
-  const handleTimeRangeClick = useCallback((e: { key: string }) => {
-    setSelectedTimeRange(e.key as WeekKey);
-  }, []);
+  // const handleTimeRangeClick = useCallback((e: { key: string }) => {
+  //   setSelectedTimeRange(e.key as WeekKey);
+  // }, []);
 
   const handleCategoryClick = useCallback((e: { key: string }) => {
     if (e.key === "학원수" || e.key === "회원수" || e.key === "결제내역") {
@@ -483,12 +560,12 @@ function DashBoard() {
   const categoryMenu = useMemo(
     () => (
       <Menu onClick={handleCategoryClick}>
-        <Menu.Item key="학원수">학원수</Menu.Item>
-        <Menu.Item key="회원수">회원수</Menu.Item>
-        <Menu.Item key="결제내역">결제내역</Menu.Item>
+        {selectableItems.map(item => (
+          <Menu.Item key={item}>{item}</Menu.Item>
+        ))}
       </Menu>
     ),
-    [handleCategoryClick],
+    [handleCategoryClick, selectableItems],
   );
 
   const categoryMenu2 = useMemo(
@@ -501,15 +578,15 @@ function DashBoard() {
     [handleCategoryClick2],
   );
 
-  const timeRangeMenu = useMemo(
-    () => (
-      <Menu onClick={handleTimeRangeClick}>
-        <Menu.Item key="이번주">이번주</Menu.Item>
-        <Menu.Item key="지난주">지난주</Menu.Item>
-      </Menu>
-    ),
-    [handleTimeRangeClick],
-  );
+  // const timeRangeMenu = useMemo(
+  //   () => (
+  //     <Menu onClick={handleTimeRangeClick}>
+  //       <Menu.Item key="이번주">이번주</Menu.Item>
+  //       <Menu.Item key="지난주">지난주</Menu.Item>
+  //     </Menu>
+  //   ),
+  //   [handleTimeRangeClick],
+  // );
 
   // 데이터 변경 시 selectedData 업데이트
   useEffect(() => {
@@ -522,23 +599,15 @@ function DashBoard() {
     }
   }, [selectedItem, academyCountData, userRegistrationData, costData]);
 
-  // Add state for search data
-  const [searchData, setSearchData] = useState<
-    Record<
-      WeekKey,
-      { id: string; label: string; value: number; color: string }[]
-    >
-  >({
-    이번주: [],
-    지난주: [],
-  });
-
-  // Add function to fetch search info
-  const fetchSearchInfo = async (period: WeekKey) => {
+  // 수정된 fetchSearchInfo 함수
+  const fetchSearchInfo = async (date: DateSelection) => {
     try {
-      const response = await jwtAxios.get(
-        `/api/academy/GetSearchInfo/${period}`,
-      );
+      const response = await jwtAxios.get(`/api/academy/GetSearchInfo`, {
+        params: {
+          year: date.year,
+          month: date.month,
+        },
+      });
       const { resultData } = response.data;
 
       // Transform API data to chart format
@@ -550,26 +619,24 @@ function DashBoard() {
         color: colors[index % colors.length],
       }));
 
-      setSearchData(prev => ({
-        ...prev,
-        [period]: chartData,
-      }));
+      // 이제 단일 데이터셋만 저장
+      setSearchData(chartData);
     } catch (error) {
-      console.error(`Error fetching search info for ${period}:`, error);
+      console.error(`Error fetching search info:`, error);
+      setSearchData([]); // 에러 시 빈 배열로 초기화
     }
   };
 
-  // Add useEffect to fetch search data
+  // 수정된 useEffect
   useEffect(() => {
-    fetchSearchInfo("이번주");
-    fetchSearchInfo("지난주");
-  }, []);
+    fetchSearchInfo(selectedDate);
+  }, [selectedDate.year, selectedDate.month]);
 
-  // Update pieData calculation
+  // pieData 계산 수정
   const pieData =
     selectedCategory === "최근 검색"
-      ? searchData[selectedTimeRange]
-      : pieChartData[selectedCategory][selectedTimeRange];
+      ? searchData
+      : pieChartData[selectedCategory]["이번주"];
 
   // 공지사항 데이터를 가져오는 함수
   const fetchNotices = async () => {
@@ -577,7 +644,8 @@ function DashBoard() {
     try {
       const response = await jwtAxios.get(`/api/board/list`, {
         params: {
-          userId: userId,
+          // userId: userId,
+          userId: 1,
           page: 1,
           size: 3,
         },
@@ -643,6 +711,13 @@ function DashBoard() {
   useEffect(() => {
     fetchReportedUsers();
   }, []);
+
+  // roleId가 3일 때 학원수에서 회원수로 변경하는 useEffect 수정
+  useEffect(() => {
+    if (roleId === 3 && selectedItem === "학원수") {
+      setSelectedItem("회원수");
+    }
+  }, [roleId]);
 
   return (
     <div className="box-border w-full max-w-full justify-center align-top">
@@ -736,26 +811,75 @@ function DashBoard() {
           <div className="w-full justify-center mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
             <div className="flex justify-between w-full p-3 border-b items-center">
               <Dropdown overlay={categoryMenu2} trigger={["click"]}>
-                <Button type="text" className="flex justify-between w-[150px]">
+                <Button type="text" className="flex justify-between w-[120px]">
                   {selectedCategory} <DownOutlined />
                 </Button>
               </Dropdown>
-              <Dropdown overlay={timeRangeMenu} trigger={["click"]}>
-                <Button
-                  type="text"
-                  size="small"
-                  style={{ fontSize: "10px", padding: "2px 8px" }}
-                  className="flex justify-between w-[120px]"
+              <div className="flex gap-3">
+                <Dropdown
+                  overlay={
+                    <Menu
+                      onClick={e =>
+                        handleYearMonthChange({
+                          ...selectedDate,
+                          year: Number(e.key),
+                        })
+                      }
+                    >
+                      {Array.from(
+                        { length: 5 },
+                        (_, i) => new Date().getFullYear() - i,
+                      ).map(year => (
+                        <Menu.Item key={year}>{year}년</Menu.Item>
+                      ))}
+                    </Menu>
+                  }
+                  trigger={["click"]}
                 >
-                  {selectedTimeRange} <DownOutlined />
-                </Button>
-              </Dropdown>
+                  <Button
+                    type="text"
+                    size="small"
+                    className="flex justify-between w-[100px]"
+                    style={{ fontSize: "10px", padding: "2px 8px" }}
+                  >
+                    {selectedDate.year}년 <DownOutlined />
+                  </Button>
+                </Dropdown>
+                <Dropdown
+                  overlay={
+                    <Menu
+                      onClick={e =>
+                        handleYearMonthChange({
+                          ...selectedDate,
+                          month: Number(e.key),
+                        })
+                      }
+                    >
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                        month => (
+                          <Menu.Item key={month}>{month}월</Menu.Item>
+                        ),
+                      )}
+                    </Menu>
+                  }
+                  trigger={["click"]}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    className="flex justify-between w-[80px]"
+                    style={{ fontSize: "10px", padding: "2px 8px" }}
+                  >
+                    {selectedDate.month}월 <DownOutlined />
+                  </Button>
+                </Dropdown>
+              </div>
             </div>
             <PieChart pieData={pieData} />
 
             <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] min-w-[350px] text-gray-700 text-sm gap-[12px] font-semibold">
               <CiCalendarDate size={"20px"} style={{ strokeWidth: 1 }} />
-              {timePeriods[selectedTimeRange]}
+              {`${selectedDate.year}년 ${selectedDate.month}월`}
             </div>
           </div>
           <NoticeList notices={notices} />
@@ -765,7 +889,7 @@ function DashBoard() {
       <div className="flex mt-[12px]">
         <AcademyApprovalList
           data={roleId === 3 ? approvalData : academyApprovals}
-          roleId={roleId}
+          roleId={roleId as number}
         />
         <ReportedUserList reportedUsers={reportedUsers} />
       </div>

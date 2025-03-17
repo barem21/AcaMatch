@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { message, Radio, Select } from "antd";
+import { message, Radio, Select, Spin } from "antd";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
@@ -256,7 +256,17 @@ const LinkModal: React.FC<LinkModalProps> = () => {
 //   productId: number;
 // }
 
-// 신고 유형 인터페이스 추가
+// BoardItem 인터페이스 추가
+interface BoardItem {
+  boardId: number;
+  userId: number;
+  boardName: string;
+  createdAt: string;
+  name: string;
+  totalCount: number;
+}
+
+// ReportType 인터페이스 추가
 interface ReportType {
   name: string;
   description: string;
@@ -345,7 +355,6 @@ const AcademyDetail = () => {
     }
   };
 
-  // Separate fetch function for general reviews
   const fetchGeneralReviews = async () => {
     try {
       const response = await jwtAxios.get(
@@ -370,6 +379,8 @@ const AcademyDetail = () => {
         : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}`;
 
       const response = await jwtAxios.get(url);
+
+      console.log(response.data.resultData);
 
       if (response.data.resultData) {
         const data = response.data.resultData;
@@ -553,7 +564,7 @@ const AcademyDetail = () => {
     }
 
     if (!userId) {
-      alert("로그인이 필요한 서비스입니다.");
+      // alert("로그인이 필요한 서비스입니다.");
       navigate("/log-in");
       return;
     }
@@ -572,9 +583,47 @@ const AcademyDetail = () => {
       setSelectedReportType("");
     } catch (error) {
       console.error("신고 처리 중 오류가 발생했습니다:", error);
-      alert("신고 처리 중 오류가 발생했습니다.");
+      // alert("신고 처리 중 오류가 발생했습니다.");
     }
   };
+
+  // 공지사항 상태 추가
+  const [academyNotices, setAcademyNotices] = useState<BoardItem[]>([]);
+  const [noticeLoading, setNoticeLoading] = useState(false);
+
+  // 학원 공지사항 불러오는 함수 추가
+  const fetchAcademyNotices = async () => {
+    if (!acaId) return;
+
+    setNoticeLoading(true);
+    try {
+      const params = {
+        acaId: acaId,
+        page: 1,
+        size: 5, // 최근 5개 공지사항만 표시
+      };
+
+      const response = await jwtAxios.get(`/api/board/list`, { params });
+      const { resultData } = response.data;
+
+      const filteredData = resultData?.filter(
+        (item: BoardItem | null): item is BoardItem => item !== null,
+      );
+
+      setAcademyNotices(filteredData || []);
+    } catch (error) {
+      console.error("Error fetching academy notices:", error);
+    } finally {
+      setNoticeLoading(false);
+    }
+  };
+
+  // 학원 정보 로드 시 공지사항도 함께 로드
+  useEffect(() => {
+    if (acaId) {
+      fetchAcademyNotices();
+    }
+  }, [acaId]);
 
   if (loading) {
     return (
@@ -767,6 +816,51 @@ const AcademyDetail = () => {
                 <CalendarWrap>
                   <AcademyCalendar academyData={academyData} />
                 </CalendarWrap>
+              </div>
+
+              {/* 공지사항 섹션 추가 */}
+              <div className={styles.section.title}>공지사항</div>
+              <div className="mb-[50px]">
+                {noticeLoading ? (
+                  <div className="flex justify-center items-center h-[100px]">
+                    <Spin />
+                  </div>
+                ) : academyNotices.length > 0 ? (
+                  <div className="border rounded-lg overflow-hidden">
+                    <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
+                      <div className="flex items-center justify-center w-[70%]">
+                        제목
+                      </div>
+                      <div className="flex items-center justify-center w-[30%]">
+                        작성일
+                      </div>
+                    </div>
+                    {academyNotices.map(notice => (
+                      <div
+                        key={notice.boardId}
+                        className="flex justify-between align-middle p-3 border-b hover:bg-gray-50"
+                      >
+                        <div className="flex items-center w-[70%] truncate">
+                          <a
+                            href={`/notice/detail?boardId=${notice.boardId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline truncate"
+                          >
+                            {notice.boardName}
+                          </a>
+                        </div>
+                        <div className="flex items-center justify-center w-[30%] text-gray-500 text-sm">
+                          {notice.createdAt}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex justify-center items-center h-[100px] border rounded-lg">
+                    등록된 공지사항이 없습니다.
+                  </div>
+                )}
               </div>
 
               {/* 책 목록 섹션 추가 */}

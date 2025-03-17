@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 interface UserApproval {
   name: string;
   userPic?: string;
@@ -20,6 +22,7 @@ interface AcademyApprovalListProps {
   roleId: number;
 }
 const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
+  const navigate = useNavigate();
   // 데이터가 없거나 배열이 아닌 경우 처리
   if (!data || !Array.isArray(data) || data.length === 0) {
     return (
@@ -62,7 +65,7 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
             승인상태
           </li>
         </ul>
-        <div className="overflow-hidden">
+        <div className="overflow-hidden h-[150px]">
           {userApprovals.slice(0, 5).map((item, index, array) => (
             <ul
               key={index}
@@ -112,7 +115,7 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
     <div className="w-full border rounded-[4px] h-fit mr-3">
       <span
         className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b cursor-pointer"
-        onClick={() => navigate("arrow-list")}
+        onClick={() => navigate("/admin/arrow-list")}
       >
         학원 승인 대기
       </span>
@@ -127,12 +130,12 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
           요청상태
         </li>
       </ul>
-      <div className="overflow-hidden">
-        {academyApprovals.slice(0, 5).map((item, index, array) => (
+      <div className="overflow-hidden h-[150px]">
+        {academyApprovals.slice(0, 5).map((item, index, _array) => (
           <ul
             key={index}
-            className={`flex mx-auto w-full h-[30px] text-[14px] ${
-              index !== array.length - 1 ? "border-b" : ""
+            className={`flex mx-auto w-full h-[30px] ${
+              index < 4 ? "border-b" : ""
             }`}
           >
             <li className="flex justify-center items-center w-1/3 text-[#242424] text-[14px]">

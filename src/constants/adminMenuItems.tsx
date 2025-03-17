@@ -292,6 +292,42 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
   },
   {
     type: "item",
+    icon: <FaBullhorn />,
+    label: "공지 및 콘텐츠 관리",
+    link: "/admin/notice-content",
+    active: false,
+    list: [
+      {
+        label: "공지사항 관리",
+        link: "/admin/notice-content",
+        subList: [
+          {
+            label: "공지사항 목록",
+            link: "/admin/notice-content",
+            active: false,
+          },
+          {
+            label: "공지사항 보기",
+            link: "/admin/notice-content/view",
+            active: false,
+          },
+          {
+            label: "공지사항 등록",
+            link: "/admin/notice-content/add",
+            active: false,
+          },
+          {
+            label: "공지사항 수정",
+            link: "/admin/notice-content/edit",
+            active: false,
+          },
+        ],
+        active: false,
+      },
+    ],
+  },
+  {
+    type: "item",
     icon: <FaUserFriends />,
     label: "회원 관리",
     link: "/admin/member",

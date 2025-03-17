@@ -49,12 +49,12 @@ const ReportedUserList = ({ reportedUsers }: ReportedUserListProps) => {
           처리상태
         </li>
       </ul>
-      <div className="overflow-hidden">
-        {reportedUsers.slice(0, 5).map((user, index, array) => (
+      <div className="overflow-hidden h-[150px]">
+        {reportedUsers.slice(0, 5).map((user, index) => (
           <ul
             key={index}
             className={`flex mx-auto w-full h-[30px] ${
-              index !== array.length - 1 ? "border-b" : ""
+              index < 4 ? "border-b" : ""
             }`}
           >
             <li className="flex justify-center items-center w-[40%] text-[#242424]">

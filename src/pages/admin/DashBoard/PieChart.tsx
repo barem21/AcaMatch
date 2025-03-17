@@ -12,7 +12,7 @@ interface PieChartProps {
 const PieChart = ({ pieData }: PieChartProps) => {
   if (!pieData || pieData.length === 0) {
     return (
-      <div className="h-full w-full mx-auto flex items-center justify-center text-gray-500">
+      <div className="h-[200px] w-full mx-auto flex items-center justify-center text-gray-500">
         데이터가 없습니다
       </div>
     );

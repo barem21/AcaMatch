@@ -13,6 +13,12 @@ import { AiTwotoneAlert } from "react-icons/ai";
 import { message } from "antd";
 import { Select } from "antd";
 
+// ReportType 인터페이스 추가
+interface ReportType {
+  name: string;
+  description: string;
+}
+
 interface ReviewSectionProps {
   star: number;
   reviewCount: number;
