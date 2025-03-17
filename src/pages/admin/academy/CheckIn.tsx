@@ -91,8 +91,8 @@ const CheckIn = () => {
   const [mergeData, setMergeData] = useState<studentList2Type[]>([]);
   const [searchParams] = useSearchParams();
 
-  const acaId = parseInt(searchParams.get("acaId") || "", 0);
-  const classId = parseInt(searchParams.get("classId") || "", 0);
+  const acaId = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId = parseInt(searchParams.get("classId") || "0", 0);
 
   //전체학원 목록
   const academyList = async () => {
@@ -238,7 +238,7 @@ const CheckIn = () => {
   };
 
   // 날짜 클릭 시 호출될 함수
-  const handleDateClick = async (info: any) => {
+  const handleDateClick = async (info: any, acaId: number, classId: number) => {
     const clickedDate = info.dateStr; // 클릭한 날짜 정보 (YYYY-MM-DD 형식)
     setAttendanceDate(clickedDate); // 상태 업데이트
     academyStudentList(classId); //수강생 목록
@@ -450,7 +450,7 @@ const CheckIn = () => {
                     <div className="p-1 text-xs">{eventInfo.event.title}</div>
                   );
                 }}
-                dateClick={handleDateClick} // 날짜 클릭 이벤트 핸들러
+                dateClick={e => handleDateClick(e, acaId, classId)} // 날짜 클릭 이벤트 핸들러
               />
             </div>
 

@@ -21,6 +21,35 @@ import CustomModal from "../../../components/modal/Modal";
 import AI from "../../../components/AI";
 import { Cookies } from "react-cookie";
 
+const RecordList = styled.div`
+  .editModal button {
+    display: none !important;
+  }
+  .addOk button,
+  .title-font button,
+  .small_line_button,
+  .ant-form-item-control-input button {
+    display: flex !important;
+  }
+  .ant-upload.ant-upload-select {
+    width: 100%;
+  }
+  .ant-upload.ant-upload-select .ant-btn {
+    width: 100%;
+    height: auto;
+    padding: 10px 0px;
+  }
+  .ant-upload-list-item .ant-upload-icon,
+  .ant-upload-list-item-progress {
+    display: none;
+  }
+  .btn-wrap .ant-form-item {
+    margin: 0px;
+  }
+`;
+
+const AddRecoad = styled.div``;
+
 interface aiHistoryType {
   feedBack: string;
   createdAt: string;
@@ -39,12 +68,27 @@ interface testStudentList {
   pass: number;
 }
 
+interface classListType {
+  acaPic: string;
+  acaPics: string;
+  classId: number;
+  className: string;
+  endDate: string;
+  name: string;
+  startDate: string;
+}
+
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 function AcademyRecord() {
   const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const [form3] = Form.useForm();
-  const currentUserInfo = useRecoilValue(userInfo);
+  const { roleId, userId } = useRecoilValue(userInfo);
   const [testStudentList, setTestStudentList] = useState<testStudentList[]>([]);
   const [testGradeId, setTestGradeId] = useState<number>(0);
   const [_testRecord, setTestRecord] = useState<number | null>(null);
@@ -67,40 +111,132 @@ function AcademyRecord() {
 
   const [searchParams] = useSearchParams();
   const [fileList, setFileList] = useState([]);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
+  const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
 
   const navigate = useNavigate();
   const acaId = parseInt(searchParams.get("acaId") || "0", 0);
   const classId = parseInt(searchParams.get("classId") || "0", 0);
-  const examId: number = parseInt(searchParams.get("examId") || "0", 0);
+  const examId = parseInt(searchParams.get("examId") || "0", 0);
+  const showCnt: number = parseInt(searchParams.get("showCnt") || "10", 0);
 
-  const RecordList = styled.div`
-    .editModal button {
-      display: none !important;
+  //전체학원 목록
+  const academyList = async () => {
+    try {
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(`/api/menuOut/academy`);
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
     }
-    .addOk button,
-    .title-font button,
-    .small_line_button,
-    .ant-form-item-control-input button {
-      display: flex !important;
-    }
-    .ant-upload.ant-upload-select {
-      width: 100%;
-    }
-    .ant-upload.ant-upload-select .ant-btn {
-      width: 100%;
-      height: auto;
-      padding: 10px 0px;
-    }
-    .ant-upload-list-item .ant-upload-icon,
-    .ant-upload-list-item-progress {
-      display: none;
-    }
-    .btn-wrap .ant-form-item {
-      margin: 0px;
-    }
-  `;
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
 
-  const AddRecoad = styled.div``;
+  //강좌 목록
+  const academyClassList = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/menuOut/class?acaId=${value ? value : acaId}`,
+      );
+      setClassList(res.data.resultData);
+      //console.log("classList : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData2 = classList?.map(
+    ({ classId: value, className: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //테스트 목록
+  const academyTestList = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/menuOut/exam?acaId=${acaId}&classId=${value ? value : classId}`,
+      );
+      const formatted = res.data.resultData.map((item: any) => ({
+        value: item.examId,
+        label: item.examName,
+      }));
+      setMyAcademyTestList(formatted);
+      //console.log("test list : ", res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //학생 목록
+  const academyStudentList = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/grade/gradeDetail?examId=${value ? value : examId}&page=1&size=${showCnt}`,
+      );
+      setTestStudentList(res.data.resultData);
+      //console.log(res.data.resultData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //학원정보 가져오기
+  const academyGetInfo = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/academy/academyDetail/${value ? value : acaId}`,
+      );
+      setAcademyInfo(res.data.resultData.acaName);
+      //console.log(res.data.resultData.acaName);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  //학원 선택
+  const handleAcademyChange = (value: number) => {
+    form3.setFieldsValue({
+      classId: null,
+      examId: null,
+    });
+    form3.submit();
+    academyGetInfo(value);
+    academyClassList(value); //강좌목록
+    setTestStudentList([]); //학생목록 초기화
+  };
+
+  //강좌 선택
+  const handleClassChange = (value: number) => {
+    form3.setFieldsValue({
+      examId: null,
+    });
+    form3.submit();
+    academyTestList(value); //테스트 목록
+    setTestStudentList([]); //학생목록 초기화
+  };
+
+  //테스트 선택
+  const handleTestChange = (value: number) => {
+    form3.submit();
+    academyStudentList(value); //수강생 목록
+  };
 
   //시험점수 수정
   const handleButton1Click = () => {
@@ -254,30 +390,6 @@ function AcademyRecord() {
     setIsModalVisible3(true);
   };
 
-  //학원정보 가져오기
-  const academyGetInfo = async () => {
-    try {
-      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
-      setAcademyInfo(res.data.resultData.acaName);
-      //console.log(res.data.resultData.acaName);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  //학생목록 가져오기
-  const academyStudentList = async () => {
-    try {
-      const res = await axios.get(
-        `/api/grade/gradeDetail?examId=${examId}&page=1&size=30`,
-      );
-      setTestStudentList(res.data.resultData);
-      console.log(res.data.resultData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   //첨부파일 처리
   const handleChange: UploadProps["onChange"] = (info: any) => {
     form.setFieldValue("gradeFile", info.file.originFileObj);
@@ -307,7 +419,7 @@ function AcademyRecord() {
       form2.resetFields(); //초기화
       setIsModalVisible6(false);
       setIsModalVisible7(true);
-      academyStudentList();
+      academyStudentList(examId);
     }
   };
 
@@ -335,7 +447,7 @@ function AcademyRecord() {
       form.resetFields(); //초기화
       setIsModalVisible(false);
       setIsModalVisible4(true);
-      academyStudentList();
+      academyStudentList(examId);
     }
   };
 
@@ -365,7 +477,7 @@ function AcademyRecord() {
         setFileList([]);
         message.success("테스트 결과 수정이 완료되었습니다.");
         setIsModalVisible3(false);
-        academyStudentList();
+        academyStudentList(examId);
       }
     } catch (error: unknown) {
       //console.log(error.response.data.resultMessage);
@@ -373,8 +485,6 @@ function AcademyRecord() {
       form.resetFields(); //초기화
       setFileList([]);
       setIsModalVisible9(true);
-
-      //academyStudentList();
 
       if (error instanceof AxiosError) {
         const errorMessage = error.response?.data.resultMessage; //에러 메시지
@@ -400,7 +510,7 @@ function AcademyRecord() {
 
     // 쿼리 문자열로 변환
     const queryParams = new URLSearchParams(values).toString();
-    navigate(`?acaId=${acaId}&classId=${classId}&${queryParams}`); //쿼리스트링 url에 추가
+    navigate(`?${queryParams}`); //쿼리스트링 url에 추가
   };
 
   const onChange = () => {
@@ -408,45 +518,20 @@ function AcademyRecord() {
   };
 
   useEffect(() => {
-    academyGetInfo();
+    academyList(); //학원 목록
+    academyGetInfo(acaId); //학원 정보
+    academyClassList(acaId); //강좌 목록
+    academyTestList(classId); //테스트 목록
+    academyStudentList(examId); //수강생 목록
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form3.setFieldsValue({
-      examId: examId ? examId : "all",
+      acaId: acaId ? acaId : null,
+      classId: classId ? classId : null,
+      examId: examId ? examId : null,
       search: "",
-      showCnt: 40,
+      showCnt: 10,
     });
-  }, []);
-
-  useEffect(() => {
-    academyStudentList();
-  }, [currentUserInfo]);
-
-  useEffect(() => {
-    //과목별 등록된 테스트 목록 가져오기
-    const academyTestList = async () => {
-      try {
-        const res = await axios.get(
-          `/api/grade/status?acaId=${acaId}&classId=${classId}`,
-        );
-        const formatted = res.data.resultData.map((item: any) => ({
-          value: item.examId,
-          label: item.examName,
-        }));
-        setMyAcademyTestList(formatted);
-        //console.log("test list : ", res.data.resultData);
-
-        //페이지 들어오면 ant design 처리용 기본값 세팅
-        form3.setFieldsValue({
-          examId: examId,
-          search: "",
-          showCnt: 40,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    academyTestList();
   }, []);
 
   useEffect(() => {
@@ -470,49 +555,76 @@ function AcademyRecord() {
           <Form form={form3} onFinish={values => onFinishedFo(values)}>
             <div className="flex justify-between w-full p-3 border-b">
               <div className="flex items-center gap-1">
-                <label className="w-24 text-sm">수강생 검색</label>
+                <label className="mr-3 text-sm">학원 선택</label>
+                <Form.Item name="acaId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="학원 선택"
+                    optionFilterProp="label"
+                    className="select-admin-basic !min-w-48"
+                    onChange={handleAcademyChange}
+                    options={simplifiedData}
+                  />
+                </Form.Item>
+
+                <label className="mr-3 ml-7 text-sm">강좌 선택</label>
+                <Form.Item name="classId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="강좌를 선택하세요"
+                    optionFilterProp="label"
+                    className="select-admin-basic !min-w-48"
+                    onChange={handleClassChange}
+                    options={simplifiedData2}
+                  />
+                </Form.Item>
+
+                <label className="mr-3 ml-7 text-sm">테스트 선택</label>
                 <Form.Item name="examId" className="mb-0">
                   <Select
                     showSearch
                     placeholder="강좌 선택"
                     optionFilterProp="label"
-                    className="select-admin-basic"
-                    // onChange={onChange}
+                    className="select-admin-basic !min-w-48"
+                    onChange={handleTestChange}
                     // onSearch={onSearch}
                     options={myAcademyTestList}
                   />
                 </Form.Item>
+
+                {/*
                 <Form.Item name="search" className="mb-0">
                   <Input
                     placeholder="수강생 명을 입력해 주세요."
-                    className="input-admin-basic w-60"
+                    className="input-admin-basic w-48"
                   />
                 </Form.Item>
                 <Button htmlType="submit" className="btn-admin-basic">
                   검색하기
                 </Button>
+                */}
               </div>
-              <div className="flex gap-2">
+
+              <div className="flex items-center gap-2">
                 <Form.Item name="showCnt" className="mb-0">
                   <Select
                     showSearch
-                    placeholder="40개씩 보기"
+                    placeholder="10개씩 보기"
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
-                    // onSearch={onSearch}
                     options={[
                       {
-                        value: 40,
-                        label: "40개씩 보기",
+                        value: 10,
+                        label: "10개씩 보기",
+                      },
+                      {
+                        value: 20,
+                        label: "20개씩 보기",
                       },
                       {
                         value: 50,
                         label: "50개씩 보기",
-                      },
-                      {
-                        value: 60,
-                        label: "60개씩 보기",
                       },
                     ]}
                   />

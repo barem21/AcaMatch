@@ -13,7 +13,6 @@ import InquiryList from "./pages/InquiryList";
 import NotFoundPage from "./pages/NotFoundPage";
 import Support from "./pages/Support";
 import AcademyDetail from "./pages/academyDetail/AcademyDetail";
-import AcaManagement from "./pages/admin/AcaManagement.tsx";
 import DashBoard from "./pages/admin/DashBoard/DashBoard.tsx";
 import PaymentManager from "./pages/admin/PaymentManager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
@@ -178,7 +177,6 @@ function App() {
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
                 <Route path="profile" element={<MemberInfo />} />
-                <Route path="acamanager" element={<AcaManagement />} />
                 <Route path="paymentmanager" element={<PaymentManager />} />
                 <Route path="acarevenue" element={<AcaRevenue />} />
                 <Route path="notice-content" element={<NoticeContent />} />
@@ -197,8 +195,8 @@ function App() {
                 <Route path="class-add" element={<AcademyClassAdd />} />
                 <Route path="class-edit" element={<AcademyClassEdit />} />
                 <Route path="class-student" element={<AcademyStudent />} />
-                <Route path="academy/like" element={<AcademyLike />} />
-                <Route path="academy/review" element={<AcademyReview />} />
+                <Route path="academy-like" element={<AcademyLike />} />
+                <Route path="academy-review" element={<AcademyReview />} />
                 <Route path="test" element={<AcademyTestList />} />
                 <Route path="test-record" element={<AcademyRecord />} />
                 <Route path="premium" element={<AcademyPremium />} />

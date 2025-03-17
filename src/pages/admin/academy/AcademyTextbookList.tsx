@@ -44,8 +44,8 @@ function AcademyTextbookList(): JSX.Element {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [textBookId, setTextBookId] = useState<number>(0);
 
-  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
-  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
   const showCnt: number = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //전체학원 목록
@@ -82,7 +82,7 @@ function AcademyTextbookList(): JSX.Element {
         `/api/menuOut/class?acaId=${value ? value : acaId}`,
       );
       setClassList(res.data.resultData);
-      console.log("classList : ", res.data.resultData);
+      //console.log("classList : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -116,7 +116,6 @@ function AcademyTextbookList(): JSX.Element {
     });
     form.submit();
     academyClassList(value); //강좌목록
-    //getTextBookList(value); //교제목록
     setTextBookList([]);
   };
 
@@ -132,11 +131,13 @@ function AcademyTextbookList(): JSX.Element {
     //console.log(values);
 
     try {
-      const res = await axios.get(
-        `/api/book/getBookList/${values.classId}&size=${showCnt}`,
-      );
-      //console.log(res.data.resultData);
-      setTextBookList(res.data.resultData);
+      if (values !== null) {
+        const res = await axios.get(
+          `/api/book/getBookList/${values.classId}?size=${showCnt}`,
+        );
+        //console.log(res.data.resultData);
+        setTextBookList(res.data.resultData);
+      }
     } catch (error) {
       console.log(error);
     }

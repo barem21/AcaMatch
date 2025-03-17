@@ -94,8 +94,8 @@ function AcademyTestList() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const acaId: number = parseInt(searchParams.get("acaId") || "", 0);
-  const classId: number = parseInt(searchParams.get("classId") || "", 0);
+  const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
+  const classId: number = parseInt(searchParams.get("classId") || "0", 0);
   const showCnt: number = parseInt(searchParams.get("showCnt") || "10", 0);
   //const search: string | null = searchParams.get("search");
 
@@ -245,7 +245,7 @@ function AcademyTestList() {
 
     academyList(); //학원 목록
     academyClassList(acaId); //강좌 목록
-    academyTestListRequest(classId, ""); //테스트 목록
+    //academyTestListRequest(classId, ""); //테스트 목록
   }, []);
 
   return (

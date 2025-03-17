@@ -1,8 +1,10 @@
-import { message, Pagination } from "antd";
+import { Form, message, Pagination, Select } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../../components/modal/Modal";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../../atoms/userInfo";
 
 interface teacherResultType {
   classId: number;
@@ -16,23 +18,59 @@ interface teacherResultType {
   teacherAgree: number;
 }
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
 const TeacherList = () => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { userId, roleId } = useRecoilValue(userInfo);
   const [academyName, setAcademyName] = useState<string>();
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [classId, setClassId] = useState(0);
-  const [userId, setUserId] = useState(0);
+  const [teacherId, setTeacherId] = useState(0);
   const [agree, setAgree] = useState(0);
   const [teacherResultList, setTeacherResultList] = useState<
     teacherResultType[]
   >([]);
   const acaId = parseInt(searchParams.get("acaId") || "0", 0);
 
-  //학원정보 불러오기
-  const academyInfo = async () => {
+  //전체학원 목록
+  const academyList = async () => {
     try {
-      const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(`/api/menuOut/academy`);
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
+
+  //학원정보 불러오기
+  const academyInfo = async (value: number) => {
+    try {
+      const res = await axios.get(
+        `/api/academy/academyDetail/${value ? value : acaId}`,
+      );
       setAcademyName(res.data.resultData.acaName);
       //console.log(res.data.resultData);
     } catch (error) {
@@ -41,13 +79,18 @@ const TeacherList = () => {
   };
 
   //강사 등록 신청목록
-  const teacherList = async () => {
+  const teacherRequestList = async (value: number) => {
+    //alert(value);
+
     try {
-      const res = await axios.get(`/api/teacher/Agree?acaId=${acaId}`);
+      const res = await axios.get(
+        `/api/teacher/Agree?acaId=${value ? value : acaId}`,
+      );
       setTeacherResultList(res.data.resultData);
       console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
+      setTeacherResultList([]);
     }
   };
 
@@ -58,7 +101,7 @@ const TeacherList = () => {
     agree: number,
   ) => {
     setClassId(classId);
-    setUserId(userId);
+    setTeacherId(userId);
     setAgree(agree);
     setIsModalVisible(true);
   };
@@ -69,7 +112,7 @@ const TeacherList = () => {
     setIsModalVisible(false);
   };
   const handleButton2Click = () => {
-    teacherAgree(classId, userId, agree);
+    teacherAgree(classId, teacherId, agree);
     setIsModalVisible(false);
   };
 
@@ -89,15 +132,34 @@ const TeacherList = () => {
       } else {
         message.error("강사 승인상태 변경이 실패되었습니다.");
       }
-      teacherList(); //목록 다시 불러오기
+      teacherRequestList(acaId); //목록 다시 불러오기
     } catch (error) {
       console.log(error);
     }
   };
 
+  //학원 선택
+  const handleAcademyChange = (value: number) => {
+    //console.log(value);
+    form.submit();
+    academyInfo(value);
+    teacherRequestList(value);
+  };
+
+  //학원 검색
+  const onFinished = async (values: any) => {
+    //console.log(values);
+
+    // 쿼리 문자열로 변환
+    const queryParams = new URLSearchParams(values).toString();
+    navigate(`../teacher?${queryParams}`); //쿼리스트링 url에 추가
+  };
+
   useEffect(() => {
+    academyList(); //학원 목록
+
     academyInfo();
-    teacherList();
+    teacherRequestList(acaId);
   }, []);
 
   return (
@@ -118,6 +180,24 @@ const TeacherList = () => {
         </div>
 
         <div className="board-wrap">
+          <Form form={form} onFinish={values => onFinished(values)}>
+            <div className="flex justify-between w-full p-3 border-b">
+              <div className="flex items-center gap-1">
+                <label className="mr-3 text-sm">학원 선택</label>
+                <Form.Item name="acaId" className="mb-0">
+                  <Select
+                    showSearch
+                    placeholder="학원 선택"
+                    optionFilterProp="label"
+                    className="select-admin-basic !min-w-52"
+                    onChange={handleAcademyChange}
+                    options={simplifiedData}
+                  />
+                </Form.Item>
+              </div>
+            </div>
+          </Form>
+
           <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
             <div className="flex items-center justify-center w-full">
               학원명

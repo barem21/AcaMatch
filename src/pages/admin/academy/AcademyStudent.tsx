@@ -42,7 +42,7 @@ function AcademyStudent() {
 
   const acaId = parseInt(searchParams.get("acaId") || "", 0);
   const classId = parseInt(searchParams.get("classId") || "", 0);
-  const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
+  //const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //전체학원 목록
   const academyList = async () => {
