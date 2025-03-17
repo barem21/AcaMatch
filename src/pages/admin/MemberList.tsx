@@ -26,7 +26,7 @@ function MemberList(): JSX.Element {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const state = searchParams.get("state");
-  //const showCnt = parseInt(searchParams.get("state") || "10", 0);
+  const showCnt = parseInt(searchParams.get("state") || "10", 0);
 
   //회원삭제 팝업
   const handleButton1Click = () => {
@@ -39,7 +39,7 @@ function MemberList(): JSX.Element {
   //회원 목록
   const memberAllList = async () => {
     try {
-      const res = await axios.get("/api/user/search?page=1&size=10");
+      const res = await axios.get(`/api/user/search?page=1&size=${showCnt}`);
       setMemberList(res.data.resultData.content);
       //console.log(res.data.resultData.content);
       return;
@@ -49,7 +49,7 @@ function MemberList(): JSX.Element {
   };
 
   const onFinished = async (values: any) => {
-    console.log(values);
+    //console.log(values);
     try {
       const res = await axios.get(
         "/api/user/search" +

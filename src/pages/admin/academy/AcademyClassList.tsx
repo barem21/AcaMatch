@@ -41,7 +41,7 @@ function AcademyClassList() {
   const [searchParams] = useSearchParams();
 
   //const acaId = parseInt(searchParams.get("acaId") || "1", 0);
-  const acaId = parseInt(searchParams.get("acaId") || "", 0);
+  const acaId = parseInt(searchParams.get("acaId") || "0", 0);
   const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //전체학원 목록
@@ -78,7 +78,7 @@ function AcademyClassList() {
       const res = await axios.get(
         "/api/acaClass?page=1&size=" +
           (showCnt ? showCnt : 10) +
-          (acaId && "&acaId=" + acaId),
+          (acaId !== 0 ? "&acaId=" + acaId : "&acaId=0"),
       );
       setClassList(res.data.resultData);
       console.log("classList : ", res.data.resultData);

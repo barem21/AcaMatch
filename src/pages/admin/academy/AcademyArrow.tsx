@@ -254,7 +254,7 @@ function AcademyArrow(): JSX.Element {
                   </div>
                   <div>
                     <div className="flex mb-0.5">
-                      <span className="flex items-center pl-1.5 pr-1.5 text-[12px] bg-red-400 rounded-md text-white">
+                      <span className="flex items-center pl-1.5 pr-1.5 text-[12px] bg-[#F28C6A] rounded-md text-white">
                         승인대기
                       </span>
                     </div>

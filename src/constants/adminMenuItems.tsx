@@ -275,12 +275,17 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
       },
       {
         label: "좋아요 목록",
-        link: "/admin/academy/like",
+        link: "/admin/academy-like",
         active: false,
       },
       {
         label: "학원 리뷰 목록",
-        link: "/admin/academy/review",
+        link: "/admin/academy-review",
+        active: false,
+      },
+      {
+        label: "프리미엄 학원 관리",
+        link: "/admin/premium",
         active: false,
       },
     ],

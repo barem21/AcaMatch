@@ -1,7 +1,10 @@
 import styled from "@emotion/styled";
-import { Button, Form, Input, Select } from "antd";
-import { useEffect } from "react";
+import { Button, Form, Input, message, Select } from "antd";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../../atoms/userInfo";
+import axios from "axios";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -92,12 +95,82 @@ const AcademyInfo = styled.div`
   }
 `;
 
+interface myAcademyListType {
+  acaId: number;
+  acaName: string;
+}
+
 function AcademyPremiumReq(): JSX.Element {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const { userId, roleId } = useRecoilValue(userInfo);
+  const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
 
-  const onFinished = (values: any) => {
+  //전체학원 목록
+  const academyList = async () => {
+    try {
+      if (roleId === 0) {
+        //전체 관리자일 때
+        const res = await axios.get(`/api/menuOut/academy`);
+        setMyAcademyList(res.data.resultData);
+        //console.log("admin : ", res.data.resultData);
+      } else {
+        const res = await axios.get(
+          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+        );
+        setMyAcademyList(res.data.resultData);
+        //console.log("academy : ", res.data.resultData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // acaId와 acaName만 남기기
+  const simplifiedData = myAcademyList.map(
+    ({ acaId: value, acaName: label }) => ({
+      value,
+      label,
+    }),
+  );
+  //console.log(simplifiedData);
+
+  const onFinished = async (values: any) => {
     console.log(values);
+
+    if (!values.acaId) {
+      message.error("프리미엄 신청할 학원을 선택해 주세요.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/payment/ready", {
+        products: [
+          {
+            productId: 1,
+            quantity: 1,
+          },
+        ],
+        acaId: values.acaId,
+        userId: userId,
+      });
+
+      if (response.data.resultData.next_redirect_pc_url) {
+        // tid를 localStorage에 저장
+        localStorage.setItem("paymentTid", response.data.resultData.tid);
+
+        // 결제창 열기
+        window.open(
+          response.data.resultData.next_redirect_pc_url,
+          "KakaoPayment",
+          "width=800,height=800",
+        );
+      } else {
+        message.error("결제 페이지 생성에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("Error during payment preparation:", error);
+      message.error("결제 준비 중 오류가 발생했습니다.");
+    }
   };
 
   //다음달 정보 구하기
@@ -125,10 +198,44 @@ function AcademyPremiumReq(): JSX.Element {
   useEffect(() => {
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
-      acaId: 1,
+      acaId: null,
       set_date: formatDate(nextMonthStart) + " ~ " + formatDate(nextMonthEnd),
-      price: 125000,
+      price: 165000,
     });
+
+    academyList(); //학원 목록
+  }, []);
+
+  // 결제 완료 후 처리를 위한 useEffect 추가
+  useEffect(() => {
+    // URL에서 pg_token 확인
+    const urlParams = new URLSearchParams(window.location.search);
+    const pgToken = urlParams.get("pg_token");
+
+    if (pgToken) {
+      const tid = localStorage.getItem("paymentTid");
+
+      // 결제 완료 처리
+      const completePayment = async () => {
+        try {
+          await axios.post("/api/payment/success", {
+            pg_token: pgToken,
+            tid: tid,
+          });
+
+          message.success("결제가 완료되었습니다.");
+          localStorage.removeItem("paymentTid"); // tid 삭제
+          // 필요한 경우 페이지 리디렉션
+        } catch (error) {
+          console.error("Error during payment completion:", error);
+          message.error("결제 완료 처리 중 오류가 발생했습니다.");
+        }
+      };
+
+      if (tid) {
+        completePayment();
+      }
+    }
   }, []);
 
   return (
@@ -155,11 +262,7 @@ function AcademyPremiumReq(): JSX.Element {
                       .toLowerCase()
                       .includes(input.toLowerCase())
                   }
-                  options={[
-                    { value: 1, label: "대구 ABC상아탑 학원" },
-                    { value: 2, label: "서울 ABC상아탑 학원" },
-                    { value: 3, label: "부산 ABC상아탑 학원" },
-                  ]}
+                  options={simplifiedData}
                 />
               </Form.Item>
 

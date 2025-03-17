@@ -195,8 +195,8 @@ function App() {
                 <Route path="class-add" element={<AcademyClassAdd />} />
                 <Route path="class-edit" element={<AcademyClassEdit />} />
                 <Route path="class-student" element={<AcademyStudent />} />
-                <Route path="academy/like" element={<AcademyLike />} />
-                <Route path="academy/review" element={<AcademyReview />} />
+                <Route path="academy-like" element={<AcademyLike />} />
+                <Route path="academy-review" element={<AcademyReview />} />
                 <Route path="test" element={<AcademyTestList />} />
                 <Route path="test-record" element={<AcademyRecord />} />
                 <Route path="premium" element={<AcademyPremium />} />

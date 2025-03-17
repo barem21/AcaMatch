@@ -29,8 +29,10 @@ function AcademyList() {
   const cookies = new Cookies();
   const currentUserInfo = useRecoilValue(userInfo);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
   const [academyId, setAcademyId] = useState<number>(0);
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
+  const [myAcademyCount, setMyAcademyCount] = useState(0);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -39,24 +41,27 @@ function AcademyList() {
   const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //학원 목록
-  const academyList = async () => {
+  const academyTotalList = async (page: number) => {
     try {
       if (currentUserInfo.roleId === 0) {
         //전체 관리자일 때
         const res = await jwtAxios.get(
-          "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree" +
-            (search !== null ? "?acaName=" + search : "") +
-            (showCnt !== null ? (search ? "&" : "?") + "size=" + showCnt : "") +
+          "/api/academy/GetAcademyInfoByAcaNameClassNameExamNameAcaAgree?page=" +
+            (page ? page : 1) +
+            (search !== null ? "&acaName=" + search : "") +
+            (showCnt !== null ? "&size=" + showCnt : "") +
             (state !== null ? "&acaAgree=" + state : ""),
         );
         setMyAcademyList(res.data.resultData);
-        console.log("admin : ", res.data.resultData);
+        setMyAcademyCount(res.data.resultData[0].totalCount);
+        //console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
           `/api/academy/getAcademyListByUserId?signedUserId=${currentUserInfo.userId}`,
         );
         setMyAcademyList(res.data.resultData);
-        console.log(res.data.resultData);
+        setMyAcademyCount(res.data.resultData[0].totalCount);
+        //console.log(res.data.resultData);
       }
     } catch (error) {
       console.log(error);
@@ -81,7 +86,7 @@ function AcademyList() {
 
       if (res.data.resultData === 1) {
         message.success("등록된 학원을 삭제하였습니다.");
-        academyList();
+        academyTotalList(currentPage);
       }
     } catch (error) {
       console.log(error);
@@ -110,6 +115,7 @@ function AcademyList() {
             (values.showCnt !== null ? "&size=" + values.showCnt : ""),
         );
         setMyAcademyList(res.data.resultData);
+        setMyAcademyCount(res.data.resultData[0].totalCount);
         //console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
@@ -118,6 +124,7 @@ function AcademyList() {
             (values.search !== null ? "&acaName=" + values.search : ""),
         );
         setMyAcademyList(res.data.resultData);
+        setMyAcademyCount(res.data.resultData[0].totalCount);
         //console.log("academy : ", res.data.resultData);
       }
     } catch (error) {
@@ -133,8 +140,14 @@ function AcademyList() {
     form.submit();
   };
 
+  //페이지 처리
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page); // 페이지 변경
+    academyTotalList(page);
+  };
+
   useEffect(() => {
-    academyList();
+    academyTotalList(currentPage);
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
@@ -142,7 +155,7 @@ function AcademyList() {
       search: search ? search : "",
       showCnt: 10,
     });
-  }, [currentUserInfo]);
+  }, []);
 
   useEffect(() => {
     if (!cookies.get("accessToken") || currentUserInfo.roleId === 1) {
@@ -377,8 +390,10 @@ function AcademyList() {
 
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
-            defaultCurrent={1}
-            total={myAcademyList?.length}
+            total={myAcademyCount}
+            current={currentPage} // 현재 페이지 번호
+            pageSize={showCnt} // 한 페이지에 표시할 항목 수
+            onChange={handlePageChange} // 페이지 변경 시 호출되는 핸들러
             showSizeChanger={false}
           />
         </div>
