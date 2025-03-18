@@ -22,7 +22,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
   const setUserInfo = useSetRecoilState(userInfo);
   const currentUserInfo = useRecoilValue(userInfo);
   const [userPic, setUserPic] = useState<string>("");
-  const [_isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [_, setIsMessageModalOpen] = useState(false);
   // const [recipientType, setRecipientType] = useState<"student" | "academy">(
   //   "student",
   // );
@@ -142,8 +142,11 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
     {
       key: "2",
       label: (
-        <button onClick={() => navigate("/")} className="w-full text-left">
-          사이트 바로가기
+        <button
+          onClick={() => navigate("../admin/profile")}
+          className="w-full text-left"
+        >
+          회원정보 수정
         </button>
       ),
     },

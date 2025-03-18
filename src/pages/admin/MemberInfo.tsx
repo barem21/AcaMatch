@@ -314,7 +314,7 @@ function MemberInfo(): JSX.Element {
     <UserInfo className="flex gap-5 w-full justify-center align-top">
       <div className="w-full mb-20">
         <h1 className="title-admin-font">
-          회원 관리
+          회원정보 수정
           <p>회원 관리 &gt; 회원정보 수정</p>
         </h1>
 

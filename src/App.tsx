@@ -14,6 +14,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Support from "./pages/Support";
 import AcademyDetail from "./pages/academyDetail/AcademyDetail";
 import DashBoard from "./pages/admin/DashBoard/DashBoard.tsx";
+import PaymentAcademy from "./pages/admin/PaymentAcademy";
 import PaymentManager from "./pages/admin/PaymentManager.tsx";
 import ForgotPw from "./pages/member/ForgotPw";
 import LoginPage from "./pages/member/LoginPage";
@@ -56,7 +57,8 @@ import AcademyTextbookAdd from "./pages/admin/academy/AcademyTextbookAdd";
 import AcademyTextbookEdit from "./pages/admin/academy/AcademyTextbookEdit";
 import AcademyTextbookList from "./pages/admin/academy/AcademyTextbookList";
 import AcademyLike from "./pages/admin/academy/AcademyLike";
-import AcademyReview from "./pages/admin/academy/AcademyReview";
+import AcademyReviewText from "./pages/admin/academy/AcademyReview";
+import AcademyReviewPhoto from "./pages/admin/academy/AcademyReviewPhoto";
 import BannerView from "./pages/admin/BannerView.tsx";
 import CheckIn from "./pages/admin/academy/CheckIn.tsx";
 import TeacherList from "./pages/admin/teacher/TeacherList";
@@ -177,6 +179,7 @@ function App() {
                 <Route index element={<DashBoard />} />
                 <Route path="member" element={<MemberList />} />
                 <Route path="profile" element={<MemberInfo />} />
+                <Route path="payment-academy" element={<PaymentAcademy />} />
                 <Route path="paymentmanager" element={<PaymentManager />} />
                 <Route path="acarevenue" element={<AcaRevenue />} />
                 <Route path="notice-content" element={<NoticeContent />} />
@@ -195,8 +198,9 @@ function App() {
                 <Route path="class-add" element={<AcademyClassAdd />} />
                 <Route path="class-edit" element={<AcademyClassEdit />} />
                 <Route path="class-student" element={<AcademyStudent />} />
-                <Route path="academy-like" element={<AcademyLike />} />
-                <Route path="academy-review" element={<AcademyReview />} />
+                <Route path="like" element={<AcademyLike />} />
+                <Route path="review-text" element={<AcademyReviewText />} />
+                <Route path="review-photo" element={<AcademyReviewPhoto />} />
                 <Route path="test" element={<AcademyTestList />} />
                 <Route path="test-record" element={<AcademyRecord />} />
                 <Route path="premium" element={<AcademyPremium />} />

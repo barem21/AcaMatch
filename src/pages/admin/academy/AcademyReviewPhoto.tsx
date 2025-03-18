@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
+//import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Cookies } from "react-cookie";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -20,6 +21,7 @@ interface ademyReviewListType {
   acaId: number;
   reviewCount: number;
   reviewId: number;
+  reviewPic: string;
 }
 
 interface myAcademyListType {
@@ -28,14 +30,14 @@ interface myAcademyListType {
 }
 
 function AcademyReview() {
-  const cookies = new Cookies();
   const [form] = Form.useForm();
+  const cookies = new Cookies();
   const [academyReviewList, setAcademyReviewList] = useState<
     ademyReviewListType[]
   >([]); //학원리뷰 목록
   const [resultMessage, setResultMessage] = useState("");
-  //const [reviewId, setReviewId] = useState();
-  const [searchParams, _] = useSearchParams();
+  //const [reviewId, _setReviewId] = useState();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
   const { roleId, userId } = useRecoilValue(userInfo);
@@ -84,13 +86,14 @@ function AcademyReview() {
     }
   };
 
-  //학원 텍스트 리뷰 목록
+  //학원 포토 리뷰 목록
   const getTagList = async (values: any) => {
     try {
       const res = await axios.get(
-        `/api/review/academy/noPic?acaId=${values.acaId}&page=1&size=${values.showCnt}`,
+        `/api/review/academy/pic?acaId=${values.acaId}&page=1&size=${values.showCnt}`,
       );
       setAcademyReviewList(res.data.resultData);
+      //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -140,8 +143,8 @@ function AcademyReview() {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          학원 텍스트 리뷰
-          <p>학원 관리 &gt; 학원 텍스트 리뷰</p>
+          학원 리뷰 목록
+          <p>학원 관리 &gt; 학원 리뷰 목록</p>
         </h1>
 
         <div className="board-wrap">
@@ -243,6 +246,16 @@ function AcademyReview() {
                   {item.className ? item.className : "학원 정보가 없습니다."}
                 </div>
                 <div className="text-sm text-gray-500">{item.comment}</div>
+                <div>
+                  {item.reviewPic.split(",").map((imageUrl, imageIndex) => (
+                    <img
+                      key={imageIndex}
+                      src={`http://112.222.157.157:5233/pic/review/${item.reviewId}/${imageUrl.trim()}`} // 공백 제거
+                      alt=""
+                      className="max-h-32"
+                    />
+                  ))}
+                </div>
               </div>
               <div className="flex items-center justify-center min-w-40">
                 <button

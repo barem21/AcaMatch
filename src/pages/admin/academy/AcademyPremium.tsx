@@ -22,11 +22,12 @@ function AcademyPremium(): JSX.Element {
   const cookies = new Cookies();
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const currentUserInfo = useRecoilValue(userInfo);
+  const { roleId, userId } = useRecoilValue(userInfo);
   const [searchParams, _] = useSearchParams();
   const [countPremium, setCountPremium] = useState(0); //전체 갯수
   const [premiumList, setPremiumList] = useState<premiumListType[]>([]); //프리미엄 목록
   const [academyId, setAcademyId] = useState(0); //삭제할려는 아카데미 고유값
+  const [premiumAcademyCount, setPremiumAcademyCount] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const state = searchParams.get("state");
@@ -34,9 +35,17 @@ function AcademyPremium(): JSX.Element {
   //프리미엄 학원 신청내역
   const premiumAcademy = async () => {
     try {
-      const res = await axios.get(`/api/academy/premium?page=1&size=30`);
-      setPremiumList(res.data.resultData);
-      setCountPremium(res.data.resultData[0].countPremium);
+      if (roleId === 0) {
+        const res = await axios.get(`/api/academy/premium?page=1&size=30`);
+        setPremiumList(res.data.resultData);
+        setCountPremium(res.data.resultData[0].countPremium);
+      } else {
+        const res = await axios.get(
+          `/api/academy/premium/acaAdmin?userId=${userId}&page=1&size=30`,
+        );
+        setPremiumList(res.data.resultData);
+        setCountPremium(res.data.resultData[0].countPremium);
+      }
       //console.log(res.data.resultData[0].countPremium);
     } catch (error) {
       console.log(error);
@@ -73,8 +82,28 @@ function AcademyPremium(): JSX.Element {
     setIsModalVisible(false);
   };
 
+  //프리미엄 학원 갯수 확인
+  const premiumAcadenyCount = async () => {
+    try {
+      const res = await axios.get(`/api/academy/premium?page=1&size=10`);
+      //console.log(res.data.resultData);
+      const filteredData = res.data.resultData.filter(
+        (item: any) => item.preCheck === 1,
+      );
+      setPremiumAcademyCount(filteredData.length);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   //프리미엄 승인처리
   const handleChangeCheck = async (acaId: number, value: string) => {
+    if (premiumAcademyCount >= 5 && parseInt(value) >= 1) {
+      //승인대기로는 변경 가능하도록
+      message.error("프리미엄 학원 지정갯수(최대 5개)가 초과되었습니다.");
+      return;
+    }
+
     try {
       const data = { acaId: acaId, preCheck: parseInt(value) };
       const res = await axios.put(`/api/academy/premium`, data);
@@ -86,6 +115,7 @@ function AcademyPremium(): JSX.Element {
         );
       }
       premiumAcademy(); //신청목록 다시 호출
+      premiumAcadenyCount(); //프리미엄 학원 갯수 다시 확인
     } catch (error) {
       console.log(error);
       message.error("프리미엄 학원 상태변경이 실패되었습니다.");
@@ -118,10 +148,11 @@ function AcademyPremium(): JSX.Element {
     });
 
     premiumAcademy(); //프리미엄 학원 목록
+    premiumAcadenyCount(); //프리미엄 학원 갯수 확인
   }, []);
 
   useEffect(() => {
-    if (!cookies.get("accessToken") || currentUserInfo.roleId === 1) {
+    if (!cookies.get("accessToken") || roleId === 1) {
       navigate("-");
       message.error("로그인이 필요한 서비스입니다.");
     }
@@ -177,7 +208,7 @@ function AcademyPremium(): JSX.Element {
               </div>
 
               <div className="flex gap-2">
-                <Form.Item name="showCnt" className="mb-0 min-w-28">
+                <Form.Item name="showCnt" className="mb-0 min-w-28 hidden">
                   <Select
                     placeholder="10개씩 보기"
                     optionFilterProp="label"
@@ -215,17 +246,25 @@ function AcademyPremium(): JSX.Element {
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
-            <div className="flex items-center justify-center w-40">신청일</div>
-            <div className="flex items-center justify-center w-72">
+            <div className="flex items-center justify-center min-w-28">
+              신청일
+            </div>
+            <div className="flex items-center justify-center min-w-52">
               적용기간
             </div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-24">
               처리상태
             </div>
-            <div className="flex items-center justify-center w-40">
-              승인여부
-            </div>
-            <div className="flex items-center justify-center w-28">관리</div>
+            {roleId === 0 && (
+              <>
+                <div className="flex items-center justify-center min-w-24">
+                  승인여부
+                </div>
+                <div className="flex items-center justify-center min-w-16">
+                  관리
+                </div>
+              </>
+            )}
           </div>
 
           {premiumList?.map((item, index) => (
@@ -245,35 +284,41 @@ function AcademyPremium(): JSX.Element {
                   {item.acaName}
                 </div>
               </div>
-              <div className="flex items-center justify-center text-center w-40">
+              <div className="flex items-center justify-center text-center min-w-28">
                 {item.createdAt.substr(0, 10)}
               </div>
-              <div className="flex items-center justify-center w-72">
+              <div className="flex items-center justify-center min-w-52">
                 {item.startDate} ~ {item.endDate}
               </div>
-              <div className="flex items-center justify-center w-40">
+              <div className="flex items-center justify-center min-w-24">
                 <p
                   className={`w-full max-w-[80px] pb-[1px] rounded-md ${item.preCheck === 1 ? "bg-[#90b1c4]" : "bg-[#F28C6A]"} text-white text-[12px] text-center`}
                 >
                   {item.preCheck === 1 ? "승인완료" : "승인대기"}
                 </p>
               </div>
-              <div className="flex items-center justify-center w-40">
-                <select
-                  className="p-1 border rounded-lg"
-                  value={item.preCheck}
-                  onChange={e => handleChangeCheck(item.acaId, e.target.value)}
-                >
-                  <option value="0">승인대기</option>
-                  <option value="1">승인완료</option>
-                  <option value="2">승인거부</option>
-                </select>
-              </div>
-              <div className="flex gap-4 items-center justify-center w-28">
-                <button onClick={() => handleDeletePremium(item.acaId)}>
-                  <FaRegTrashAlt className="w-3 text-gray-400" />
-                </button>
-              </div>
+              {roleId === 0 && (
+                <>
+                  <div className="flex items-center justify-center min-w-24">
+                    <select
+                      className="p-1 border rounded-lg"
+                      value={item.preCheck}
+                      onChange={e =>
+                        handleChangeCheck(item.acaId, e.target.value)
+                      }
+                    >
+                      <option value="0">승인대기</option>
+                      <option value="1">승인완료</option>
+                      <option value="2">승인거부</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-4 items-center justify-center min-w-16">
+                    <button onClick={() => handleDeletePremium(item.acaId)}>
+                      <FaRegTrashAlt className="w-3 text-gray-400" />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

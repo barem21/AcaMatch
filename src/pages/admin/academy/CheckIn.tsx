@@ -246,7 +246,8 @@ const CheckIn = () => {
     academyStudentList(classId); //수강생 목록
 
     if (!classId) {
-      alert("강좌를 선택해 주세요.");
+      //alert("강좌를 선택해 주세요.");
+      message.error("강좌를 선택해주세요.");
       return;
     }
 
