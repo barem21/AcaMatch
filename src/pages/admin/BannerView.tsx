@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 
 interface BannerItem {
   acaId: number;
@@ -20,6 +22,7 @@ const BannerView = () => {
   const [bannerList, setBannerList] = useState<BannerItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState<BannerItem | null>(null);
+  const { roleId } = useRecoilValue(userInfo);
 
   const acaId = searchParams.get("acaId");
 
@@ -143,9 +146,11 @@ const BannerView = () => {
             <div className="flex items-center justify-center w-[132px]">
               노출상태
             </div>
-            <div className="flex items-center justify-center w-[72px]">
-              삭제
-            </div>
+            {roleId !== 3 && (
+              <div className="flex items-center justify-center w-[72px]">
+                삭제
+              </div>
+            )}
           </div>
 
           {bannerList.map(banner => (
@@ -171,25 +176,39 @@ const BannerView = () => {
                 </div>
               </div>
 
-              {/* 노출 상태 드롭다운 */}
+              {/* 노출 상태 */}
               <div className="flex items-center justify-center text-center w-[132px]">
-                <Select
-                  value={banner.bannerShow}
-                  className="w-[100px] h-[28px] text-center text-[10px] [&_.ant-select-selection-item]:text-[14px]"
-                  onChange={value => handleBannerShowChange(banner, value)}
-                  options={[
-                    { value: 1, label: "출력" },
-                    { value: 0, label: "미출력" },
-                  ]}
-                />
+                {roleId === 3 ? (
+                  // 학원 관리자는 상태만 표시
+                  <p
+                    className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center ${
+                      banner.bannerShow === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"
+                    } text-white`}
+                  >
+                    {banner.bannerShow === 1 ? "출력" : "미출력"}
+                  </p>
+                ) : (
+                  // 관리자는 상태 변경 가능
+                  <Select
+                    value={banner.bannerShow}
+                    className="w-[100px] h-[28px] text-center text-[10px] [&_.ant-select-selection-item]:text-[14px]"
+                    onChange={value => handleBannerShowChange(banner, value)}
+                    options={[
+                      { value: 1, label: "출력" },
+                      { value: 0, label: "미출력" },
+                    ]}
+                  />
+                )}
               </div>
 
-              {/* 삭제 버튼 */}
-              <div className="flex gap-4 items-center justify-center w-[72px]">
-                <button onClick={() => handleDelete(banner.bannerPosition)}>
-                  <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
-                </button>
-              </div>
+              {/* 삭제 버튼 - 관리자만 표시 */}
+              {roleId !== 3 && (
+                <div className="flex gap-4 items-center justify-center w-[72px]">
+                  <button onClick={() => handleDelete(banner.bannerPosition)}>
+                    <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

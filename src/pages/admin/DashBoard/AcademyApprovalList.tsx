@@ -75,14 +75,16 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
               }`}
             >
               <li className="flex justify-center items-center w-[30%] text-[#242424] text-[14px]">
-                <div className="flex items-center text-[12px]">
-                  <span className="text-[14px]">{item.name}</span>
-                  <span className="text-[12px] text-gray-500">
-                    ({item.email})
-                  </span>
+                <div className="flex items-center text-[12px] w-full overflow-hidden">
+                  <div className="flex items-center w-full truncate">
+                    <span className="text-[14px] truncate">{item.name}</span>
+                    <span className="text-[12px] text-gray-500 truncate ml-1">
+                      ({item.email})
+                    </span>
+                  </div>
                 </div>
               </li>
-              <li className="flex justify-center items-center w-[11%] text-[#242424] text-[14px]">
+              <li className="flex justify-center items-center w-[11%] text-[#242424] text-[12px]">
                 {item.registrationDate}
               </li>
               <li className=" w-[14%] my-auto text-[#242424] overflow-hidden whitespace-nowrap text-ellipsis text-center text-[14px]">
@@ -94,7 +96,7 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
               <li className="flex justify-center items-center w-[16%] text-[#242424] text-[14px]">
                 {item.phone}
               </li>
-              <li className="flex justify-center items-center w-[11%] text-[#242424] text-[14px]">
+              <li className="flex justify-center items-center w-[11%] text-[#242424] text-[12px]">
                 <p
                   className={`w-full max-w-[80px] pb-[1px] rounded-md ${
                     item.certification === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"

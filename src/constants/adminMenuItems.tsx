@@ -350,6 +350,11 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
         ],
         active: false,
       },
+      {
+        label: "배너관리",
+        link: "/admin/banner-content",
+        active: false,
+      },
     ],
   },
   {

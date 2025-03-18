@@ -20,6 +20,11 @@ import LinkModal from "./LinkModal";
 import NoticeSection from "./NoticeSection";
 import ReviewSection from "./ReviewSection";
 import { AcademyData, Class } from "./types";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 declare global {
   interface Window {
@@ -374,6 +379,12 @@ const AcademyDetail = () => {
     }
   };
 
+  // acaPics 문자열을 배열로 변환하는 함수 추가
+  const getImageUrls = (acaPics: string) => {
+    if (!acaPics) return [];
+    return acaPics.split(",").map(pic => pic.trim());
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -399,10 +410,148 @@ const AcademyDetail = () => {
   }
 
   return (
-    <div ref={scrollRef} className={styles.container}>
+    <div className={styles.container}>
       <div className={styles.content.wrapper}>
         <div className={styles.header.wrapper}>
           <h1 className={styles.header.title}>{academyData.acaName}</h1>
+        </div>
+
+        <div className={styles.content.imageContainer}>
+          <div className={styles.content.image}>
+            {academyData.acaPics && (
+              <Swiper
+                modules={[Navigation, Pagination, Autoplay]}
+                spaceBetween={30}
+                slidesPerView={1}
+                pagination={{ clickable: true }}
+                autoplay={{
+                  delay: 3000,
+                  disableOnInteraction: false,
+                }}
+                loop={true}
+                className="rounded-xl"
+              >
+                {getImageUrls(academyData.acaPics).map((pic, index) => (
+                  <SwiperSlide key={index}>
+                    <img
+                      src={`http://112.222.157.157:5233/pic/academy/${academyData.acaId}/${pic}`}
+                      alt={`${academyData.acaName} ${index + 1}`}
+                      className="w-full h-[320px] bg-gray-300 rounded-xl object-cover"
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            )}
+          </div>
+        </div>
+        <div className={styles.content.mainContent}>
+          <h2 className={`${styles.academy.title} relative`}>
+            {academyData.acaName}
+            <div className="flex items-center gap-2 text-2xl absolute right-[16px] top-[25px]">
+              <button
+                onClick={() => setIsReportModalOpen(true)}
+                className="flex items-center gap-1 text-[#507A95]"
+              >
+                <AiTwotoneAlert
+                  size={20}
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="cursor-pointer mb-[2px]"
+                />
+              </button>
+              <LinkModal acaId={acaId} />
+            </div>
+          </h2>
+          <div className={styles.academy.description}>
+            {academyData.addressDto?.address}{" "}
+            {academyData.addressDto?.detailAddress}
+          </div>
+          <div className={styles.academy.description}>
+            {academyData.acaPhone}
+          </div>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(academyData.comments),
+            }}
+            className="text-[14px] mb-[50px] max-[640px]:pl-5 max-[640px]:pr-5"
+          >
+            {/* {academyData.comments} */}
+          </div>
+          <div className={styles.stats.container}>
+            <div className={styles.stats.ratingWrapper}>
+              <div className={styles.stats.rating}>
+                {academyData.star.toFixed(1)}
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-[2px] text-[14px] mt-[12px]">
+                  {renderStars(academyData.star)}
+                </div>
+                <div className="text-[14px]">
+                  {academyData.reviewCount} reviews
+                </div>
+                <div ref={scrollRef}></div>
+              </div>
+            </div>
+
+            <div className={styles.stats.statsWrapper}>
+              <div className={styles.stats.statItem}>
+                <div className={`${styles.stats.statLabel} w-20`}>
+                  <LikeButton
+                    academyId={academyData.acaId}
+                    initialIsLiked={isLiked}
+                    onLikeChange={setIsLiked}
+                    setLikeCount={setLikeCount}
+                  />
+                </div>
+                <span className={styles.stats.statValue}>{likeCount}명</span>
+              </div>
+              <div className={styles.stats.statItem}>
+                <span className={styles.stats.statLabel}>강사 수 &nbsp;</span>
+                <span className={styles.stats.statValue}>
+                  {academyData.teacherNum}명
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-[12px]">
+              {roleId === 3 ? (
+                <div className="w-[119px] h-[40px] text-[14px]"></div>
+              ) : (
+                <MainButton
+                  className="w-[119px] h-[40px] text-[14px]"
+                  onClick={() => {
+                    if (!checkIsAuthenticated()) {
+                      navigate("/log-in");
+                      message.error("로그인이 필요한 서비스입니다.");
+                      return;
+                    }
+                    navigate(
+                      `/support/inquiry/detail?acaId=${academyData.acaId}&userId=${currentUserInfo.userId}`,
+                    );
+                  }}
+                >
+                  학원 문의하기
+                </MainButton>
+              )}
+              {roleId === 3 ? (
+                <div className="w-[119px] h-[40px] text-[14px]"></div>
+              ) : (
+                <MainButton
+                  className="w-[119px] h-[40px] text-[14px]"
+                  onClick={() => {
+                    if (!checkIsAuthenticated()) {
+                      navigate("/log-in");
+                      message.error("로그인이 필요한 서비스입니다.");
+                      return;
+                    }
+                    setIsModalVisible(true);
+                  }}
+                  type="primary"
+                >
+                  학원 신청하기
+                </MainButton>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className={styles.tab.container}>
@@ -429,131 +578,7 @@ const AcademyDetail = () => {
 
         {items[0].isActive && (
           <div>
-            <div className={styles.content.imageContainer}>
-              <div className={styles.content.image}>
-                {academyData.acaPic && (
-                  <img
-                    src={`http://112.222.157.157:5233/pic/academy/${academyData.acaId}/${academyData.acaPic}`}
-                    alt={academyData.acaName}
-                    className="w-full h-full object-cover rounded-[12px]"
-                  />
-                )}
-              </div>
-            </div>
-
             <div className={styles.content.mainContent}>
-              <h2 className={`${styles.academy.title} relative`}>
-                {academyData.acaName}
-                <div className="flex items-center gap-2 text-2xl absolute right-[16px] top-[25px]">
-                  <button
-                    onClick={() => setIsReportModalOpen(true)}
-                    className="flex items-center gap-1 text-[#507A95]"
-                  >
-                    <AiTwotoneAlert
-                      size={20}
-                      onClick={() => setIsReportModalOpen(true)}
-                      className="cursor-pointer mb-[2px]"
-                    />
-                  </button>
-                  <LinkModal acaId={acaId} />
-                </div>
-              </h2>
-              <div className={styles.academy.description}>
-                {academyData.addressDto?.address}{" "}
-                {academyData.addressDto?.detailAddress}
-              </div>
-              <div className={styles.academy.description}>
-                {academyData.acaPhone}
-              </div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(academyData.comments),
-                }}
-                className="text-[14px] mb-[50px] max-[640px]:pl-5 max-[640px]:pr-5"
-              >
-                {/* {academyData.comments} */}
-              </div>
-
-              <div className={styles.stats.container}>
-                <div className={styles.stats.ratingWrapper}>
-                  <div className={styles.stats.rating}>
-                    {academyData.star.toFixed(1)}
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-[2px] text-[14px] mt-[12px]">
-                      {renderStars(academyData.star)}
-                    </div>
-                    <div className="text-[14px]">
-                      {academyData.reviewCount} reviews
-                    </div>
-                  </div>
-                </div>
-
-                <div className={styles.stats.statsWrapper}>
-                  <div className={styles.stats.statItem}>
-                    <div className={`${styles.stats.statLabel} w-20`}>
-                      <LikeButton
-                        academyId={academyData.acaId}
-                        initialIsLiked={isLiked}
-                        onLikeChange={setIsLiked}
-                        setLikeCount={setLikeCount}
-                      />
-                    </div>
-                    <span className={styles.stats.statValue}>
-                      {likeCount}명
-                    </span>
-                  </div>
-                  <div className={styles.stats.statItem}>
-                    <span className={styles.stats.statLabel}>
-                      강사 수 &nbsp;
-                    </span>
-                    <span className={styles.stats.statValue}>
-                      {academyData.teacherNum}명
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-center gap-[12px]">
-                  {roleId === 3 ? (
-                    <div className="w-[119px] h-[40px] text-[14px]"></div>
-                  ) : (
-                    <MainButton
-                      className="w-[119px] h-[40px] text-[14px]"
-                      onClick={() => {
-                        if (!checkIsAuthenticated()) {
-                          navigate("/log-in");
-                          message.error("로그인이 필요한 서비스입니다.");
-                          return;
-                        }
-                        navigate(
-                          `/support/inquiry/detail?acaId=${academyData.acaId}&userId=${currentUserInfo.userId}`,
-                        );
-                      }}
-                    >
-                      학원 문의하기
-                    </MainButton>
-                  )}
-                  {roleId === 3 ? (
-                    <div className="w-[119px] h-[40px] text-[14px]"></div>
-                  ) : (
-                    <MainButton
-                      className="w-[119px] h-[40px] text-[14px]"
-                      onClick={() => {
-                        if (!checkIsAuthenticated()) {
-                          navigate("/log-in");
-                          message.error("로그인이 필요한 서비스입니다.");
-                          return;
-                        }
-                        setIsModalVisible(true);
-                      }}
-                      type="primary"
-                    >
-                      학원 신청하기
-                    </MainButton>
-                  )}
-                </div>
-              </div>
-
               <div className={styles.section.title}>학원 일정</div>
               <div className="mb-[50px]">
                 <CalendarWrap>

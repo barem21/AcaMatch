@@ -348,7 +348,7 @@ const ReviewSection = ({
 
   return (
     <div className="flex flex-col mx-auto p-[12px] max-[640px]:w-full">
-      <div className={styles.stats.container}>
+      {/* <div className={styles.stats.container}>
         <div className={styles.stats.ratingWrapper}>
           <div className={styles.stats.rating}>{star.toFixed(1)}</div>
           <div className="flex flex-col items-center">
@@ -358,7 +358,7 @@ const ReviewSection = ({
             <div className="text-[14px]">{reviewCount} reviews</div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex justify-between items-center ">
         <div className="flex gap-4"></div>
