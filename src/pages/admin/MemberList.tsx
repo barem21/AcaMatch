@@ -27,11 +27,14 @@ function MemberList(): JSX.Element {
   const navigate = useNavigate();
   const currentUserInfo = useRecoilValue(userInfo);
   const [searchParams] = useSearchParams();
-  const [memberList, setMemberList] = useState<memberListType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [memberList, setMemberList] = useState<memberListType[]>([]); //회원목록
+  const [memberCount, setMemberCount] = useState(0); //총 최원수
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
 
-  const state = searchParams.get("state");
-  const showCnt = parseInt(searchParams.get("state") || "10", 0);
+  const state = parseInt(searchParams.get("state") || "0", 0);
+  const search = searchParams.get("search");
+  const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //회원삭제 팝업
   const handleButton1Click = () => {
@@ -42,11 +45,13 @@ function MemberList(): JSX.Element {
   };
 
   //회원 목록
-  const memberAllList = async () => {
+  const memberAllList = async (value: number) => {
     try {
-      const res = await axios.get(`/api/user/search?page=1&size=${showCnt}`);
+      const res = await axios.get(
+        `/api/user/search?page=${value}&size=${showCnt}`,
+      );
       setMemberList(res.data.resultData.content);
-      //console.log(res.data.resultData.content);
+      setMemberCount(res.data.resultData.totalElements); //총 회원수
       return;
     } catch (error) {
       console.log(error);
@@ -55,18 +60,23 @@ function MemberList(): JSX.Element {
 
   const onFinished = async (values: any) => {
     //console.log(values);
+    setCurrentPage(1);
+
     try {
       const res = await axios.get(
-        "/api/user/search" +
-          (values.state ? "?userRole=" + values.state : "") +
-          (values.search
-            ? (values.state ? "&" : "?") + "name=" + values.search
-            : "") +
-          (values.showCnt
-            ? (values.state ? "&" : "?") + "size=" + values.showCnt
-            : ""),
+        "/api/user/search?page=" +
+          currentPage +
+          (values.state ? "&userRole=" + values.state : "") +
+          (values.search ? "&name=" + values.search : "") +
+          (values.showCnt ? "&size=" + values.showCnt : ""),
       );
-      setMemberList(res.data.resultData.content);
+      if (res.data.resultData) {
+        setMemberList(res.data.resultData.content);
+        setMemberCount(res.data.resultData.totalElements); //총 회원수
+      } else {
+        setMemberList([]);
+        setMemberCount(0);
+      }
       //console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
@@ -78,17 +88,24 @@ function MemberList(): JSX.Element {
   };
 
   const onChange = () => {
+    setCurrentPage(1);
     form.submit();
   };
 
+  //페이지 처리
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page); // 페이지 변경
+    memberAllList(page);
+  };
+
   useEffect(() => {
-    memberAllList();
+    memberAllList(1);
 
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form.setFieldsValue({
       state: state ? state : null,
-      search: "",
-      showCnt: 10,
+      search: search ? search : "",
+      showCnt: showCnt ? showCnt : 10,
     });
   }, []);
 
@@ -204,6 +221,12 @@ function MemberList(): JSX.Element {
             {/*<div className="flex items-center justify-center w-36">관리</div>*/}
           </div>
 
+          {memberList?.length === 0 && (
+            <div className="loop-content flex justify-center align-middle p-2 pl-3 border-b">
+              등록된 회원이 없습니다.
+            </div>
+          )}
+
           {memberList?.map(item => (
             <div className="loop-content flex justify-between align-middle p-2 pl-3 border-b">
               <div className="flex justify-start items-center w-full">
@@ -264,7 +287,13 @@ function MemberList(): JSX.Element {
         </div>
 
         <div className="flex justify-center items-center m-6 mb-10">
-          <Pagination defaultCurrent={1} total={10} showSizeChanger={false} />
+          <Pagination
+            total={memberCount}
+            current={currentPage} // 현재 페이지 번호
+            pageSize={showCnt} // 한 페이지에 표시할 항목 수
+            onChange={handlePageChange} // 페이지 변경 시 호출되는 핸들러
+            showSizeChanger={false}
+          />
         </div>
       </div>
 

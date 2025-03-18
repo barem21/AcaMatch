@@ -275,12 +275,17 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
       },
       {
         label: "좋아요 목록",
-        link: "/admin/academy-like",
+        link: "/admin/like",
         active: false,
       },
       {
-        label: "학원 리뷰 목록",
-        link: "/admin/academy-review",
+        label: "학원 텍스트 리뷰",
+        link: "/admin/review-text",
+        active: false,
+      },
+      {
+        label: "학원 포토 리뷰",
+        link: "/admin/review-photo",
         active: false,
       },
       {
@@ -290,6 +295,27 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
       },
     ],
   },
+
+  {
+    type: "item",
+    icon: <FaCreditCard />,
+    label: "결제 및 지출 관리",
+    link: "/admin/payment-academy",
+    active: false,
+    list: [
+      {
+        label: "학원 수강신청",
+        link: "/admin/payment-academy",
+        active: false,
+      },
+      {
+        label: "결제 내역",
+        link: "/admin/paymentmanager",
+        active: false,
+      },
+    ],
+  },
+
   {
     type: "item",
     icon: <FaBullhorn />,
@@ -329,9 +355,10 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
   {
     type: "item",
     icon: <FaUserFriends />,
-    label: "회원 관리",
-    link: "/admin/member",
+    label: "회원정보 수정",
+    link: "/admin/profile",
     active: false,
+    /*
     list: [
       {
         label: "회원 목록",
@@ -344,7 +371,9 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
     ],
+    */
   },
+  /*
   {
     type: "item",
     icon: <FaCreditCard />,
@@ -352,6 +381,7 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
     link: "/admin/paymentmanager",
     active: false,
   },
+  */
 ];
 
 // 강사용 메뉴 (roleId === 4)

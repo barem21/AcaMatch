@@ -1,8 +1,18 @@
-import { Button, DatePicker, Form, Input, Pagination, Select } from "antd";
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  message,
+  Pagination,
+  Select,
+} from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
+import CustomModal from "../../components/modal/Modal";
+import axios from "axios";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
 
@@ -14,6 +24,8 @@ interface AcademyList {
   orderer: string;
   processingStatus: string;
   classOrBookName: string;
+  tid: number;
+  costId: number;
 }
 
 function PaymentManager() {
@@ -21,6 +33,9 @@ function PaymentManager() {
   const [academyList, setAcademyList] = useState<AcademyList[] | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [totalCount, setTotalCount] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [toTid, setToTid] = useState(0);
+  const [toCostId, setToCostId] = useState(0);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [inputAcaName, setInputAcaName] = useState("");
   const user = useRecoilValue(userInfo);
@@ -155,6 +170,8 @@ function PaymentManager() {
           paymentDate: item.createdAt.split(" ")[0],
           paymentAmount: item.price.toLocaleString(),
           orderer: item.name,
+          tid: item.tid,
+          costId: item.costId,
           processingStatus: item.costStatus === 2 ? "결제완료" : "결제대기",
         }));
         setAcademyList(formattedData);
@@ -170,6 +187,46 @@ function PaymentManager() {
     }
   };
 
+  //주문취소
+  const orderCancel = (tid: number, costId: number) => {
+    //alert("주문취소 처리하시겠습니까?");
+    setToTid(tid);
+    setToCostId(costId);
+    setIsModalVisible(true);
+    return;
+  };
+
+  //주문취소 팝업
+  const handleButton1Click = () => {
+    setToTid(0);
+    setToCostId(0);
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = async () => {
+    try {
+      //취소요청되야만 취소가능해서 취소요청부터 실행
+      const res = await axios.post(`/api/refund/postRefund?costId=${toCostId}`);
+      if (res.data.resultData === 1) {
+        const deleteOrder = async () => {
+          const rese = await axios.post(
+            `/api/payment/refund?tid=${toTid}&costId=${toCostId}`,
+          );
+          console.log(rese.data.resultData);
+        };
+
+        await deleteOrder(); //삭제 실행
+        setToTid(0);
+        setToCostId(0);
+        message.success("결제취소 완료되었습니다.");
+        fetchAcademyList(); //목록 다시 호출
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsModalVisible(false);
+  };
+
+  // 페이지 변경 감지를 위한 useEffect 추가
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
@@ -292,6 +349,8 @@ function PaymentManager() {
             <div className="w-[8%] text-center">결제금액</div>
             <div className="w-[8%] text-center">주문자</div>
             <div className="w-[8%] text-center">처리상태</div>
+            <div className="w-[8%] text-center">결제취소</div>
+            {/* <div className="w-[8%] text-center">삭제</div> */}
           </div>
 
           {academyList?.map((item, index) => (
@@ -319,6 +378,18 @@ function PaymentManager() {
                   {item.processingStatus}
                 </p>
               </div>
+              <div className="w-[8%] text-center">
+                <button
+                  className="small_line_button"
+                  onClick={() => orderCancel(item.tid, item.costId)}
+                >
+                  결제취소
+                </button>
+              </div>
+              {/* <div className="w-[8%] text-center flex justify-center">
+                <FaPen className="mx-2 text-gray-400 cursor-pointer" />
+                <FaRegTrashAlt className="mx-2 text-gray-400 cursor-pointer" />
+              </div> */}
             </div>
           ))}
         </div>
@@ -332,6 +403,19 @@ function PaymentManager() {
           />
         </div>
       </div>
+
+      {isModalVisible && (
+        <CustomModal
+          visible={isModalVisible}
+          title={"결제 취소"}
+          content={`선택하신 주문의 결제를 취소하시겠습니까?`}
+          onButton1Click={handleButton1Click}
+          onButton2Click={handleButton2Click}
+          button1Text={"취소"}
+          button2Text={"결제취소하기"}
+          modalWidth={400}
+        />
+      )}
     </div>
   );
 }

@@ -107,6 +107,7 @@ function AcademyPremiumReq(): JSX.Element {
   const navigate = useNavigate();
   const { userId, roleId } = useRecoilValue(userInfo);
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
+  const [premiumAcademyCount, setPremiumAcademyCount] = useState(0);
 
   //전체학원 목록
   const academyList = async () => {
@@ -118,7 +119,7 @@ function AcademyPremiumReq(): JSX.Element {
         //console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
-          `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,
+          `/api/academy/premium/notPremium?userId=${userId}`,
         );
         setMyAcademyList(res.data.resultData);
         //console.log("academy : ", res.data.resultData);
@@ -135,6 +136,20 @@ function AcademyPremiumReq(): JSX.Element {
     }),
   );
   //console.log(simplifiedData);
+
+  //프리미엄 학원 갯수 확인
+  const premiumAcadenyCount = async () => {
+    try {
+      const res = await axios.get(`/api/academy/premium?page=1&size=10`);
+      console.log(res.data.resultData);
+      const filteredData = res.data.resultData.filter(
+        (item: any) => item.preCheck === 1,
+      );
+      setPremiumAcademyCount(filteredData.length);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onFinished = async (values: any) => {
     console.log(values);
@@ -206,6 +221,7 @@ function AcademyPremiumReq(): JSX.Element {
     });
 
     academyList(); //학원 목록
+    premiumAcadenyCount(); //프리미엄 학원 갯수 확인
   }, []);
 
   // 결제 완료 후 처리를 위한 useEffect 추가
@@ -264,6 +280,7 @@ function AcademyPremiumReq(): JSX.Element {
                 rules={[{ required: true, message: "학원을 선택해 주세요." }]}
               >
                 <Select
+                  showSearch
                   className="select-admin-basic"
                   placeholder="학원을 선택해 주세요."
                   filterOption={(input, option) =>
@@ -324,26 +341,37 @@ function AcademyPremiumReq(): JSX.Element {
               </div>
 
               <div className="flex justify-end pt-3 border-t gap-3">
-                <button
-                  type="button"
-                  className="btn-admin-cancel"
-                  onClick={() => navigate(-1)}
-                >
-                  취소하기
-                </button>
-                <Form.Item className="mb-0">
-                  <Button htmlType="submit" className="btn-admin-ok">
-                    신청 및 결제하기
-                  </Button>
-                </Form.Item>
+                {premiumAcademyCount < 5 ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn-admin-cancel"
+                      onClick={() => navigate(-1)}
+                    >
+                      취소하기
+                    </button>
 
-                <button type="button" className="btn-admin-cancel">
-                  프리미엄 학원 신청이 마감되었습니다.
-                </button>
+                    <Form.Item className="mb-0">
+                      <Button htmlType="submit" className="btn-admin-ok">
+                        신청 및 결제하기
+                      </Button>
+                    </Form.Item>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn-admin-cancel"
+                    onClick={() => navigate(-1)}
+                  >
+                    프리미엄 학원 신청이 마감되었습니다.
+                  </button>
+                )}
 
+                {/*
                 <button type="button" className="btn-admin-ok">
                   프리미엄 학원 신청 심사중입니다.
                 </button>
+                */}
               </div>
             </Form>
           </div>

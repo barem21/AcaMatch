@@ -109,7 +109,7 @@ function AcademyLike() {
             >
               <div className="w-full">
                 <div className="flex items-center gap-3">
-                  <div className="flex justify-center items-center w-10 h-10 border rounded-full overflow-hidden">
+                  <div className="flex justify-center items-center w-14 min-w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
                       src={
                         item.userPic
