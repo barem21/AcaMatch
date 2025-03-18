@@ -2,6 +2,10 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import CustomModal from "../../components/modal/Modal";
 import { message } from "antd";
+import { Cookies } from "react-cookie";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
+import { useNavigate } from "react-router-dom";
 
 interface ReportMemberListType {
   actionType: string;
@@ -16,6 +20,9 @@ interface ReportMemberListType {
 }
 
 function ReportMember() {
+  const cookies = new Cookies();
+  const { roleId } = useRecoilValue(userInfo);
+  const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [reportMessage, setReportMessage] = useState<string | null>(null);
   const [reportId, setReportId] = useState<number>(0);
@@ -81,6 +88,13 @@ function ReportMember() {
 
   useEffect(() => {
     ReportMemberResult();
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (

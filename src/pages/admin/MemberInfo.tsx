@@ -8,6 +8,9 @@ import CustomModal from "../../components/modal/Modal";
 import { useNavigate } from "react-router-dom";
 import type { RcFile, UploadProps } from "antd/es/upload";
 import type { UploadFile } from "antd/es/upload/interface";
+import { Cookies } from "react-cookie";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 
 const UserInfo = styled.div`
   .ant-form-item-label {
@@ -125,14 +128,16 @@ interface FormValues {
 }
 
 function MemberInfo(): JSX.Element {
+  const cookies = new Cookies();
   const [form] = Form.useForm<FormValues>();
+  const currentUserInfo = useRecoilValue(userInfo);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [nickNameCheck, setNickNameCheck] = useState<number>(0);
   const [editMember, setEditMember] = useState<MemberInfoType>({});
   const navigate = useNavigate();
   const [previewOpen, setPreviewOpen] = useState<boolean>(false);
   const [previewImage, setPreviewImage] = useState<string>("");
-  const [phoneNumber, _setPhoneNumber] = useState<string>("");
+  const [phoneNumber, _] = useState<string>("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   //회원정보 조회
@@ -297,6 +302,13 @@ function MemberInfo(): JSX.Element {
       }); //8자리 이상
     }
   };
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || currentUserInfo.roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
+  }, []);
 
   return (
     <UserInfo className="flex gap-5 w-full justify-center align-top">

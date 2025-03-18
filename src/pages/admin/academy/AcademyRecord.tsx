@@ -3,23 +3,22 @@ import styled from "@emotion/styled";
 import {
   Button,
   Form,
-  Input,
   message,
   Pagination,
+  Radio,
   Select,
   Upload,
-  Radio,
   UploadProps,
 } from "antd";
 import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { Cookies } from "react-cookie";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
-import CustomModal from "../../../components/modal/Modal";
 import AI from "../../../components/AI";
-import { Cookies } from "react-cookie";
+import CustomModal from "../../../components/modal/Modal";
 
 const RecordList = styled.div`
   .editModal button {

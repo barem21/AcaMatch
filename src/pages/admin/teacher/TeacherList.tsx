@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../../components/modal/Modal";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
+import { Cookies } from "react-cookie";
 
 interface teacherResultType {
   classId: number;
@@ -23,6 +24,7 @@ interface myAcademyListType {
   acaName: string;
 }
 const TeacherList = () => {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -158,8 +160,15 @@ const TeacherList = () => {
   useEffect(() => {
     academyList(); //학원 목록
 
-    academyInfo();
+    academyInfo(acaId);
     teacherRequestList(acaId);
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (
