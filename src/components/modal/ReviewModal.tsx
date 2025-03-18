@@ -2,7 +2,6 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Form, message, Radio, Upload } from "antd";
 import type { RcFile, UploadProps } from "antd/es/upload";
 import type { UploadFile } from "antd/es/upload/interface";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilState } from "recoil";
@@ -10,68 +9,46 @@ import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import MainButton from "../button/MainButton";
 import { SecondaryButton } from "./Modal";
-import { Class } from "../../pages/academyDetail/types";
 
 interface ReviewModalProps {
   onClose: () => void;
-  joinClassId: number[];
   academyId: number;
-  existingReview?: any;
-  classId?: number;
-  classes?: Class[];
+  existingReview?: Review;
+  userClasses: any[];
+  onSubmitSuccess?: () => void;
 }
 
 type ReviewType = "general" | "media";
 
 function ReviewModal({
   onClose,
-  // joinClassId,
-  // academyId,
+  academyId,
   existingReview,
-  classId,
-  classes = [],
+  userClasses = [],
+  onSubmitSuccess,
 }: ReviewModalProps) {
   const [form] = Form.useForm();
-  const [rating, setRating] = useState(existingReview?.reviewStar || 1);
+  const [rating, setRating] = useState(existingReview?.star || 1);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewType, setReviewType] = useState<ReviewType>(
-    existingReview?.reviewPics?.length ? "media" : "general",
+    existingReview?.reviewPic ? "media" : "general",
   );
   const [user] = useRecoilState(userInfo);
-  const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
-
-  // const selectedClassId =
-  //   Form.useWatch("classId", form) ||
-  //   existingReview?.classId ||
-  //   classId ||
-  //   joinClassId[0];
-
-  // const navigate = useNavigate();
+  const [_deletedFiles, setDeletedFiles] = useState<string[]>([]);
 
   useEffect(() => {
-    // existingReview가 있을 때만 실행
-    if (existingReview) {
-      form.setFieldsValue({
-        comment: existingReview.reviewComment,
-        classId: existingReview.classId, // joinClassId 대신 classId 사용
-        reviewType: existingReview.reviewPics?.length ? "media" : "general",
-      });
-
-      setRating(existingReview.reviewStar);
-
-      if (existingReview.reviewPics) {
-        const existingFiles = existingReview.reviewPics.map((pic: string) => ({
-          uid: pic,
-          name: pic,
-          status: "done",
-          url: `http://112.222.157.157:5233/pic/reviews/${existingReview.reviewId}/images/${pic}`,
-        }));
-        setFileList(existingFiles);
-      }
+    if (existingReview?.reviewPic) {
+      const existingFiles = existingReview.reviewPic.split(",").map(pic => ({
+        uid: pic,
+        name: pic,
+        status: "done",
+        url: `http://112.222.157.157:5233/pic/review/${existingReview.reviewId}/${pic}`,
+      }));
+      setFileList(existingFiles);
     }
-  }, [existingReview, form]);
+  }, [existingReview]);
 
   const handleStarClick = (selectedRating: number) => {
     setRating(selectedRating);
@@ -106,87 +83,78 @@ function ReviewModal({
   const handleSubmit = async (values: { comment: string }) => {
     if (isSubmitting) return;
 
-    if (reviewType === "media" && fileList.length === 0) {
-      message.error("이미지 리뷰는 최소 1장의 이미지가 필요합니다.");
-      return;
-    }
-
     try {
       setIsSubmitting(true);
+
       const formData = new FormData();
 
-      const reviewData = {
-        userId: user.userId,
-        classId: form.getFieldValue("classId"),
-        comment: values.comment.trim(),
-        star: rating,
-        reviewId: existingReview?.reviewId || 0,
+      // JSON 데이터 생성
+      const reqData = {
+        p: {
+          joinClassId: Number(form.getFieldValue("joinClassId")),
+          userId: Number(user.userId),
+          comment: values.comment.trim(),
+          star: Number(rating),
+          banReview: 0,
+          reviewId: existingReview?.reviewId,
+        },
+        pics: fileList
+          .filter(file => file.status === "done" && !file.originFileObj)
+          .map(file => file.name),
       };
 
-      // 리뷰 데이터 로그
-      console.log("리뷰 데이터:", reviewData);
-      console.log(
-        "새로운 파일:",
-        fileList.filter(file => file.originFileObj),
-      );
-      console.log("삭제된 파일:", deletedFiles);
-
+      // JSON 데이터를 Blob으로 변환하여 FormData에 추가
       formData.append(
-        "review",
-        new Blob([JSON.stringify(reviewData)], {
-          type: "application/json",
-        }),
+        "p",
+        new Blob([JSON.stringify(reqData.p)], { type: "application/json" }),
       );
 
-      // FormData 내용 확인
-      console.log("FormData 내용:");
-      for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
+      // 이미지 파일들 추가
       fileList.forEach(file => {
         if (file.originFileObj) {
-          formData.append("files", file.originFileObj, file.originFileObj.name);
+          formData.append("pics", file.originFileObj); // 'pics'로 파일 추가
         }
       });
 
-      deletedFiles.forEach(fileName => {
-        formData.append("deletedFiles", fileName);
-      });
+      // 이미지 파일 이름들 추가 (이미지가 있을 경우에만)
+      if (reqData.pics.length > 0) {
+        formData.append(
+          "pics",
+          new Blob([JSON.stringify(reqData.pics)], {
+            type: "application/json",
+          }),
+        );
+      }
 
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+
+      // API 메서드 변경: POST -> PUT
       if (existingReview) {
-        await jwtAxios.post(`/api/image-review/update`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
-        });
+        await jwtAxios.put("/api/review/updateReview", formData, config);
       } else {
-        await jwtAxios.post("/api/image-review/create", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Accept: "application/json",
-          },
-        });
+        await jwtAxios.post("/api/review", formData, config);
       }
 
       message.success(
         existingReview ? "리뷰가 수정되었습니다." : "리뷰가 등록되었습니다.",
       );
-      onClose();
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        if (error.response) {
-          console.error("Server Error:", error.response.data);
-          message.error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-        } else if (error.request) {
-          console.error("Network Error:", error.request);
-          message.error("네트워크 연결을 확인해주세요.");
-        }
+
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
       } else {
-        console.error("Error:", error);
-        message.error("오류가 발생했습니다.");
+        onClose();
       }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      message.error(
+        existingReview
+          ? "리뷰 수정에 실패했습니다."
+          : "리뷰 등록에 실패했습니다.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -220,9 +188,6 @@ function ReviewModal({
     );
   };
 
-  // 수강 중인 클래스만 필터링
-  const activeCourses = classes.filter(cls => cls.userCertification === 1);
-
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
       <div className="flex flex-col items-center w-[500px] bg-white rounded-xl p-6 gap-6">
@@ -232,15 +197,12 @@ function ReviewModal({
           layout="vertical"
           className="w-full"
           initialValues={{
-            classId:
-              existingReview?.classId ||
-              classId ||
-              activeCourses[0]?.classId ||
+            joinClassId:
+              existingReview?.joinClassId ||
+              userClasses[0]?.joinClassId ||
               null,
-            comment: existingReview?.reviewComment || "",
-            reviewType: existingReview?.reviewPics?.length
-              ? "media"
-              : "general",
+            comment: existingReview?.comment || "",
+            reviewType: existingReview?.reviewPic ? "media" : "general",
           }}
         >
           {/* Header */}
@@ -271,18 +233,18 @@ function ReviewModal({
             </Radio.Group>
           </Form.Item>
 
-          {/* Class Selection - 수강 중인 클래스만 표시 */}
+          {/* 수강 중인 클래스 선택 - joinClassId 사용 */}
           <Form.Item
             label="수강 중인 클래스"
-            name="classId"
+            name="joinClassId"
             className="mb-6"
             rules={[{ required: true, message: "클래스를 선택해주세요" }]}
           >
             <Radio.Group>
-              {activeCourses.map(cls => (
+              {userClasses.map(cls => (
                 <Radio
-                  key={cls.classId}
-                  value={cls.classId}
+                  key={cls.joinClassId}
+                  value={cls.joinClassId}
                   className="block mb-2"
                 >
                   {cls.className}

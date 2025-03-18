@@ -181,8 +181,8 @@ const BookList = ({ books, selectedClassId }: BookListProps) => {
             </div>
           ))
         ) : (
-          <div className="col-span-5 h-[178px] flex items-center justify-center border rounded-xl bg-gray-100">
-            <p className="text-lg text-gray-500">등록된 교재가 없습니다</p>
+          <div className="col-span-5 h-[178px] flex items-center justify-center border rounded-xl">
+            <p className="text-[16px]">등록된 교재가 없습니다</p>
           </div>
         )}
       </div>

@@ -167,8 +167,10 @@ function DashBoard() {
       if (roleId === 3) {
         // 학원 관리자용 API
         const response = await jwtAxios.get(
-          `/api/academy-manager/GetUserInfoList/${userId}`,
+          `/api/academy-manager/GetUserInfoList?userId=${userId}&page=1&size=6`,
         );
+        console.log("ddd:", response.data.resultData);
+
         setApprovalData(response.data.resultData);
       }
     } catch (error) {
@@ -874,7 +876,7 @@ function DashBoard() {
           roleId={roleId as number}
         />
         {roleId === 3 ? (
-          <AttendanceList userId={userId} />
+          <AttendanceList userId={userId as number} />
         ) : (
           <ReportedUserList reportedUsers={reportedUsers} />
         )}

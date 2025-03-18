@@ -161,20 +161,18 @@ const AttendanceList = ({ userId }: AttendanceListProps) => {
   }, [selectedAcademy, selectedClass]);
 
   // 출석 상태에 따른 배경색 반환
-  const getStatusColor = (status: string, count: number) => {
-    // if (count === 0) return "bg-gray-100 text-gray-400";
-
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "present":
-        return " text-green-600";
+        return "text-green-600";
       case "late":
-        return " text-yellow-600";
+        return "text-yellow-600";
       case "absent":
         return "text-red-600";
       case "earlyLeave":
-        return "";
+        return "text-orange-600";
       default:
-        return "bg-gray-100";
+        return "text-gray-400";
     }
   };
 
@@ -264,28 +262,28 @@ const AttendanceList = ({ userId }: AttendanceListProps) => {
               </li>
               <li className="flex justify-center items-center w-[20%]">
                 <span
-                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("present", record.present)}`}
+                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("present")}`}
                 >
                   {record.present}
                 </span>
               </li>
               <li className="flex justify-center items-center w-[20%]">
                 <span
-                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("late", record.late)}`}
+                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("late")}`}
                 >
                   {record.late}
                 </span>
               </li>
               <li className="flex justify-center items-center w-[20%]">
                 <span
-                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("absent", record.absent)}`}
+                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("absent")}`}
                 >
                   {record.absent}
                 </span>
               </li>
               <li className="flex justify-center items-center w-[20%]">
                 <span
-                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("earlyLeave", record.earlyLeave)}`}
+                  className={`w-[60px] text-center rounded-md py-1 ${getStatusColor("earlyLeave")}`}
                 >
                   {record.earlyLeave}
                 </span>
