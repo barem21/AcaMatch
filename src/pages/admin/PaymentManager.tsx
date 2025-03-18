@@ -13,6 +13,8 @@ import { useSearchParams } from "react-router-dom";
 import jwtAxios from "../../apis/jwt";
 import CustomModal from "../../components/modal/Modal";
 import axios from "axios";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 
 interface AcademyList {
   acaName: string;
@@ -35,21 +37,16 @@ function PaymentManager() {
   const [toTid, setToTid] = useState(0);
   const [toCostId, setToCostId] = useState(0);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  // const [searchAcaName, setSearchAcaName] = useState(
-  //   searchParams.get("acaName") || "",
-  // );
   const [inputAcaName, setInputAcaName] = useState("");
+  const user = useRecoilValue(userInfo);
 
-  // URL에서 모든 파라미터 가져오기
   const currentPage = Number(searchParams.get("page")) || 1;
   const [pageSize, setPageSize] = useState<number>(
-    Number(searchParams.get("size")) || 30, // size 파라미터가 없을 경우 기본값 30
+    Number(searchParams.get("size")) || 30,
   );
-  // const orderType = Number(searchParams.get("orderType")) || 0;
   const startDateStr = searchParams.get("startDate");
   const endDateStr = searchParams.get("endDate");
 
-  // 날짜 상태를 URL 파라미터에서 초기화
   const [startDate, setStartDate] = useState<Dayjs | null>(
     startDateStr ? dayjs(startDateStr) : null,
   );
@@ -89,7 +86,6 @@ function PaymentManager() {
     updateSearchParams({
       page: page.toString(),
     });
-    // MyPage 컴포넌트와 동일한 방식으로 스크롤 처리
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -138,7 +134,6 @@ function PaymentManager() {
     });
   };
 
-  // API에서 학원 결제 내역을 가져오는 함수 (Axios 사용)
   const fetchAcademyList = async () => {
     const url = `/api/academy/GetAcademyListByAcaNameOrderType`;
 
@@ -147,6 +142,10 @@ function PaymentManager() {
       size: pageSize,
       acaName: searchParams.get("acaName") || undefined,
     };
+
+    if (user.roleId === 3) {
+      params.userId = user.userId;
+    }
 
     const orderTypeParam = searchParams.get("orderType");
     if (orderTypeParam) {
@@ -230,15 +229,13 @@ function PaymentManager() {
   // 페이지 변경 감지를 위한 useEffect 추가
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [currentPage]); // currentPage가 변경될 때마다 실행
+  }, [currentPage]);
 
-  // searchParams 변경 감지를 위한 useEffect
   useEffect(() => {
     fetchAcademyList();
   }, [searchParams]);
 
   const handleSizeChange = (value: number) => {
-    // 먼저 스크롤을 실행
     setTimeout(() => {
       window.scrollTo({
         top: 0,

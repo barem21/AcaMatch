@@ -1,11 +1,10 @@
 import styled from "@emotion/styled";
-import { message, Radio, Select, Spin } from "antd";
+import { message, Radio, Select } from "antd";
 import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
-import { FaFacebookF, FaLink, FaShare, FaXTwitter } from "react-icons/fa6";
+import { AiTwotoneAlert } from "react-icons/ai";
 import { GoStar, GoStarFill } from "react-icons/go";
-import { SiNaver } from "react-icons/si";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
@@ -17,9 +16,10 @@ import AcademyCalendar from "./AcademyCalendar";
 import BookList from "./BookList";
 import ClassList from "./ClassList";
 import KakaoMap from "./KakaoMap";
+import LinkModal from "./LinkModal";
+import NoticeSection from "./NoticeSection";
 import ReviewSection from "./ReviewSection";
-import { AcademyData, Class, Review } from "./types";
-import { AiTwotoneAlert } from "react-icons/ai";
+import { AcademyData, Class } from "./types";
 
 declare global {
   interface Window {
@@ -107,165 +107,6 @@ const styles = {
   },
 };
 
-// LinkModal props 타입 정의
-interface LinkModalProps {
-  acaId: string | null;
-}
-
-const LinkModal: React.FC<LinkModalProps> = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLink, setIsLink] = useState(false);
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
-  // 모달 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      setTimeout(() => {
-        window.addEventListener("click", handleClickOutside);
-      }, 0);
-    }
-
-    return () => {
-      window.removeEventListener("click", handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const handleModalClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // 이벤트 버블링 방지
-    setIsLink(true);
-
-    try {
-      // 현재 브라우저의 URL을 가져옴
-      const currentURL = window.location.href;
-
-      // Clipboard API 사용
-      await navigator.clipboard.writeText(currentURL);
-      message.success("링크가 복사되었습니다!");
-    } catch (error) {
-      console.error("링크 복사 실패:", error);
-
-      // Clipboard API 지원이 안되는 경우, input을 활용한 복사
-      try {
-        const textarea = document.createElement("textarea");
-        textarea.value = window.location.href;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-        message.success("링크가 복사되었습니다!");
-      } catch (fallbackError) {
-        console.error("대체 복사 실패:", fallbackError);
-        message.error("링크 복사에 실패했습니다. 수동으로 복사해주세요.");
-      }
-    }
-  };
-
-  const snsSendProc = (type: string) => {
-    const shareTitle = "학원 상세정보 공유하기";
-    const currentURL = window.location.href;
-    let href = "";
-
-    switch (type) {
-      case "FB":
-        href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentURL)}&t=${encodeURIComponent(shareTitle)}`;
-        break;
-      case "TW":
-        href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(currentURL)}`;
-        break;
-      case "NB":
-        href = `https://share.naver.com/web/shareView?url=${encodeURIComponent(currentURL)}&title=${encodeURIComponent(shareTitle)}`;
-        break;
-    }
-
-    if (href) {
-      window.open(href, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  return (
-    <div className="relative inline-block">
-      {/* 모달을 여는 버튼 */}
-      <button
-        onClick={e => {
-          e.stopPropagation();
-          setIsOpen(true);
-        }}
-      >
-        <FaShare color="#507A95" />
-      </button>
-
-      {/* 모달 */}
-      {isOpen && (
-        <div className="absolute right-0 flex justify-center items-center z-1">
-          <div
-            ref={modalRef}
-            onClick={handleModalClick}
-            className="bg-white p-5 rounded-lg shadow-lg w-64"
-          >
-            <h2 className="text-lg font-semibold mb-3">공유하기</h2>
-            <div className="flex justify-around gap-3">
-              <button onClick={() => snsSendProc("FB")}>
-                <FaFacebookF className="text-blue-600 text-3xl" />
-              </button>
-              <button onClick={() => snsSendProc("TW")}>
-                <FaXTwitter className="text-blue-400 text-3xl" />
-              </button>
-              <button onClick={() => snsSendProc("NB")}>
-                <SiNaver className="text-green-500 text-3xl" />
-              </button>
-              <button onClick={handleCopy}>
-                <FaLink
-                  className={`text-gray-600 text-3xl ${isLink ? "text-green-400" : ""}`}
-                />
-              </button>
-            </div>
-
-            {/* 닫기 버튼 */}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="mt-4 w-full bg-gray-200 py-2 rounded-md"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// interface AcademyClass {
-//   classId: number;
-//   className: string;
-//   classStartDate: string;
-//   classEndDate: string;
-//   classPrice: number;
-//   productId: number;
-// }
-
-// BoardItem 인터페이스 추가
-interface BoardItem {
-  boardId: number;
-  userId: number;
-  boardName: string;
-  createdAt: string;
-  name: string;
-  totalCount: number;
-}
-
 // ReportType 인터페이스 추가
 interface ReportType {
   name: string;
@@ -278,7 +119,6 @@ const AcademyDetail = () => {
   // const { search } = useLocation();
 
   const acaId = searchParams.get("id");
-  const size = 10;
 
   const [academyData, setAcademyData] = useState<AcademyData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -297,10 +137,7 @@ const AcademyDetail = () => {
   const cookies = new Cookies();
   const navigate = useNavigate();
 
-  //리뷰를 위한 쿼리스트링
-  // const [searchParams, setSearchParams] = useSearchParams();
   const page = searchParams.get("page") || "1";
-  const reviewTab = searchParams.get("review");
 
   const [items, setItems] = useState([
     { label: "상세 학원정보", isActive: false },
@@ -310,9 +147,18 @@ const AcademyDetail = () => {
 
   // 초기 탭 설정을 위한 useEffect 추가
   useEffect(() => {
+    const reviewParam = searchParams.get("review");
+    let activeTabIndex = 0; // 기본값은 첫 번째 탭
+
+    if (reviewParam === "2") {
+      activeTabIndex = 2; // 리뷰 탭
+    } else if (searchParams.has("classTab")) {
+      activeTabIndex = 1; // 수업정보 탭
+    }
+
     const updatedItems = items.map((item, idx) => ({
       ...item,
-      isActive: reviewTab ? idx === 2 : idx === 0,
+      isActive: idx === activeTabIndex,
     }));
     setItems(updatedItems);
   }, [searchParams]);
@@ -326,51 +172,6 @@ const AcademyDetail = () => {
 
   // 스크롤 참조 추가
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Add state for general reviews pagination
-  const [generalPage, setGeneralPage] = useState(1);
-  const [generalReviews, setGeneralReviews] = useState<Review[]>([]);
-  const [totalGeneralReviewCount, setTotalGeneralReviewCount] = useState(0);
-
-  // Add new state for media reviews pagination
-  const [mediaPage, setMediaPage] = useState(1);
-  const [mediaReviews, setMediaReviews] = useState<Review[]>([]);
-  const [totalMediaReviewCount, setTotalMediaReviewCount] = useState(0);
-
-  // Separate fetch function for media reviews
-  const fetchMediaReviews = async () => {
-    try {
-      const response = await jwtAxios.get(
-        `/api/academy/getMediaReview?mediaStartIndx=${(mediaPage - 1) * size}&acaId=${acaId}&size=${size}`,
-      );
-
-      if (response.data.resultData) {
-        setMediaReviews(response.data.resultData.mediaReviews);
-        setTotalMediaReviewCount(
-          response.data.resultData.totalMediaReviewCount,
-        );
-      }
-    } catch (error) {
-      console.error("Failed to fetch media reviews:", error);
-    }
-  };
-
-  const fetchGeneralReviews = async () => {
-    try {
-      const response = await jwtAxios.get(
-        `/api/academy/getGeneralReview?generalStartIndx=${(generalPage - 1) * size}&acaId=${acaId}&size=${size}`,
-      );
-
-      if (response.data.resultData) {
-        const { generalReviews, totalGeneralReviewCount } =
-          response.data.resultData;
-        setGeneralReviews(generalReviews);
-        setTotalGeneralReviewCount(totalGeneralReviewCount);
-      }
-    } catch (error) {
-      console.error("Failed to fetch general reviews:", error);
-    }
-  };
 
   const fetchData = async () => {
     try {
@@ -413,10 +214,16 @@ const AcademyDetail = () => {
     newParams.set("page", page);
     newParams.set("size", "10");
 
+    // 탭에 따라 URL 파라미터 설정
     if (index === 2) {
       newParams.set("review", "2");
+      newParams.delete("classTab");
+    } else if (index === 1) {
+      newParams.set("classTab", "1");
+      newParams.delete("review");
     } else {
       newParams.delete("review");
+      newParams.delete("classTab");
     }
 
     setSearchParams(newParams);
@@ -512,26 +319,6 @@ const AcademyDetail = () => {
     setSelectClass(classId);
   };
 
-  // Add useEffect for general reviews
-  useEffect(() => {
-    if (items[2].isActive) {
-      fetchGeneralReviews();
-      fetchMediaReviews();
-    }
-  }, [generalPage, mediaPage, acaId, items[2].isActive]);
-
-  // Add general page change handler
-  const handleGeneralPageChange = (page: number) => {
-    setGeneralPage(page);
-    setMediaPage(page); // 두 페이지를 동기화
-  };
-
-  // Add media page change handler
-  const handleMediaPageChange = (page: number) => {
-    setMediaPage(page);
-    setGeneralPage(page); // 두 페이지를 동기화
-  };
-
   // 수강 가능한 클래스만 필터링
   const availableClasses =
     academyData?.classes?.filter(
@@ -586,44 +373,6 @@ const AcademyDetail = () => {
       // alert("신고 처리 중 오류가 발생했습니다.");
     }
   };
-
-  // 공지사항 상태 추가
-  const [academyNotices, setAcademyNotices] = useState<BoardItem[]>([]);
-  const [noticeLoading, setNoticeLoading] = useState(false);
-
-  // 학원 공지사항 불러오는 함수 추가
-  const fetchAcademyNotices = async () => {
-    if (!acaId) return;
-
-    setNoticeLoading(true);
-    try {
-      const params = {
-        acaId: acaId,
-        page: 1,
-        size: 5, // 최근 5개 공지사항만 표시
-      };
-
-      const response = await jwtAxios.get(`/api/board/list`, { params });
-      const { resultData } = response.data;
-
-      const filteredData = resultData?.filter(
-        (item: BoardItem | null): item is BoardItem => item !== null,
-      );
-
-      setAcademyNotices(filteredData || []);
-    } catch (error) {
-      console.error("Error fetching academy notices:", error);
-    } finally {
-      setNoticeLoading(false);
-    }
-  };
-
-  // 학원 정보 로드 시 공지사항도 함께 로드
-  useEffect(() => {
-    if (acaId) {
-      fetchAcademyNotices();
-    }
-  }, [acaId]);
 
   if (loading) {
     return (
@@ -687,12 +436,6 @@ const AcademyDetail = () => {
                     src={`http://112.222.157.157:5233/pic/academy/${academyData.acaId}/${academyData.acaPic}`}
                     alt={academyData.acaName}
                     className="w-full h-full object-cover rounded-[12px]"
-                    // onError={e => {
-                    // const target = e.target as HTMLImageElement;
-                    // const randomNum = getRandomUniqueNumber();
-                    // target.src = `/default_academy${randomNum}.jpg`;
-                    // console.log(`/default_academy${randomNum}.jpg`);
-                    // }}
                   />
                 )}
               </div>
@@ -818,50 +561,7 @@ const AcademyDetail = () => {
                 </CalendarWrap>
               </div>
 
-              {/* 공지사항 섹션 추가 */}
-              <div className={styles.section.title}>공지사항</div>
-              <div className="mb-[50px]">
-                {noticeLoading ? (
-                  <div className="flex justify-center items-center h-[100px]">
-                    <Spin />
-                  </div>
-                ) : academyNotices.length > 0 ? (
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
-                      <div className="flex items-center justify-center w-[70%]">
-                        제목
-                      </div>
-                      <div className="flex items-center justify-center w-[30%]">
-                        작성일
-                      </div>
-                    </div>
-                    {academyNotices.map(notice => (
-                      <div
-                        key={notice.boardId}
-                        className="flex justify-between align-middle p-3 border-b hover:bg-gray-50"
-                      >
-                        <div className="flex items-center w-[70%] truncate">
-                          <a
-                            href={`/notice/detail?boardId=${notice.boardId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline truncate"
-                          >
-                            {notice.boardName}
-                          </a>
-                        </div>
-                        <div className="flex items-center justify-center w-[30%] text-gray-500 text-sm">
-                          {notice.createdAt}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex justify-center items-center h-[100px] border rounded-lg">
-                    등록된 공지사항이 없습니다.
-                  </div>
-                )}
-              </div>
+              <NoticeSection acaId={acaId} />
 
               {/* 책 목록 섹션 추가 */}
               <BookList books={academyData?.books || []} />
@@ -891,18 +591,11 @@ const AcademyDetail = () => {
             renderStars={renderStars}
             academyId={Number(acaId)}
             classes={academyData?.classes || []}
-            generalReviews={generalReviews}
-            mediaReviews={mediaReviews}
-            generalReviewCount={totalGeneralReviewCount}
-            mediaReviewCount={totalMediaReviewCount}
             onReviewUpdate={async () => {
-              await fetchGeneralReviews();
-              await fetchMediaReviews();
+              // 리뷰 업데이트 후 학원 데이터 다시 가져오기
+              await fetchData();
             }}
-            onMediaPageChange={handleMediaPageChange}
-            onGeneralPageChange={handleGeneralPageChange}
-            mediaPage={mediaPage}
-            generalPage={generalPage}
+            roleId={roleId as number}
           />
         )}
       </div>
