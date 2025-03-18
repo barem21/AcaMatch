@@ -6,6 +6,7 @@ import axios from "axios";
 import CustomModal from "../../../components/modal/Modal";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
+import { Cookies } from "react-cookie";
 
 interface classListType {
   acaPic: string;
@@ -34,6 +35,7 @@ interface myAcademyListType {
 }
 
 function AcademyTextbookList(): JSX.Element {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { userId, roleId } = useRecoilValue(userInfo);
@@ -192,6 +194,13 @@ function AcademyTextbookList(): JSX.Element {
       search: "",
       showCnt: 10,
     });
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (

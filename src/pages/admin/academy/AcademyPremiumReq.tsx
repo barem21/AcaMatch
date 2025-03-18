@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../../atoms/userInfo";
 import axios from "axios";
+import { Cookies } from "react-cookie";
 
 const AcademyInfo = styled.div`
   .ant-form-item-label {
@@ -101,6 +102,7 @@ interface myAcademyListType {
 }
 
 function AcademyPremiumReq(): JSX.Element {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { userId, roleId } = useRecoilValue(userInfo);
@@ -235,6 +237,13 @@ function AcademyPremiumReq(): JSX.Element {
       if (tid) {
         completePayment();
       }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
     }
   }, []);
 

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../../components/modal/Modal";
+import { Cookies } from "react-cookie";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../../atoms/userInfo";
 
 interface premiumListType {
   acaId: number;
@@ -16,8 +19,10 @@ interface premiumListType {
 }
 
 function AcademyPremium(): JSX.Element {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const currentUserInfo = useRecoilValue(userInfo);
   const [searchParams, _] = useSearchParams();
   const [countPremium, setCountPremium] = useState(0); //전체 갯수
   const [premiumList, setPremiumList] = useState<premiumListType[]>([]); //프리미엄 목록
@@ -113,6 +118,13 @@ function AcademyPremium(): JSX.Element {
     });
 
     premiumAcademy(); //프리미엄 학원 목록
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || currentUserInfo.roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (

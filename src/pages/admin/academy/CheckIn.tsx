@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 //import jwtAxios from "../../../apis/jwt";
 import userInfo from "../../../atoms/userInfo";
+import { Cookies } from "react-cookie";
 
 /*
 interface BoardItem {
@@ -79,6 +80,7 @@ interface myAcademyListType {
 }
 
 const CheckIn = () => {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const [form2] = Form.useForm();
   const navigate = useNavigate();
@@ -391,6 +393,13 @@ const CheckIn = () => {
     form2.setFieldsValue({
       status: "출석",
     });
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (

@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomModal from "../../components/modal/Modal";
+import { Cookies } from "react-cookie";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
+import { message } from "antd";
+import { useNavigate } from "react-router-dom";
 
 function ReportAcademy() {
+  const cookies = new Cookies();
+  const { roleId } = useRecoilValue(userInfo);
+  const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [reportMessage, setReportMessage] = useState<string | null>(null);
   //const [reportId, setReportId] = useState<number>(0);
@@ -40,6 +48,13 @@ function ReportAcademy() {
   const handleButton2Click = () => {
     setIsModalVisible(false);
   };
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
+  }, []);
 
   return (
     <div className="flex gap-5 w-full justify-center align-top">

@@ -1,8 +1,11 @@
-import { Button, Form, Input, Pagination, Select } from "antd";
+import { Button, Form, Input, message, Pagination, Select } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import CustomModal from "../../components/modal/Modal";
 import axios from "axios";
+import { Cookies } from "react-cookie";
+import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 
 interface memberListType {
   birth: string;
@@ -19,8 +22,10 @@ interface memberListType {
 }
 
 function MemberList(): JSX.Element {
+  const cookies = new Cookies();
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const currentUserInfo = useRecoilValue(userInfo);
   const [searchParams] = useSearchParams();
   const [memberList, setMemberList] = useState<memberListType[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -85,6 +90,13 @@ function MemberList(): JSX.Element {
       search: "",
       showCnt: 10,
     });
+  }, []);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken") || currentUserInfo.roleId === 1) {
+      navigate("-");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
   }, []);
 
   return (
