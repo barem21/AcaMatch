@@ -21,17 +21,27 @@ export interface Class {
 
 export interface Review {
   reviewId: number;
-  reviewComment: string;
-  reviewStar: number;
-  reviewCreatedAt: string;
-  reviewUpdatedAt: string;
-  reviewUserId: number;
-  reviewUserNickName: string;
-  reviewClassName: string;
-  joinClassId: number;
-  banReview: number;
-  writerPic: string;
   classId: number;
+  className: string;
+  acaId: number;
+  userId: number;
+  writerName: string;
+  writerPic: string;
+  comment: string;
+  star: number;
+  createdAt: string;
+  myReviewCount: number;
+  banReview: number;
+  reviewPic: string;
+
+  reviewComment?: string;
+  reviewStar?: number;
+  reviewCreatedAt?: string;
+  reviewUpdatedAt?: string;
+  reviewUserId?: number;
+  reviewUserNickName?: string;
+  reviewClassName?: string;
+  joinClassId?: number;
   reviewPics?: string[];
   totalGeneralReviewCount?: number;
   totalMediaReviewCount?: number;

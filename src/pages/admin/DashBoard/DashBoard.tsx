@@ -23,6 +23,7 @@ import {
   SearchInfo,
   WeekKey,
 } from "./types";
+import AttendanceList from "./AttendanceList";
 
 // const generateData = (
 //   id: DataKey,
@@ -71,28 +72,6 @@ const pieChartData: Record<
   },
 };
 
-// 이번 주와 지난 주의 날짜 범위를 동적으로 생성하는 함수
-// const getWeekRange = (weeksAgo: number = 0): string => {
-//   const now = new Date();
-//   const currentDay = now.getDay(); // 현재 요일 (0: 일요일, 1: 월요일, ... 6: 토요일)
-//   const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay; // 월요일까지의 차이 계산
-//   const monday = new Date(now);
-//   monday.setDate(now.getDate() + diffToMonday - weeksAgo * 7); // 해당 주의 월요일
-
-//   const sunday = new Date(monday);
-//   sunday.setDate(monday.getDate() + 6); // 해당 주의 일요일
-
-//   const formatDate = (date: Date) =>
-//     `${date.getFullYear()} ${String(date.getMonth() + 1).padStart(2, "0")} ${String(date.getDate()).padStart(2, "0")}`;
-
-//   return `${formatDate(monday)} ~ ${formatDate(sunday)}`;
-// };
-
-// const timePeriods: Record<WeekKey, string> = {
-//   이번주: getWeekRange(0),
-//   지난주: getWeekRange(1),
-// };
-
 interface AcademyCountData {
   registerDate: string;
   totalAcademyCount: number;
@@ -115,6 +94,8 @@ function DashBoard() {
   const [selectedItem, setSelectedItem] = useState<DataKey>(
     (searchParams.get("category") as DataKey) || "학원수",
   );
+
+  // LineChart용 날짜 선택 상태
   const [selectedDate, setSelectedDate] = useState<DateSelection>(() => {
     const now = new Date();
     return {
@@ -122,6 +103,16 @@ function DashBoard() {
       month: now.getMonth() + 1,
     };
   });
+
+  // PieChart용 날짜 선택 상태 추가
+  const [selectedPieDate, setSelectedPieDate] = useState<DateSelection>(() => {
+    const now = new Date();
+    return {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+    };
+  });
+
   const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
     (searchParams.get("pieCategory") as CategoryKey) || "최근 검색",
   );
@@ -221,10 +212,19 @@ function DashBoard() {
     setSearchParams({
       category: selectedItem,
       month: selectedDate.month.toString(),
+      pieMonth: selectedPieDate.month.toString(),
+      pieYear: selectedPieDate.year.toString(),
       pieCategory: selectedCategory,
       week: selectedTimeRange,
     });
-  }, [selectedItem, selectedDate.month, selectedCategory, selectedTimeRange]);
+  }, [
+    selectedItem,
+    selectedDate.month,
+    selectedPieDate.year,
+    selectedPieDate.month,
+    selectedCategory,
+    selectedTimeRange,
+  ]);
 
   const [userRegistrationData, setUserRegistrationData] = useState<ChartData[]>(
     [],
@@ -232,9 +232,14 @@ function DashBoard() {
   const [costData, setCostData] = useState<ChartData[]>([]);
   const [academyCountData, setAcademyCountData] = useState<ChartData[]>([]);
 
-  // 년/월 선택 핸들러
+  // 년/월 선택 핸들러 - LineChart용
   const handleYearMonthChange = (date: DateSelection) => {
     setSelectedDate(date);
+  };
+
+  // 년/월 선택 핸들러 - PieChart용
+  const handlePieYearMonthChange = (date: DateSelection) => {
+    setSelectedPieDate(date);
   };
 
   // fetchUserRegistrationData 수정
@@ -245,6 +250,7 @@ function DashBoard() {
         roleId === 3
           ? `/api/academy-manager/GetUserCountByUserId`
           : `/api/academy-manager/GetUserCount`;
+      console.log(roleId);
 
       const params: any = {
         year: date.year,
@@ -281,19 +287,12 @@ function DashBoard() {
             }
           });
         } else {
-          // 기존 API 응답 구조 처리 (registerDate, count)
-          const dateMap = new Map(
-            resultData.map(item => [
-              parseInt(item.registerDate.split("-")[2]),
-              item.count,
-            ]),
-          );
-
-          // 모든 날짜에 대해 데이터 설정
-          allDaysData.forEach((day, index) => {
-            const dayNumber = index + 1;
-            if (dateMap.has(dayNumber)) {
-              day.y = dateMap.get(dayNumber) || 0;
+          // 새 API 응답 구조 처리 (registerDate, totalUserCount)
+          resultData.forEach(item => {
+            const day = parseInt(item.registerDate.split("-")[2]);
+            if (day > 0 && day <= daysInMonth) {
+              const index = day - 1;
+              allDaysData[index].y = item.totalUserCount;
             }
           });
         }
@@ -333,19 +332,18 @@ function DashBoard() {
   const fetchPaymentData = async (date: DateSelection) => {
     try {
       // roleId에 따라 다른 API 엔드포인트 사용
-      const endpoint =
-        roleId === 3
-          ? `/api/academy-manager/GetAcademyCostByUserId`
-          : `/api/academy-manager/GetAcademyCost`;
-
+      let endpoint;
       const params: any = {
         year: date.year,
         month: date.month,
       };
 
-      // roleId가 3일 때 userId 파라미터 추가
       if (roleId === 3) {
+        endpoint = `/api/academy-manager/GetAcademyCostByUserId`;
         params.userId = userId;
+      } else {
+        // 새로운 엔드포인트 사용
+        endpoint = `/api/academy-manager/GetAcademyCostCount`;
       }
 
       const response = await jwtAxios.get(endpoint, { params });
@@ -362,9 +360,8 @@ function DashBoard() {
 
       // API 응답 데이터로 실제 값 업데이트
       if (resultData && Array.isArray(resultData)) {
-        // roleId에 따라 다른 데이터 구조 처리
         if (roleId === 3) {
-          // 새 API 응답 구조 처리 (paymentDate, paymentCount)
+          // 기존 로직 유지
           resultData.forEach(item => {
             const day = parseInt(item.paymentDate.split("-")[2]);
             if (day > 0 && day <= daysInMonth) {
@@ -373,19 +370,12 @@ function DashBoard() {
             }
           });
         } else {
-          // 기존 API 응답 구조 처리 (paymentDate, count)
-          const dateMap = new Map(
-            resultData.map(item => [
-              parseInt(item.paymentDate.split("-")[2]),
-              item.count,
-            ]),
-          );
-
-          // 모든 날짜에 대해 데이터 설정
-          allDaysData.forEach((day, index) => {
-            const dayNumber = index + 1;
-            if (dateMap.has(dayNumber)) {
-              day.y = dateMap.get(dayNumber) || 0;
+          // 새 API 응답 구조 처리 (GetAcademyCostCount 엔드포인트)
+          resultData.forEach(item => {
+            const day = parseInt(item.registerDate.split("-")[2]);
+            if (day > 0 && day <= daysInMonth) {
+              const index = day - 1;
+              allDaysData[index].y = item.academyCostCount; // 응답 구조에 맞게 조정
             }
           });
         }
@@ -539,11 +529,6 @@ function DashBoard() {
     loadMonthlyData();
   }, [selectedDate, selectedItem]);
 
-  // 핸들러 함수들
-  // const handleTimeRangeClick = useCallback((e: { key: string }) => {
-  //   setSelectedTimeRange(e.key as WeekKey);
-  // }, []);
-
   const handleCategoryClick = useCallback((e: { key: string }) => {
     if (e.key === "학원수" || e.key === "회원수" || e.key === "결제내역") {
       setSelectedItem(e.key as DataKey);
@@ -578,16 +563,6 @@ function DashBoard() {
     [handleCategoryClick2],
   );
 
-  // const timeRangeMenu = useMemo(
-  //   () => (
-  //     <Menu onClick={handleTimeRangeClick}>
-  //       <Menu.Item key="이번주">이번주</Menu.Item>
-  //       <Menu.Item key="지난주">지난주</Menu.Item>
-  //     </Menu>
-  //   ),
-  //   [handleTimeRangeClick],
-  // );
-
   // 데이터 변경 시 selectedData 업데이트
   useEffect(() => {
     if (selectedItem === "학원수") {
@@ -599,7 +574,7 @@ function DashBoard() {
     }
   }, [selectedItem, academyCountData, userRegistrationData, costData]);
 
-  // 수정된 fetchSearchInfo 함수
+  // 수정된 fetchSearchInfo 함수 - PieChart용 날짜 사용
   const fetchSearchInfo = async (date: DateSelection) => {
     try {
       const response = await jwtAxios.get(`/api/academy/GetSearchInfo`, {
@@ -627,10 +602,10 @@ function DashBoard() {
     }
   };
 
-  // 수정된 useEffect
+  // 수정된 useEffect - PieChart 데이터 로드
   useEffect(() => {
-    fetchSearchInfo(selectedDate);
-  }, [selectedDate.year, selectedDate.month]);
+    fetchSearchInfo(selectedPieDate);
+  }, [selectedPieDate.year, selectedPieDate.month]);
 
   // pieData 계산 수정
   const pieData =
@@ -675,12 +650,20 @@ function DashBoard() {
     setSelectedData(selectedData.filter(data => data.id === "학원수"));
   }, []);
 
-  // Add function to fetch cost info
   const fetchCostInfo = async () => {
     try {
-      const response = await jwtAxios.get(
-        "/api/academyCost/getAcademyCostInfoByMonth",
-      );
+      // roleId에 따라 다른 API 엔드포인트 사용
+      let endpoint;
+
+      if (roleId === 3) {
+        // 학원 관리자용 API
+        endpoint = `/api/academy-manager/GetAcademyCostInfoByUserId/${userId}`;
+      } else {
+        // 일반 관리자용 API
+        endpoint = "/api/academyCost/getAcademyCostInfoByMonth";
+      }
+
+      const response = await jwtAxios.get(endpoint);
       const { resultData } = response.data;
       setStatsInfo(resultData);
     } catch (error) {
@@ -688,7 +671,6 @@ function DashBoard() {
     }
   };
 
-  // Add useEffect to fetch cost info
   useEffect(() => {
     fetchCostInfo();
   }, []);
@@ -702,7 +684,7 @@ function DashBoard() {
         console.log("Reported users:", response.data.resultData); // 데이터 확인용 로그
       }
     } catch (error) {
-      console.error("Error fetching reported users:", error);
+      console.error("에러:", error);
       setReportedUsers([]); // 에러 시 빈 배열로 초기화
     }
   };
@@ -820,8 +802,8 @@ function DashBoard() {
                   overlay={
                     <Menu
                       onClick={e =>
-                        handleYearMonthChange({
-                          ...selectedDate,
+                        handlePieYearMonthChange({
+                          ...selectedPieDate,
                           year: Number(e.key),
                         })
                       }
@@ -842,15 +824,15 @@ function DashBoard() {
                     className="flex justify-between w-[100px]"
                     style={{ fontSize: "10px", padding: "2px 8px" }}
                   >
-                    {selectedDate.year}년 <DownOutlined />
+                    {selectedPieDate.year}년 <DownOutlined />
                   </Button>
                 </Dropdown>
                 <Dropdown
                   overlay={
                     <Menu
                       onClick={e =>
-                        handleYearMonthChange({
-                          ...selectedDate,
+                        handlePieYearMonthChange({
+                          ...selectedPieDate,
                           month: Number(e.key),
                         })
                       }
@@ -870,7 +852,7 @@ function DashBoard() {
                     className="flex justify-between w-[80px]"
                     style={{ fontSize: "10px", padding: "2px 8px" }}
                   >
-                    {selectedDate.month}월 <DownOutlined />
+                    {selectedPieDate.month}월 <DownOutlined />
                   </Button>
                 </Dropdown>
               </div>
@@ -879,7 +861,7 @@ function DashBoard() {
 
             <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] min-w-[350px] text-gray-700 text-sm gap-[12px] font-semibold">
               <CiCalendarDate size={"20px"} style={{ strokeWidth: 1 }} />
-              {`${selectedDate.year}년 ${selectedDate.month}월`}
+              {`${selectedPieDate.year}년 ${selectedPieDate.month}월`}
             </div>
           </div>
           <NoticeList notices={notices} />
@@ -891,7 +873,11 @@ function DashBoard() {
           data={roleId === 3 ? approvalData : academyApprovals}
           roleId={roleId as number}
         />
-        <ReportedUserList reportedUsers={reportedUsers} />
+        {roleId === 3 ? (
+          <AttendanceList userId={userId} />
+        ) : (
+          <ReportedUserList reportedUsers={reportedUsers} />
+        )}
       </div>
     </div>
   );

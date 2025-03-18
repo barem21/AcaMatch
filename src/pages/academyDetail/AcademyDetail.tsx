@@ -20,6 +20,7 @@ import KakaoMap from "./KakaoMap";
 import ReviewSection from "./ReviewSection";
 import { AcademyData, Class, Review } from "./types";
 import { AiTwotoneAlert } from "react-icons/ai";
+import { SlArrowDown } from "react-icons/sl";
 
 declare global {
   interface Window {
@@ -256,20 +257,40 @@ const LinkModal: React.FC<LinkModalProps> = () => {
 //   productId: number;
 // }
 
-// BoardItem 인터페이스 추가
+// BoardItem 인터페이스 수정
 interface BoardItem {
   boardId: number;
-  userId: number;
+  acaId?: number;
+  acaName?: string;
+  userId?: number;
   boardName: string;
+  boardComment?: string;
   createdAt: string;
   name: string;
-  totalCount: number;
+  totalCount?: number;
 }
 
 // ReportType 인터페이스 추가
 interface ReportType {
   name: string;
   description: string;
+}
+
+// 후기 데이터 타입 업데이트
+interface Review {
+  reviewId: number;
+  classId: number;
+  className: string;
+  acaId: number;
+  userId: number;
+  writerName: string;
+  writerPic: string;
+  comment: string;
+  star: number;
+  createdAt: string;
+  myReviewCount: number;
+  banReview: number;
+  reviewPic: string;
 }
 
 const AcademyDetail = () => {
@@ -327,50 +348,25 @@ const AcademyDetail = () => {
   // 스크롤 참조 추가
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Add state for general reviews pagination
-  const [generalPage, setGeneralPage] = useState(1);
-  const [generalReviews, setGeneralReviews] = useState<Review[]>([]);
-  const [totalGeneralReviewCount, setTotalGeneralReviewCount] = useState(0);
+  // 리뷰 관련 상태 제거
+  // const [reviews, setReviews] = useState<Review[]>([]);
+  // const [totalReviewCount, setTotalReviewCount] = useState(0);
+  // const [reviewPage, setReviewPage] = useState(1);
 
-  // Add new state for media reviews pagination
-  const [mediaPage, setMediaPage] = useState(1);
-  const [mediaReviews, setMediaReviews] = useState<Review[]>([]);
-  const [totalMediaReviewCount, setTotalMediaReviewCount] = useState(0);
+  // 기존 미디어/일반 리뷰 상태도 제거
+  // const [generalPage, setGeneralPage] = useState(1);
+  // const [generalReviews, setGeneralReviews] = useState<Review[]>([]);
+  // const [totalGeneralReviewCount, setTotalGeneralReviewCount] = useState(0);
 
-  // Separate fetch function for media reviews
-  const fetchMediaReviews = async () => {
-    try {
-      const response = await jwtAxios.get(
-        `/api/academy/getMediaReview?mediaStartIndx=${(mediaPage - 1) * size}&acaId=${acaId}&size=${size}`,
-      );
+  // const [mediaPage, setMediaPage] = useState(1);
+  // const [mediaReviews, setMediaReviews] = useState<Review[]>([]);
+  // const [totalMediaReviewCount, setTotalMediaReviewCount] = useState(0);
 
-      if (response.data.resultData) {
-        setMediaReviews(response.data.resultData.mediaReviews);
-        setTotalMediaReviewCount(
-          response.data.resultData.totalMediaReviewCount,
-        );
-      }
-    } catch (error) {
-      console.error("Failed to fetch media reviews:", error);
-    }
-  };
+  // 리뷰 데이터 가져오는 함수 제거
+  // const fetchReviews = async () => { ... }
 
-  const fetchGeneralReviews = async () => {
-    try {
-      const response = await jwtAxios.get(
-        `/api/academy/getGeneralReview?generalStartIndx=${(generalPage - 1) * size}&acaId=${acaId}&size=${size}`,
-      );
-
-      if (response.data.resultData) {
-        const { generalReviews, totalGeneralReviewCount } =
-          response.data.resultData;
-        setGeneralReviews(generalReviews);
-        setTotalGeneralReviewCount(totalGeneralReviewCount);
-      }
-    } catch (error) {
-      console.error("Failed to fetch general reviews:", error);
-    }
-  };
+  // 리뷰 페이지 변경 핸들러 제거
+  // const handleReviewPageChange = (page: number) => { ... }
 
   const fetchData = async () => {
     try {
@@ -512,26 +508,6 @@ const AcademyDetail = () => {
     setSelectClass(classId);
   };
 
-  // Add useEffect for general reviews
-  useEffect(() => {
-    if (items[2].isActive) {
-      fetchGeneralReviews();
-      fetchMediaReviews();
-    }
-  }, [generalPage, mediaPage, acaId, items[2].isActive]);
-
-  // Add general page change handler
-  const handleGeneralPageChange = (page: number) => {
-    setGeneralPage(page);
-    setMediaPage(page); // 두 페이지를 동기화
-  };
-
-  // Add media page change handler
-  const handleMediaPageChange = (page: number) => {
-    setMediaPage(page);
-    setGeneralPage(page); // 두 페이지를 동기화
-  };
-
   // 수강 가능한 클래스만 필터링
   const availableClasses =
     academyData?.classes?.filter(
@@ -587,11 +563,52 @@ const AcademyDetail = () => {
     }
   };
 
-  // 공지사항 상태 추가
+  // 공지사항 상태 수정
   const [academyNotices, setAcademyNotices] = useState<BoardItem[]>([]);
   const [noticeLoading, setNoticeLoading] = useState(false);
+  const [openNotices, setOpenNotices] = useState<number[]>([]);
+  const [noticeDetails, setNoticeDetails] = useState<Record<number, BoardItem>>(
+    {},
+  );
+  const [loadingNoticeIds, setLoadingNoticeIds] = useState<number[]>([]);
 
-  // 학원 공지사항 불러오는 함수 추가
+  // 공지사항 토글 함수 수정
+  const toggleNotice = async (notice: BoardItem) => {
+    const boardId = notice.boardId;
+
+    // 이미 열려있는 경우 닫기
+    if (openNotices.includes(boardId)) {
+      setOpenNotices(prev => prev.filter(id => id !== boardId));
+      return;
+    }
+
+    // 아직 상세 내용을 불러오지 않은 경우
+    if (!noticeDetails[boardId]?.boardComment) {
+      setLoadingNoticeIds(prev => [...prev, boardId]);
+
+      try {
+        const response = await jwtAxios.get(`/api/board`, {
+          params: { boardId },
+        });
+
+        const detailData = response.data.resultData;
+        setNoticeDetails(prev => ({
+          ...prev,
+          [boardId]: detailData,
+        }));
+      } catch (error) {
+        console.error("Error fetching notice detail:", error);
+        message.error("공지사항 상세 내용을 불러오는데 실패했습니다.");
+      } finally {
+        setLoadingNoticeIds(prev => prev.filter(id => id !== boardId));
+      }
+    }
+
+    // 열린 공지사항 목록에 추가
+    setOpenNotices(prev => [...prev, boardId]);
+  };
+
+  // 학원 공지사항 불러오는 함수 (기존 함수 유지)
   const fetchAcademyNotices = async () => {
     if (!acaId) return;
 
@@ -624,6 +641,34 @@ const AcademyDetail = () => {
       fetchAcademyNotices();
     }
   }, [acaId]);
+
+  // 학원 데이터 업데이트 함수
+  const fetchAcademyData = async () => {
+    try {
+      const url = userId
+        ? `/api/academy/getAcademyDetailAllInfo?signedUserId=${userId}&acaId=${acaId}`
+        : `/api/academy/getAcademyDetailAllInfo?acaId=${acaId}`;
+
+      const response = await jwtAxios.get(url);
+
+      console.log(response.data.resultData);
+
+      if (response.data.resultData) {
+        const data = response.data.resultData;
+        setAcademyData(data);
+        setIsLiked(data.isLiked);
+        setLikeCount(data.likeCount);
+        if (data.addressDto?.address) {
+          setAddress(data.addressDto.address);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch academy data:", error);
+      setError("학원 정보를 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -818,40 +863,74 @@ const AcademyDetail = () => {
                 </CalendarWrap>
               </div>
 
-              {/* 공지사항 섹션 추가 */}
+              {/* 공지사항 섹션 */}
               <div className={styles.section.title}>공지사항</div>
-              <div className="mb-[50px]">
+              <div className="mb-[50px] w-[100%] max-[640px]:w-[90%]">
                 {noticeLoading ? (
                   <div className="flex justify-center items-center h-[100px]">
                     <Spin />
                   </div>
                 ) : academyNotices.length > 0 ? (
                   <div className="border rounded-lg overflow-hidden">
-                    <div className="flex justify-between align-middle p-2 border-b bg-gray-100">
-                      <div className="flex items-center justify-center w-[70%]">
-                        제목
-                      </div>
-                      <div className="flex items-center justify-center w-[30%]">
-                        작성일
-                      </div>
-                    </div>
                     {academyNotices.map(notice => (
                       <div
                         key={notice.boardId}
-                        className="flex justify-between align-middle p-3 border-b hover:bg-gray-50"
+                        className="border-b last:border-b-0 cursor-pointer"
+                        onClick={() => toggleNotice(notice)}
                       >
-                        <div className="flex items-center w-[70%] truncate">
-                          <a
-                            href={`/notice/detail?boardId=${notice.boardId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline truncate"
-                          >
-                            {notice.boardName}
-                          </a>
+                        <div className="py-4 px-[16px]">
+                          <div className="flex items-start gap-2">
+                            <div className="flex flex-col gap-2 w-full">
+                              <div className="flex justify-between items-center w-full">
+                                <div className="flex items-center gap-4">
+                                  <h3 className="text-base font-medium">
+                                    {notice.boardName}
+                                  </h3>
+                                  <span className="text-sm text-gray-500">
+                                    {notice.createdAt}
+                                  </span>
+                                </div>
+                                {loadingNoticeIds.includes(notice.boardId) ? (
+                                  <Spin size="small" />
+                                ) : (
+                                  <SlArrowDown
+                                    className={`transition-transform duration-200 ${
+                                      openNotices.includes(notice.boardId)
+                                        ? "rotate-180"
+                                        : ""
+                                    }`}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-center w-[30%] text-gray-500 text-sm">
-                          {notice.createdAt}
+
+                        <div
+                          className={`transition-all duration-200 overflow-hidden bg-brand-BTWhite ${
+                            openNotices.includes(notice.boardId)
+                              ? "max-h-[500px]"
+                              : "max-h-0"
+                          }`}
+                        >
+                          <div className="py-4 px-[16px]">
+                            <div className="flex items-center gap-2">
+                              {noticeDetails[notice.boardId]?.boardComment ? (
+                                <div
+                                  className="text-sm"
+                                  dangerouslySetInnerHTML={{
+                                    __html:
+                                      noticeDetails[notice.boardId]
+                                        .boardComment || "",
+                                  }}
+                                />
+                              ) : (
+                                <div className="text-sm text-gray-500">
+                                  내용을 불러오는 중...
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -891,18 +970,10 @@ const AcademyDetail = () => {
             renderStars={renderStars}
             academyId={Number(acaId)}
             classes={academyData?.classes || []}
-            generalReviews={generalReviews}
-            mediaReviews={mediaReviews}
-            generalReviewCount={totalGeneralReviewCount}
-            mediaReviewCount={totalMediaReviewCount}
             onReviewUpdate={async () => {
-              await fetchGeneralReviews();
-              await fetchMediaReviews();
+              // 리뷰 업데이트 후 학원 데이터 다시 가져오기
+              await fetchAcademyData();
             }}
-            onMediaPageChange={handleMediaPageChange}
-            onGeneralPageChange={handleGeneralPageChange}
-            mediaPage={mediaPage}
-            generalPage={generalPage}
           />
         )}
       </div>
