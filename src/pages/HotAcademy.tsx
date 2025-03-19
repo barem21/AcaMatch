@@ -102,7 +102,7 @@ function HotAcademy() {
     }
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId); // ✅ 명확하게 void만 반환하도록 수정
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [loading]);
 
@@ -123,7 +123,7 @@ function HotAcademy() {
         <div className="w-full gap-[12px] py-[16px] px-[16px] border rounded-lg overflow-hidden">
           <div className="flex flex-col gap-6">
             {/* 학원 목록 */}
-            <div className="grid grid-cols-5 gap-6 h-[568px] max-[768px]:grid-cols-2 max-[768px]:h-auto">
+            <div className="grid grid-cols-5 gap-6 h-[568px] max-[768px]:grid-cols-2 max-[768px]:h-auto max-[640px]:grid-cols-2 max-[640px]:h-auto">
               {showSkeleton
                 ? [...Array(10)].map((_, index) => <SkeletonCard key={index} />)
                 : academyData.map(academy => (

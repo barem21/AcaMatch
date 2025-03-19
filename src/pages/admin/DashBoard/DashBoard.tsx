@@ -21,7 +21,7 @@ import {
   CostInfo,
   DataKey,
   SearchInfo,
-  WeekKey,
+  // WeekKey,
 } from "./types";
 import AttendanceList from "./AttendanceList";
 
@@ -117,7 +117,7 @@ function DashBoard() {
     };
   });
 
-  const [selectedCategory, setSelectedCategory] =
+  const [selectedCategory, _setSelectedCategory] =
     useState<CategoryKey>("최근 태그");
   const [selectedTimeRange, _setSelectedTimeRange] =
     useState<WeekKey>("이번주");
@@ -540,11 +540,11 @@ function DashBoard() {
     }
   }, []);
 
-  const handleCategoryClick2 = useCallback((e: { key: string }) => {
-    if (pieChartData[e.key as CategoryKey]) {
-      setSelectedCategory(e.key as CategoryKey);
-    }
-  }, []);
+  // const handleCategoryClick2 = useCallback((e: { key: string }) => {
+  //   if (pieChartData[e.key as CategoryKey]) {
+  //     setSelectedCategory(e.key as CategoryKey);
+  //   }
+  // }, []);
 
   // 메뉴 컴포넌트들을 useMemo로 메모이제이션
   const categoryMenu = useMemo(
@@ -558,15 +558,15 @@ function DashBoard() {
     [handleCategoryClick, selectableItems],
   );
 
-  const categoryMenu2 = useMemo(
-    () => (
-      <Menu onClick={handleCategoryClick2}>
-        <Menu.Item key="최근 태그">최근 태그</Menu.Item>
-        {/* <Menu.Item key="방문 통계">방문통계</Menu.Item> */}
-      </Menu>
-    ),
-    [handleCategoryClick2],
-  );
+  // const categoryMenu2 = useMemo(
+  //   () => (
+  //     <Menu onClick={handleCategoryClick2}>
+  //       <Menu.Item key="최근 태그">최근 태그</Menu.Item>
+  //       {/* <Menu.Item key="방문 통계">방문통계</Menu.Item> */}
+  //     </Menu>
+  //   ),
+  //   [handleCategoryClick2],
+  // );
 
   // 데이터 변경 시 selectedData 업데이트
   useEffect(() => {
@@ -600,7 +600,7 @@ function DashBoard() {
           value: item.tagCount,
           color: colors[index % colors.length],
         }))
-        .sort((a, b) => b.value - a.value); // 값이 큰 순서대로 정렬
+        .sort((a: SearchInfo, b: SearchInfo) => b.tagCount - a.tagCount); // 값이 큰 순서대로 정렬
 
       console.log("Transformed Search Data:", chartData); // 데이터 확인용
       setSearchData(chartData);

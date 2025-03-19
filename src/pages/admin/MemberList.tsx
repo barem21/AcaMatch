@@ -32,8 +32,8 @@ function MemberList(): JSX.Element {
   const [memberList, setMemberList] = useState<memberListType[]>([]); //회원목록
   const [memberCount, setMemberCount] = useState(0); //총 최원수
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
-  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
-  const [selectedPhone, setSelectedPhone] = useState("");
+  // const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
+  // const [selectedPhone, setSelectedPhone] = useState("");
 
   const state = parseInt(searchParams.get("state") || "0", 0);
   const search = searchParams.get("search");
@@ -101,10 +101,10 @@ function MemberList(): JSX.Element {
     memberAllList(page);
   };
 
-  const handleSendMessage = (phone: string) => {
-    setSelectedPhone(phone);
-    setIsSmsModalOpen(true);
-  };
+  // const handleSendMessage = (phone: string) => {
+  //   setSelectedPhone(phone);
+  //   setIsSmsModalOpen(true);
+  // };
 
   useEffect(() => {
     memberAllList(1);

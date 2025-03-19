@@ -8,7 +8,7 @@ const { TextArea } = Input;
 
 const Sms = ({ to }: { to: string }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [from, setFrom] = useState("");
+  const [_from, setFrom] = useState("");
   const [text, setText] = useState("");
   const [error, setError] = useState("");
 

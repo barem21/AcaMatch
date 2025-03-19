@@ -1,15 +1,15 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Form, message, Radio, Upload } from "antd";
 import type { RcFile, UploadProps } from "antd/es/upload";
-import type { UploadFile, UploadFileStatus } from "antd/es/upload/interface";
+import type { UploadFile } from "antd/es/upload/interface";
 import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilState } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
+import { Review } from "../../pages/academyDetail/types";
 import MainButton from "../button/PrimaryButton";
 import { SecondaryButton } from "./Modal";
-import { Review } from "../../pages/academyDetail/types";
 
 interface ReviewModalProps {
   onClose: () => void;
