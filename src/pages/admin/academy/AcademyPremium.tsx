@@ -16,6 +16,7 @@ interface premiumListType {
   endDate: string;
   preCheck: number;
   startDate: string;
+  acaPic: string;
 }
 
 function AcademyPremium(): JSX.Element {
@@ -267,6 +268,12 @@ function AcademyPremium(): JSX.Element {
             )}
           </div>
 
+          {premiumList.length === 0 && (
+            <div className="loop-content flex justify-center align-middle p-2 pl-3 border-b">
+              등록된 프리미엄 학원이 없습니다.
+            </div>
+          )}
+
           {premiumList?.map((item, index) => (
             <div
               key={index}
@@ -276,7 +283,11 @@ function AcademyPremium(): JSX.Element {
                 <div className="flex items-center gap-3 cursor-pointer">
                   <div className="flex justify-center items-center w-14 h-14 rounded-xl bg-gray-300 overflow-hidden">
                     <img
-                      src={"/aca_image_1.png"}
+                      src={
+                        item.acaPic
+                          ? `http://112.222.157.157:5233/pic/academy/${item.acaId}/${item.acaPic}`
+                          : "/aca_image_1.png"
+                      }
                       className="max-w-fit max-h-full object-cover"
                       alt=" /"
                     />
