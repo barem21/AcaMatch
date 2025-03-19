@@ -141,18 +141,18 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
               index < 4 ? "border-b" : ""
             }`}
           >
-            <li className="flex justify-center items-center w-1/3 text-[#242424] text-[14px]">
+            <li className="flex justify-center items-center w-full text-[#242424] text-[14px]">
               {item.date}
             </li>
-            <li className="flex justify-center items-center w-1/3 text-[#242424] text-[14px] overflow-hidden whitespace-nowrap text-ellipsis px-2">
+            <li className="flex justify-center items-center w-full text-[#242424] text-[14px] overflow-hidden whitespace-nowrap text-ellipsis px-2">
               {item.name}
             </li>
-            <li className="flex justify-center items-center w-1/3 text-[#242424] text-[14px]">
+            {/* <li className="flex justify-center items-center w-full text-[#242424] text-[14px]">
               <div className="overflow-hidden whitespace-nowrap text-ellipsis text-center px-2">
                 {item.className}
-              </div>
-            </li>
-            <li className="flex justify-center items-center w-1/3 text-[#242424] text-[14px]">
+              </div> 
+            </li> */}
+            <li className="flex justify-center items-center w-full text-[#242424] text-[14px]">
               <p className="w-full max-w-[80px] pb-[1px] rounded-md bg-[#90b1c4] text-white text-[12px] text-center">
                 {item.status}
               </p>
