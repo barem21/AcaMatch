@@ -50,6 +50,8 @@ function MyPageRecord() {
         { label: "나의 성적확인", isActive: true, link: "/mypage/record" },
         { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
         { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
+        { label: "결제 내역", isActive: false, link: "/mypage/order" },
+        { label: "취소(환불) 내역", isActive: false, link: "/mypage/refund" },
       ];
       break;
   }

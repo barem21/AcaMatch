@@ -84,7 +84,7 @@ const TeacherAdd = () => {
 
   const onFinished = async (values: any) => {
     //console.log(values);
-    if (roleId === 4) {
+    if (roleId !== 10) {
       const data = {
         classId: values.classId,
         userId: userId,
@@ -97,7 +97,7 @@ const TeacherAdd = () => {
 
       if (res.data.resultData === 1) {
         message.success("강사등록 신청이 완료되었습니다.");
-        navigate("../list");
+        navigate("../teacher");
       }
     } else {
       message.error("강사 회원만 등록신청이 가능합니다.");
@@ -177,7 +177,7 @@ const TeacherAdd = () => {
             </div>
 
             <div className="flex justify-end pt-3 border-t gap-3">
-              {roleId === 4 ? (
+              {roleId !== 10 ? (
                 <>
                   <button
                     type="button"
