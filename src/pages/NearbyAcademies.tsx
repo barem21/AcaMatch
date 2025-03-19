@@ -73,62 +73,62 @@ const NearbyAcademies = () => {
 
       try {
         let location: Location;
-        if (accessToken) {
-          // 방법 1: ip-api.com 사용
+        // if (accessToken) {
+        //   // 방법 1: ip-api.com 사용
+        try {
+          const locationResponse = await axios.get("http://ip-api.com/json");
+          location = {
+            lat: locationResponse.data.lat,
+            lon: locationResponse.data.lon,
+          };
+        } catch (error) {
+          // 방법 2: abstractapi.com 사용 (API 키 필요)
           try {
-            const locationResponse = await axios.get("http://ip-api.com/json");
+            const API_KEY = "your_api_key";
+            const locationResponse = await axios.get(
+              `https://ipgeolocation.abstractapi.com/v1/?api_key=${API_KEY}`,
+            );
             location = {
-              lat: locationResponse.data.lat,
-              lon: locationResponse.data.lon,
+              lat: locationResponse.data.latitude,
+              lon: locationResponse.data.longitude,
             };
           } catch (error) {
-            // 방법 2: abstractapi.com 사용 (API 키 필요)
-            try {
-              const API_KEY = "your_api_key";
-              const locationResponse = await axios.get(
-                `https://ipgeolocation.abstractapi.com/v1/?api_key=${API_KEY}`,
-              );
-              location = {
-                lat: locationResponse.data.latitude,
-                lon: locationResponse.data.longitude,
-              };
-            } catch (error) {
-              // 방법 3: geolocation API 사용 (브라우저 내장)
-              location = await new Promise<Location>(resolve => {
-                if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(
-                    position => {
-                      resolve({
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                      });
-                    },
-                    error => {
-                      console.error("Error getting location:", error);
-                      // 실패시 기본 위치 (서울시청)
-                      resolve({
-                        lat: 37.5665,
-                        lon: 126.978,
-                      });
-                    },
-                  );
-                } else {
-                  // geolocation이 지원되지 않는 경우 기본 위치
-                  resolve({
-                    lat: 37.5665,
-                    lon: 126.978,
-                  });
-                }
-              });
-            }
+            // 방법 3: geolocation API 사용 (브라우저 내장)
+            location = await new Promise<Location>(resolve => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  position => {
+                    resolve({
+                      lat: position.coords.latitude,
+                      lon: position.coords.longitude,
+                    });
+                  },
+                  error => {
+                    console.error("Error getting location:", error);
+                    // 실패시 기본 위치 (서울시청)
+                    resolve({
+                      lat: 37.5665,
+                      lon: 126.978,
+                    });
+                  },
+                );
+              } else {
+                // geolocation이 지원되지 않는 경우 기본 위치
+                resolve({
+                  lat: 37.5665,
+                  lon: 126.978,
+                });
+              }
+            });
           }
-        } else {
-          // 로그인하지 않은 경우 기본 위치
-          location = {
-            lat: 37.5665,
-            lon: 126.978,
-          };
         }
+        // } else {
+        //   // 로그인하지 않은 경우 기본 위치
+        //   location = {
+        //     lat: 37.5665,
+        //     lon: 126.978,
+        //   };
+        // }
 
         setUserLocation(location);
 

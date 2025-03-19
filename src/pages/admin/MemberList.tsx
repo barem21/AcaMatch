@@ -6,6 +6,7 @@ import axios from "axios";
 import { Cookies } from "react-cookie";
 import { useRecoilValue } from "recoil";
 import userInfo from "../../atoms/userInfo";
+import Sms from "../../components/admin/Sms";
 
 interface memberListType {
   birth: string;
@@ -31,6 +32,8 @@ function MemberList(): JSX.Element {
   const [memberList, setMemberList] = useState<memberListType[]>([]); //회원목록
   const [memberCount, setMemberCount] = useState(0); //총 최원수
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
+  const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
+  const [selectedPhone, setSelectedPhone] = useState("");
 
   const state = parseInt(searchParams.get("state") || "0", 0);
   const search = searchParams.get("search");
@@ -96,6 +99,11 @@ function MemberList(): JSX.Element {
   const handlePageChange = (page: number) => {
     setCurrentPage(page); // 페이지 변경
     memberAllList(page);
+  };
+
+  const handleSendMessage = (phone: string) => {
+    setSelectedPhone(phone);
+    setIsSmsModalOpen(true);
   };
 
   useEffect(() => {
@@ -262,8 +270,9 @@ function MemberList(): JSX.Element {
               <div className="flex items-center justify-center text-center w-40">
                 {item.createdAt.substr(0, 10)}
               </div>
-              <div className="flex items-center justify-center text-center w-52">
+              <div className="flex flex-col items-center justify-center text-center w-52">
                 {item.phone}
+                <Sms to={item.phone} />
               </div>
               <div className="flex items-center justify-center text-center w-52">
                 {item.birth}

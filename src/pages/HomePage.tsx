@@ -607,13 +607,13 @@ function HomePage() {
           ) : (
             <div></div>
           )}
-          <SwiperSlide>
+          {/* <SwiperSlide>
             <img
               src="/ai2.png"
               alt="main_banner"
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />
-          </SwiperSlide>
+          </SwiperSlide> */}
           {/* <SwiperSlide>
             <img
               src="/ai1.png"

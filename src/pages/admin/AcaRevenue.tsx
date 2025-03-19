@@ -15,15 +15,6 @@ interface RevenueData {
   costIds: string;
 }
 
-// interface OrderDetails {
-//   name: string;
-//   partnerOrderId: string;
-//   price: number;
-//   fee: number;
-//   createdAt: string;
-//   orderType: number;
-// }
-
 const AcaRevenue = (): JSX.Element => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -83,20 +74,6 @@ const AcaRevenue = (): JSX.Element => {
       setLoading(false);
     }
   };
-
-  // const fetchOrderDetails = async (costId: number) => {
-  //   try {
-  //     const response = await axios.get(
-  //       `/api/academyCost/getAcademyCostInfoByCostId/${costId}`,
-  //     );
-  //     console.log(response.data.resultData);
-  //     setOrderDetails(response.data.resultData);
-  //     setModalVisible(true);
-  //   } catch (error) {
-  //     console.error("주문내역 불러오기 실패:", error);
-  //     message.error("주문내역을 불러오는 데 실패했습니다.");
-  //   }
-  // };
 
   const onFinished = (values: any) => {
     const queryParams = new URLSearchParams(values).toString();
