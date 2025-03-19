@@ -92,6 +92,16 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
       {
+        label: "학원 텍스트 리뷰",
+        link: "/admin/review-text",
+        active: false,
+      },
+      {
+        label: "학원 포토 리뷰",
+        link: "/admin/review-photo",
+        active: false,
+      },
+      {
         label: "프리미엄 학원 관리",
         link: "/admin/premium",
         active: false,

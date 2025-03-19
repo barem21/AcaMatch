@@ -29,6 +29,7 @@ import MyPageUserInfo from "./pages/mypage/MyPageUserInfo";
 import MypageChild from "./pages/mypage/MypageChild";
 import MypageParent from "./pages/mypage/MypageParent";
 import MypageReview from "./pages/mypage/MypageReview";
+import MypagePhotoReview from "./pages/mypage/MypagePhotoReview";
 
 import AcaRevenue from "./pages/admin/AcaRevenue.tsx";
 import BannerContent from "./pages/admin/BannerContent.tsx";
@@ -65,6 +66,8 @@ import TeacherList from "./pages/admin/teacher/TeacherList";
 import TeacherAdd from "./pages/admin/teacher/TeacherAdd";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import NearbyAcademies from "./pages/NearbyAcademies.tsx";
+import MypageOrderList from "./pages/mypage/MypageOrderList.tsx";
+import MypageRefundList from "./pages/mypage/MypageRefundList.tsx";
 
 function App() {
   useEffect(() => {
@@ -154,12 +157,18 @@ function App() {
                 <Route path="/mypage/like" element={<MyPageLike />} />
                 <Route path="/mypage/user" element={<MyPageUserInfo />} />
                 <Route path="/mypage/review" element={<MypageReview />} />
+                <Route
+                  path="/mypage/photo-review"
+                  element={<MypagePhotoReview />}
+                />
                 <Route path="/mypage/child" element={<MypageChild />} />
                 <Route path="/mypage/parent" element={<MypageParent />} />
                 <Route
                   path="/mypage/record/detail"
                   element={<MyPageRecordDetail />}
                 />
+                <Route path="/mypage/order" element={<MypageOrderList />} />
+                <Route path="/mypage/refund" element={<MypageRefundList />} />
               </Route>
 
               <Route path="/academy">

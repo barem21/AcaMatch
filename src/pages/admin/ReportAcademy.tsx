@@ -161,7 +161,9 @@ function ReportAcademy() {
               </div>
               <div className="flex items-center justify-center min-w-56">
                 {item.exposureEndDate
-                  ? item.exposureEndDate?.substr(0, 10)
+                  ? item.updatedAt.substr(0, 10) +
+                    " ~ " +
+                    item.exposureEndDate?.substr(0, 10)
                   : "-"}
               </div>
               <div className="flex items-center justify-center min-w-20">

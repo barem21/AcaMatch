@@ -136,6 +136,7 @@ function MemberList(): JSX.Element {
                     optionFilterProp="label"
                     className="select-admin-basic"
                     style={{ minWidth: "110px" }}
+                    onChange={onChange}
                     options={[
                       {
                         value: "",
@@ -179,7 +180,6 @@ function MemberList(): JSX.Element {
                     optionFilterProp="label"
                     className="select-admin-basic"
                     onChange={onChange}
-                    // onSearch={onSearch}
                     options={[
                       {
                         value: 10,
