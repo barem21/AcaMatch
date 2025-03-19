@@ -105,7 +105,7 @@ const NoticeSection: React.FC<NoticeSectionProps> = ({ acaId }) => {
       <div className="text-[24px] font-bold flex items-center h-[70px]">
         공지사항
       </div>
-      <div className="mb-[50px] w-[100%] max-[640px]:w-[90%]">
+      <div className="mb-[50px] w-[100%] max-[768px]:p-4">
         {noticeLoading ? (
           <div className="flex justify-center items-center h-[100px]">
             <Spin />
@@ -175,7 +175,7 @@ const NoticeSection: React.FC<NoticeSectionProps> = ({ acaId }) => {
             ))}
           </div>
         ) : (
-          <div className="flex justify-center items-center h-[157px] border rounded-lg">
+          <div className="flex w-full justify-center items-center h-[157px] border rounded-lg ">
             등록된 공지사항이 없습니다.
           </div>
         )}

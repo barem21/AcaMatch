@@ -26,7 +26,7 @@ const ClassList = ({ classes }: ClassListProps) => {
     currentPage * pageSize,
   );
   return (
-    <div className="flex flex-col justify-center items-center mt-[12px] w-[930px] mx-auto mb-[50px] max-[640px]:w-[94%]">
+    <div className="flex flex-col justify-center items-center mt-[12px] w-[930px] mx-auto mb-[50px] max-[768px]:w-[94%] max-[640px]:w-[94%]">
       {classes[0].classId !== 0 && classes[0].className !== "" ? (
         paginatedData.map(classItem => (
           <div

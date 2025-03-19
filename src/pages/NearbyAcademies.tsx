@@ -198,17 +198,17 @@ const NearbyAcademies = () => {
   };
 
   return (
-    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
+    <div className="flex gap-5 w-full max-[768px]:flex-col max-[768px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full max-[640px]:p-4">
-        <h1 className="title-font flex justify-between align-middle max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+      <div className="w-full max-[768px]:p-4">
+        <h1 className="title-font flex justify-between align-middle max-[768px]:mb-3 max-[768px]:text-xl max-[768px]:mt-0">
           근처의 학원
         </h1>
         <div className="w-full gap-[12px] py-[16px] px-[16px] border rounded-lg overflow-hidden">
           <div className="flex flex-col gap-6">
             {/* 학원 목록 */}
-            <div className="grid grid-cols-5 gap-6 h-[568px] max-[640px]:grid-cols-2 max-[640px]:h-auto">
+            <div className="grid grid-cols-5 gap-6 h-[568px] max-[768px]:grid-cols-2 max-[768px]:h-auto">
               {showSkeleton
                 ? [...Array(10)].map((_, index) => <SkeletonCard key={index} />)
                 : academyData.map(academy => (
@@ -260,16 +260,16 @@ const AcademyCard = ({ academy }: { academy: any }) => {
 
   return (
     <div
-      className="flex flex-col items-start pb-3 gap-3 w-[166px] cursor-pointer max-[640px]:w-full"
+      className="flex flex-col items-start pb-3 gap-3 w-[166px] cursor-pointer max-[768px]:w-full"
       onClick={() =>
         navigate(`/academy/detail?id=${academy.id}&page=1&size=10`)
       }
     >
-      <div className="relative w-full max-[640px]:pb-[100%]">
+      <div className="relative w-full max-[768px]:pb-[100%]">
         <img
           src={academy.image}
           alt={academy.name}
-          className="w-[166px] h-[166px] rounded-xl object-cover max-[640px]:absolute max-[640px]:w-full max-[640px]:h-full"
+          className="w-[166px] h-[166px] rounded-xl object-cover max-[768px]:absolute max-[768px]:w-full max-[768px]:h-full"
         />
       </div>
 

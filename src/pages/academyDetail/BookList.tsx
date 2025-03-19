@@ -6,6 +6,8 @@ import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import CustomModal from "../../components/modal/Modal";
 import { Book } from "./types";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { FreeMode } from "swiper/modules";
 
 interface BookListProps {
   books: Book[];
@@ -138,54 +140,117 @@ const BookList = ({ books, selectedClassId }: BookListProps) => {
   }
 
   return (
-    <div className="w-full max-[640px]:p-4">
+    <div className="w-full max-[768px]:p-4 max-[640px]:p-4">
       <h2 className="text-[24px] font-bold flex items-center h-[70px]">
         교재 소개
       </h2>
-      {/* 교재 목록 표시 */}
-      <div className="grid grid-cols-5 gap-4 max-[640px]:grid-cols-2">
-        {currentBooks.length > 0 ? (
-          currentBooks.map(book => (
-            <div
-              key={book.bookId}
-              className="relative cursor-pointer border rounded-xl p-4 hover:border-brand-default"
-              onClick={() => handleBookClick(book)}
-            >
-              <img
-                src={`http://112.222.157.157:5233/pic/book/${book.bookId}/${book.bookPic}`}
-                alt={book.bookName}
-                className={`w-full max-h-[178px] rounded-xl object-cover max-[640px] ${
-                  isOutOfStock(book) ? "opacity-50" : ""
-                }`}
-              />
-              {isOutOfStock(book) && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-md">
-                  품절
-                </div>
-              )}
-              <div>
-                <h3
-                  className={`font-medium text-base text-[#242424] truncate ${
+
+      {/* 데스크톱용 교재 목록 */}
+      <div className="max-[768px]:hidden">
+        <div className="grid grid-cols-5 gap-4">
+          {currentBooks.length > 0 ? (
+            currentBooks.map(book => (
+              <div
+                key={book.bookId}
+                className="relative cursor-pointer border rounded-xl p-4 hover:border-brand-default"
+                onClick={() => handleBookClick(book)}
+              >
+                <img
+                  src={`http://112.222.157.157:5233/pic/book/${book.bookId}/${book.bookPic}`}
+                  alt={book.bookName}
+                  className={`w-full max-h-[178px] rounded-xl object-cover ${
                     isOutOfStock(book) ? "opacity-50" : ""
                   }`}
-                >
-                  {book.bookName}
-                </h3>
-                <p className="text-sm text-[#507A95]">
-                  {book.bookPrice.toLocaleString()}원
-                </p>
+                />
+                {isOutOfStock(book) && (
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-md">
+                    품절
+                  </div>
+                )}
+                <div>
+                  <h3
+                    className={`font-medium text-base text-[#242424] truncate ${
+                      isOutOfStock(book) ? "opacity-50" : ""
+                    }`}
+                  >
+                    {book.bookName}
+                  </h3>
+                  <p className="text-sm text-[#507A95]">
+                    {book.bookPrice.toLocaleString()}원
+                  </p>
+                </div>
+                <div className="text-sm text-gray-500 mt-2">
+                  클래스: {book.classId ? "지정됨" : "미지정"}
+                </div>
               </div>
-              <div className="text-sm text-gray-500 mt-2">
-                클래스: {book.classId ? "지정됨" : "미지정"}
-              </div>
+            ))
+          ) : (
+            <div className="col-span-5 h-[178px] flex items-center justify-center border rounded-xl">
+              <p className="text-[16px]">등록된 교재가 없습니다</p>
             </div>
-          ))
+          )}
+        </div>
+      </div>
+
+      {/* 모바일용 교재 목록 */}
+      <div className="hidden max-[768px]:block">
+        {currentBooks.length > 0 ? (
+          <Swiper
+            modules={[FreeMode]}
+            slidesPerView={"auto"}
+            spaceBetween={16}
+            freeMode={true}
+            grabCursor={true}
+            className="overflow-visible"
+          >
+            {currentBooks.map(book => (
+              <SwiperSlide
+                key={book.bookId}
+                className="w-[160px] flex-shrink-0"
+              >
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => handleBookClick(book)}
+                >
+                  <img
+                    src={`http://112.222.157.157:5233/pic/book/${book.bookId}/${book.bookPic}`}
+                    alt={book.bookName}
+                    className={`w-full h-[160px] rounded-xl object-cover ${
+                      isOutOfStock(book) ? "opacity-50" : ""
+                    }`}
+                  />
+                  {isOutOfStock(book) && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-md">
+                      품절
+                    </div>
+                  )}
+                  <div className="mt-4">
+                    <h3
+                      className={`font-medium text-base text-[#242424] truncate ${
+                        isOutOfStock(book) ? "opacity-50" : ""
+                      }`}
+                    >
+                      {book.bookName}
+                    </h3>
+                    <p className="text-sm text-[#507A95]">
+                      {book.bookPrice.toLocaleString()}원
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      클래스: {book.classId ? "지정됨" : "미지정"}
+                    </p>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         ) : (
-          <div className="col-span-5 h-[178px] flex items-center justify-center border rounded-xl">
+          <div className="h-[178px] flex items-center justify-center border rounded-xl">
             <p className="text-[16px]">등록된 교재가 없습니다</p>
           </div>
         )}
       </div>
+
+      {/* 페이지네이션 */}
       <div className="flex justify-center mt-4 mb-[50px]">
         <Pagination
           current={currentPage}

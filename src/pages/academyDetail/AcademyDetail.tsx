@@ -64,22 +64,23 @@ const CalendarWrap = styled.div`
 const styles = {
   container: "flex w-full",
   content: {
-    wrapper: "flex flex-col gap-[12px] mt-[32px] relative max-[640px]:w-full",
+    wrapper:
+      "flex flex-col gap-[12px] mt-[32px] relative max-[768px]:w-full max-[640px]:w-full",
     imageContainer: "flex items-center justify-center px-[16px] py-[12px]",
     image:
-      "w-[928px] h-[320px] bg-gray-500 rounded-[12px] max-[640px]:w-full max-[640px]:h-[240px]",
+      "w-[928px] h-[320px] bg-gray-500 rounded-[12px] max-[768px]:w-full max-[768px]:h-[240px] max-[640px]:w-full max-[640px]:h-[240px]",
     mainContent:
-      "w-[940px] flex flex-col gap-[12px] mx-auto max-[640px]:w-full max-[640px]:items-center",
+      "w-[940px] flex flex-col gap-[12px] mx-auto max-[768px]:w-full max-[768px]:items-center max-[640px]:w-full max-[640px]:items-center",
   },
   header: {
     wrapper:
-      "flex h-[72px] px-[16px] py-[16px] max-[640px]:h-auto max-[640px]:justify-center",
+      "flex h-[72px] px-[16px] py-[16px] max-[768px]:h-auto max-[768px]:justify-center max-[640px]:h-auto max-[640px]:justify-center",
     title: "mx-auto text-[32px] font-bold text-brand-default text-start",
   },
   tab: {
     container:
       "flex flex-row justify-between items-end h-[63px] sticky top-[64px] bg-white z-[10]",
-    item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[40px] border-b-2 max-[640px]:w-full max-[640px]:!min-w-10",
+    item: "cursor-pointer flex justify-center items-center w-[416px] min-w-[288px] h-[40px] border-b-2 max-[768px]:w-full max-[768px]:!min-w-10 max-[640px]:w-full max-[640px]:!min-w-10",
     activeTab: "border-brand-BTBlue",
     inactiveTab: "border-[#F0F0F0]",
     text: "text-[16px] leading-[40px] text-center",
@@ -88,27 +89,27 @@ const styles = {
   },
   academy: {
     title:
-      " flex justify-center items-center text-[24px] font-bold max-[640px]:w-full",
+      " flex justify-center items-center text-[24px] font-bold max-[768px]:w-full max-[640px]:w-full",
     description:
-      "h-[36px] flex justify-center items-center text-[14px] text-[#507A95] max-[640px]:h-auto",
+      "h-[36px] flex justify-center items-center text-[14px] text-[#507A95] max-[768px]:h-auto max-[640px]:h-auto",
     content: "flex flex-col justify-center items-center text-[14px]",
     textContent: "text-[14px]items-center px-[16px] py-[12px] mb-[50px]",
   },
   stats: {
     container:
-      "flex justify-center items-center p-5 gap-[130px] w-[960px] h-[94px] mb-[50px] border border-[#EEEEEE] rounded-[10px] max-[640px]:w-[96%] max-[640px]:gap-5 max-[640px]:flex-col max-[640px]:h-auto",
+      "flex justify-center items-center p-5 gap-[130px] w-[960px] h-[94px] mb-[50px] border border-[#EEEEEE] rounded-[10px] max-[768px]:gap-5 max-[640px]:w-[96%] max-[640px]:gap-5 max-[640px]:flex-col max-[640px]:h-auto",
     rating: "flex items-center h-[50px] text-[32px] font-bold",
     ratingWrapper: "flex items-center gap-[10px]",
     statsWrapper:
-      "flex flex-col items-center justify-between max-[640px]:flex-row max-[640px]:gap-8",
+      "flex flex-col items-center justify-between max-[768px]:flex-row max-[768px]:gap-8 max-[640px]:flex-row max-[640px]:gap-8",
     statItem:
-      "w-[200px] flex items-center justify-between max-[640px]:w-auto max-[640px]:gap-3",
+      "w-[200px] flex items-center justify-between max-[768px]:w-auto max-[768px]:gap-3 max-[640px]:w-auto max-[640px]:gap-3",
     statLabel: "font-bold",
     statValue: "flex items-center text-[14px] text-[#507A95]",
   },
   section: {
     title: "text-[24px] font-bold flex items-center h-[70px]",
-    map: "w-full h-[450px] mb-[100px] max-[640px]:h-auto max-[640px]:mb-0",
+    map: "w-full h-[450px] mb-[100px] max-[768px]:h-auto max-[768px]:mb-0 max-[640px]:h-auto max-[640px]:mb-0",
   },
 };
 

@@ -40,17 +40,17 @@ function ReviewModal({
   const [_deletedFiles, setDeletedFiles] = useState<string[]>([]);
 
   useEffect(() => {
-    if (existingReview?.reviewPic) {
-      const existingFiles: UploadFile[] = existingReview.reviewPic
-        .split(",")
-        .map((pic: string) => ({
-          uid: pic,
-          name: pic,
-          status: "done" as UploadFileStatus,
-          url: `http://112.222.157.157:5233/pic/review/${existingReview.reviewId}/${pic}`,
-        }));
-      setFileList(existingFiles);
-    }
+    // if (existingReview?.reviewPic) {
+    //   const existingFiles: UploadFile[] = existingReview.reviewPic
+    //     .split(",")
+    //     .map((pic: string) => ({
+    //       uid: pic,
+    //       name: pic,
+    //       status: "done" as UploadFileStatus,
+    //       url: `http://112.222.157.157:5233/pic/review/${existingReview.reviewId}/${pic}`,
+    //     }));
+    //   setFileList(existingFiles);
+    // }
   }, [existingReview]);
 
   const handleStarClick = (selectedRating: number) => {
@@ -64,11 +64,11 @@ function ReviewModal({
       message.error("이미지 파일만 업로드할 수 있습니다!");
       return false;
     }
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      message.error("이미지는 5MB보다 작아야 합니다!");
-      return false;
-    }
+    // const isLt5M = file.size / 1024 / 1024 < 5;
+    // if (!isLt5M) {
+    //   message.error("이미지는 5MB보다 작아야 합니다!");
+    //   return false;
+    // }
     return true;
   };
 
@@ -105,6 +105,8 @@ function ReviewModal({
           .filter(file => file.status === "done" && !file.originFileObj)
           .map(file => file.name),
       };
+
+      console.log(reqData);
 
       // JSON 데이터를 Blob으로 변환하여 FormData에 추가
       formData.append(
@@ -192,8 +194,8 @@ function ReviewModal({
   };
 
   return (
-    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-      <div className="flex flex-col items-center w-[500px] bg-white rounded-xl p-6 gap-6">
+    <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-[1000]">
+      <div className="flex flex-col items-center w-[500px] max-[768px]:w-[90%] bg-white rounded-xl p-6 gap-6">
         <Form
           form={form}
           onFinish={handleSubmit}
@@ -211,7 +213,7 @@ function ReviewModal({
           {/* Header */}
           <div className="flex items-center w-full mb-6">
             <div className="flex items-center justify-between w-full">
-              <h2 className="text-[32px] font-bold text-[#0E161B] font-lexend leading-none">
+              <h2 className="text-[32px] font-bold text-[#0E161B] font-lexend leading-none max-[768px]:text-[24px]">
                 리뷰 & 후기 작성하기
               </h2>
               <div className="flex items-center self-center">
@@ -220,7 +222,6 @@ function ReviewModal({
             </div>
           </div>
 
-          {/* Review Type Selection */}
           <Form.Item label="리뷰 유형" className="mb-6">
             <Radio.Group
               value={reviewType}
@@ -287,7 +288,7 @@ function ReviewModal({
           <Form.Item name="comment" className="mb-6">
             <textarea
               placeholder="내용을 작성해 주세요"
-              className="w-[450px] h-[224px] p-4 bg-white border border-[#DBE0E6] rounded-xl resize-none text-base text-[#637887] focus:outline-none"
+              className="w-[450px] max-[768px]:w-[100%] h-[224px] p-4 bg-white border border-[#DBE0E6] rounded-xl resize-none text-base text-[#637887] focus:outline-none"
             />
           </Form.Item>
 
@@ -300,7 +301,6 @@ function ReviewModal({
               <span className="font-bold text-sm text-[#0E161B]">취소</span>
             </SecondaryButton>
             <MainButton
-              type="primary"
               htmlType="submit"
               className="flex justify-center items-center w-full h-10 bg-[#3B77D8] rounded-xl"
               disabled={isSubmitting}

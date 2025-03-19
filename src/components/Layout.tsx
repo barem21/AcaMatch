@@ -197,6 +197,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [currentUserInfo.roleId, isAdminPage]);
 
+  // BottomNavBar를 숨길 경로들
+  const hideBottomNavPaths = [
+    ...noLayoutPaths, // 기존 noLayoutPaths의 모든 경로 포함
+  ];
+
   return (
     <div className="flex mobile-width" ref={mainRef}>
       {isAdminPage ? (
@@ -259,7 +264,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       ) : (
         <div className="flex flex-col flex-1 relative">
           {isLayoutVisible && !isAdminPage && (
-            <Header className="sticky top-0 left-0 right-0 z-50 flex items-center h-[64px] bg-white border-b border-brand-BTWhite mobile-width" />
+            <Header className="sticky top-0 left-0 right-0 z-1000 flex items-center h-[64px] bg-white border-b border-brand-BTWhite mobile-width " />
           )}
 
           {isLayoutVisible ? (
@@ -286,7 +291,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {isLayoutVisible && !isAdminPage && (
             <Footer className="w-full h-[100px] max-[768px]:h-[130px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
           )}
-          <BottomNavBar />
+          {/* BottomNavBar 조건부 렌더링 수정 */}
+          {!hideBottomNavPaths.includes(location.pathname) && <BottomNavBar />}
           <ScrollButton onScrollToTop={handleScrollToTop} />
         </div>
       )}

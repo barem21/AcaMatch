@@ -142,11 +142,11 @@ function Support() {
   const Kategorie = ["전체", "가입", "학원 문의", "계정", "리뷰", "기타"];
 
   return (
-    <div className="flex gap-5 w-full max-[640px]:flex-col max-[640px]:gap-0">
+    <div className="flex gap-5 w-full max-[768px]:flex-col max-[768px]:gap-0">
       <SideBar menuItems={menuItems} titleName={titleName} />
 
-      <div className="w-full max-[640px]:p-4">
-        <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
+      <div className="w-full max-[768px]:p-4">
+        <h1 className="title-font max-[768px]:mb-3 max-[768px]:text-xl max-[768px]:mt-0">
           자주하는 질문
         </h1>
 

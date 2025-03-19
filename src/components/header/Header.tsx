@@ -235,7 +235,14 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
   };
 
   return (
-    <header className={className}>
+    <header
+      className={className}
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+      }}
+    >
       <div className="w-[1280px] max-[768px]:w-full max-[768px]:h-[64px] max-[768px]:px-4 max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
         <img
           src="/logo2.png"
@@ -354,7 +361,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           id="mobileMenuWrap"
           className={`${isMenuOpen ? "show" : "hide"} fixed top-0 left-0 w-full h-[100vh]`}
         >
-          <div className="wrapper z-99">
+          <div className="wrapper">
             <button
               className="absolute right-[-45px] top-6 size-8 text-white text-2xl "
               onClick={() => toggleMobileMenu()}

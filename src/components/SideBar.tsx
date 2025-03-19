@@ -34,7 +34,9 @@ const SideBar: React.FC<SideBarProps> = ({
 }) => {
   const navigate = useNavigate();
   return (
-    <div className={`mt-[75px] max-[640px]:hidden ${className}`}>
+    <div
+      className={`mt-[75px] max-[768px]:hidden max-[640px]:hidden ${className}`}
+    >
       <div className="w-[240px] mr-10 max-[640px]:w-full max-[640px]:p-4">
         {titleName && (
           <h2 className="mb-10 text-[24px] font-[500] leading-[21px] text-brand-default max-[640px]:hidden">
