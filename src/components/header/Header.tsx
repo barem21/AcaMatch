@@ -344,7 +344,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
         </button>
       </div>
 
-      <MobileMenuWrap className="min-[769px]:hidden ">
+      <MobileMenuWrap className="min-[769px]:hidden">
         <div
           id="mobileMenuBg"
           className={`${isMenuOpen ? "show" : "hide"} fixed top-0 left-0 w-full h-full`}
@@ -354,9 +354,9 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           id="mobileMenuWrap"
           className={`${isMenuOpen ? "show" : "hide"} fixed top-0 left-0 w-full h-[100vh]`}
         >
-          <div className="wrapper">
+          <div className="wrapper z-99">
             <button
-              className="absolute right-[-45px] top-6 size-8 text-white text-2xl"
+              className="absolute right-[-45px] top-6 size-8 text-white text-2xl "
               onClick={() => toggleMobileMenu()}
             >
               &times;

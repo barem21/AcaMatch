@@ -19,6 +19,7 @@ import Header from "./header/Header";
 import ScrollButton from "./ScrollButton";
 import PopupWindow from "./popup/PopupWindow";
 import jwtAxios from "../apis/jwt";
+import BottomNavBar from "./BottomNavBar";
 
 interface LayoutProps {
   children?: ReactNode;
@@ -265,10 +266,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <>
               {location.pathname === "/" && <PopupWindow isAdmin={false} />}
               <div className="flex justify-center">
-                {/* <div className="w-[280px] max-[640px]:hidden"></div> */}
                 <main
                   className="flex w-full min-w-[1280px] mx-auto max-w-[1280px] max-[768px]:min-w-[640px] max-[640px]:min-w-[320px]"
-                  style={{ minHeight: "calc(100vh - 164px)" }}
+                  style={{
+                    minHeight: "calc(100vh - 164px - 60px)",
+                  }}
                 >
                   {children}
                 </main>
@@ -276,11 +278,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </>
           ) : (
-            <main>{children}</main>
+            <main style={{ minHeight: "calc(100vh - 60px)" }}>
+              {/* // BottomNavBar가 있는 경우 */}
+              {children}
+            </main>
           )}
           {isLayoutVisible && !isAdminPage && (
-            <Footer className="w-full h-[100px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px] " />
+            <Footer className="w-full h-[100px] max-[768px]:h-[130px] flex-col-center mx-auto bg-[#242424] text-white text-[14px] border-[#000] border-t-[1px]" />
           )}
+          <BottomNavBar />
           <ScrollButton onScrollToTop={handleScrollToTop} />
         </div>
       )}
