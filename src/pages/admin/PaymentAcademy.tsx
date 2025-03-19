@@ -28,7 +28,7 @@ function PaymenuAcademy() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [paymentCount, setPaymenuCount] = useState(0); //총 최원수
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
-  //const [joinClassId, setJoinClassId] = useState(0);
+  const [joinClassId, setJoinClassId] = useState(0);
 
   const state = parseInt(searchParams.get("state") || "0", 0);
   const search = searchParams.get("search");
@@ -61,6 +61,7 @@ function PaymenuAcademy() {
     if (value === "2") {
       //승인거부
       setIsModalVisible(true);
+      setJoinClassId(joinClassId);
       return;
     } else {
       const data = { joinClassId: joinClassId, certification: parseInt(value) };
@@ -70,6 +71,7 @@ function PaymenuAcademy() {
 
         if (res.data.resultData === 1) {
           message.success("승인처리 완료되었습니다.");
+          paymentAcademyList({}); //목록 다시 불러오기
         }
       } catch (error) {
         console.log(error);
@@ -80,10 +82,24 @@ function PaymenuAcademy() {
   //승인거부팝업
   const handleButton1Click = () => {
     setIsModalVisible(false);
-    //setJoinClassId(0);
+    setJoinClassId(0);
     //setReportType(null);
   };
   const handleButton2Click = async () => {
+    //승인거부(삭제) 처리
+    try {
+      const res = await axios.delete(
+        `/api/joinClass?joinClassId=${joinClassId}`,
+      );
+      //console.log(res.data.resultData);
+
+      if (res.data.resultData === 1) {
+        message.success("승인거부(삭제) 완료되었습니다.");
+        paymentAcademyList({}); //목록 다시 불러오기
+      }
+    } catch (error) {
+      console.log(error);
+    }
     setIsModalVisible(false);
   };
 
@@ -203,7 +219,7 @@ function PaymenuAcademy() {
             <div className="flex items-center justify-center min-w-24">
               처리상태
             </div>
-            <div className="flex items-center justify-center min-w-24">
+            <div className="flex items-center justify-center min-w-32">
               승인
             </div>
           </div>
@@ -252,7 +268,7 @@ function PaymenuAcademy() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center justify-center text-center min-w-24">
+              <div className="flex items-center justify-center text-center min-w-32">
                 <select
                   name="actionType"
                   value={item.certification}
@@ -266,7 +282,7 @@ function PaymenuAcademy() {
                 >
                   <option value="0">승인대기</option>
                   <option value="1">승인완료</option>
-                  <option value="2">승인거부</option>
+                  <option value="2">승인거부(삭제)</option>
                 </select>
               </div>
             </div>
@@ -288,11 +304,11 @@ function PaymenuAcademy() {
         <CustomModal
           visible={isModalVisible}
           title={"수강 승인거부"}
-          content={`선택하신 수강신청을 수강 승인거부하시겠습니까?`}
+          content={`선택하신 수강신청을 승인거부(삭제)하시겠습니까?`}
           onButton1Click={handleButton1Click}
           onButton2Click={handleButton2Click}
           button1Text={"취소"}
-          button2Text={"수강 승인거부"}
+          button2Text={"수강 승인거부(삭제)"}
           modalWidth={400}
         />
       )}

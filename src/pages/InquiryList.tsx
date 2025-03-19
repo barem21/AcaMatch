@@ -32,8 +32,8 @@ function InquiryList() {
 
   const titleName = "고객지원";
   const menuItems = [
-    { label: "FAQ", isActive: false, link: "/support" },
-    { label: "1 : 1 문의", isActive: true, link: "/support/inquiryList" },
+    { label: "자주하는 질문", isActive: false, link: "/support" },
+    { label: "1:1 문의", isActive: true, link: "/support/inquiryList" },
   ];
 
   /*

@@ -35,7 +35,7 @@ function MypageReview() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [editReview, setEditReview] = useState({}); // 수정할 리뷰 데이터 상태 추가
+  const [_editReview, setEditReview] = useState({}); // 수정할 리뷰 데이터 상태 추가
 
   const [academyId, setAcademyId] = useState(0);
   const [reviewId, setReviewId] = useState(0);
@@ -243,7 +243,7 @@ function MypageReview() {
             academyId={academyId}
             userClasses={[]}
             //onSubmitSuccess={}
-            existingReview={editReview}
+            //existingReview={editReview}
           />
         )}
         {isDeleteModalVisible && (

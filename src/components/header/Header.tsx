@@ -221,6 +221,8 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     } catch (error) {
       console.error("Failed to fetch user data:", error);
     }
+
+    toggleMobileMenu(); //모바일메뉴 닫기
   };
 
   const navigate = useNavigate();
@@ -363,20 +365,40 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             </button>
 
             <div className="flex mb-3">
-              <Link
-                to={"/log-in"}
-                onClick={() => toggleMobileMenu()}
-                className="flex w-full h-10 justify-center items-center bg-blue-800 text-white font-bold"
-              >
-                로그인
-              </Link>
-              <Link
-                to={"/signup"}
-                onClick={() => toggleMobileMenu()}
-                className="flex w-full h-10 justify-center items-center bg-white text-blue-800 font-bold"
-              >
-                회원가입
-              </Link>
+              {getCookie("accessToken") ? (
+                <>
+                  <button
+                    onClick={() => logOut()}
+                    className="flex w-full h-10 justify-center items-center bg-blue-800 text-white font-bold"
+                  >
+                    로그아웃
+                  </button>
+                  <Link
+                    to={"/mypage/user"}
+                    onClick={() => toggleMobileMenu()}
+                    className="flex w-full h-10 justify-center items-center bg-white text-blue-800 font-bold"
+                  >
+                    회원정보수정
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to={"/log-in"}
+                    onClick={() => toggleMobileMenu()}
+                    className="flex w-full h-10 justify-center items-center bg-blue-800 text-white font-bold"
+                  >
+                    로그인
+                  </Link>
+                  <Link
+                    to={"/signup"}
+                    onClick={() => toggleMobileMenu()}
+                    className="flex w-full h-10 justify-center items-center bg-white text-blue-800 font-bold"
+                  >
+                    회원가입
+                  </Link>
+                </>
+              )}
             </div>
 
             <ul>
