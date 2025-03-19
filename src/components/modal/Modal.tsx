@@ -63,7 +63,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-10 modal-popup-wrap"
+      className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-[1000] modal-popup-wrap"
       style={{ width: "100%", height: "100vh" }}
     >
       <div

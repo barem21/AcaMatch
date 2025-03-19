@@ -76,7 +76,7 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
             >
               <li className="flex justify-center items-center w-[30%] text-[#242424] text-[14px]">
                 <div className="flex items-center text-[12px] w-full overflow-hidden">
-                  <div className="flex items-center w-full truncate">
+                  <div className="flex px-2 items-center w-full truncate">
                     <span className="text-[14px] truncate">{item.name}</span>
                     <span className="text-[12px] text-gray-500 truncate ml-1">
                       ({item.email})
