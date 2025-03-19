@@ -462,7 +462,7 @@ const BannerContent = () => {
                 </Select>
               </div>
               <div>
-                <label className="block mb-2">메인 배너</label>
+                <label className="block mb-2">모바일 배너</label>
                 <Upload
                   listType="picture-card"
                   fileList={fileList.top}
@@ -479,7 +479,7 @@ const BannerContent = () => {
                 </Upload>
               </div>
               <div>
-                <label className="block mb-2">모바일 배너</label>
+                <label className="block mb-2">메인 배너</label>
                 <Upload
                   listType="picture-card"
                   fileList={fileList.bottom}

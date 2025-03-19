@@ -102,9 +102,9 @@ const BannerView = () => {
   const getBannerPositionText = (position: number) => {
     switch (position) {
       case 1:
-        return "상단 배너";
+        return "모바일 베너";
       case 2:
-        return "중단 배너";
+        return "메인 배너";
       case 3:
         return "좌측 배너";
       case 4:

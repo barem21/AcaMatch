@@ -59,11 +59,46 @@ function LoginPage() {
         roleId: String(roleId),
         userId: String(userId),
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
       removeCookie("accessToken");
-      message.error("아이디와 비밀번호가 일치하지않습니다.");
-      setMsg("아이디와 비밀번호가 일치하지않습니다.");
+
+      // error 객체를 AxiosError로 타입 체크
+      if (axios.isAxiosError(error)) {
+        // 400 Bad Request 에러 처리
+        if (
+          error.response?.status === 400 ||
+          error.code === "ERR_BAD_REQUEST"
+        ) {
+          // 서버에서 보낸 에러 메시지가 있는 경우
+          if (error.response?.data?.resultMessage) {
+            message.error(error.response.data.resultMessage);
+            setMsg(error.response.data.resultMessage);
+          } else {
+            // 서버에서 보낸 에러 메시지가 없는 경우
+            message.error("로그인에 실패했습니다. 입력 정보를 확인해주세요.");
+            setMsg("로그인에 실패했습니다. 입력 정보를 확인해주세요.");
+          }
+        } else if (
+          error.response?.data?.resultMessage ===
+          "아이디 또는 비밀번호가 일치하지 않습니다."
+        ) {
+          message.error("아이디 또는 비밀번호가 일치하지 않습니다.");
+          setMsg("아이디 또는 비밀번호가 일치하지 않습니다.");
+        } else {
+          // 기타 에러 처리
+          message.error(
+            "로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          );
+          setMsg("로그인 중 오류가 발생했습니다.");
+        }
+      } else {
+        // Axios 에러가 아닌 경우
+        message.error(
+          "로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        );
+        setMsg("로그인 중 오류가 발생했습니다.");
+      }
     }
   };
 
