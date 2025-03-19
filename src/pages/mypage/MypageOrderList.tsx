@@ -1,13 +1,12 @@
+import { message, Pagination } from "antd";
+import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { Cookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
+import userInfo from "../../atoms/userInfo";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
-import userInfo from "../../atoms/userInfo";
-//import { getCookie } from "../../utils/cookie";
-import { message, Pagination } from "antd";
-import { useNavigate } from "react-router-dom";
-import jwtAxios from "../../apis/jwt";
-import { Cookies } from "react-cookie";
 
 interface mypageAcademyListType {
   acaId: number;
@@ -24,7 +23,7 @@ interface mypageAcademyListType {
   ];
 }
 
-function MyPage() {
+function MypageOrderList() {
   const cookies = new Cookies();
   const [resultTitle, _setResultTitle] = useState("");
   const [resultMessage, _setResultMessage] = useState("");
@@ -34,7 +33,6 @@ function MyPage() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { roleId, userId } = useRecoilValue(userInfo);
-  //const accessToken = getCookie("accessToken");
   const navigate = useNavigate();
   const pageSize = 10;
 
@@ -62,47 +60,24 @@ function MyPage() {
     default: //일반학생
       menuItems = [
         { label: "회원정보 관리", isActive: false, link: "/mypage/user" },
-        { label: "나의 학원정보", isActive: true, link: "/mypage" },
+        { label: "나의 학원정보", isActive: false, link: "/mypage" },
         { label: "보호자 정보", isActive: false, link: "/mypage/parent" },
         { label: "나의 성적확인", isActive: false, link: "/mypage/record" },
         { label: "나의 좋아요 목록", isActive: false, link: "/mypage/like" },
         { label: "나의 리뷰 목록", isActive: false, link: "/mypage/review" },
-        { label: "결제 내역", isActive: false, link: "/mypage/order" },
+        { label: "결제 내역", isActive: true, link: "/mypage/order" },
         { label: "취소(환불) 내역", isActive: false, link: "/mypage/refund" },
       ];
       break;
   }
-  //const scrollRef = useRef(null);
+
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  /*
-  const handleScrollToTop = () => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
-  };
-  */
-
-  const myAcademyList = async (page: number) => {
-    //자녀목록 호출
-    let checkUserId = userId; //기본은 본인 아이디
-    if (roleId === 2) {
-      //학부모는 자녀 정보 필요
-      try {
-        const ress = await jwtAxios.get("/api/user/relationship/list/1");
-        checkUserId = ress.data.resultData[0].userId; //자녀 아이디로 교체
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
+  const myOrderList = async (page: number) => {
     try {
-      //나(자녀)의 수강목록 호출
-      const res = await jwtAxios.get(
-        `/api/joinClass?userId=${checkUserId}&role=${roleId}&page=${page}&size=100`,
+      const res = await axios.get(
+        `/api/academy/GetAcademyListByAcaNameOrderType?userId=${userId}&page=${page}&size=30`,
       );
-
-      console.log(res.data.resultData);
 
       if (res.data.resultData?.length > 0) {
         setMypageAcademyList(res.data.resultData);
@@ -121,32 +96,6 @@ function MyPage() {
     setIsModalVisible(false);
   };
 
-  useEffect(() => {
-    if (userId !== "") {
-      myAcademyList(1);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (!cookies.get("accessToken")) {
-      navigate("/log-in");
-      message.error("로그인이 필요한 서비스입니다.");
-    }
-  }, [userId]);
-
-  // useEffect(() => {
-  //   if (!currentUserInfo.userId) {
-  //     navigate("/log-in");
-  //     message.error("로그인이 필요한 서비스입니다.");
-  //   }
-  // }, []);
-
-  useEffect(() => {
-    if (roleId === 0 || roleId === 3 || roleId === 4) {
-      navigate("/mypage/user");
-    }
-  }, []);
-
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (scrollRef.current) {
@@ -159,6 +108,25 @@ function MyPage() {
     currentPage * pageSize,
   );
 
+  useEffect(() => {
+    if (userId !== "") {
+      myOrderList(1);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (!cookies.get("accessToken")) {
+      navigate("/log-in");
+      message.error("로그인이 필요한 서비스입니다.");
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (roleId === 0 || roleId === 3 || roleId === 4) {
+      navigate("/mypage/user");
+    }
+  }, []);
+
   return (
     <div
       id="list-wrap"
@@ -169,7 +137,7 @@ function MyPage() {
 
       <div className="w-full max-[640px]:p-4">
         <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
-          {roleId === 2 ? "자녀" : "나의"} 학원정보
+          {roleId === 2 ? "자녀" : "나의"} 결제 내역
         </h1>
 
         <div className="board-wrap">
@@ -276,4 +244,4 @@ function MyPage() {
   );
 }
 
-export default MyPage;
+export default MypageOrderList;

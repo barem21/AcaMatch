@@ -43,6 +43,7 @@ function AcademyReview() {
 
   const acaId = parseInt(searchParams.get("acaId") || "0", 0);
   const classId = parseInt(searchParams.get("classId") || "0", 0);
+  const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //전체학원 목록
   const academyList = async () => {
@@ -88,7 +89,7 @@ function AcademyReview() {
   const getTagList = async (values: any) => {
     try {
       const res = await axios.get(
-        `/api/review/academy/noPic?acaId=${values.acaId}&page=1&size=${values.showCnt}`,
+        `/api/review/academy/noPic?acaId=${values.acaId ? values.acaId : acaId}&page=1&size=${values.showCnt ? values.showCnt : showCnt}`,
       );
       setAcademyReviewList(res.data.resultData);
     } catch (error) {
@@ -193,7 +194,7 @@ function AcademyReview() {
             <div className="flex items-center justify-center w-full">
               리뷰 내용
             </div>
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-28">
               삭제하기
             </div>
           </div>
@@ -212,45 +213,58 @@ function AcademyReview() {
           {academyReviewList?.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-6 border-b"
+              className="loop-content flex justify-between align-middle p-2 border-b"
             >
               <div className="w-full">
-                <div className="flex items-center gap-3">
-                  <div className="flex justify-center items-center w-10 h-10 border rounded-full overflow-hidden">
-                    <img
-                      src={
-                        item.writerPic
-                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.writerPic}`
-                          : "/aca_image_1.png"
-                      }
-                      className="max-w-fit max-h-full object-cover"
-                      alt=""
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">{item.writerName}</div>
-                    <div className="text-sm text-gray-500">
-                      {item.createdAt.substr(0, 10)}
+                <div className="flex justify-between items-center mb-3 gap-3 pl-3">
+                  <div className="flex justify-between items-center gap-3">
+                    <div className="flex justify-center items-center w-12 h-12 border rounded-xl overflow-hidden">
+                      <img
+                        src={
+                          item.writerPic
+                            ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.writerPic}`
+                            : "/aca_image_1.png"
+                        }
+                        className="max-w-fit max-h-20 object-cover"
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">
+                        {item.writerName}
+                      </div>
+                      <div className="flex items-center justify-start gap-1">
+                        <p className=" text-sm text-gray-500">
+                          {item.createdAt.substr(0, 10)}
+                        </p>
+
+                        <div className="flex items-center gap-1 ml-2 mt-0.5">
+                          {Array.from({ length: 5 }, (_, index) =>
+                            index < item.star ? <GoStarFill /> : <GoStar />,
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
+
+                  <div className="flex items-center justify-center min-w-28">
+                    <button
+                      className="small_line_button"
+                      onClick={() =>
+                        deleteReviewCheck(item.acaId, item.classId)
+                      }
+                    >
+                      삭제하기
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1 mt-4 mb-3">
-                  {Array.from({ length: 5 }, (_, index) =>
-                    index < item.star ? <GoStarFill /> : <GoStar />,
-                  )}
+
+                <div className="p-3 pb-3.5 bg-gray-100 rounded-md">
+                  <div className="text-lg font-bold">
+                    {item.className ? item.className : "학원 정보가 없습니다."}
+                  </div>
+                  <div className="text-sm text-gray-500">{item.comment}</div>
                 </div>
-                <div className="text-lg font-bold">
-                  {item.className ? item.className : "학원 정보가 없습니다."}
-                </div>
-                <div className="text-sm text-gray-500">{item.comment}</div>
-              </div>
-              <div className="flex items-center justify-center min-w-40">
-                <button
-                  className="small_line_button"
-                  onClick={() => deleteReviewCheck(item.acaId, item.classId)}
-                >
-                  삭제하기
-                </button>
               </div>
             </div>
           ))}
