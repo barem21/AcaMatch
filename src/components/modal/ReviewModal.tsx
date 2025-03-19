@@ -1,7 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Form, message, Radio, Upload } from "antd";
 import type { RcFile, UploadProps } from "antd/es/upload";
-import type { UploadFile } from "antd/es/upload/interface";
+import type { UploadFile, UploadFileStatus } from "antd/es/upload/interface";
 import { useEffect, useState } from "react";
 import { GoStar, GoStarFill } from "react-icons/go";
 import { useRecoilState } from "recoil";
@@ -9,6 +9,7 @@ import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import MainButton from "../button/MainButton";
 import { SecondaryButton } from "./Modal";
+import { Review } from "../../pages/academyDetail/types";
 
 interface ReviewModalProps {
   onClose: () => void;
@@ -22,7 +23,7 @@ type ReviewType = "general" | "media";
 
 function ReviewModal({
   onClose,
-  academyId,
+  // academyId,
   existingReview,
   userClasses = [],
   onSubmitSuccess,
@@ -40,12 +41,14 @@ function ReviewModal({
 
   useEffect(() => {
     if (existingReview?.reviewPic) {
-      const existingFiles = existingReview.reviewPic.split(",").map(pic => ({
-        uid: pic,
-        name: pic,
-        status: "done",
-        url: `http://112.222.157.157:5233/pic/review/${existingReview.reviewId}/${pic}`,
-      }));
+      const existingFiles: UploadFile[] = existingReview.reviewPic
+        .split(",")
+        .map((pic: string) => ({
+          uid: pic,
+          name: pic,
+          status: "done" as UploadFileStatus,
+          url: `http://112.222.157.157:5233/pic/review/${existingReview.reviewId}/${pic}`,
+        }));
       setFileList(existingFiles);
     }
   }, [existingReview]);

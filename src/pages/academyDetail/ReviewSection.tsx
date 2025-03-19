@@ -62,7 +62,7 @@ const styles = {
 };
 
 const ReviewSection = ({
-  star,
+  // star,
   reviewCount,
   renderStars,
   academyId,
@@ -228,10 +228,12 @@ const ReviewSection = ({
     if (deleteReviewId === null) return;
 
     try {
-      const res = await jwtAxios.delete("/api/review/user", {
-        data: { acaId: academyId, userId: user.userId },
-      });
+      const res = await jwtAxios.delete(
+        `/api/review/me?reviewId=${deleteReviewId}&userId=${user.userId}`,
+      );
       console.log(res);
+
+      message.success("리뷰가 삭제되었습니다.");
 
       // 삭제 후 리뷰 목록 다시 가져오기
       await fetchGeneralReviews();
@@ -246,15 +248,6 @@ const ReviewSection = ({
     }
     setIsDeleteModalVisible(false);
   };
-
-  // const handleReviewUpdate = async () => {
-  //   await fetchGeneralReviews();
-  //   await fetchMediaReviews();
-
-  //   if (onReviewUpdate) {
-  //     await onReviewUpdate();
-  //   }
-  // };
 
   const handleReport = async () => {
     if (!selectedReportType) {
@@ -345,6 +338,13 @@ const ReviewSection = ({
     await fetchGeneralReviews();
     await fetchMediaReviews();
   };
+
+  // 리뷰가 없을 때 표시할 컴포넌트
+  const NoReviews = () => (
+    <div className="w-[928px] h-[200px] flex flex-col items-center justify-center border border-[#EEEEEE] rounded-[10px] bg-white">
+      <p className="text-[#637887] text-[14px]">아직 등록된 글이 없습니다.</p>
+    </div>
+  );
 
   return (
     <div className="flex flex-col mx-auto p-[12px] max-[640px]:w-full">
@@ -483,9 +483,7 @@ const ReviewSection = ({
             </div>
           ))
         ) : (
-          <div className="flex justify-center items-center text-[14px] text-gray-500 border rounded-[8px] h-[142px]">
-            <span>등록된 후기가 없습니다.</span>
-          </div>
+          <NoReviews />
         )}
 
         {/* 페이지네이션 */}
@@ -548,7 +546,7 @@ const ReviewSection = ({
                               setEditReview(review);
                             }}
                           >
-                            후기수정
+                            리뷰수정
                           </button>
                           <button
                             className="small_line_button bg-[#fff] text-[14px] text-[#242424]"
@@ -557,7 +555,7 @@ const ReviewSection = ({
                               setIsDeleteModalVisible(true);
                             }}
                           >
-                            후기삭제
+                            리뷰삭제
                           </button>
                         </>
                       )}
@@ -578,9 +576,7 @@ const ReviewSection = ({
             </div>
           ))
         ) : (
-          <div className="flex justify-center items-center text-[14px] text-gray-500 border rounded-[8px] h-[142px]">
-            <span>등록된 리뷰가 없습니다.</span>
-          </div>
+          <NoReviews />
         )}
 
         {/* 페이지네이션 */}
@@ -601,7 +597,7 @@ const ReviewSection = ({
           academyId={academyId}
           userClasses={selectedAcademy.classList}
           onSubmitSuccess={handleReviewSubmitted}
-          existingReview={editReview}
+          existingReview={editReview as Review}
         />
       )}
       {isDeleteModalVisible && (
@@ -631,7 +627,7 @@ const ReviewSection = ({
               ✕
             </button>
             <img
-              src={`http://112.222.157.157:5233/pic/reviews/${selectedImage.userId}/${selectedImage.imageName}`}
+              src={`http://112.222.157.157:5233/pic/review/${selectedImage.reviewId}/${selectedImage.imageName}`}
               alt="Large preview"
               className="max-w-[800px] max-h-[800px] object-contain"
               onClick={e => e.stopPropagation()}

@@ -36,6 +36,7 @@
 /* 반응형 모바일 사이즈 */
 .mobile-width {
   @apply max-[640px]:block;
+  @apply max-[768px]:block;
 }
 /* 반응형 모바일 사이즈 */
 

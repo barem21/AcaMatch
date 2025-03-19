@@ -103,6 +103,7 @@ export interface AcademyData {
   generalReviewCount: number; // 추가
   mediaReviewCount: number; // 추가
   books?: Book[];
+  acaPics?: string[];
 }
 
 export interface MapPosition {

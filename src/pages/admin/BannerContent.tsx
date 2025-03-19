@@ -50,6 +50,13 @@ const BannerContent = () => {
     { acaId: number; acaName: string }[]
   >([]);
 
+  // 승인 상태 변경 관련 상태 추가
+  const [selectedAcaId, setSelectedAcaId] = useState<number | null>(null);
+  const [selectedBannerType, setSelectedBannerType] = useState<number | null>(
+    null,
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // 학원 목록 불러오기
   const fetchPremiumAcademies = async () => {
     try {
@@ -273,6 +280,34 @@ const BannerContent = () => {
     setIsRegisterModalOpen(true);
   };
 
+  // 승인 상태 변경 시 모달 띄우기
+  const handleApprovalChange = (bannerType: number, acaId: number) => {
+    setSelectedAcaId(acaId);
+    setSelectedBannerType(bannerType);
+    setIsModalOpen(true);
+  };
+
+  // 승인/미승인 API 호출
+  const confirmApprovalChange = async () => {
+    if (selectedAcaId === null || selectedBannerType === null) return;
+
+    try {
+      await jwtAxios.put(`/api/banner/agree`, {
+        acaId: selectedAcaId,
+        bannerType: selectedBannerType,
+      });
+
+      message.success(
+        selectedBannerType === 1 ? "승인되었습니다." : "승인 취소되었습니다.",
+      );
+      setIsModalOpen(false);
+      fetchPremiumAcademies(); // 목록 새로고침
+    } catch (error) {
+      console.error("Error updating approval status:", error);
+      message.error("승인 상태 변경에 실패했습니다.");
+    }
+  };
+
   // 컴포넌트 마운트 시 학원 목록 가져오기
   useEffect(() => {
     fetchPremiumAcademies();
@@ -330,9 +365,11 @@ const BannerContent = () => {
             <div className="flex items-center justify-center w-[132px]">
               상세보기
             </div>
-            <div className="flex items-center justify-center w-[132px]">
-              승인여부
-            </div>
+            {roleId !== 3 && (
+              <div className="flex items-center justify-center w-[132px]">
+                승인여부
+              </div>
+            )}
             <div className="flex items-center justify-center w-[72px]">
               삭제
             </div>
@@ -364,21 +401,11 @@ const BannerContent = () => {
                   상세보기
                 </p>
               </div>
-              <div className="flex items-center justify-center w-[132px]">
-                {roleId === 3 ? (
-                  // 학원 관리자용 승인 상태 표시
-                  <p
-                    className={`w-[80px] pb-[1px] rounded-md text-[12px] text-center ${
-                      academy.bannerType === 1 ? "bg-[#90b1c4]" : "bg-[#f8a57d]"
-                    } text-white`}
-                  >
-                    {academy.bannerType === 1 ? "승인" : "미승인"}
-                  </p>
-                ) : (
-                  // 관리자용 승인 상태 변경 select
+              {roleId !== 3 && (
+                <div className="flex items-center justify-center w-[132px]">
                   <select
                     className="p-1 border rounded-lg"
-                    value={academy.bannerType}
+                    value={academy.bannerType || 0}
                     onChange={e =>
                       handleApprovalChange(
                         parseInt(e.target.value),
@@ -389,8 +416,8 @@ const BannerContent = () => {
                     <option value={0}>미승인</option>
                     <option value={1}>승인</option>
                   </select>
-                )}
-              </div>
+                </div>
+              )}
               <div className="flex gap-4 items-center justify-center w-[72px]">
                 <button onClick={() => handleDelete(academy.acaId)}>
                   <FaRegTrashAlt className="w-3 text-gray-400 hover:text-red-500" />
@@ -435,7 +462,7 @@ const BannerContent = () => {
                 </Select>
               </div>
               <div>
-                <label className="block mb-2">상단 배너</label>
+                <label className="block mb-2">메인 배너</label>
                 <Upload
                   listType="picture-card"
                   fileList={fileList.top}
@@ -452,7 +479,7 @@ const BannerContent = () => {
                 </Upload>
               </div>
               <div>
-                <label className="block mb-2">하단 배너</label>
+                <label className="block mb-2">모바일 배너</label>
                 <Upload
                   listType="picture-card"
                   fileList={fileList.bottom}
@@ -496,6 +523,23 @@ const BannerContent = () => {
           button1Text="취소"
           button2Text="등록"
           modalWidth={500}
+        />
+
+        <CustomModal
+          visible={isModalOpen}
+          title="승인 상태 변경"
+          content={
+            <p className="mt-[15px]">
+              {selectedBannerType === 1
+                ? "승인하시겠습니까?"
+                : "승인 취소하시겠습니까?"}
+            </p>
+          }
+          onButton1Click={() => setIsModalOpen(false)}
+          onButton2Click={confirmApprovalChange}
+          button1Text="취소"
+          button2Text="확인"
+          modalWidth={400}
         />
       </div>
     </div>

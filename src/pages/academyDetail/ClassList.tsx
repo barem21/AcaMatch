@@ -13,7 +13,7 @@ const ClassList = ({ classes }: ClassListProps) => {
   // }, []);
   const [currentPage, setCurrentPage] = useState(1);
   const scrollRef = useRef<HTMLElement | null>(null);
-  const pageSize = 2;
+  const pageSize = 5;
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (scrollRef.current) {

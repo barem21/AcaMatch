@@ -74,7 +74,7 @@ const styles = {
   header: {
     wrapper:
       "flex h-[72px] px-[16px] py-[16px] max-[640px]:h-auto max-[640px]:justify-center",
-    title: "font-bold text-3xl text-brand-default text-start",
+    title: "mx-auto text-[32px] font-bold text-brand-default text-start",
   },
   tab: {
     container:
@@ -88,7 +88,7 @@ const styles = {
   },
   academy: {
     title:
-      "h-[58px] flex justify-center items-center text-[24px] font-bold max-[640px]:w-full",
+      " flex justify-center items-center text-[24px] font-bold max-[640px]:w-full",
     description:
       "h-[36px] flex justify-center items-center text-[14px] text-[#507A95] max-[640px]:h-auto",
     content: "flex flex-col justify-center items-center text-[14px]",
@@ -379,8 +379,8 @@ const AcademyDetail = () => {
     }
   };
 
-  // acaPics 문자열을 배열로 변환하는 함수 추가
-  const getImageUrls = (acaPics: string) => {
+  // acaPics 문자열을 배열로 변환하는 함수 수정
+  const getImageUrls = (acaPics: string | undefined): string[] => {
     if (!acaPics) return [];
     return acaPics.split(",").map(pic => pic.trim());
   };
@@ -431,11 +431,14 @@ const AcademyDetail = () => {
                 loop={true}
                 className="rounded-xl"
               >
-                {getImageUrls(academyData.acaPics).map((pic, index) => (
+                {(Array.isArray(academyData.acaPics)
+                  ? academyData.acaPics
+                  : getImageUrls(academyData.acaPics)
+                ).map((pic, index) => (
                   <SwiperSlide key={index}>
                     <img
-                      src={`http://112.222.157.157:5233/pic/academy/${academyData.acaId}/${pic}`}
-                      alt={`${academyData.acaName} ${index + 1}`}
+                      src={`http://112.222.157.157:5233/pic/academy/${academyData?.acaId}/${pic}`}
+                      alt={`${academyData?.acaName} ${index + 1}`}
                       className="w-full h-[320px] bg-gray-300 rounded-xl object-cover"
                     />
                   </SwiperSlide>
@@ -446,8 +449,8 @@ const AcademyDetail = () => {
         </div>
         <div className={styles.content.mainContent}>
           <h2 className={`${styles.academy.title} relative`}>
-            {academyData.acaName}
-            <div className="flex items-center gap-2 text-2xl absolute right-[16px] top-[25px]">
+            {/* {academyData.acaName} */}
+            <div className="flex items-center gap-2 text-2xl absolute right-[16px] top-[2px]">
               <button
                 onClick={() => setIsReportModalOpen(true)}
                 className="flex items-center gap-1 text-[#507A95]"
@@ -460,11 +463,12 @@ const AcademyDetail = () => {
               </button>
               <LinkModal acaId={acaId} />
             </div>
+            <div className={styles.academy.description}>
+              {academyData.addressDto?.address}{" "}
+              {academyData.addressDto?.detailAddress}
+            </div>
           </h2>
-          <div className={styles.academy.description}>
-            {academyData.addressDto?.address}{" "}
-            {academyData.addressDto?.detailAddress}
-          </div>
+
           <div className={styles.academy.description}>
             {academyData.acaPhone}
           </div>

@@ -265,23 +265,6 @@ function HomePage() {
 
     fetchDefaultAcademies();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchDefaultAcademies = async () => {
-  //     // setIsDefaultLoading(true);
-  //     try {
-  //       const response = await axios.get("/api/academy/AcademyDefault");
-  //       setDefaultAcademies(response.data.resultData);
-  //       // console.log(response);
-  //     } catch (error) {
-  //       console.error(error);
-  //     } finally {
-  //       // setIsDefaultLoading(false);
-  //     }
-  //   };
-
-  //   fetchDefaultAcademies();
-  // }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -385,26 +368,26 @@ function HomePage() {
   // };
 
   return (
-    <div className="flex flex-col w-full items-center px-4 py-[24px] max-[640px]:py-[16px] gap-8 mx-auto">
+    <div className="flex flex-col w-full items-center px-4 py-[24px] max-[768px]:py-[20px] max-[640px]:py-[16px] gap-8 mx-auto">
       {/* 메인 베너 */}
       <div
-        className="w-[990px] h-[400px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[640px]:h-[400px] max-[640px]:w-full"
+        className="w-[990px] h-[400px] bg-gradient-to-b from-black/10 to-black/40 rounded-xl relative max-[768px]:h-[400px] max-[768px]:w-full max-[640px]:h-[400px] max-[640px]:w-full "
         style={{
           backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.4)), url(/main_banner_1.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute left-10 max-[640px]:left-5 top-[216px] max-[640px]:top-[175px] text-white">
+        <div className="absolute left-10 max-[768px]:left-7 top-[216px] max-[640px]:left-5 max-[768px]:top-[205px] max-[640px]:top-[175px] text-white">
           <h1 className="text-2xl min-[640px]:text-4xl font-black font-lexend mb-4">
             원하는 학원을 찾아보세요
           </h1>
-          <p className="text-sm min-[640px]:text-base max-[640px]:w-[290px] font-normal">
+          <p className="text-sm min-[768px]:text-base max-[768px]:w-[100%] max-[640px]:w-[290px] font-normal">
             여러분의 학습 목표에 맞는 학원을 쉽고 빠르게 추천해 드립니다.
           </p>
         </div>
         <div
-          className="absolute left-10 max-[640px]:left-5 right-10 max-[640px]:right-5 max-[640px]:bottom-5 bottom-10 py-5 flex justify-center items-center w-[full]"
+          className="absolute left-10 max-[768px]:left-7 max-[640px]:left-5 right-10 max-[768px]:right-7 max-[640px]:right-5 max-[768px]:bottom-3 max-[640px]:bottom-5 bottom-10 py-5 flex justify-center items-center w-[full]"
           onKeyDown={e => {
             if (e.key === "Enter") handleButton1Click(); // 엔터 입력 시 버튼 클릭
           }}
@@ -631,13 +614,13 @@ function HomePage() {
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />
           </SwiperSlide>
-          <SwiperSlide>
+          {/* <SwiperSlide>
             <img
               src="/ai1.png"
               alt="main_banner"
               className="w-full h-[200px] bg-blue-500 rounded-xl"
             />
-          </SwiperSlide>
+          </SwiperSlide> */}
         </Swiper>
       </div>
 
