@@ -37,6 +37,7 @@ import MemberInfo from "./pages/admin/MemberInfo";
 import MemberList from "./pages/admin/MemberList";
 import ReportMember from "./pages/admin/ReportMember";
 import ReportAcademy from "./pages/admin/ReportAcademy";
+import ReportReview from "./pages/admin/ReportReview";
 import NoticeAdd from "./pages/admin/NoticeAdd.tsx";
 import NoticeContent from "./pages/admin/NoticeContent.tsx";
 import NoticeView from "./pages/admin/NoticeView.tsx";
@@ -219,6 +220,7 @@ function App() {
                 <Route path="textbook-edit" element={<AcademyTextbookEdit />} />
                 <Route path="rep-member" element={<ReportMember />} />
                 <Route path="rep-academy" element={<ReportAcademy />} />
+                <Route path="rep-review" element={<ReportReview />} />
                 <Route path="teacher" element={<TeacherList />} />
                 <Route path="teacher-add" element={<TeacherAdd />} />
               </Route>

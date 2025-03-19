@@ -47,7 +47,6 @@ const TeacherList = () => {
         //전체 관리자일 때
         const res = await axios.get(`/api/menuOut/academy`);
         setMyAcademyList(res.data.resultData);
-        //console.log("admin : ", res.data.resultData);
       } else {
         const res = await axios.get(
           `/api/academy/getAcademyListByUserId?signedUserId=${userId}`,

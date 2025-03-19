@@ -153,6 +153,11 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         link: "/admin/rep-academy",
         active: false,
       },
+      {
+        label: "리뷰 신고",
+        link: "/admin/rep-review",
+        active: false,
+      },
     ],
   },
   { type: "divider" },
@@ -410,12 +415,12 @@ export const teacherMenuItems: (MenuItem | Divider)[] = [
     list: [
       {
         label: "신청 내역",
-        link: "/admin/teacher/list",
+        link: "/admin/teacher",
         active: false,
       },
       {
         label: "등록 신청",
-        link: "/admin/teacher/add",
+        link: "/admin/teacher-add",
         active: false,
       },
     ],

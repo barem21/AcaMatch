@@ -1,5 +1,5 @@
 import type { MenuProps } from "antd";
-import { Dropdown } from "antd";
+import { Dropdown, message } from "antd";
 import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
 import { FaBell } from "react-icons/fa";
@@ -50,7 +50,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
 
           //일반회원은 관리자 접근권한 없음
           if (userData.roleId === 1) {
-            alert("접근 권한(1)이 없습니다.");
+            message.error("접근 권한(1)이 없습니다.");
             navigate("/");
             return;
           }
@@ -64,7 +64,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
       fetchUserData();
     } else {
       //비회원은 접근제한
-      alert("잘못된 접근(1)입니다.");
+      message.error("잘못된 접근(1)입니다.");
       navigate("/log-in");
       return;
     }

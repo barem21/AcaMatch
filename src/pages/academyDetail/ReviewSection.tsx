@@ -389,9 +389,13 @@ const ReviewSection = ({
               key={review.reviewId}
               className="flex flex-col mb-[24px] p-[16px] border rounded-[8px]"
             >
-              <div className="flex items-start gap-2">
+              <div className="flex items-center gap-2">
                 <img
-                  src={`http://112.222.157.157:5233/pic/user/${review.userId}/${review.writerPic}`}
+                  src={
+                    review.writerPic
+                      ? `http://112.222.157.157:5233/pic/user/${review.userId}/${review.writerPic}`
+                      : "/aca_image_1.png"
+                  }
                   alt={review.writerName}
                   className={styles.reviews.avatar}
                 />
@@ -514,9 +518,13 @@ const ReviewSection = ({
               key={review.reviewId}
               className="flex flex-col mb-[24px] p-[16px] border rounded-[8px]"
             >
-              <div className="flex items-start gap-2">
+              <div className="flex items-center gap-2">
                 <img
-                  src={`http://112.222.157.157:5233/pic/user/${review.userId}/${review.writerPic}`}
+                  src={
+                    review.writerPic
+                      ? `http://112.222.157.157:5233/pic/user/${review.userId}/${review.writerPic}`
+                      : "/aca_image_1.png"
+                  }
                   alt={review.writerName}
                   className={styles.reviews.avatar}
                 />
