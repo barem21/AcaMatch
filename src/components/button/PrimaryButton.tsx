@@ -19,7 +19,7 @@ interface MainButtonProps extends ButtonProps {
  *
  * @returns {JSX.Element} 버튼을 렌더링하는 컴포넌트
  */
-export default function MainButton({
+export default function PrimaryButton({
   onClick,
   className,
   children,

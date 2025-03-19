@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import MainButton from "../button/MainButton";
+import MainButton from "../button/PrimaryButton";
 
 import styled from "@emotion/styled";
 import { Radio } from "antd";

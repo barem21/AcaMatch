@@ -15,7 +15,7 @@ import CustomInput from "../../components/CustomInput ";
 import { SecondaryButton } from "../../components/modal/Modal";
 import { FadeLoader } from "react-spinners";
 import styled from "@emotion/styled";
-import MainButton from "../../components/button/MainButton";
+import MainButton from "../../components/button/PrimaryButton";
 import { setCookie } from "../../utils/cookie";
 
 interface FormValues {

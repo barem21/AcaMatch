@@ -10,7 +10,7 @@ import { useRecoilValue } from "recoil";
 import jwtAxios from "../../apis/jwt";
 import userInfo from "../../atoms/userInfo";
 import LikeButton from "../../components/button/LikeButton";
-import MainButton from "../../components/button/MainButton";
+import MainButton from "../../components/button/PrimaryButton";
 import CustomModal from "../../components/modal/Modal";
 import AcademyCalendar from "./AcademyCalendar";
 import BookList from "./BookList";

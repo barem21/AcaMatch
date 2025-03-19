@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import MainButton from "../../components/button/MainButton";
+import MainButton from "../../components/button/PrimaryButton";
 
 function SignupEnd() {
   const navigate = useNavigate();

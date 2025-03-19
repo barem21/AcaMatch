@@ -10,7 +10,7 @@ import "swiper/css/pagination";
 import { Autoplay, FreeMode, Navigation, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import CustomInput from "../components/CustomInput ";
-import MainButton from "../components/button/MainButton";
+import MainButton from "../components/button/PrimaryButton";
 import { getCookie } from "../utils/cookie";
 
 interface Academy {

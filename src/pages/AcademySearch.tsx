@@ -5,7 +5,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { SlArrowDown } from "react-icons/sl";
 import { useLocation, useNavigate } from "react-router-dom";
-import MainButton from "../components/button/MainButton";
+import MainButton from "../components/button/PrimaryButton";
 import LocationModal from "../components/modal/LocationModal";
 
 interface FilterOption {
