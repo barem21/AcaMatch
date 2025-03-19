@@ -688,10 +688,11 @@ const AcademyDetail = () => {
           <div className="flex flex-col gap-4 h-[104px]">
             <p className="text-sm text-gray-600">신고 유형을 선택해주세요.</p>
             <Select
-              value={selectedReportType}
+              value={selectedReportType || undefined}
               onChange={value => setSelectedReportType(value)}
               placeholder="신고 유형 선택"
               style={{ width: "100%" }}
+              allowClear
             >
               {reportTypes.map(type => (
                 <Select.Option key={type.name} value={type.name}>
@@ -699,8 +700,10 @@ const AcademyDetail = () => {
                 </Select.Option>
               ))}
             </Select>
-            {!selectedReportType && (
+            {!selectedReportType ? (
               <p className="text-red-500 text-sm">신고 유형을 선택해주세요.</p>
+            ) : (
+              <p className="h-[20px]"></p>
             )}
           </div>
         }
