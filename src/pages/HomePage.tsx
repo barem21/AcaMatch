@@ -323,7 +323,7 @@ function HomePage() {
       // setLoading(true); // 데이터 로딩 시작
       try {
         const response = await axios.get("/api/academy/best", {
-          params: { page: 1, size: 4 },
+          params: { page: 1, size: 5 },
         });
         // console.log("작동중", response);
 
@@ -439,7 +439,7 @@ function HomePage() {
         </div>
       </div>
 
-      <div className="w-full max-w-[990px] max-[640px]:hidden">
+      <div className="w-full max-w-[990px] max-[769px]:hidden">
         <h2 className="text-2xl font-bold mb-5">
           {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
         </h2>
@@ -484,7 +484,7 @@ function HomePage() {
       </div>
 
       {/* 모바일용 */}
-      <div className="w-full min-[640px]:hidden">
+      <div className="w-full min-[769px]:hidden">
         <h2 className="text-2xl font-bold mb-6">
           {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
         </h2>
@@ -533,7 +533,7 @@ function HomePage() {
       </div>
 
       {/* 베너 */}
-      <div className="w-full max-w-[990px] max-[640px]:hidden">
+      <div className="w-full max-w-[990px] max-[769px]:hidden">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
@@ -579,7 +579,7 @@ function HomePage() {
       </div>
 
       {/* 모바일 */}
-      <div className="w-full max-w-[990px] min-[640px]:hidden">
+      <div className="w-full max-w-[990px] min-[769px]:hidden">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
@@ -652,11 +652,11 @@ function HomePage() {
       </div>
 
       {/* 화제가 되고 있는 학원 */}
-      <div className="w-full max-w-[990px] max-[640px]:hidden">
+      <div className="w-full max-w-[990px] max-[769px]:hidden">
         <h2 className="text-2xl font-bold mb-5">화제가 되고 있는 학원</h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <div className="grid grid-cols-4 gap-6">
-            {bestAcademyCards.map((card, index) => (
+            {bestAcademyCards.slice(0, 4).map((card, index) => (
               <div
                 key={index}
                 className="flex flex-col gap-4 cursor-pointer"
@@ -691,7 +691,7 @@ function HomePage() {
       </div>
 
       {/* 화제가 되고 있는 학원 (모바일) */}
-      <div className="w-full min-[640px]:hidden">
+      <div className="w-full min-[769px]:hidden">
         <h2 className="text-2xl font-bold mb-6">화제가 되고 있는 학원</h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <Swiper

@@ -7,7 +7,7 @@ export const COLORS = {
 export type DataKey = keyof typeof COLORS;
 export type MonthKey = "이번 달" | "지난 달";
 export type WeekKey = "이번주" | "지난주";
-export type CategoryKey = "최근 검색" | "방문 통계";
+export type CategoryKey = "최근 태그" | "방문 통계";
 
 export interface DataPoint {
   x: string;

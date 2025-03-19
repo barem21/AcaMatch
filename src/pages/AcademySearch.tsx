@@ -69,11 +69,25 @@ const FilterBox = ({
   selectedValues: string[];
   onValueChange: (value: string, checked: boolean) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(() => {
+    return window.innerWidth > 768;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsOpen(window.innerWidth > 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <div
-      className="w-[288px] border border-brand-BTWhite rounded-xl p-[12px] max-[640px]:w-full"
+      className="w-[288px] border border-brand-BTWhite rounded-xl p-[12px] max-[768px]:w-full max-[640px]:w-full"
       style={style}
     >
       {/* Header 부분 */}
@@ -89,18 +103,16 @@ const FilterBox = ({
         />
       </div>
 
-      {/* Filter Options: 열림/닫힘에 따른 높이 조정 */}
       <div
         className={`transition-all duration-300 ease-in-out overflow-hidden`}
         style={{
-          maxHeight: isOpen ? `${options.length * 50}px` : "0", // 옵션 개수에 따라 동적 높이
+          maxHeight: isOpen ? `${options.length * 50}px` : "0",
         }}
       >
         {options.map(option => (
           <FilterCheckbox
             key={option.value}
             label={option.label}
-            // value={option.value}
             checked={selectedValues.includes(option.value)}
             onChange={checked => onValueChange(option.value, checked)}
           />
@@ -135,14 +147,14 @@ const AcademySearch = () => {
     string | null
   >(null);
 
-  const [_searchInput, _setSearchInput] = useState<string>("");
+  // const [_searchInput, _setSearchInput] = useState<string>("");
 
   // const [age, setAge] = useState("");
   // const [level, setLevel] = useState("");
   const [academyData, setAcademyData] = useState<Academy[]>([]);
 
   const [searchValue, setSearchValue] = useState("");
-  const [_searchLocation, _setSearchLocation] = useState("");
+  // const [_searchLocation, _setSearchLocation] = useState("");
 
   const [isFirst, setIsFirst] = useState(true);
 
@@ -198,7 +210,7 @@ const AcademySearch = () => {
     id: string, // 선택한 필터 값
     checked: boolean, // 체크 여부
   ) => {
-    console.log("나실행");
+    // console.log("나실행");
 
     setSelectedFilters(prev => {
       const currentValues = prev[sectionId] || [];

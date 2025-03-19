@@ -52,13 +52,14 @@ interface ReportedUser {
   reportCount: number;
 }
 
+// pieChartData 정의를 수정
 const pieChartData: Record<
   CategoryKey,
   Record<WeekKey, { id: string; label: string; value: number; color: string }[]>
 > = {
-  "최근 검색": {
-    이번주: [], // Will be populated from API
-    지난주: [], // Will be populated from API
+  "최근 태그": {
+    이번주: [], // 문자열 키를 명시적으로 지정
+    지난주: [], // 문자열 키를 명시적으로 지정
   },
   "방문 통계": {
     이번주: [
@@ -71,6 +72,9 @@ const pieChartData: Record<
     ],
   },
 };
+
+// WeekKey 타입도 명시적으로 정의
+type WeekKey = "이번주" | "지난주";
 
 interface AcademyCountData {
   registerDate: string;
@@ -113,9 +117,8 @@ function DashBoard() {
     };
   });
 
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>(
-    (searchParams.get("pieCategory") as CategoryKey) || "최근 검색",
-  );
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryKey>("최근 태그");
   const [selectedTimeRange, _setSelectedTimeRange] =
     useState<WeekKey>("이번주");
   const [selectedData, setSelectedData] = useState<ChartData[]>(thisMonthData);
@@ -140,7 +143,7 @@ function DashBoard() {
     {
       id: 1,
       value: statsInfo?.sumFee ? `₩${statsInfo.sumFee.toLocaleString()}` : "₩0",
-      label: "이번주 판매금액",
+      label: "이번달 판매금액",
     },
     {
       id: 2,
@@ -558,8 +561,8 @@ function DashBoard() {
   const categoryMenu2 = useMemo(
     () => (
       <Menu onClick={handleCategoryClick2}>
-        <Menu.Item key="최근 검색">최근검색</Menu.Item>
-        <Menu.Item key="방문 통계">방문통계</Menu.Item>
+        <Menu.Item key="최근 태그">최근 태그</Menu.Item>
+        {/* <Menu.Item key="방문 통계">방문통계</Menu.Item> */}
       </Menu>
     ),
     [handleCategoryClick2],
@@ -587,33 +590,36 @@ function DashBoard() {
       });
       const { resultData } = response.data;
 
-      // Transform API data to chart format
-      const colors = ["#377dff", "#A8C5FF", "#FFAA00"]; // Keep existing colors
-      const chartData = resultData.map((item: SearchInfo, index: number) => ({
-        id: item.tagName,
-        label: item.tagName,
-        value: item.tagCount,
-        color: colors[index % colors.length],
-      }));
+      // 데이터 변환 및 정렬 (상위 3개만 선택)
+      const colors = ["#377dff", "#A8C5FF", "#FFAA00"];
+      const chartData = resultData
+        .slice(0, 3) // 상위 3개만 선택
+        .map((item: SearchInfo, index: number) => ({
+          id: item.tagName,
+          label: item.tagName,
+          value: item.tagCount,
+          color: colors[index % colors.length],
+        }))
+        .sort((a, b) => b.value - a.value); // 값이 큰 순서대로 정렬
 
-      // 이제 단일 데이터셋만 저장
+      console.log("Transformed Search Data:", chartData); // 데이터 확인용
       setSearchData(chartData);
     } catch (error) {
       console.error(`Error fetching search info:`, error);
-      setSearchData([]); // 에러 시 빈 배열로 초기화
+      setSearchData([]);
     }
   };
 
-  // 수정된 useEffect - PieChart 데이터 로드
-  useEffect(() => {
-    fetchSearchInfo(selectedPieDate);
-  }, [selectedPieDate.year, selectedPieDate.month]);
+  // pieData 계산 로직 수정
+  const pieData = useMemo(() => {
+    console.log("Selected Category:", selectedCategory); // 디버깅용
+    console.log("Search Data:", searchData); // 디버깅용
 
-  // pieData 계산 수정
-  const pieData =
-    selectedCategory === "최근 검색"
-      ? searchData
-      : pieChartData[selectedCategory]["이번주"];
+    if (selectedCategory === "최근 태그") {
+      return searchData.length > 0 ? searchData : [];
+    }
+    return pieChartData[selectedCategory]?.[selectedTimeRange] || [];
+  }, [selectedCategory, selectedTimeRange, searchData]);
 
   // 공지사항 데이터를 가져오는 함수
   const fetchNotices = async () => {
@@ -702,6 +708,11 @@ function DashBoard() {
       setSelectedItem("회원수");
     }
   }, [roleId]);
+
+  // useEffect 추가 - 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    fetchSearchInfo(selectedPieDate);
+  }, [selectedPieDate]); // selectedPieDate가 변경될 때마다 데이터 새로 로드
 
   return (
     <div className="box-border w-full max-w-full justify-center align-top">
@@ -794,11 +805,14 @@ function DashBoard() {
         <div className="flex-col w-[350px]">
           <div className="w-full justify-center mx-auto gap-0 border rounded-lg h-[320px] mb-[12px]">
             <div className="flex justify-between w-full p-3 border-b items-center">
-              <Dropdown overlay={categoryMenu2} trigger={["click"]}>
-                <Button type="text" className="flex justify-between w-[120px]">
-                  {selectedCategory} <DownOutlined />
-                </Button>
-              </Dropdown>
+              {/* <Dropdown overlay={categoryMenu2} trigger={["click"]}> */}
+              {/* <Button type="text" className="flex justify-between w-[120px]"> */}
+              <p className="flex justify-center items-center text-[14px] h-[32px]">
+                최근 태그
+              </p>
+              {/* {selectedCategory} <DownOutlined /> */}
+              {/* </Button> */}
+              {/* </Dropdown> */}
               <div className="flex gap-3">
                 <Dropdown
                   overlay={
@@ -859,7 +873,7 @@ function DashBoard() {
                 </Dropdown>
               </div>
             </div>
-            <PieChart pieData={pieData} />
+            <PieChart pieData={pieData.length > 0 ? pieData : []} />
 
             <div className="mt-2 flex justify-center items-center p-[8px] bg-[#F1F5FA] min-w-[350px] text-gray-700 text-sm gap-[12px] font-semibold">
               <CiCalendarDate size={"20px"} style={{ strokeWidth: 1 }} />

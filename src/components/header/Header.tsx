@@ -236,7 +236,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
 
   return (
     <header className={className}>
-      <div className="w-[1280px] max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
+      <div className="w-[1280px] max-[768px]:w-full max-[768px]:h-[64px] max-[768px]:px-4 max-[640px]:w-full max-[640px]:h-[64px] max-[640px]:px-4 flex items-center justify-between mx-auto">
         <img
           src="/logo2.png"
           className="w-[160px] cursor-pointer mr-[full]"
@@ -245,7 +245,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
           }}
         />
 
-        <div className="flex items-center gap-[30px] max-[640px]:hidden">
+        <div className="flex items-center gap-[30px] max-[768px]:hidden max-[640px]:hidden">
           <ul className="flex items-center gap-[30px]">
             {menuItems.map((item, index) => (
               <li
@@ -338,13 +338,13 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
             )}
           </div>
         </div>
-        <button className="min-[640px]:hidden">
+        <button className="min-[769px]:hidden">
           <GiHamburgerMenu size={24} onClick={() => toggleMobileMenu()} />
           {/* 크기는 필요에 따라 조절 가능 */}
         </button>
       </div>
 
-      <MobileMenuWrap className="min-[640px]:hidden">
+      <MobileMenuWrap className="min-[769px]:hidden ">
         <div
           id="mobileMenuBg"
           className={`${isMenuOpen ? "show" : "hide"} fixed top-0 left-0 w-full h-full`}
@@ -392,6 +392,21 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                 <Link to={"/hotAcademy"} onClick={() => toggleMobileMenu()}>
                   추천 학원
                 </Link>
+                <ul>
+                  <li>
+                    <Link to={"/hotAcademy"} onClick={() => toggleMobileMenu()}>
+                      화제의 학원
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to={"/nearby-academies"}
+                      onClick={() => toggleMobileMenu()}
+                    >
+                      근처의 학원
+                    </Link>
+                  </li>
+                </ul>
               </li>
               <li>
                 <Link to={"/support"} onClick={() => toggleMobileMenu()}>
