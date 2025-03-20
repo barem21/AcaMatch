@@ -57,7 +57,7 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
     active: false,
     list: [
       {
-        label: "학원 등록/수정/삭제",
+        label: "학원 등록/수정",
         link: "/admin/academy",
         active: false,
       },
@@ -82,7 +82,7 @@ export const adminMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
       {
-        label: "교제 관리",
+        label: "교재 관리",
         link: "/admin/textbook",
         active: false,
       },
@@ -259,7 +259,12 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
     active: false,
     list: [
       {
-        label: "학원 등록/수정/삭제",
+        label: "학원 수강신청 내역",
+        link: "/admin/payment-academy",
+        active: false,
+      },
+      {
+        label: "학원 등록/수정",
         link: "/admin/academy",
         active: false,
       },
@@ -279,7 +284,7 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
         active: false,
       },
       {
-        label: "교제 관리",
+        label: "교재 관리",
         link: "/admin/textbook",
         active: false,
       },
@@ -315,14 +320,9 @@ export const academyMenuItems: (MenuItem | Divider)[] = [
     type: "item",
     icon: <FaCreditCard />,
     label: "결제 및 지출 관리",
-    link: "/admin/payment-academy",
+    link: "/admin/paymentmanager",
     active: false,
     list: [
-      {
-        label: "학원 수강신청",
-        link: "/admin/payment-academy",
-        active: false,
-      },
       {
         label: "결제 내역",
         link: "/admin/paymentmanager",

@@ -132,8 +132,8 @@ function PaymenuAcademy() {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          학원 수강신청
-          <p>결제 및 지출 관리 &gt; 학원 수강신청</p>
+          학원 수강신청 내역
+          <p>결제 및 지출 관리 &gt; 학원 수강신청 내역</p>
         </h1>
 
         <div className="board-wrap">
@@ -304,7 +304,7 @@ function PaymenuAcademy() {
         <CustomModal
           visible={isModalVisible}
           title={"수강 승인거부"}
-          content={`선택하신 수강신청을 승인거부(삭제)하시겠습니까?`}
+          content={`승인거부 시 결제취소가 같이 진행됩니다.\n선택하신 수강신청을 승인거부(삭제)하시겠습니까?`}
           onButton1Click={handleButton1Click}
           onButton2Click={handleButton2Click}
           button1Text={"취소"}

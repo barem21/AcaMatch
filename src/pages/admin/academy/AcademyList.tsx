@@ -168,8 +168,8 @@ function AcademyList() {
     <div className="flex gap-5 w-full justify-center align-top">
       <div className="w-full">
         <h1 className="title-admin-font">
-          학원 등록/수정/삭제
-          <p>학원 관리 &gt; 학원 등록/수정/삭제</p>
+          학원 등록/수정
+          <p>학원 관리 &gt; 학원 등록/수정</p>
         </h1>
 
         <div className="board-wrap">

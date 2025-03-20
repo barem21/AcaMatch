@@ -1,6 +1,7 @@
 import { Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import jwtAxios from "../../../apis/jwt";
+import { useNavigate } from "react-router-dom";
 
 interface Academy {
   acaId: number;
@@ -32,6 +33,7 @@ interface AttendanceListProps {
 }
 
 const AttendanceList = ({ userId }: AttendanceListProps) => {
+  const navigate = useNavigate();
   const [academies, setAcademies] = useState<Academy[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedAcademy, setSelectedAcademy] = useState<number | null>(null);
@@ -179,7 +181,12 @@ const AttendanceList = ({ userId }: AttendanceListProps) => {
   return (
     <div className="w-full border rounded-[4px] ">
       <div className="flex justify-between items-center h-[47px] pl-4 p-1 border-b">
-        <span className="text-[#303E67]">출석부 현황</span>
+        <span
+          className="text-[#303E67] cursor-pointer"
+          onClick={() => navigate("check-in")}
+        >
+          출석부 현황
+        </span>
         <div className="flex gap-2">
           <Select
             showSearch
