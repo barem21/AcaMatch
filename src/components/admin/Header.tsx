@@ -2,7 +2,6 @@ import type { MenuProps } from "antd";
 import { Dropdown, message } from "antd";
 import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
-import { FaBell } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -22,7 +21,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
   const setUserInfo = useSetRecoilState(userInfo);
   const currentUserInfo = useRecoilValue(userInfo);
   const [userPic, setUserPic] = useState<string>("");
-  const [_, setIsMessageModalOpen] = useState(false);
+  // const [_, setIsMessageModalOpen] = useState(false);
   // const [recipientType, setRecipientType] = useState<"student" | "academy">(
   //   "student",
   // );
@@ -70,9 +69,9 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
     }
   }, [setUserInfo]);
 
-  const handleSendMessage = () => {
-    setIsMessageModalOpen(true);
-  };
+  // const handleSendMessage = () => {
+  //   setIsMessageModalOpen(true);
+  // };
 
   // const handleMessageSubmit = async () => {
   //   try {
@@ -131,14 +130,14 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
   // );
 
   const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <button onClick={handleSendMessage} className="w-full text-left">
-          문자메시지 전송
-        </button>
-      ),
-    },
+    // {
+    //   key: "1",
+    //   label: (
+    //     <button onClick={handleSendMessage} className="w-full text-left">
+    //       문자메시지 전송
+    //     </button>
+    //   ),
+    // },
     {
       key: "2",
       label: (
@@ -190,9 +189,9 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
           </div>
           <div className="flex gap-4 pr-3">
             <ul className="flex justify-center items-center gap-[12px] p-[12px]">
-              <li>
+              {/* <li>
                 <FaBell />
-              </li>
+              </li> */}
               <li className="w-[32px] h-[32px]">
                 {currentUserInfo.userId && (
                   <Dropdown

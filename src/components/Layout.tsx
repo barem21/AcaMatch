@@ -192,6 +192,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    const accessToken = getCookie("accessToken");
+    if (isAdminPage && !accessToken) {
+      navigate("/log-in");
+    }
+  }, [isAdminPage, navigate]);
+
+  useEffect(() => {
     if (currentUserInfo.roleId === 0 && !isAdminPage) {
       logOut();
     }
