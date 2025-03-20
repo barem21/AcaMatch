@@ -663,11 +663,13 @@ function DashBoard() {
       // roleId에 따라 다른 API 엔드포인트 사용
       let endpoint;
 
+      console.log(roleId);
+
       if (roleId === 3) {
         // 학원 관리자용 API
         endpoint = `/api/academy-manager/GetAcademyCostInfoByUserId/${userId}`;
       } else {
-        // 일반 관리자용 API
+        // 사이트 관리자용 API
         endpoint = "/api/academyCost/getAcademyCostInfoByMonth";
       }
 
@@ -681,7 +683,7 @@ function DashBoard() {
 
   useEffect(() => {
     fetchCostInfo();
-  }, []);
+  }, [roleId]);
 
   // 신고된 유저 목록 가져오기
   const fetchReportedUsers = async () => {

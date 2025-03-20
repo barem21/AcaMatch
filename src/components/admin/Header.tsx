@@ -131,14 +131,14 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
   // );
 
   const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: (
-        <button onClick={handleSendMessage} className="w-full text-left">
-          문자메시지 전송
-        </button>
-      ),
-    },
+    // {
+    //   key: "1",
+    //   label: (
+    //     <button onClick={handleSendMessage} className="w-full text-left">
+    //       문자메시지 전송
+    //     </button>
+    //   ),
+    // },
     {
       key: "2",
       label: (
@@ -190,9 +190,9 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
           </div>
           <div className="flex gap-4 pr-3">
             <ul className="flex justify-center items-center gap-[12px] p-[12px]">
-              <li>
+              {/* <li>
                 <FaBell />
-              </li>
+              </li> */}
               <li className="w-[32px] h-[32px]">
                 {currentUserInfo.userId && (
                   <Dropdown
