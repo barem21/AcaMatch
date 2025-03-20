@@ -76,7 +76,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
       >
         <h2 className="text-2xl font-bold text-left mb-[30px]">{title}</h2>
         <p className="text-base text-left mb-5">{content}</p>
-        <div className="flex justify-end space-x-[10px]">
+        <div className="btn-wrap flex justify-end space-x-[10px]">
           <CancelButton
             onClick={onButton1Click}
             className={`px-4 py-2 w-[100%] h-[100%]`}
