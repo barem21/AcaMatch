@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import MainButton from "../button/PrimaryButton";
 
 import styled from "@emotion/styled";
-import { Radio } from "antd";
+//import { Radio } from "antd";
 
 interface LocationModalProps {
   visible: boolean;
