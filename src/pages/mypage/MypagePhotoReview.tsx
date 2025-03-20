@@ -24,6 +24,14 @@ interface reviewListType {
   userId: number;
   writerName: string;
   writerPic: string;
+  reviewPic: string;
+  acaName: string;
+}
+
+interface SelectedImageInfo {
+  reviewId: number;
+  imageName: string;
+  userId: number;
 }
 
 function MypagePhotoReview() {
@@ -39,6 +47,10 @@ function MypagePhotoReview() {
 
   const [academyId, setAcademyId] = useState(0);
   const [reviewId, setReviewId] = useState(0);
+
+  const [selectedImage, setSelectedImage] = useState<SelectedImageInfo | null>(
+    null,
+  );
 
   const titleName = "마이페이지";
   let menuItems = [];
@@ -120,7 +132,8 @@ function MypagePhotoReview() {
           <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
             나의 리뷰(포토)
           </h1>
-          <div className="flex gap-5 mt-8 max-[640px]:mt-0 max-[640px]:mb-3">
+          <div className="flex justify-center items-center gap-5 mt-8 max-[640px]:mt-0 max-[640px]:mb-3">
+            <span className="text-3xl">←</span>
             <Link
               to={"../review"}
               className="text-gray-500 max-[640px]:text-sm"
@@ -156,78 +169,103 @@ function MypagePhotoReview() {
           )}
 
           {reviewList.map((item, index) => (
-            <div
-              key={index}
-              className="loop-content flex justify-between align-middle p-6 border-b max-[640px]:flex-col"
-            >
-              <div className="w-full">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
-                    <img
-                      src={
-                        item.writerPic && item.writerPic !== "default_user.jpg"
-                          ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.writerPic}`
-                          : "/aca_image_1.png"
-                      }
-                      alt="User Profile"
-                    />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">{item.writerName}</div>
-                    <div className="text-sm text-gray-500">
-                      {item.createdAt}
+            <div key={index} className="loop-content p-6 border-b">
+              <div className="flex justify-between align-middle max-[640px]:flex-col">
+                <div className="w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden">
+                      <img
+                        src={
+                          item.writerPic &&
+                          item.writerPic !== "default_user.jpg"
+                            ? `http://112.222.157.157:5233/pic/user/${item.userId}/${item.writerPic}`
+                            : "/aca_image_1.png"
+                        }
+                        alt="User Profile"
+                      />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium">
+                        {item.writerName}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {item.createdAt}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1 mt-4 mb-3">
+                    {Array.from({ length: 5 }, (_, index) =>
+                      index < item.star ? <GoStarFill /> : <GoStar />,
+                    )}
+                  </div>
+                  <div
+                    className="text-lg font-bold"
+                    onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
+                  >
+                    {item.acaName}
+                    <p className="mb-4 text-sm">수업명 : {item.className}</p>
+                  </div>
+                  <div className="text-sm text-gray-500">{item.comment}</div>
                 </div>
-                <div className="flex items-center gap-1 mt-4 mb-3">
-                  {Array.from({ length: 5 }, (_, index) =>
-                    index < item.star ? <GoStarFill /> : <GoStar />,
-                  )}
+
+                <div className="flex gap-2 mt-2 sm:mt-0 sm:gap-0">
+                  <div className="flex items-start justify-center min-w-auto sm:min-w-24">
+                    <button
+                      className="small_line_button"
+                      onClick={() => {
+                        // console.log(item);
+                        setAcademyId(item.acaId);
+                        const temp: {
+                          star: number;
+                          comment: string;
+                        } = {
+                          star: item.star,
+                          comment: item.comment,
+                        };
+
+                        setIsModalVisible(true);
+                        setEditReview(temp); // 수정할 리뷰 데이터 설정
+                      }}
+                    >
+                      수정하기
+                    </button>
+                  </div>
+                  <div className="flex items-start justify-center min-w-auto sm:min-w-24">
+                    <button
+                      className="small_line_button"
+                      onClick={() => {
+                        setAcademyId(item.acaId);
+                        setReviewId(item.reviewId);
+                        setIsDeleteModalVisible(true);
+                      }}
+                    >
+                      삭제하기
+                    </button>
+                  </div>
                 </div>
-                <div
-                  className="text-lg font-bold"
-                  onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
-                >
-                  {item.className}
-                </div>
-                <div className="text-sm text-gray-500">{item.comment}</div>
               </div>
 
-              <div className="flex gap-2 mt-2 sm:mt-0 sm:gap-0">
-                <div className="flex items-center justify-center min-w-auto sm:min-w-24">
-                  <button
-                    className="small_line_button"
-                    onClick={() => {
-                      // console.log(item);
-                      setAcademyId(item.acaId);
-                      const temp: {
-                        star: number;
-                        comment: string;
-                      } = {
-                        star: item.star,
-                        comment: item.comment,
-                      };
-
-                      setIsModalVisible(true);
-                      setEditReview(temp); // 수정할 리뷰 데이터 설정
-                    }}
-                  >
-                    수정하기
-                  </button>
+              {item.reviewPic && (
+                <div className="flex gap-3 mt-3">
+                  {item.reviewPic.split(",").map((imageUrl, imageIndex) => (
+                    <div className="flex justify-center items-center max-w-1/2 min-w-20 h-28 mt-3 mb-3 border bg-gray-300 rounded-xl overflow-hidden cursor-pointer sm:max-w-40 sm:h-40">
+                      <img
+                        key={imageIndex}
+                        src={`http://112.222.157.157:5233/pic/review/${item.reviewId}/${imageUrl.trim()}`} // 공백 제거
+                        alt={item.className}
+                        className="max-w-fit max-h-40 object-cover"
+                        onClick={() =>
+                          setSelectedImage({
+                            reviewId: item.reviewId,
+                            imageName: imageUrl.trim(),
+                            userId: item.userId,
+                          })
+                        }
+                      />
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center justify-center min-w-auto sm:min-w-24">
-                  <button
-                    className="small_line_button"
-                    onClick={() => {
-                      setAcademyId(item.acaId);
-                      setReviewId(item.reviewId);
-                      setIsDeleteModalVisible(true);
-                    }}
-                  >
-                    삭제하기
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
@@ -262,6 +300,29 @@ function MypagePhotoReview() {
           />
         )}
       </div>
+
+      {/* 이미지 모달 */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative flex justify-center items-center">
+            <button
+              className="absolute flex justify-center items-center -top-12 right-4 w-8 h-8 text-white rounded-full text-3xl"
+              onClick={() => setSelectedImage(null)}
+            >
+              &times;
+            </button>
+            <img
+              src={`http://112.222.157.157:5233/pic/review/${selectedImage.reviewId}/${selectedImage.imageName}`}
+              alt="Large preview"
+              className="w-11/12 object-contain sm:max-w-[800px] sm:max-h-[800px]"
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
