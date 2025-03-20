@@ -147,33 +147,22 @@ const LocationModal: React.FC<LocationModalProps> = ({
             </CustomScrollbar>
 
             <CustomScrollbar className="flex flex-col w-[150px] h-[528px] overflow-y-auto pr-[10px] max-[640px]:w-1/3 max-[640px]:h-[calc(80vh-170px)]">
-              <Radio.Group
-                value={selectedDongId}
-                onChange={e => {
-                  const selectedDong = dongData.find(
-                    dong => dong.dongId === e.target.value,
-                  );
-                  if (selectedDong) {
-                    setSelectedDongId(e.target.value);
-                    setSelectedDongText(selectedDong.dongName);
-                    console.log(e.target.value);
-                  }
-                }}
-              >
-                {dongData.map(dong => (
-                  <Radio
-                    key={`dong-${dong.dongId}`}
-                    value={dong.dongId}
-                    className={`flex items-center w-[145px] text-base mb-[10px] h-[48px] leading-[48px] ${
-                      selectedDongId === dong.dongId
-                        ? "text-blue-500 font-bold"
-                        : ""
-                    }`}
-                  >
-                    {dong.dongName}
-                  </Radio>
-                ))}
-              </Radio.Group>
+              {dongData.map(dong => (
+                <p
+                  key={dong.dongId}
+                  className={`flex items-center pl-[15px] text-base text-left mb-[10px] h-[48px] leading-[48px] cursor-pointer rounded-[12px] max-[640px]:h-auto max-[640px]:leading-normal max-[640px]:p-2 ${
+                    selectedDongId === dong.dongId
+                      ? "text-white bg-brand-BTBlue font-bold"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedDongId(dong.dongId);
+                    setSelectedDongText(dong.dongName);
+                  }}
+                >
+                  {dong.dongName}
+                </p>
+              ))}
             </CustomScrollbar>
           </div>
 
@@ -192,7 +181,10 @@ const LocationModal: React.FC<LocationModalProps> = ({
                   selectedDongText ?? "",
                 )
               }
-              className="px-4 py-2 w-full h-[32px]"
+              className={`px-4 py-2 w-full h-[32px] ${
+                !selectedDongId ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={!selectedDongId}
             >
               검색
             </MainButton>
