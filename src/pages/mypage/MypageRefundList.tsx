@@ -203,7 +203,9 @@ function MypageRefundList() {
                       강좌
                     </span>
                   ) : (
-                    <span>교제</span>
+                    <span className="mr-1.5 pr-1 pt-[1px] pb-0.5 pl-1 rounded-md bg-red-400 text-[11px] text-white">
+                      교제
+                    </span>
                   )}
                   {item.prname}
                 </div>

@@ -34,15 +34,16 @@ function AcademyReview() {
     ademyReviewListType[]
   >([]); //학원리뷰 목록
   const [resultMessage, setResultMessage] = useState("");
-  //const [reviewId, setReviewId] = useState();
   const [searchParams, _] = useSearchParams();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]);
+  const [reviewId, setReviewId] = useState(0);
+  const [reviewUserId, setReviewUserId] = useState(0);
   const { roleId, userId } = useRecoilValue(userInfo);
   const navigate = useNavigate();
 
   const acaId = parseInt(searchParams.get("acaId") || "0", 0);
-  const classId = parseInt(searchParams.get("classId") || "0", 0);
+  //const classId = parseInt(searchParams.get("classId") || "0", 0);
   const showCnt = parseInt(searchParams.get("showCnt") || "10", 0);
 
   //전체학원 목록
@@ -70,23 +71,8 @@ function AcademyReview() {
     }),
   );
 
-  const handleButton1Click = () => {
-    setIsModalVisible(false);
-  };
-  const handleButton2Click = async () => {
-    try {
-      const res = await axios.delete(
-        `/api/review/academy?acaId=${acaId}&joinClassId=${classId}&userId=${userId}`,
-      );
-      console.log(res.data.resultData);
-      setIsModalVisible(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   //학원 텍스트 리뷰 목록
-  const getTagList = async (values: any) => {
+  const getReviewList = async (values: any) => {
     try {
       const res = await axios.get(
         `/api/review/academy/noPic?acaId=${values.acaId ? values.acaId : acaId}&page=1&size=${values.showCnt ? values.showCnt : showCnt}`,
@@ -98,11 +84,33 @@ function AcademyReview() {
   };
 
   //리뷰 삭제하기
-  const deleteReviewCheck = (acaId: number, classId: number) => {
+  const deleteReviewCheck = (reviewId: number, userId: number) => {
     setResultMessage(
-      `리뷰(${acaId}/${classId})를 삭제하시면 복구할 수 없습니다. 해당 리뷰를 삭제하시겠습니까?`,
+      `리뷰를 삭제하시면 복구할 수 없습니다. 해당 리뷰를 삭제하시겠습니까?`,
     );
+    setReviewId(reviewId);
+    setReviewUserId(userId);
     setIsModalVisible(true);
+  };
+
+  const handleButton1Click = () => {
+    setIsModalVisible(false);
+  };
+  const handleButton2Click = async () => {
+    try {
+      const res = await axios.delete(
+        `/api/review/me?userId=${reviewUserId}&reviewId=${reviewId}`,
+      );
+      if (res.data.resultData === 1) {
+        message.success("해당 리뷰가 삭제되었습니다.");
+        getReviewList({ acaId: acaId, showCnt: showCnt });
+      }
+      setReviewUserId(0); //초기화
+      setReviewId(0); //초기화
+      setIsModalVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const onFinished = async (values: any) => {
@@ -110,7 +118,7 @@ function AcademyReview() {
     const queryParams = new URLSearchParams(values).toString();
     navigate(`?${queryParams}`); //쿼리스트링 url에 추가
 
-    getTagList(values);
+    getReviewList(values);
   };
 
   const onChange = () => {
@@ -119,7 +127,7 @@ function AcademyReview() {
   };
 
   useEffect(() => {
-    getTagList({ acaId: 0, showCnt: 10 });
+    getReviewList({ acaId: 0, showCnt: 10 });
   }, [userId]);
 
   useEffect(() => {
@@ -251,7 +259,7 @@ function AcademyReview() {
                     <button
                       className="small_line_button"
                       onClick={() =>
-                        deleteReviewCheck(item.acaId, item.classId)
+                        deleteReviewCheck(item.reviewId, item.userId)
                       }
                     >
                       삭제하기

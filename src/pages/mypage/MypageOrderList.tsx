@@ -8,30 +8,26 @@ import userInfo from "../../atoms/userInfo";
 import SideBar from "../../components/SideBar";
 import CustomModal from "../../components/modal/Modal";
 
-interface mypageAcademyListType {
+interface myOrderListType {
   acaId: number;
-  acaPics: string;
-  acaPic: string;
   acaName: string;
-  classList: [
-    {
-      classId: number;
-      className: string;
-      startDate: string;
-      endDate: string;
-    },
-  ];
+  classOrBookName: string;
+  acaPic: string;
+  createdAt: string;
+  price: number;
+  costStatus: number;
+  name: string;
+  costId: number;
+  refundStatus: number;
+  tid: string;
 }
 
 function MypageOrderList() {
   const cookies = new Cookies();
-  const [resultTitle, _setResultTitle] = useState("");
-  const [resultMessage, _setResultMessage] = useState("");
-  const [mypageAcademyList, setMypageAcademyList] = useState<
-    mypageAcademyListType[]
-  >([]); //내 학원 내역
+  const [myOrderList, setMyOrderList] = useState<myOrderListType[]>([]); //내 학원 내역
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [costId, setCostId] = useState(0);
   const { roleId, userId } = useRecoilValue(userInfo);
   const navigate = useNavigate();
   const pageSize = 10;
@@ -73,14 +69,15 @@ function MypageOrderList() {
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const myOrderList = async (page: number) => {
+  //내 주문내역
+  const myOrderListAll = async () => {
     try {
       const res = await axios.get(
-        `/api/academy/GetAcademyListByAcaNameOrderType?userId=${userId}&page=${page}&size=30`,
+        `/api/academyCost/getAcademyCostListByUser/${userId}`,
       );
 
       if (res.data.resultData?.length > 0) {
-        setMypageAcademyList(res.data.resultData);
+        setMyOrderList(res.data.resultData);
       }
     } catch (error) {
       console.log(error);
@@ -88,11 +85,27 @@ function MypageOrderList() {
     //console.log(page);
   };
 
+  //환불신청
+  const orderCancel = (value: number) => {
+    setCostId(value);
+    setIsModalVisible(true);
+  };
   const handleButton1Click = () => {
     setIsModalVisible(false);
   };
-
-  const handleButton2Click = () => {
+  const handleButton2Click = async (value: number) => {
+    try {
+      const res = await axios.post(
+        `/api/refund/postRefund?costId=${value}&refundComment=사용자 환불신청`,
+      );
+      if (res.data.resultData === 1) {
+        message.success("환불신청 완료되었습니다.");
+        myOrderListAll(); //목록 다시 불러오기
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setCostId(0); //초기화
     setIsModalVisible(false);
   };
 
@@ -103,14 +116,9 @@ function MypageOrderList() {
     }
   };
 
-  const paginatedData = mypageAcademyList.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
-
   useEffect(() => {
     if (userId !== "") {
-      myOrderList(1);
+      myOrderListAll();
     }
   }, [userId]);
 
@@ -141,34 +149,37 @@ function MypageOrderList() {
         </h1>
 
         <div className="board-wrap">
-          <div className="flex justify-between align-middle p-4 border-b">
+          <div className="hidden justify-between align-middle p-4 border-b sm:flex">
             <div className="flex items-center justify-center w-full">
               학원명
             </div>
             {/* <div className="flex items-center justify-center w-60">등록일</div> */}
-            <div className="flex items-center justify-center w-40">
+            <div className="flex items-center justify-center min-w-24">
+              주문자명
+            </div>
+            <div className="flex items-center justify-center min-w-24">
+              주문일자
+            </div>
+            <div className="flex items-center justify-center min-w-24">
               처리상태
             </div>
-            <div className="flex items-center justify-center w-40">
-              취소하기
+            <div className="flex items-center justify-center min-w-24">
+              취소요청
             </div>
           </div>
 
-          {mypageAcademyList?.length === 0 && (
+          {myOrderList?.length === 0 && (
             <div className="text-center p-4 border-b">
-              등록한 학원이 없습니다.
+              결제한 내역이 없습니다.
             </div>
           )}
 
-          {paginatedData.map((item, index) => (
+          {myOrderList.map((item, index) => (
             <div
               key={index}
-              className="loop-content flex justify-between align-middle p-4 border-b cursor-pointer"
-              onClick={() =>
-                navigate(`/academy/detail?id=${item.acaId}&page=1&size=10`)
-              }
+              className="loop-content flex flex-col justify-between align-middle p-4 border-b sm:flex-row"
             >
-              <div className="flex justify-start items-center w-full">
+              <div className="flex justify-start items-center w-full mb-2 sm:mb-0">
                 <div
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
@@ -186,34 +197,32 @@ function MypageOrderList() {
                   </div>
                   <div>
                     <h4 className="font-semibold">{item.acaName}</h4>
-                    {item.classList.length > 0 ? (
-                      <div className="flex text-gray-400 text-sm">
-                        {" "}
-                        [수업명 :&nbsp;
-                        {item.classList.map((classItem, index) => (
-                          <p key={index} className="text-sm">
-                            {classItem.className}
-                            {item.classList.length !== index + 1 ? ", " : ""}
-                          </p>
-                        ))}
-                        ]
-                      </div>
-                    ) : (
-                      ""
-                    )}
+                    <p className="text-[13px] text-gray-400">
+                      [{item.classOrBookName}]
+                    </p>
                   </div>
                 </div>
               </div>
-              {/* <div className="flex items-center justify-center w-60">
-                2025-01-01
-              </div> */}
-              <div className="flex items-center justify-center w-40">
-                등록완료
+
+              <div className="flex gap-4 mb-2 sm:gap-0 sm:mb-0">
+                <div className="hidden items-center justify-center sm:min-w-24 sm:flex">
+                  {item.name}
+                </div>
+                <div className="flex items-center justify-center sm:min-w-24">
+                  {item.createdAt.substr(0, 10)}
+                </div>
+                <div className="flex items-center justify-center sm:min-w-24">
+                  {item.costStatus === 2 ? "결제완료" : "결제대기"}
+                </div>
               </div>
-              <div className="flex items-center justify-center w-40">
-                <span className="small_line_button bg-gray-200 opacity-50">
-                  취소하기
-                </span>
+
+              <div className="flex items-center justify-start sm:min-w-24 sm:justify-center">
+                <button
+                  className="small_line_button bg-gray-200 opacity-50"
+                  onClick={() => orderCancel(item.costId)}
+                >
+                  취소요청
+                </button>
               </div>
             </div>
           ))}
@@ -222,7 +231,7 @@ function MypageOrderList() {
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
             current={currentPage}
-            total={mypageAcademyList?.length}
+            total={myOrderList?.length}
             pageSize={pageSize}
             onChange={handlePageChange}
             showSizeChanger={false}
@@ -231,10 +240,10 @@ function MypageOrderList() {
 
         <CustomModal
           visible={isModalVisible}
-          title={resultTitle}
-          content={resultMessage}
+          title={"취소 요청"}
+          content={"선택한 결제내역을 취소요청하시겠습니까?"}
           onButton1Click={handleButton1Click}
-          onButton2Click={handleButton2Click}
+          onButton2Click={() => handleButton2Click(costId)}
           button1Text={"취소"}
           button2Text={"확인"}
           modalWidth={400}
