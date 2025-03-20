@@ -88,7 +88,7 @@ const TeacherList = () => {
         `/api/teacher/Agree?acaId=${value ? value : acaId}`,
       );
       setTeacherResultList(res.data.resultData);
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
       setTeacherResultList([]);

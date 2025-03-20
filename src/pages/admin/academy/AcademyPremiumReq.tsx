@@ -141,7 +141,7 @@ function AcademyPremiumReq(): JSX.Element {
   const premiumAcadenyCount = async () => {
     try {
       const res = await axios.get(`/api/academy/premium?page=1&size=10`);
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
       const filteredData = res.data.resultData.filter(
         (item: any) => item.preCheck === 1,
       );
@@ -152,7 +152,7 @@ function AcademyPremiumReq(): JSX.Element {
   };
 
   const onFinished = async (values: any) => {
-    console.log(values);
+    // console.log(values);
 
     if (!values.acaId) {
       message.error("프리미엄 신청할 학원을 선택해 주세요.");

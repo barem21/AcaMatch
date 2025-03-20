@@ -403,7 +403,7 @@ const AcademySearch = () => {
     }
   }, [searchState]);
   useEffect(() => {
-    console.log(search);
+    // console.log(search);
     const params = new URLSearchParams(search);
 
     if (search === "?page=1") {
@@ -417,8 +417,8 @@ const AcademySearch = () => {
       form.resetFields();
       updateSearchState(params);
     }
-    console.log("주소가 변경되었습니다!", location.pathname); // 경로(pathname) 출력
-    console.log("쿼리 파라미터:", location.search); // 쿼리 파라미터 출력
+    // console.log("주소가 변경되었습니다!", location.pathname); // 경로(pathname) 출력
+    // console.log("쿼리 파라미터:", location.search); // 쿼리 파라미터 출력
   }, [search]);
 
   const navigate = useNavigate();

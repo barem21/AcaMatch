@@ -61,7 +61,7 @@ const NoticeContent = () => {
   };
 
   const onFinished = async (values: any) => {
-    console.log(values);
+    // console.log(values);
     const queryParams = new URLSearchParams(values).toString();
     navigate(`?${queryParams}`);
   };

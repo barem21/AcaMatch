@@ -309,7 +309,7 @@ function MyPageUserInfo() {
 
       if (response.data.resultData) {
         message.success("회원정보가 수정되었습니다.");
-        console.log("response : ", response);
+        // console.log("response : ", response);
       }
     } catch (error) {
       console.error("Update failed:", error);

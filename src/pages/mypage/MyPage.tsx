@@ -102,7 +102,7 @@ function MyPage() {
         `/api/joinClass?userId=${checkUserId}&role=${roleId}&page=${page}&size=100`,
       );
 
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
 
       if (res.data.resultData?.length > 0) {
         setMypageAcademyList(res.data.resultData);

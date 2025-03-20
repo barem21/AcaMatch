@@ -181,7 +181,7 @@ function AcademyTestList() {
         `/api/grade/status?page=1&size=${showCnt}&acaId=${acaId}&classId=${value ? value : classId}${search ? "&keyword3=" + search : search}`,
       );
       setMyAcademyTestList(res.data.resultData);
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }

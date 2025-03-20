@@ -77,7 +77,7 @@ function MypagePhotoReview() {
       const res = await axios.get(
         `/api/review/me/pic?userId=${currentUserInfo.userId}&page=${page}&size=30`,
       );
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
       if (res.data.resultData.length > 0) {
         setReviewList(res.data.resultData);
       }
@@ -198,7 +198,7 @@ function MypagePhotoReview() {
                   <button
                     className="small_line_button"
                     onClick={() => {
-                      console.log(item);
+                      // console.log(item);
                       setAcademyId(item.acaId);
                       const temp: {
                         star: number;

@@ -187,7 +187,7 @@ const AcademyDetail = () => {
 
       const response = await jwtAxios.get(url);
 
-      console.log(response.data.resultData);
+      // console.log(response.data.resultData);
 
       if (response.data.resultData) {
         const data = response.data.resultData;

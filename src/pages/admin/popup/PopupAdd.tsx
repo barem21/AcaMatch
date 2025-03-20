@@ -95,10 +95,10 @@ const PopupAdd = () => {
         );
 
         const popupDetail = response.data.resultData[0];
-        console.log("서버에서 받은 날짜:", {
-          startDate: popupDetail.startDate,
-          endDate: popupDetail.endDate,
-        });
+        // console.log("서버에서 받은 날짜:", {
+        //   startDate: popupDetail.startDate,
+        //   endDate: popupDetail.endDate,
+        // });
 
         if (popupDetail.popUpPic) {
           setRegistrationType("image");
@@ -125,10 +125,10 @@ const PopupAdd = () => {
           popUpType: popupDetail.popUpType,
         });
 
-        console.log("폼에 설정된 날짜:", {
-          startDate: form.getFieldValue("startDate"),
-          endDate: form.getFieldValue("endDate"),
-        });
+        // console.log("폼에 설정된 날짜:", {
+        //   startDate: form.getFieldValue("startDate"),
+        //   endDate: form.getFieldValue("endDate"),
+        // });
       } catch (error) {
         console.error("팝업 상세 정보 조회 실패:", error);
         message.error("팝업 정보를 불러오는데 실패했습니다.");
@@ -183,11 +183,11 @@ const PopupAdd = () => {
       };
 
       // 전송되는 데이터 확인을 위한 로그
-      console.log("수정할 데이터:", popupData.p);
-      console.log("원본 날짜 값:", {
-        startDate: values.startDate,
-        endDate: values.endDate,
-      });
+      // console.log("수정할 데이터:", popupData.p);
+      // console.log("원본 날짜 값:", {
+      //   startDate: values.startDate,
+      //   endDate: values.endDate,
+      // });
 
       // 직접 입력일 경우 comment 추가
       if (values.registrationType === "direct") {
@@ -225,7 +225,7 @@ const PopupAdd = () => {
         });
         message.success("팝업이 등록되었습니다.");
       }
-      console.log(formData);
+      // console.log(formData);
 
       navigate(-1);
     } catch (error) {

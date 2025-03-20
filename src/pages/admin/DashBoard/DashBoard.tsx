@@ -172,7 +172,7 @@ function DashBoard() {
         const response = await jwtAxios.get(
           `/api/academy-manager/GetUserInfoList?userId=${userId}&page=1&size=6`,
         );
-        console.log("ddd:", response.data.resultData);
+        // console.log("ddd:", response.data.resultData);
 
         setApprovalData(response.data.resultData);
       }
@@ -255,7 +255,7 @@ function DashBoard() {
         roleId === 3
           ? `/api/academy-manager/GetUserCountByUserId`
           : `/api/academy-manager/GetUserCount`;
-      console.log(roleId);
+      // console.log(roleId);
 
       const params: any = {
         year: date.year,
@@ -602,7 +602,7 @@ function DashBoard() {
         }))
         .sort((a: SearchInfo, b: SearchInfo) => b.tagCount - a.tagCount); // 값이 큰 순서대로 정렬
 
-      console.log("Transformed Search Data:", chartData); // 데이터 확인용
+      // console.log("Transformed Search Data:", chartData); // 데이터 확인용
       setSearchData(chartData);
     } catch (error) {
       console.error(`Error fetching search info:`, error);
@@ -612,8 +612,8 @@ function DashBoard() {
 
   // pieData 계산 로직 수정
   const pieData = useMemo(() => {
-    console.log("Selected Category:", selectedCategory); // 디버깅용
-    console.log("Search Data:", searchData); // 디버깅용
+    // console.log("Selected Category:", selectedCategory); // 디버깅용
+    // console.log("Search Data:", searchData); // 디버깅용
 
     if (selectedCategory === "최근 태그") {
       return searchData.length > 0 ? searchData : [];
@@ -633,7 +633,7 @@ function DashBoard() {
           size: 3,
         },
       });
-      console.log(response.data);
+      // console.log(response.data);
 
       const { resultData } = response.data;
       const filteredData = resultData
@@ -651,9 +651,9 @@ function DashBoard() {
   }, [userId]);
 
   useEffect(() => {
-    console.log("선택된 카테고리:", selectedCategory);
-    console.log("선택된 시간 범위:", selectedTimeRange);
-    console.log("차트 데이터:", pieData);
+    // console.log("선택된 카테고리:", selectedCategory);
+    // console.log("선택된 시간 범위:", selectedTimeRange);
+    // console.log("차트 데이터:", pieData);
 
     setSelectedData(selectedData.filter(data => data.id === "학원수"));
   }, []);
@@ -663,7 +663,7 @@ function DashBoard() {
       // roleId에 따라 다른 API 엔드포인트 사용
       let endpoint;
 
-      console.log(roleId);
+      // console.log(roleId);
 
       if (roleId === 3) {
         // 학원 관리자용 API
@@ -691,7 +691,7 @@ function DashBoard() {
       const response = await jwtAxios.get("/api/reports/getUserList");
       if (response.data && response.data.resultData) {
         setReportedUsers(response.data.resultData);
-        console.log("Reported users:", response.data.resultData); // 데이터 확인용 로그
+        // console.log("Reported users:", response.data.resultData); // 데이터 확인용 로그
       }
     } catch (error) {
       console.error("에러:", error);

@@ -135,7 +135,7 @@ function MyPageLike() {
   };
 
   const deleteLike = async () => {
-    console.log(academyIdToDelete);
+    // console.log(academyIdToDelete);
 
     try {
       // 좋아요 삭제 요청

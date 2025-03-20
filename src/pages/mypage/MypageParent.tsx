@@ -139,7 +139,7 @@ function MypageParent() {
     try {
       const res = await jwtAxios.get("/api/user/relationship/list/2");
       setMypageChildList(res.data.resultData);
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }

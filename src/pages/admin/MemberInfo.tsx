@@ -146,7 +146,7 @@ function MemberInfo(): JSX.Element {
       const res = await jwtAxios.get(`/api/user`);
       setEditMember(res.data.resultData);
       //console.log("res.data.resultData : ", res.data.resultData);
-      console.log(res);
+      // console.log(res);
 
       // 데이터를 받아온 즉시 form 값 설정
       form.setFieldsValue({
@@ -251,7 +251,7 @@ function MemberInfo(): JSX.Element {
 
       if (response.data.resultData) {
         message.success("회원정보가 수정되었습니다.");
-        console.log("response : ", response);
+        // console.log("response : ", response);
       }
     } catch (error) {
       console.error("Update failed:", error);

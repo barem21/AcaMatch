@@ -81,7 +81,7 @@ function AcademyClassList() {
           (acaId !== 0 ? "&acaId=" + acaId : "&acaId=0"),
       );
       setClassList(res.data.resultData);
-      console.log("classList : ", res.data.resultData);
+      // console.log("classList : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }
@@ -149,7 +149,7 @@ function AcademyClassList() {
           (values.search ? "&keyword2=" + values.search : ""),
       );
       setClassList(res.data.resultData);
-      console.log("search : ", res.data.resultData);
+      // console.log("search : ", res.data.resultData);
     } catch (error) {
       console.log(error);
     }

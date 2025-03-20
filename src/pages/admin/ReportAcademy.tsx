@@ -39,7 +39,7 @@ function ReportAcademy() {
     try {
       const res = await axios.get(`/api/reports/getAcademyList`);
       setReportAcademyList(res.data.resultData);
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
     } catch (error) {
       console.log(error);
     }

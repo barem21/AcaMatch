@@ -157,19 +157,19 @@ function MyPageRecordDetail() {
 
   //시험정보 가져오기
   const testGetInfo = async () => {
-    console.log("여기", currentUserInfo.userId);
+    // console.log("여기", currentUserInfo.userId);
 
     const params = new URLSearchParams(search);
     const acaId = params.get("acaId");
 
-    console.log(
-      `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
-    );
+    // console.log(
+    //   `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
+    // );
     try {
       const res = await jwtAxios.get(
         `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
       );
-      console.log("grade result : ", res.data.resultData);
+      // console.log("grade result : ", res.data.resultData);
 
       setTestStudentList(res.data.resultData);
       setAcademyInfo(() => params.get("acaName"));

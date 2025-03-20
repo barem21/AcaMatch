@@ -48,7 +48,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
       ];
 
       setResultData(dataWithAll); // API 응답 데이터를 상태에 저장
-      console.log(dataWithAll);
+      // console.log(dataWithAll);
     } catch (error) {
       console.error("Failed to fetch city data:", error);
       //   setResultData([]); // 오류 발생 시 빈 배열로 설정
@@ -63,7 +63,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
         },
       });
       setStreetData(response.data.resultData);
-      console.log(response.data.resultData);
+      // console.log(response.data.resultData);
     } catch (error) {
       console.error("Failed to fetch dong data:", error);
       setStreetData([]);
@@ -78,7 +78,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
         },
       });
       setDongData(response.data.resultData); // setStreetData에서 setDongData로 수정
-      console.log(response.data.resultData);
+      // console.log(response.data.resultData);
     } catch (error) {
       console.error("Failed to fetch dong data:", error);
       setDongData([]); // setStreetData에서 setDongData로 수정
@@ -115,7 +115,9 @@ const LocationModal: React.FC<LocationModalProps> = ({
                     setSelectedCityId(data.cityId);
                     setSelectedStreetId(null); // street 선택 초기화
                     setSelectedDongId(null); // dong 선택 초기화
+                    setSelectedDongText(null); // dong 텍스트 초기화
                     setDongData([]); // dong 데이터 초기화
+                    setStreetData([]); // street 데이터도 초기화
                     fetchStreetData(data.cityId);
                   }}
                 >
@@ -135,6 +137,9 @@ const LocationModal: React.FC<LocationModalProps> = ({
                   }`}
                   onClick={() => {
                     setSelectedStreetId(street.streetId);
+                    setSelectedDongId(null); // dong 선택 초기화
+                    setSelectedDongText(null); // dong 텍스트 초기화
+                    setDongData([]); // dong 데이터 초기화
                     if (selectedCityId) {
                       fetchDongData(selectedCityId, street.streetId);
                     }

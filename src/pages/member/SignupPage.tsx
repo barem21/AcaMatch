@@ -149,21 +149,21 @@ function SignupPage() {
       const res = await axios.get(
         `/api/user/check-duplicate/nick-name?text=${nickName}`,
       );
-      console.log("닉네임 중복 체크 응답:", res.data); // 응답 데이터 확인
+      // console.log("닉네임 중복 체크 응답:", res.data); // 응답 데이터 확인
 
       if (res.data.resultData === 1) {
-        console.log("사용 가능한 닉네임입니다"); // 조건 확인
+        // console.log("사용 가능한 닉네임입니다"); // 조건 확인
         message.success("사용 가능한 닉네임입니다.");
         setModalMessage("사용 가능한 닉네임입니다");
         setNickNameCheck(2);
       } else {
-        console.log("이미 사용중인 닉네임입니다"); // 조건 확인
+        // console.log("이미 사용중인 닉네임입니다"); // 조건 확인
         message.error("이미 사용중인 닉네임입니다.");
         setModalMessage("이미 사용중인 닉네임입니다.");
         setNickNameCheck(1);
       }
 
-      console.log("닉네임 체크 상태:", nickNameCheck); // 상태 변경 확인
+      // console.log("닉네임 체크 상태:", nickNameCheck); // 상태 변경 확인
     } catch (error) {
       console.error("에러 발생:", error);
       // message.error("닉네임 중복 확인 중 오류가 발생했습니다.");
@@ -194,22 +194,22 @@ function SignupPage() {
       const res = await axios.get(
         `/api/user/check-duplicate/email?text=${email}`,
       );
-      console.log("이메일 중복 체크 응답:", res.data);
+      // console.log("이메일 중복 체크 응답:", res.data);
 
       if (res.data.resultData === 1) {
-        console.log("사용 가능한 이메일입니다");
+        // console.log("사용 가능한 이메일입니다");
         message.success("사용 가능한 이메일입니다.");
         setEmailCheck(2);
         setModalMessage("사용 가능한 이메일입니다.");
       } else {
-        console.log("이미 사용중인 이메일입니다");
+        // console.log("이미 사용중인 이메일입니다");
         message.error("이미 사용중인 이메일입니다.");
         setEmailCheck(1);
         setModalMessage("이미 사용중인 이메일입니다.");
       }
       setIsModalVisible(true);
 
-      console.log("이메일 체크 상태:", emailCheck);
+      // console.log("이메일 체크 상태:", emailCheck);
     } catch (error) {
       console.error("에러 발생:", error);
       message.error("이미 사용중인 이메일입니다.");

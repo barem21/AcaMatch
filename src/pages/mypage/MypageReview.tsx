@@ -77,7 +77,7 @@ function MypageReview() {
       const res = await axios.get(
         `/api/review/me/noPic?userId=${currentUserInfo.userId}&page=${page}&size=30`,
       );
-      console.log(res.data.resultData);
+      // console.log(res.data.resultData);
       if (res.data.resultData.length > 0) {
         setReviewList(res.data.resultData);
       }
@@ -103,7 +103,7 @@ function MypageReview() {
         data: { reviewId: reviewId, userId: currentUserInfo.userId },
       });
       fetchData(1);
-      console.log(res);
+      // console.log(res);
       //setReviewList(reviewList.filter(review => review.acaId !== academyId));
     } catch (error) {
       console.error("리뷰 삭제 실패:", error);
@@ -195,7 +195,7 @@ function MypageReview() {
                   <button
                     className="small_line_button"
                     onClick={() => {
-                      console.log(item);
+                      // console.log(item);
                       setAcademyId(item.acaId);
                       const temp: {
                         star: number;

@@ -37,7 +37,7 @@ const PopupContent = () => {
       const response = await jwtAxios.get("/api/popUp", {
         params: { page, size: pageSize }, // 페이지네이션 적용
       });
-      console.log(response);
+      // console.log(response);
 
       const { resultData } = response.data;
       setPopupList(resultData);
@@ -57,16 +57,16 @@ const PopupContent = () => {
 
       if (response.data.resultData.length > 0) {
         const detail = response.data.resultData[0];
-        console.log("Popup Detail:", detail); // 전체 데이터 확인
+        // console.log("Popup Detail:", detail); // 전체 데이터 확인
 
         setPopupDetail(detail);
 
         if (detail.popUpPic) {
           const url = `http://112.222.157.157:5233/pic/popUp/${detail.popUpId}/${detail.popUpPic}`;
-          console.log("Setting image URL:", url);
+          // console.log("Setting image URL:", url);
           setImageUrl(url);
         } else {
-          console.log("No popUpPic found");
+          // console.log("No popUpPic found");
           setImageUrl(null);
         }
 
@@ -110,11 +110,11 @@ const PopupContent = () => {
   const renderModalContent = () => {
     if (!popupDetail) return null;
 
-    console.log("Rendering modal with:", {
-      popupDetail,
-      imageUrl,
-      comment: popupDetail.comment,
-    });
+    // console.log("Rendering modal with:", {
+    //   popupDetail,
+    //   imageUrl,
+    //   comment: popupDetail.comment,
+    // });
 
     return (
       <div

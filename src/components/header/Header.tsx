@@ -153,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
     };
 
     return () => {
-      console.log("SSE 연결 종료");
+      // console.log("SSE 연결 종료");
       eventSource.close();
     };
   }, [currentUserInfo.userId]);

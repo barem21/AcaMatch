@@ -12,7 +12,7 @@ const PaymentSuccess = () => {
       const pgToken = searchParams.get("pg_token");
       const Tid = localStorage.getItem("paymentTid");
 
-      console.log("Payment tokens:", { pgToken, Tid });
+      // console.log("Payment tokens:", { pgToken, Tid });
 
       if (!pgToken || !Tid) {
         localStorage.removeItem("paymentTid");

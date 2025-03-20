@@ -147,7 +147,7 @@ function AcademyClassEdit() {
       const res = await jwtAxios.get(`/api/acaClass/detail?acaId=${acaId}`);
       for (let i = 0; i < res.data.resultData.length; i++) {
         if (res.data.resultData[i].classId === classId) {
-          console.log(res.data.resultData[i]);
+          // console.log(res.data.resultData[i]);
 
           // 데이터를 받아온 즉시 form 값 설정
           form.setFieldsValue({

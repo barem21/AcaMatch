@@ -60,25 +60,22 @@ const LikeButton = ({
 
       if (isLiked) {
         // 좋아요 삭제
-        const res = await jwtAxios.delete(
-          `/api/like?userId=${userId}&acaId=${academyId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${cookies.get("accessToken")}`,
-            },
-            data: {
-              userId: userId,
-              acaId: academyId,
-            },
+        await jwtAxios.delete(`/api/like?userId=${userId}&acaId=${academyId}`, {
+          headers: {
+            Authorization: `Bearer ${cookies.get("accessToken")}`,
           },
-        );
+          data: {
+            userId: userId,
+            acaId: academyId,
+          },
+        });
         if (setLikeCount) {
           setLikeCount((prevCount: number) => prevCount - 1); // 타입 명시
         }
-        console.log("좋아요 삭제 완료", res);
+        // console.log("좋아요 삭제 완료", res);
       } else {
         // 좋아요 등록
-        const res = await jwtAxios.post(
+        await jwtAxios.post(
           `/api/like`,
           {
             userId: userId,
@@ -90,7 +87,7 @@ const LikeButton = ({
             },
           },
         );
-        console.log("좋아요 등록 완료", res);
+        // console.log("좋아요 등록 완료", res);
         if (setLikeCount) {
           setLikeCount(prevCount => prevCount + 1); // 좋아요 수 증가
         }

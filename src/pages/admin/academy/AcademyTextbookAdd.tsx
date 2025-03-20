@@ -112,7 +112,7 @@ function AcademyTextbookAdd(): JSX.Element {
   };
 
   const onFinished = async (values: any) => {
-    console.log(values);
+    // console.log(values);
     try {
       const formData = new FormData(); // pic이 있는 경우에만 추가
       if (values.file) {

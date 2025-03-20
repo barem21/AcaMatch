@@ -254,7 +254,7 @@ function AcademyEdit() {
   const academyGetInfo = async () => {
     try {
       const res = await axios.get(`/api/academy/academyDetail/${acaId}`);
-      console.log("aca_info : ", res.data.resultData);
+      // console.log("aca_info : ", res.data.resultData);
 
       // 데이터를 받아온 즉시 form 값 설정
       form.setFieldsValue({

@@ -118,7 +118,7 @@ const ReviewSection = ({
       const response = await jwtAxios.get(
         `/api/review/academy/noPic?acaId=${academyId}&page=${generalReviewPage}&size=10`,
       );
-      console.log("리뷰 데이터", response);
+      // console.log("리뷰 데이터", response);
 
       if (response.data.resultMessage === "리뷰가 조회되었습니다.") {
         setGeneralReviews(response.data.resultData);
@@ -144,7 +144,7 @@ const ReviewSection = ({
 
       setMediaReviews(response.data.resultData || []);
       setTotalMediaReviewCount(response.data.resultData[0]?.myReviewCount || 0);
-      console.log("이미지 리뷰 데이터", response.data.resultData);
+      // console.log("이미지 리뷰 데이터", response.data.resultData);
     } catch (error) {
       console.error("Error fetching media reviews:", error);
       message.error("후기를 불러오는데 실패했습니다.");
@@ -176,7 +176,7 @@ const ReviewSection = ({
       const res = await jwtAxios.get(
         `/api/joinClass?studentId=${user.userId}&page=1&size=100`,
       );
-      console.log(res);
+      // console.log(res);
 
       const resultData: { classList?: ClassItem[] }[] = res.data.resultData;
       const matchedClassIds: number[] = [];
@@ -230,10 +230,10 @@ const ReviewSection = ({
     if (deleteReviewId === null) return;
 
     try {
-      const res = await jwtAxios.delete(
+      await jwtAxios.delete(
         `/api/review/me?reviewId=${deleteReviewId}&userId=${user.userId}`,
       );
-      console.log(res);
+      // console.log(res);
 
       message.success("리뷰가 삭제되었습니다.");
 
@@ -294,7 +294,7 @@ const ReviewSection = ({
         const currentAcademy = response.data.resultData.find(
           (aca: any) => aca.acaId === academyId,
         );
-        console.log(currentAcademy);
+        // console.log(currentAcademy);
 
         if (currentAcademy) {
           setSelectedAcademy(currentAcademy);

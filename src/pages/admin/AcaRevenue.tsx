@@ -62,7 +62,7 @@ const AcaRevenue = (): JSX.Element => {
         },
       });
 
-      console.log("API Response:", response.data.resultData);
+      // console.log("API Response:", response.data.resultData);
       setRevenueData(response.data.resultData);
       if (response.data.resultData.length > 0) {
         setTotalCount(response.data.resultData[0].totalCount);
@@ -248,7 +248,7 @@ const AcaRevenue = (): JSX.Element => {
             <p className="text-center p-4">데이터 로딩 중...</p>
           ) : revenueData.length > 0 ? (
             revenueData.map(item => {
-              console.log("Item status:", item.latestStatus);
+              // console.log("Item status:", item.latestStatus);
               return (
                 <div
                   key={item.acaId}

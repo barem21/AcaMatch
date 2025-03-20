@@ -208,10 +208,10 @@ function PaymentManager() {
       const res = await axios.post(`/api/refund/postRefund?costId=${toCostId}`);
       if (res.data.resultData === 1) {
         const deleteOrder = async () => {
-          const rese = await axios.post(
+          await axios.post(
             `/api/payment/refund?tid=${toTid}&costId=${toCostId}`,
           );
-          console.log(rese.data.resultData);
+          // console.log(rese.data.resultData);
         };
 
         await deleteOrder(); //삭제 실행

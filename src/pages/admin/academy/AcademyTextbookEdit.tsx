@@ -121,7 +121,7 @@ function AcademyTextbookEdit(): JSX.Element {
   const textBookGetInfo = async () => {
     try {
       const res = await axios.get(`/api/book/GetBookInfo/${bookId}`);
-      console.log("book_info : ", res.data.resultData);
+      // console.log("book_info : ", res.data.resultData);
 
       // 데이터를 받아온 즉시 form 값 설정
       form.setFieldsValue({
@@ -153,7 +153,7 @@ function AcademyTextbookEdit(): JSX.Element {
   };
 
   const onFinished = async (values: any) => {
-    console.log(values);
+    // console.log(values);
     try {
       const formData = new FormData();
 

@@ -191,7 +191,7 @@ function AcademyAdd() {
 
   // 체크박스 클릭 시 선택/해제 처리
   const handleCheckbox2Change = (tagId: number, tagName: string) => {
-    console.log(tagId);
+    // console.log(tagId);
     setSelectedItems(
       prevSelectedItems =>
         prevSelectedItems.includes(tagName)
@@ -332,7 +332,7 @@ function AcademyAdd() {
         const res = await axios.get(
           `https://open.neis.go.kr/hub/acaInsTiInfo?KEY=2143c6cb07f24ada85a7d265c6832b2b&Type=json&pIndex=1&pSize=20&ATPT_OFCDC_SC_CODE=${academyArea}&ACA_NM=${academyKeyword}`,
         );
-        console.log(res.data.acaInsTiInfo[1]);
+        // console.log(res.data.acaInsTiInfo[1]);
         setSearchAcademyResult(res.data.acaInsTiInfo[1].row);
       } catch (error) {
         console.log(error);
