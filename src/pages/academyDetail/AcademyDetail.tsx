@@ -453,7 +453,7 @@ const AcademyDetail = () => {
             className={`${styles.academy.title} relative max-[768px]:mt-[80px] max-[768px]:mr-[35px] `}
           >
             {/* {academyData.acaName} */}
-            <div className="flex items-center gap-2 text-2xl absolute max-[768px]:relative max-[768px]:left-[300px] max-[768px]:top-[40px]">
+            <div className="flex items-center gap-2 text-2xl right-[16px] max-[768px]:right-[0] top-[2px] absolute max-[768px]:relative max-[768px]:left-[300px] max-[768px]:top-[40px]">
               <button
                 onClick={() => setIsReportModalOpen(true)}
                 className="flex items-center gap-1 text-[#507A95]"
