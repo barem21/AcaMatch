@@ -12,7 +12,7 @@ function HotAcademy() {
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const [loading, setLoading] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
-  // const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
   const pageSize = 10;
 
   const usedRandomNumbers = new Set<number>();
@@ -60,12 +60,9 @@ function HotAcademy() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("/api/academy/best", {
-          params: {
-            page: currentPage,
-            size: pageSize,
-          },
-        });
+        const response = await axios.get(
+          `/api/academy/best?page=${currentPage}&size=${pageSize}`,
+        );
 
         const updatedCards = response.data.resultData.map((item: any) => ({
           id: item.acaId,
@@ -77,10 +74,8 @@ function HotAcademy() {
           academyLikeCount: item.academyLikeCount,
         }));
 
-        // console.log(response);
-
         setAcademyData(updatedCards);
-        // setHasMore(updatedCards.length === pageSize);
+        setHasMore(updatedCards.length === pageSize);
       } catch (error) {
         console.error("Error fetching academy data:", error);
       } finally {
@@ -89,7 +84,7 @@ function HotAcademy() {
     };
 
     fetchData();
-  }, [currentPage]); // currentPage가 변경될 때마다 fetchData 실행
+  }, [currentPage, searchParams]); // searchParams 의존성 유지
 
   // 스켈레톤 UI 표시 최적화
   useEffect(() => {
@@ -138,12 +133,8 @@ function HotAcademy() {
           <Pagination
             current={currentPage}
             total={
-              academyData &&
-              academyData.length > 0 &&
-              academyData[0].academyLikeCount
-                ? Number(academyData[0].academyLikeCount)
-                : 1
-            } // 전체 아이템 수
+              hasMore ? (currentPage + 1) * pageSize : currentPage * pageSize
+            }
             pageSize={pageSize}
             onChange={handlePageChange}
             showSizeChanger={false}
