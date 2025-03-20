@@ -424,7 +424,7 @@ function AcademyRecord() {
 
   //점수 직접 수정하기
   const onFinished = async (values: any) => {
-    //console.log(values);
+    console.log(values);
 
     //오늘 날짜 확인
     const today = new Date();
@@ -435,7 +435,7 @@ function AcademyRecord() {
 
     const datas = {
       gradeId: testGradeId,
-      score: values.record ? parseInt(values.record) : null,
+      score: values.record ? parseInt(values.record) : 0,
       pass: values.pass ? parseInt(values.pass) : 0,
       examDate: dateString,
       processingStatus: 1,
@@ -698,7 +698,9 @@ function AcademyRecord() {
               <div className="flex items-center justify-center w-40">
                 {item.pass !== null
                   ? item.pass === 1
-                    ? "합격"
+                    ? item.examDate === null
+                      ? "미응시"
+                      : "합격"
                     : item.examDate === null
                       ? "미응시"
                       : "불합격"

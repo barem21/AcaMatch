@@ -20,6 +20,9 @@ const TestList = styled.div`
   .ant-form-item-control-input button {
     display: flex !important;
   }
+  .btn-wrap {
+    display: none;
+  }
 `;
 const AddTest = styled.div`
   div {
@@ -97,9 +100,13 @@ function AcademyTestList() {
   const acaId: number = parseInt(searchParams.get("acaId") || "0", 0);
   const classId: number = parseInt(searchParams.get("classId") || "0", 0);
   const showCnt: number = parseInt(searchParams.get("showCnt") || "10", 0);
-  //const search: string | null = searchParams.get("search");
+  //const search = searchParams.get("search") ? searchParams.get("search") : null;
 
   const handleButton1Click = () => {
+    form.setFieldsValue({
+      examType: 0,
+      examName: "",
+    });
     setIsModalVisible(false);
   };
   const handleButton2Click = () => {
@@ -175,10 +182,13 @@ function AcademyTestList() {
   );
 
   //과목별 등록된 테스트 목록 가져오기
-  const academyTestListRequest = async (value: number, search: string) => {
+  const academyTestListRequest = async (
+    value: number,
+    search: string | null,
+  ) => {
     try {
       const res = await axios.get(
-        `/api/grade/status?page=1&size=${showCnt}&acaId=${acaId}&classId=${value ? value : classId}${search ? "&keyword3=" + search : search}`,
+        `/api/grade/status?page=1&size=${showCnt}&acaId=${acaId}&classId=${value ? value : classId}${search !== null ? "&keyword3=" + search : ""}`,
       );
       setMyAcademyTestList(res.data.resultData);
       // console.log(res.data.resultData);
@@ -189,13 +199,14 @@ function AcademyTestList() {
 
   //학원 선택
   const handleAcademyChange = (value: number) => {
-    //console.log(value);
+    console.log(value);
+
+    setMyAcademyTestList([]);
     form2.setFieldsValue({
       classId: null,
     });
     form2.submit();
     academyClassList(value); //강좌목록
-    setMyAcademyTestList([]);
   };
 
   //강좌선택
@@ -204,13 +215,36 @@ function AcademyTestList() {
     academyTestListRequest(value, ""); //테스트 목록
   };
 
+  const AddAcademyTest = () => {
+    if (!acaId) {
+      message.error("학원을 선택해 주세요.");
+      return;
+    }
+    if (!classId) {
+      message.error("강좌를 선택해 주세요.");
+      return;
+    }
+    setIsModalVisible(true);
+  };
+
   //전송하기
   const onFinished = async (values: any) => {
     //console.log(values);
-
-    // 쿼리 문자열로 변환
-    const queryParams = new URLSearchParams(values).toString();
-    navigate(`../test?${queryParams}`); //쿼리스트링 url에 추가
+    const data = {
+      classId: classId,
+      examName: values.examName,
+      examType: values.examType,
+    };
+    try {
+      const res = await axios.post(`/api/exam`, data);
+      if (res.data.resultData === 1) {
+        message.success("테스트 등록이 완료되었습니다.");
+        academyTestListRequest(acaId, null); //목록 다시 호출
+        setIsModalVisible(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //테스트 검색
@@ -235,6 +269,11 @@ function AcademyTestList() {
       message.error("로그인이 필요한 서비스입니다.");
     }
 
+    form.setFieldsValue({
+      examType: 0,
+      examName: "",
+    });
+
     //페이지 들어오면 ant design 처리용 기본값 세팅
     form2.setFieldsValue({
       acaId: acaId ? acaId : null,
@@ -245,7 +284,7 @@ function AcademyTestList() {
 
     academyList(); //학원 목록
     academyClassList(acaId); //강좌 목록
-    //academyTestListRequest(classId, ""); //테스트 목록
+    academyTestListRequest(classId, ""); //테스트 목록
   }, []);
 
   return (
@@ -322,7 +361,7 @@ function AcademyTestList() {
 
                 <Button
                   className="btn-admin-basic"
-                  onClick={() => setIsModalVisible(true)}
+                  onClick={() => AddAcademyTest()}
                 >
                   + 테스트 신규등록
                 </Button>
@@ -369,7 +408,7 @@ function AcademyTestList() {
                   className="flex items-center gap-3 cursor-pointer"
                   onClick={() =>
                     navigate(
-                      `../academy/student?acaId=${acaId}&classId=${classId}`,
+                      `../class-student?acaId=${acaId}&classId=${classId}`,
                     )
                   }
                 >
@@ -452,7 +491,7 @@ function AcademyTestList() {
                   />
                 </Form.Item>
 
-                <div className="flex w-full mt-3">
+                <div className="flex w-full mt-3 !mb-3">
                   <Form.Item
                     name="examName"
                     className="w-full"
@@ -471,7 +510,7 @@ function AcademyTestList() {
                   <Form.Item>
                     <Button
                       className="w-full h-14 text-sm"
-                      onClick={() => setIsModalVisible(false)}
+                      onClick={() => handleButton1Click()}
                     >
                       취소하기
                     </Button>
