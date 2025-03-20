@@ -2,7 +2,6 @@ import type { MenuProps } from "antd";
 import { Dropdown, message } from "antd";
 import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
-import { FaBell } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -22,7 +21,7 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
   const setUserInfo = useSetRecoilState(userInfo);
   const currentUserInfo = useRecoilValue(userInfo);
   const [userPic, setUserPic] = useState<string>("");
-  const [_, setIsMessageModalOpen] = useState(false);
+  // const [_, setIsMessageModalOpen] = useState(false);
   // const [recipientType, setRecipientType] = useState<"student" | "academy">(
   //   "student",
   // );
@@ -70,9 +69,9 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
     }
   }, [setUserInfo]);
 
-  const handleSendMessage = () => {
-    setIsMessageModalOpen(true);
-  };
+  // const handleSendMessage = () => {
+  //   setIsMessageModalOpen(true);
+  // };
 
   // const handleMessageSubmit = async () => {
   //   try {
