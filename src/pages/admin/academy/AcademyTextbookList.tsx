@@ -1,4 +1,4 @@
-import { Button, Form, Input, message, Pagination, Select } from "antd";
+import { Button, Form, message, Pagination, Select } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPen, FaRegTrashAlt } from "react-icons/fa";
@@ -42,7 +42,7 @@ function AcademyTextbookList(): JSX.Element {
   const [searchParams] = useSearchParams();
   const [myAcademyList, setMyAcademyList] = useState<myAcademyListType[]>([]); //학원 목록
   const [classList, setClassList] = useState<classListType[]>([]); //강좌 목록
-  const [textBookList, setTextBookList] = useState<textBookListType[]>([]); //교제 목록
+  const [textBookList, setTextBookList] = useState<textBookListType[]>([]); //교재 목록
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [textBookId, setTextBookId] = useState<number>(0);
 
@@ -125,7 +125,7 @@ function AcademyTextbookList(): JSX.Element {
   const handleClassChange = (value: number) => {
     //alert(value);
     form.submit();
-    getTextBookList(value); //교제목록
+    getTextBookList(value); //교재목록
   };
 
   //학원 검색
@@ -239,6 +239,7 @@ function AcademyTextbookList(): JSX.Element {
                   />
                 </Form.Item>
 
+                {/*
                 <Form.Item name="search" className="mb-0">
                   <Input
                     className="input-admin-basic w-60"
@@ -249,6 +250,7 @@ function AcademyTextbookList(): JSX.Element {
                 <Button htmlType="submit" className="btn-admin-basic">
                   검색하기
                 </Button>
+                */}
               </div>
 
               <div className="flex gap-2">

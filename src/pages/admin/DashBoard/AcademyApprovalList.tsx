@@ -43,8 +43,11 @@ const AcademyApprovalList = ({ data, roleId }: AcademyApprovalListProps) => {
     const userApprovals = data as UserApproval[];
     return (
       <div className="w-full border rounded-[4px] h-fit mr-3">
-        <span className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b">
-          수강 신청 현황
+        <span
+          className="flex p-4 items-center w-full h-[47px] text-[#303E67] border-b cursor-pointer"
+          onClick={() => navigate("payment-academy")}
+        >
+          학원 수강신청 현황
         </span>
         <ul className="flex mx-auto w-full h-[30px] bg-[#F1F5FA] border-b">
           <li className="flex justify-center items-center w-[30%] text-[#303E67]">

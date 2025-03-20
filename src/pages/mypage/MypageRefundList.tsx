@@ -204,7 +204,7 @@ function MypageRefundList() {
                     </span>
                   ) : (
                     <span className="mr-1.5 pr-1 pt-[1px] pb-0.5 pl-1 rounded-md bg-red-400 text-[11px] text-white">
-                      교제
+                      교재
                     </span>
                   )}
                   {item.prname}

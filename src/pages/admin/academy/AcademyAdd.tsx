@@ -940,7 +940,7 @@ function AcademyAdd() {
                 </button>
               </div>
 
-              <ul className="w-full max-h-32 pr-2 overflow-y-auto">
+              <ul className="w-full h-64 pr-2 overflow-y-auto">
                 {searchAcademyResult.length > 0 ? (
                   searchAcademyResult?.map((item, index) => (
                     <li
@@ -968,7 +968,7 @@ function AcademyAdd() {
                     </li>
                   ))
                 ) : (
-                  <li className="p-3 text-center bg-gray-100">
+                  <li className="flex justify-center items-center p-3 h-64 text-center bg-gray-100">
                     검색된 학원이 없습니다.
                   </li>
                 )}
@@ -981,6 +981,7 @@ function AcademyAdd() {
         button1Text={"취소하기"}
         button2Text={"선택완료"}
         modalWidth={500}
+        modalHeight={500}
       />
     </AcademyInfo>
   );

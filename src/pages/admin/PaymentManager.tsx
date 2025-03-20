@@ -258,7 +258,7 @@ function PaymentManager() {
     >
       <div className="w-full">
         <h1 className="title-admin-font">
-          학원별 결제 내역 (학원비/교제구매)
+          학원별 결제 내역 (학원비/교재구매)
           <p>결제 및 지출 관리 {">"} 학원별 결제 내역</p>
         </h1>
 

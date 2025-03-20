@@ -159,6 +159,15 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
     },
   ];
 
+  //오늘날짜 확인
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0"); // 월은 0부터 시작하므로 +1을 해줍니다.
+  const day = String(today.getDate()).padStart(2, "0"); // 두 자릿수로 맞추기 위해 padStart 사용
+  const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
+  const dayOfWeek = daysOfWeek[today.getDay()];
+  const todayDate = `${year}-${month}-${day}(${dayOfWeek})`;
+
   const logOut = async () => {
     try {
       await jwtAxios.post("/api/user/log-out", {});
@@ -192,6 +201,13 @@ const AdminHeader: React.FC<HeaderProps> = ({ className, close }) => {
               {/* <li>
                 <FaBell />
               </li> */}
+              <li className="text-gray-500 text-sm">
+                <span className="mr-1 text-sm">{todayDate} /</span>
+                <span className="text-sm font-semibold">
+                  {currentUserInfo.name}
+                </span>
+                님, 환영합니다.
+              </li>
               <li className="w-[32px] h-[32px]">
                 {currentUserInfo.userId && (
                   <Dropdown
