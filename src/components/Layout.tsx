@@ -180,7 +180,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const logOut = async () => {
     try {
-      const res = await jwtAxios.post("/api/user/log-out", {});
+      await jwtAxios.post("/api/user/log-out", {});
       // console.log(res);
       removeCookie("accessToken");
       removeCookie("message");

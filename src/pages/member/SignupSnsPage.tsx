@@ -36,7 +36,7 @@ function SignupSnsPage() {
   const [checkedList, setCheckedList] = useState<string[]>([]);
   const [form] = Form.useForm();
 
-  const [nickNameCheck, setNickNameCheck] = useState<number>(0);
+  const [_nickNameCheck, setNickNameCheck] = useState<number>(0);
   // const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSnsLoading, setIsSnsLoading] = useState(true);

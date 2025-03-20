@@ -99,7 +99,7 @@ function MypageReview() {
 
   const handleDeleteReview = async () => {
     try {
-      const res = await axios.delete("/api/review/me", {
+      await axios.delete("/api/review/me", {
         data: { reviewId: reviewId, userId: currentUserInfo.userId },
       });
       fetchData(1);

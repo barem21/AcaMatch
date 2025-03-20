@@ -190,7 +190,7 @@ function AcademyAdd() {
   const navigate = useNavigate();
 
   // 체크박스 클릭 시 선택/해제 처리
-  const handleCheckbox2Change = (tagId: number, tagName: string) => {
+  const handleCheckbox2Change = (_tagId: number, tagName: string) => {
     // console.log(tagId);
     setSelectedItems(
       prevSelectedItems =>
