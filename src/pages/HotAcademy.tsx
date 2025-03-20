@@ -40,8 +40,8 @@ function HotAcademy() {
 
   const titleName = "학원목록";
   const menuItems = [
-    { label: "화제의 학원", isActive: true, link: "/hotAcademy" },
-    { label: "근처의 학원", isActive: false, link: "/nearby-academies" },
+    { label: "화제가 되고 있는 학원", isActive: true, link: "/hotAcademy" },
+    { label: "주변에 있는 학원", isActive: false, link: "/nearby-academies" },
   ];
 
   const [academyData, setAcademyData] = useState<

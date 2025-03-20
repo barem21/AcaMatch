@@ -440,7 +440,10 @@ function HomePage() {
       </div>
 
       <div className="w-full max-w-[990px] max-[769px]:hidden">
-        <h2 className="text-2xl font-bold mb-5">
+        <h2
+          className="text-2xl font-bold mb-5 cursor-pointer"
+          onClick={() => (isLoggedIn ? navigate("/nearby-academies") : "")}
+        >
           {isLoggedIn ? "주변에 있는 학원" : "이 학원 어떠신가요?"}
         </h2>
         {academies && academies.length > 0 ? (
@@ -653,7 +656,12 @@ function HomePage() {
 
       {/* 화제가 되고 있는 학원 */}
       <div className="w-full max-w-[990px] max-[769px]:hidden">
-        <h2 className="text-2xl font-bold mb-5">화제가 되고 있는 학원</h2>
+        <h2
+          className="text-2xl font-bold mb-5 cursor-pointer"
+          onClick={() => navigate("/hotAcademy")}
+        >
+          화제가 되고 있는 학원
+        </h2>
         {bestAcademyCards && bestAcademyCards.length > 0 ? (
           <div className="grid grid-cols-4 gap-6">
             {bestAcademyCards.slice(0, 4).map((card, index) => (

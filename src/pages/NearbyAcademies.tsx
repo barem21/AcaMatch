@@ -48,8 +48,8 @@ const NearbyAcademies = () => {
 
   const titleName = "학원목록";
   const menuItems = [
-    { label: "화제의 학원", isActive: false, link: "/hotAcademy" },
-    { label: "근처의 학원", isActive: true, link: "/nearby-academies" },
+    { label: "화제가 되고 있는 학원", isActive: false, link: "/hotAcademy" },
+    { label: "주변에 있는 학원", isActive: true, link: "/nearby-academies" },
   ];
 
   const [academyData, setAcademyData] = useState<
@@ -203,7 +203,7 @@ const NearbyAcademies = () => {
 
       <div className="w-full max-[768px]:p-4">
         <h1 className="title-font flex justify-between align-middle max-[768px]:mb-3 max-[768px]:text-xl max-[768px]:mt-0">
-          근처의 학원
+          주변에 있는 학원
         </h1>
         <div className="w-full gap-[12px] py-[16px] px-[16px] border rounded-lg overflow-hidden">
           <div className="flex flex-col gap-6">
