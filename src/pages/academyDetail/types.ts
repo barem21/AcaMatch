@@ -82,6 +82,7 @@ export interface Book {
   bookComment: string;
   manager: string;
   classId: number;
+  productId: number;
 }
 
 export interface AcademyData {

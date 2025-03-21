@@ -60,7 +60,7 @@ const BookList = ({ books, selectedClassId }: BookListProps) => {
       const response = await jwtAxios.post("/api/payment/ready", {
         products: [
           {
-            productId: selectedBook.bookId,
+            productId: selectedBook.productId,
             quantity: 1,
           },
         ],
