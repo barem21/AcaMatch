@@ -75,7 +75,7 @@ function MyPageRecord() {
     try {
       //나의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?studentId=${checkUserId}&role=${currentUserInfo.roleId}&page=${currentPage}`,
+        `/api/joinClass?studentId=${checkUserId}&role=${currentUserInfo.roleId}&page=${currentPage}&size=100`,
       );
       //console.log(checkUserId);
       //console.log(res.data.resutData);

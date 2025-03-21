@@ -121,7 +121,8 @@ function AcademyList() {
         const res = await axios.get(
           "/api/academy/getAcademyListByUserId?signedUserId=" +
             currentUserInfo.userId +
-            (values.search !== null ? "&acaName=" + values.search : ""),
+            (values.search !== null ? "&acaName=" + values.search : "") +
+            (values.state !== null ? "&acaAgree=" + values.state : ""),
         );
         setMyAcademyList(res.data.resultData);
         setMyAcademyCount(res.data.resultData[0].totalCount);

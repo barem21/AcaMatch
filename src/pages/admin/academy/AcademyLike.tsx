@@ -25,14 +25,15 @@ function AcademyLike() {
   const [academyLikeList, setAcademyLikeList] = useState<academyLikeListType[]>(
     [],
   );
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
   const currentUserInfo = useRecoilValue(userInfo);
   const navigate = useNavigate();
 
   //학원 좋아요 전체목록 가져오기
-  const getLikeList = async () => {
+  const getLikeList = async (page: number) => {
     try {
       const res = await jwtAxios.get(
-        "/api/like/all-owned-academy-likes?page=1&size=20",
+        `/api/like/all-owned-academy-likes?page=${page}&size=10`,
       );
 
       // 객체들을 하나로 합치기
@@ -56,8 +57,14 @@ function AcademyLike() {
     }
   };
 
+  //페이지 처리
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page); // 페이지 변경
+    getLikeList(page);
+  };
+
   useEffect(() => {
-    getLikeList();
+    getLikeList(1);
   }, [currentUserInfo]);
 
   useEffect(() => {
@@ -138,8 +145,10 @@ function AcademyLike() {
 
         <div className="flex justify-center items-center m-6 mb-10">
           <Pagination
-            defaultCurrent={1}
             total={academyLikeList?.length}
+            current={currentPage} // 현재 페이지 번호
+            pageSize={10} // 한 페이지에 표시할 항목 수
+            onChange={handlePageChange} // 페이지 변경 시 호출되는 핸들러
             showSizeChanger={false}
           />
         </div>
