@@ -24,6 +24,7 @@ interface reviewListType {
   userId: number;
   writerName: string;
   writerPic: string;
+  acaName: string;
 }
 
 function MypageReview() {
@@ -120,7 +121,8 @@ function MypageReview() {
           <h1 className="title-font max-[640px]:mb-3 max-[640px]:text-xl max-[640px]:mt-0">
             나의 리뷰(텍스트)
           </h1>
-          <div className="flex gap-5 mt-8 max-[640px]:mt-0 max-[640px]:mb-3">
+          <div className="flex justify-center items-center gap-5 mt-8 max-[640px]:mt-0 max-[640px]:mb-3">
+            <span className="text-3xl">←</span>
             <Link to={"../review"} className="font-bold max-[640px]:text-sm">
               텍스트 리뷰
             </Link>
@@ -185,13 +187,14 @@ function MypageReview() {
                   className="text-lg font-bold"
                   onClick={() => navigate(`/academy/detail?id=${item.acaId}`)}
                 >
-                  {item.className}
+                  {item.acaName}
+                  <p className="mb-4 text-sm">수업명 : {item.className}</p>
                 </div>
                 <div className="text-sm text-gray-500">{item.comment}</div>
               </div>
 
               <div className="flex gap-2 mt-2 sm:mt-0 sm:gap-0">
-                <div className="flex items-center justify-center min-w-auto sm:min-w-24">
+                <div className="flex items-start justify-center min-w-auto sm:min-w-24">
                   <button
                     className="small_line_button"
                     onClick={() => {
@@ -212,7 +215,7 @@ function MypageReview() {
                     수정하기
                   </button>
                 </div>
-                <div className="flex items-center justify-center min-w-auto sm:min-w-24">
+                <div className="flex items-start justify-center min-w-auto sm:min-w-24">
                   <button
                     className="small_line_button"
                     onClick={() => {
