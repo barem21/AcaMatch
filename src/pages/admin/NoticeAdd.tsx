@@ -90,10 +90,13 @@ const NoticeAdd = () => {
         message.success(
           isEdit ? "공지사항이 수정되었습니다." : "공지사항이 등록되었습니다.",
         );
+
         if (roleId === 3 && acaId) {
-          navigate(`/admin/notice-content?acaId=${acaId}`);
+          navigate(`/admin/notice-content?acaId=${acaId}`, {
+            state: { refresh: true },
+          });
         } else {
-          navigate("/admin/notice-content");
+          navigate("/admin/notice-content", { state: { refresh: true } });
         }
       }
     } catch (error) {

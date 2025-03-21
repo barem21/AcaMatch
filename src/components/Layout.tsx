@@ -279,9 +279,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {location.pathname === "/" && <PopupWindow isAdmin={false} />}
               <div className="flex justify-center">
                 <main
-                  className="flex w-full min-w-[1280px] mx-auto max-w-[1280px] max-[768px]:min-w-[640px] max-[640px]:min-w-[320px]"
+                  className="flex w-full min-w-[1280px] mx-auto max-w-[1280px] max-[768px]:min-w-[640px] max-[640px]:min-w-[320px] "
                   style={{
-                    minHeight: "calc(100vh - 164px - 60px)",
+                    minHeight: "calc(100vh - 164px",
                   }}
                 >
                   {children}
