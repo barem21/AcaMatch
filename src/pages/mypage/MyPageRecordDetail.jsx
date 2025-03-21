@@ -161,13 +161,14 @@ function MyPageRecordDetail() {
 
     const params = new URLSearchParams(search);
     const acaId = params.get("acaId");
+    const classId = params.get("classId");
 
     // console.log(
     //   `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
     // );
     try {
       const res = await jwtAxios.get(
-        `/api/grade?userId=${currentUserInfo.userId}&classId=${acaId}&page=${currentPage}&size=1000`,
+        `/api/grade?userId=${currentUserInfo.userId}&classId=${classId}&page=${currentPage}&size=1000`,
       );
       // console.log("grade result : ", res.data.resultData);
 
@@ -254,6 +255,11 @@ function MyPageRecordDetail() {
             </div> */}
           </div>
 
+          {!testStudentList && (
+            <div className="p-4 text-center border-b">
+              테스트 내역이 없습니다.
+            </div>
+          )}
           {testStudentList === null && (
             <div className="p-4 text-center border-b">
               테스트 내역이 없습니다.
@@ -271,20 +277,20 @@ function MyPageRecordDetail() {
               className="loop-content flex justify-between align-middle p-4 border-b"
             >
               <div className="flex justify-start items-center w-full">
-                <div className="flex items-center gap-3 cursor-pointer">
+                <div className="flex items-center gap-3">
                   <img src="/aca_image_1.png" alt="" />
-                  {item.subjectName}
+                  {item.examName}
                 </div>
               </div>
               <div className="flex items-center justify-center w-60">
                 {item.examDate}
               </div>
               <div className="flex items-center justify-center w-60">
-                {item.pass !== null
+                {item.pass >= 0
                   ? item.pass === 1
                     ? "합격"
                     : "불합격"
-                  : item.score !== null
+                  : item.score
                     ? item.score + "점"
                     : 0 + "점"}
               </div>

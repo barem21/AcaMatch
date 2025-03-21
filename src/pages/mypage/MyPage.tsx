@@ -99,7 +99,7 @@ function MyPage() {
     try {
       //나(자녀)의 수강목록 호출
       const res = await jwtAxios.get(
-        `/api/joinClass?userId=${checkUserId}&role=${roleId}&page=${page}&size=100`,
+        `/api/joinClass?studentId=${checkUserId}&role=${roleId}&page=${page}&size=100`,
       );
 
       // console.log(res.data.resultData);
